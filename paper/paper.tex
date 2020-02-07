@@ -44,15 +44,89 @@
 \begin{document}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{Machine verification of typed process calculi}
-\subtitle{Research Proposal}
+\title{Typechecking a linear \picalc}
 \author{Uma Zalakain}
 \maketitle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{abstract}
+  We present the syntax, operational semantics, and typing rules for a \picalc{} with linear and shared types. We use a typing with leftovers approach \cite{} to encode our typing rules. We build framing and weakening proofs that we then use to prove subject congruence and subject reduction.
+\end{abstract}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\cite{empty}
+
+Goals: present nice model, prove subject reduction
+
+Intensional (correct by construction) vs extensional
+
+same syntax and semantics, different typing rules
+
+full formalisation available in Agda
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related work}
+
+\cite{previous-work} polymorphic tokens, HOAS
+
+\cite{typing-with-leftovers}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Syntax}
+
+variable references (strings, locally named, de Bruijn)
+
+strings to maybe de Bruijn
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Semantics}
+
+keeping track of the variable on which communication occurs
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Linear typing rules}
+
+using dependent types to encode typing rules
+
+removing from context vs keeping in context but marking it used
+
+two-layered approach: types on one hand, capabilities on the other
+
+n multiplicities as a generalisation
+
+properties of the underlaying monoid
+
+nat numbers + omega as a generalisation
+
+partial vs total
+
+\subsection{Typing with leftovers}
+
+Variable references as proofs of capability
+
+Context splits at each variable reference
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Subject reduction}
+
+\subsection{Framing}
+\subsection{Weakening}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Future work}
+
+Work that will be done time permiting:
+
+Decidable typechecking
+
+Proof of progress
+
+Product types
+
+Sum types
+
+Encoding of session types
+
 
 \footnotesize
 \bibliographystyle{alpha}
