@@ -1,0 +1,60 @@
+\documentclass{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{todonotes}
+\usepackage{enumitem}
+\setlist{parsep=0pt,listparindent=\parindent}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[many]{tcolorbox}
+
+% Links and their colors
+\usepackage[
+  colorlinks=true,
+  linkcolor=darkgray,
+  citecolor=darkgray,
+  urlcolor=darkgray,
+  ]{hyperref}
+
+% Commands for the pi-calculus
+\newcommand{\PO}{\mathbf{0}}
+\newcommand{\comp}[2]{#1 \mid #2}
+\newcommand{\new}[2]{(\boldsymbol{\nu} #1 #2)\,}
+\newcommand{\cout}[2]{\overline{#1}\langle#2\rangle.}
+\newcommand{\cin}[2]{#1(#2).}
+\newcommand{\select}[2]{#1\triangleleft#2.}
+\newcommand{\branch}[2]{#1\triangleright#2}
+
+\newcommand{\subst}[3]{#1[#2/#3]}
+
+\newcommand{\picalc}{$\pi$-calculus}
+\newcommand{\Picalc}{$\pi$-Calculus}
+
+\newcommand{\type}{\texttt}
+\newcommand{\End}{\type{End}}
+\newcommand{\Send}[1]{!#1.}
+\newcommand{\Recv}[1]{?#1.}
+\newcommand{\Select}{\oplus}
+\newcommand{\Branch}{\&}
+\newcommand{\dual}{\overline}
+
+\newcommand{\reduce}{\rightarrow}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Machine verification of typed process calculi}
+\subtitle{Research Proposal}
+\author{Uma Zalakain}
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\cite{empty}
+
+\footnotesize
+\bibliographystyle{alpha}
+\bibliography{paper}
+\end{document}
