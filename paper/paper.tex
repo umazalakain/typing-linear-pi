@@ -50,17 +50,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-  We present the syntax, operational semantics, and typing rules for a \picalc{} with linear and shared types. We use a typing with leftovers approach \cite{} to encode our typing rules. We build framing and weakening proofs that we then use to prove subject congruence and subject reduction.
+  We present the syntax, operational semantics, and typing rules for a \picalc{} with linear and shared types. We use leftover typing \cite{} to encode our typing rules. We build framing and weakening proofs that we then use to prove subject congruence and subject reduction.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Goals: present nice model, prove subject reduction
-
 Intensional (correct by construction) vs extensional
 
 same syntax and semantics, different typing rules
+
+\subsection{Contribution}
+
+machine verified formalisation of the pi calculus
+
+typing with leftovers applied to the pi calculus
+
+unique quirks: multiple multiplicities per variable, shared types
 
 full formalisation available in Agda
 
@@ -86,21 +92,35 @@ keeping track of the variable on which communication occurs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Linear typing rules}
 
-using dependent types to encode typing rules
+\subsection{Variable references}
 
-removing from context vs keeping in context but marking it used
+\begin{description}
+  \item[Polarities]
+  \item[Multiple variables]
+  \item[Vectors]
+    Most general solution, $n$ possible multiplicities
+\end{description}
 
-two-layered approach: types on one hand, capabilities on the other
+\subsection{Multiplicities}
 
-n multiplicities as a generalisation
+$\inf$ and $\mathbb{N}$ as generalisations
 
 properties of the underlaying monoid
 
-nat numbers + omega as a generalisation
+\subsubsection{Total definition}
+
+\subsubsection{Partial definition}
 
 partial vs total
 
+\subsection{Variable types and multiplicities}
+
+two-layered approach: types on one hand, capabilities on the other
+removing from context vs keeping in context but marking it used
+
 \subsection{Typing with leftovers}
+
+\subsubsection{Typing relation}
 
 Variable references as proofs of capability
 
@@ -110,6 +130,15 @@ Context splits at each variable reference
 \section{Subject reduction}
 
 \subsection{Framing}
+
+Definition
+Let $\Gamma \types P \boxtimes \Delta$ and $\Gamma - Delta \equiv \Xi - \phi$.
+Then $\Xi \types P \boxtimes \phi$.
+
+By defining of $\uplus$ as a total function, $\Gamma - \Delta$ is no longer
+functional: $\omega - \omega$ results in any multiplicity, including $0$. Therefore
+$\Xi \types P \boxtimes \phi$ would imply that such a variable cannot appear in $P$.
+
 \subsection{Weakening}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
