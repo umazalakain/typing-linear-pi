@@ -1,11 +1,13 @@
 open import Relation.Nullary.Decidable using (True)
 open import Data.Product using (Σ; Σ-syntax; _×_; _,_)
 
+import Data.Unit as Unit
 import Data.Fin as Fin
 import Data.Nat as Nat
 import Data.Bool as Bool
 import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
+open Unit using (⊤; tt)
 open Nat using (ℕ; zero; suc)
 open Fin using (Fin; zero; suc)
 open Vec using (Vec; []; _∷_)
@@ -21,9 +23,11 @@ module PiCalculus.LinearTypeSystem where
 
 infix 50 _↑_↓
 infixl 20 _-,_
-infixr 5 _w_⊢_⊠_
-infixr 5 _w_∋_w_⊠_
+infixr 4 _w_⊢_⊠_
+infixr 4 _w_∋_w_⊠_
 infixr 10 base chan recv send
+
+pattern _-,_ Γ σ = σ ∷ Γ
 
 -- Shapes
 
@@ -37,106 +41,106 @@ record Tree (A : Set) : Set where
 Shape : Set
 Shape = Tree ℕ
 
-SCtx : ℕ → Set
-SCtx = Vec Shape
+Shapes : ℕ → Set
+Shapes = Vec Shape
 
 -- Shapes interpreted as multiplicities
 
-Capability : Shape → Set
-Capability < n & _ > = Vec ωℕ n
+Card : Shape → Set
+Card < v & _ > = Vec MType v
 
-CCtx : ∀ {n} → SCtx n → Set
-CCtx = All Capability
+Cards : ∀ {n} → Shapes n → Set
+Cards [] = ⊤
+Cards (xs -, x) = Cards xs × Card x
 
--- Shapes interpreted as types
+Mult : (s : Shape) → Card s → Set
+Mult _ = All ωℕ
+
+Mults : ∀ {n} {ss : Shapes n} → Cards ss → Set
+Mults {ss = []} tt = ⊤
+Mults {ss = ss -, s} (cs , c) = Mults cs × Mult s c
+
+ε : ∀ {n} {ss : Shapes n} {cs : Cards ss} → Mults cs
+ε {ss = []} {tt} = tt
+ε {ss = _ -, _} {_ , _} = ε , ω0s
 
 data Type : Shape → Set where
   B[_]   : ℕ → Type < 0 & _ , [] >
-  C[_w_] : ∀ {s : Shape} → Type s → Capability s → Type < 2 & _ , s ∷ [] >
-  P[_&_] : ∀ {s r : Shape} → Type s → Type r → Type < 0 & _ , s ∷ r ∷ [] >
+  C[_w_] : {s : Shape} {c : Card s} → Type s → Mult s c → Type < 2 & _ , s ∷ [] >
+  P[_&_] : {s r : Shape} → Type s → Type r → Type < 0 & _ , s ∷ r ∷ [] >
 
-TCtx : ∀ {n} → SCtx n → Set
-TCtx = All Type
-
-pattern _-,_ Γ σ = σ ∷ Γ
+Types : ∀ {n} → Shapes n → Set
+Types = All Type
 
 private
   variable
     n : ℕ
-    i : Fin n
-    s : Shape
-    t : Type s
-    c : Capability s
-    ss : SCtx n
-    γ : TCtx ss
-    Γ Δ ϕ Κ : CCtx ss
+    M N : MType
     P Q : Scoped n
 
-data _w_∋_w_⊠_ : {ss : SCtx n} → TCtx ss → CCtx ss
-               → {s : Shape} → Type s → Capability s
-               → CCtx ss
-               → Set where
+data _w_∋_w_⊠_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs
+               → {s : Shape} → Type s → (∀ (c : Card s) → Mult s c)
+               → Mults cs → Set where
 
-  -- Let Γ ⊢ P ⊠ Δ and Δ ⊢ Q ⊠ ϕ. Additionally, assume P preserves ω∙ resources,
-  -- but Q downgrades ω∙ resources into 1∙ -- possible because ω∙ + 1∙ ≡ ω∙.
-  -- Then Γ ⊢ P ∥ Q ⊠ ϕ but Γ ⊬ Q ∥ P ⊠ ϕ.
-  -- Therefore ω∙ resources must be preserved.
+  zero : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
+       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c} {f : ∀ (c : Card s) → Mult s c}
+       → γ -, t w Γ , (m +ᵥ f c) ∋ t w f ⊠ Γ , m
 
-  zero : {ss : SCtx n} {γ : TCtx ss} {Γ : CCtx ss}
-       → {s : Shape} {t : Type s} {ms ns : Capability s}
-       -- Prevent ns from introducing ω
-       → ⦃ p : True (ωᵥ? (ms +ᵥ ns) ms) ⦄
-       → γ -, t w Γ -, (ms +ᵥ ns) ∋ t w ns ⊠ Γ -, ms
+  suc : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+      → {s : Shape} {t : Type s} {f : ∀ (c : Card s) → Mult s c}
+      → {s' : Shape} {c' : Card s'} {t' : Type s'} {m' : Mult s' c'}
+      → γ w Γ ∋ t w f ⊠ Δ
+      → γ -, t' w Γ , m' ∋ t w f ⊠ Δ , m'
 
-  suc : {ss : SCtx n} {γ : TCtx ss} {Γ Δ : CCtx ss}
-      → {s : Shape} {t : Type s} {c : Capability s}
-      → {s' : Shape} {t' : Type s'} {c' : Capability s'}
-      → γ       w Γ       ∋ t w c ⊠ Δ
-      → γ -, t' w Γ -, c' ∋ t w c ⊠ Δ -, c'
-
-toFin : {ss : SCtx n} {γ : TCtx ss} {Γ Δ : CCtx ss}
-      → {s : Shape} {t : Type s} {c : Capability s}
-      → γ w Γ ∋ t w c ⊠ Δ
+toFin : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+      → {s : Shape} {t : Type s} {f : ∀ (c : Card s) → Mult s c}
+      → γ w Γ ∋ t w f ⊠ Δ
       → Fin n
 toFin zero = zero
 toFin (suc x) = suc (toFin x)
 
-_↑_↓ : ωℕ → ωℕ → Vec ωℕ 2
+_↑_↓ : ωℕ M → ωℕ N → All ωℕ (N ∷ M ∷ [])
 μ↑ ↑ μ↓ ↓ = μ↓ ∷ μ↑ ∷ []
 
-data _w_⊢_⊠_ : {ss : SCtx n} → TCtx ss → CCtx ss → Scoped n → CCtx ss → Set where
-  end : γ w Γ ⊢ 𝟘 ⊠ Γ
+data _w_⊢_⊠_ : {ss : Shapes n} {cs : Cards ss}
+             → Types ss → Mults cs → Scoped n → Mults cs → Set where
 
-  base : {n : ℕ}
-       → γ -, B[ n ] w Γ -, [] ⊢ P     ⊠ Δ -, []
-       -----------------------------------------
-       → γ           w Γ       ⊢ +[] P ⊠ Δ
+  end : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
+      → γ w Γ ⊢ 𝟘 ⊠ Γ
 
-  chan : {s : Shape} (t : Type s) (c : Capability s)
-       → (μ : ωℕ)
-       → let μs = Vec.replicate μ in
-         γ -, C[ t w c ] w Γ -, μs ⊢ P     ⊠ Δ -, (μs ∸ᵥ μs)
-       -----------------------------------------------------
-       → γ               w Γ       ⊢ new P ⊠ Δ
+  base : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+       → {n : ℕ}
+       → γ -, B[ n ] w Γ , [] ⊢ P     ⊠ Δ , []
+       ---------------------------------------
+       → γ           w Γ      ⊢ +[] P ⊠ Δ
 
-  recv : {ss : SCtx n} {γ : TCtx ss} {Γ Δ ϕ : CCtx ss}
-       → {s : Shape} {t : Type s} {c : Capability s}
-       → (x : γ      w Γ      ∋ C[ t w c ] w 1∙ ↑ 0∙ ↓ ⊠ Δ)
-       →      γ -, t w Δ -, c ⊢ P                      ⊠ ϕ -, (c ∸ᵥ c)
-       ---------------------------------------------------------------
-       →      γ      w Γ      ⊢ toFin x ⦅⦆ P           ⊠ ϕ
+  chan : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+       → {s : Shape} {c : Card s} (t : Type s) (m : Mult s c)
+       → (μ : ωℕ M)
+       → γ -, C[ t w m ] w Γ , μ ↑ μ ↓ ⊢ P     ⊠ Δ , ω0 ↑ ω0 ↓
+       -------------------------------------------------------
+       → γ               w Γ           ⊢ new P ⊠ Δ
 
-  send : {s : Shape} {t : Type s} {c : Capability s}
-       → (x : γ w Γ ∋ C[ t w c ] w 0∙ ↑ 1∙ ↓ ⊠ Δ)
-       → (y : γ w Δ ∋ t          w c         ⊠ ϕ)
-       →      γ w ϕ ⊢ P                      ⊠ Κ
-       ------------------------------------------
-       →      γ w Γ ⊢ toFin x ⟨ toFin y ⟩ P  ⊠ Κ
+  recv : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ : Mults cs}
+       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+       → (x : γ      w Γ      ∋ C[ t w m ] w rebaseᵥ (0∙ ↑ 1∙ ↓) ⊠ Δ)
+       →      γ -, t w Δ , m  ⊢ P                                ⊠ Ξ , ω0s
+       -------------------------------------------------------------------
+       →      γ      w Γ      ⊢ toFin x ⦅⦆ P                     ⊠ Ξ
 
-  comp : γ w Γ ⊢ P     ⊠ Δ
-       → γ w Δ ⊢ Q     ⊠ ϕ
-       ----------------------------
-       → γ w Γ ⊢ P ∥ Q ⊠ ϕ
+  send : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
+       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+       → (x : γ w Γ ∋ C[ t w m ] w rebaseᵥ (1∙ ↑ 0∙ ↓) ⊠ Δ)
+       → (y : γ w Δ ∋ t          w rebaseᵥ m           ⊠ Ξ)
+       →      γ w Ξ ⊢ P                                ⊠ Θ
+       ---------------------------------------------------
+       →      γ w Γ ⊢ toFin x ⟨ toFin y ⟩ P            ⊠ Θ
 
-_w_⊢_ : {ss : SCtx n} → TCtx ss → CCtx ss → Scoped n → Set
-γ w Γ ⊢ P = γ w Γ ⊢ P ⊠ All.map (Vec.map consume) Γ -- FIXME: Γ / Γ
+  comp : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ : Mults cs}
+       → γ w Γ ⊢ P     ⊠ Δ
+       → γ w Δ ⊢ Q     ⊠ Ξ
+       -------------------
+       → γ w Γ ⊢ P ∥ Q ⊠ Ξ
+
+_w_⊢_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs → Scoped n → Set
+γ w Γ ⊢ P = γ w Γ ⊢ P ⊠ ε

@@ -120,7 +120,7 @@ _ = scope-end
 
 raw⊢_ : Raw tt → Set
 raw⊢ P with raw→scoped P
-(raw⊢ P) | just P' = [] w [] ⊢ P'
+(raw⊢ P) | just P' = [] w tt ⊢ P'
 (raw⊢ P) | nothing = L.Lift _ ⊤
 
 _ : raw⊢ (⦅new "x" ⦆ (+[ "a" ] ("x" ⟨ "a" ⟩ 𝟘)) ∥ ("x" ⦅ "b" ⦆ 𝟘))
@@ -130,7 +130,15 @@ _ = chan B[ 0 ] [] 1∙
     (recv zero end))
 
 _ : raw⊢ channel-over-channel₀
-_ = chan C[ B[ 0 ] w [] ] (1∙ ↑ 0∙ ↓) 1∙ (comp
+_ = chan C[ B[ 0 ] w [] ] (0∙ ↑ 1∙ ↓) 1∙ (comp
+         (recv zero
+               (recv zero end))
+         (chan B[ 0 ] [] 1∙ (base
+               (send (suc (suc zero)) (suc zero)
+                     (send (suc zero) zero end)))))
+
+_ : raw⊢ channel-over-channel₀
+_ = chan C[ B[ 0 ] w [] ] (0∙ ↑ 1∙ ↓) ω∙ (comp
          (recv zero
                (recv zero end))
          (chan B[ 0 ] [] 1∙ (base

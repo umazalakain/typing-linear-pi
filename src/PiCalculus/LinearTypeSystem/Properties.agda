@@ -144,7 +144,6 @@ comp-comm Γ ϕ (comp {Δ = Δ} ⊢P ⊢Q) = {!!}
       )
       -}
 
-{-
 subject-cong : SubjectCongruence
 subject-cong comp-assoc (comp ⊢P (comp ⊢Q ⊢R)) = comp (comp ⊢P ⊢Q) ⊢R
 subject-cong comp-symm (comp ⊢P ⊢Q) = {!!}
@@ -191,5 +190,3 @@ subject-reduction (base {c = nothing} P⇒Q) (base ⊢P) = base (subject-reducti
 subject-reduction (base {c = just zero} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (base {c = just (suc x)} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (struct P≅P' P'⇒Q) ⊢P = subject-reduction P'⇒Q (subject-cong P≅P' ⊢P)
-
--}
