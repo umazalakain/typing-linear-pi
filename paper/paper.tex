@@ -1,4 +1,4 @@
-\documentclass{scrartcl}
+\documentclass[a4paper,UKenglish,cleveref, autoref, thm-restate,authorcolumns]{lipics-v2019}
 
 \usepackage[utf8]{inputenc}
 \usepackage{url}
@@ -8,14 +8,30 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage[many]{tcolorbox}
+\bibliographystyle{plainurl}
 
-% Links and their colors
-\usepackage[
-  colorlinks=true,
-  linkcolor=darkgray,
-  citecolor=darkgray,
-  urlcolor=darkgray,
-  ]{hyperref}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Typing a linear \picalc}
+\author{Uma Zalakain}{University of Glasgow, Scotland}
+       {uma.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
+\author{Ornela Dardha}{University of Glasgow, Scotland}
+       {ornela.dardha@glasgow.ac.uk}{https://orcid.org/0000-0001-9927-7875}{}
+\authorrunning{U. Zalakain and O. Dardha}
+\Copyright{Uma Zalakain and Ornela Dardha}
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10003752.10003753.10003761.10003764</concept_id>
+<concept_desc>Theory of computation~Process calculi</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[300]{Theory of computation~Process calculi}
+\keywords{pi calculus, linear, types, concurrency}
+\supplement{\url{https://github/umazalakain/typing-linear-pi}}
+\acknowledgements{I want to thank \dots}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Commands for the pi-calculus
 \newcommand{\PO}{\mathbf{0}}
@@ -43,11 +59,7 @@
 
 \begin{document}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{Typechecking a linear \picalc}
-\author{Uma Zalakain}
 \maketitle
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
   We present the syntax, operational semantics, and typing rules for a \picalc{} with linear and shared types. We use leftover typing \cite{} to encode our typing rules. We build framing and weakening proofs that we then use to prove subject congruence and subject reduction.
@@ -132,12 +144,12 @@ Context splits at each variable reference
 \subsection{Framing}
 
 Definition
-Let $\Gamma \types P \boxtimes \Delta$ and $\Gamma - Delta \equiv \Xi - \phi$.
-Then $\Xi \types P \boxtimes \phi$.
+Let $\Gamma \type P \boxtimes \Delta$ and $\Gamma - Delta \equiv \Xi - \phi$.
+Then $\Xi \type P \boxtimes \phi$.
 
 By defining of $\uplus$ as a total function, $\Gamma - \Delta$ is no longer
 functional: $\omega - \omega$ results in any multiplicity, including $0$. Therefore
-$\Xi \types P \boxtimes \phi$ would imply that such a variable cannot appear in $P$.
+$\Xi \type P \boxtimes \phi$ would imply that such a variable cannot appear in $P$.
 
 \subsection{Weakening}
 
@@ -157,7 +169,5 @@ Sum types
 Encoding of session types
 
 
-\footnotesize
-\bibliographystyle{alpha}
 \bibliography{paper}
 \end{document}
