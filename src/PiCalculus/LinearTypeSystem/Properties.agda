@@ -43,21 +43,16 @@ module PiCalculus.LinearTypeSystem.Properties where
 
 private
   variable
-    s : Shape
-    t : Type s
-    c : Capability s
     n : ℕ
-    ss : SCtx n
-    γ : TCtx ss
-    Γ Δ ϕ Κ : CCtx ss
     P Q : Scoped n
 
-∋-⊆ : {s : Shape} {t : Type s} {c : Capability s}
-    → γ w Γ ∋ t w c ⊠ ϕ → ϕ ⊆ Γ
-∋-⊆ zero = _ , (_-,_ & ⊎-idˡ _ ⊗ +ᵥ-comm _ _)
-∋-⊆ (suc x) with ∋-⊆ x
-∋-⊆ (suc x) | _ , eq = _ , (_-,_ & eq ⊗ +ᵥ-idˡ _)
+∋-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+    → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+    → γ w Γ ∋ t w m ⊠ Δ → Δ ⊆ Γ
+∋-⊆ {ss = ss -, s} zero = ⊆-cong {ss = ss} {s = s} ⊆-refl (≤ᵥ-+ᵥʳ _ (≤ᵥ-refl _))
+∋-⊆ (suc ⊢P) = {!!}
 
+{-
 ⊢-⊆ : γ w Γ ⊢ P ⊠ ϕ → ϕ ⊆ Γ
 ⊢-⊆ end = ⊆-refl
 ⊢-⊆ (base ⊢P) = ⊆-tail (⊢-⊆ ⊢P)
@@ -117,12 +112,20 @@ postulate
              → γ w Γ       ⊢ P ⊠ Δ
              → γ w (Γ / Δ) ⊢ P ⊠ (Δ / Δ)
 
-comp-comm : ∀ {n} {P Q : Scoped n} {ss : SCtx n} {γ : TCtx ss}
-          → (Γ ϕ : CCtx ss)
-          → γ w Γ ⊢ P ∥ Q ⊠ ϕ
-          → γ w Γ ⊢ Q ∥ P ⊠ ϕ
+frame : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
+      → γ w Γ ⊢ P ⊠ Δ
+             -}
 
-comp-comm Γ ϕ (comp {Δ = Δ} ⊢P ⊢Q) = {!!}
+comp-comm : {ss : Shapes n} {cs : Cards ss} {γ : Types ss}
+          → (Γ Ξ : Mults cs)
+          → γ w Γ ⊢ P ∥ Q ⊠ Ξ
+          → γ w Γ ⊢ Q ∥ P ⊠ Ξ
+
+comp-comm Γ Ξ (comp {Δ = Δ} ⊢P ⊢Q) =
+  (⊢Q |> {!!} ∶ {!!}
+      |> {!!} ∶ {!!}
+      )
+      {!!}
 {-
   (⊢Q |> weaken Γ                        ∶ _ w  Γ ⊎ Δ      ⊢ _ ⊗  Γ ⊎ ϕ
       |> strengthen (⊆-⊎ʳ ϕ (⊢-to-⊆ ⊢P)) ∶ _ w (Γ ⊎ Δ) / Δ ⊢ _ ⊗ (Γ ⊎ ϕ) / Δ
@@ -144,9 +147,10 @@ comp-comm Γ ϕ (comp {Δ = Δ} ⊢P ⊢Q) = {!!}
       )
       -}
 
+{-
 subject-cong : SubjectCongruence
 subject-cong comp-assoc (comp ⊢P (comp ⊢Q ⊢R)) = comp (comp ⊢P ⊢Q) ⊢R
-subject-cong comp-symm (comp ⊢P ⊢Q) = {!!}
+subject-cong comp-symm (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
 subject-cong comp-end (comp ⊢P end) = ⊢P
 subject-cong scope-end (chan t c μ ⊢P) = {!⊢P!}
 subject-cong base-end (base end) = end
@@ -184,9 +188,10 @@ subject-reduction comm (comp (recv x ⊢P) ⊢Q) = {!⊢Q!}
 subject-reduction {c = nothing} (par P⇒P') (comp ⊢P ⊢Q) = comp (subject-reduction P⇒P' ⊢P) ⊢Q
 subject-reduction {c = just i} (par P⇒P') (comp ⊢P ⊢Q) = {!!}
 subject-reduction (res {c = nothing} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
-subject-reduction (res {c = just zero} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ (consume μ) (subject-reduction P⇒Q ⊢P)
+subject-reduction (res {c = just zero} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ ω0 (subject-reduction P⇒Q ⊢P)
 subject-reduction (res {c = just (suc i)} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
 subject-reduction (base {c = nothing} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (base {c = just zero} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (base {c = just (suc x)} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (struct P≅P' P'⇒Q) ⊢P = subject-reduction P'⇒Q (subject-cong P≅P' ⊢P)
+-}

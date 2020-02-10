@@ -62,7 +62,7 @@ Mults {ss = ss -, s} (cs , c) = Mults cs × Mult s c
 
 ε : ∀ {n} {ss : Shapes n} {cs : Cards ss} → Mults cs
 ε {ss = []} {tt} = tt
-ε {ss = _ -, _} {_ , _} = ε , ω0s
+ε {ss = _ -, _} {_ , _} = ε , replicate ω0
 
 data Type : Shape → Set where
   B[_]   : ℕ → Type < 0 & _ , [] >
@@ -124,8 +124,8 @@ data _w_⊢_⊠_ : {ss : Shapes n} {cs : Cards ss}
   recv : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
        → (x : γ      w Γ      ∋ C[ t w m ] w (ω0 {M}) ↑ (ω1 {N}) ↓ ⊠ Δ)
-       →      γ -, t w Δ , m  ⊢ P                                  ⊠ Ξ , ω0s
-       ---------------------------------------------------------------------
+       →      γ -, t w Δ , m  ⊢ P                                  ⊠ Ξ , replicate ω0
+       ------------------------------------------------------------------------------
        →      γ      w Γ      ⊢ toFin x ⦅⦆ P                       ⊠ Ξ
 
   send : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}

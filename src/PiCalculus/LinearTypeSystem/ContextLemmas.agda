@@ -21,6 +21,7 @@ open Fin using (Fin ; zero ; suc)
 open Bool using (T)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
+open import PiCalculus.Function
 open import PiCalculus.LinearTypeSystem
 open import PiCalculus.LinearTypeSystem.OmegaNat
 
@@ -29,23 +30,28 @@ module PiCalculus.LinearTypeSystem.ContextLemmas where
 private
   variable
     n : ℕ
-    ss : SCtx n
-    Γ Δ ϕ : CCtx ss
+    ss : Shapes n
+    cs : Cards ss
 
 -- Addition of contexts
 
-_⊎_ : (Γ Δ : CCtx ss) → CCtx ss
-[] ⊎ [] = []
-(Γ -, ms) ⊎ (Δ -, ns) = (Γ ⊎ Δ) -, (ms +ᵥ ns)
+_⊎_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Mults cs
+_⊎_ {ss = []} tt tt = tt
+_⊎_ {ss = _ -, _} (Γ , m) (Δ , n) = Γ ⊎ Δ , m +ᵥ n
 
-⊎-comm : (Γ Δ : CCtx ss) → Γ ⊎ Δ ≡ Δ ⊎ Γ
-⊎-comm [] [] = refl
-⊎-comm (Γ -, ms) (Δ -, ns) rewrite ⊎-comm Γ Δ | +ᵥ-comm ms ns = refl
+⊎-idˡ : {ss : Shapes n} {cs : Cards ss} (Γ : Mults cs) → ε ⊎ Γ ≡ Γ
+⊎-idˡ {ss = []} tt = refl
+⊎-idˡ {ss = _ -, _} (Γ , m) rewrite ⊎-idˡ Γ | +ᵥ-idˡ m = refl
 
-⊎-assoc : (Γ Δ ϕ : CCtx ss) → (Γ ⊎ Δ) ⊎ ϕ ≡ Γ ⊎ (Δ ⊎ ϕ)
-⊎-assoc [] [] [] = refl
-⊎-assoc (Γ -, ms) (Δ -, ns) (ϕ -, ls) rewrite ⊎-assoc Γ Δ ϕ | +ᵥ-+ᵥ-assoc ms ns ls = refl
+⊎-comm : {ss : Shapes n} {cs : Cards ss} (Γ Δ : Mults cs) → Γ ⊎ Δ ≡ Δ ⊎ Γ
+⊎-comm {ss = []} tt tt = refl
+⊎-comm {ss = _ -, _} (Γ , m) (Δ , n) rewrite ⊎-comm Γ Δ | +ᵥ-comm m n = refl
 
+⊎-assoc : {ss : Shapes n} {cs : Cards ss} (Γ Δ Ξ : Mults cs) → (Γ ⊎ Δ) ⊎ Ξ ≡ Γ ⊎ (Δ ⊎ Ξ)
+⊎-assoc {ss = []} tt tt tt = refl
+⊎-assoc {ss = _ -, _} (Γ , m) (Δ , n) (Ξ , l) rewrite ⊎-assoc Γ Δ Ξ | +ᵥ-assoc m n l = refl
+
+{-
 0Δ : {ss : SCtx n} → CCtx ss
 0Δ {ss = []} = []
 0Δ {ss = _ -, _} = 0Δ -, Vec.replicate 0∙
@@ -53,37 +59,26 @@ _⊎_ : (Γ Δ : CCtx ss) → CCtx ss
 ⊎-idˡ : (Γ : CCtx ss) → 0Δ ⊎ Γ ≡ Γ
 ⊎-idˡ [] = refl
 ⊎-idˡ (Γ -, ns) rewrite ⊎-idˡ Γ | +ᵥ-idˡ ns = refl
+-}
 
--- Preservation of infinity for contexts
-
-_<ω>_ : (Γ Δ : CCtx ss) → Set
-[] <ω> [] = ⊤
-(Γ -, ms) <ω> (Δ -, ns) = (Γ <ω> Δ) × (ms ~ω~ᵥ ns)
-
-<ω>-refl : {Γ : CCtx ss} → Γ <ω> Γ
-<ω>-refl {Γ = []} = tt
-<ω>-refl {Γ = Γ -, ms} = <ω>-refl , ωᵥ-refl
-
-<ω>-sym : {Γ Δ : CCtx ss} → Γ <ω> Δ → Δ <ω> Γ
-<ω>-sym {Γ = []} {[]} tt = tt
-<ω>-sym {Γ = _ -, _} {_ -, _} (Γ<ω>Δ , ms~ω~ᵥns) = <ω>-sym Γ<ω>Δ , ωᵥ-sym ms~ω~ᵥns
-
-<ω>-trans : {Γ Δ ϕ : CCtx ss} → Γ <ω> Δ → Δ <ω> ϕ → Γ <ω> ϕ
-<ω>-trans {Γ = []} {[]} {[]} tt tt = tt
-<ω>-trans {Γ = _ -, _} {_ -, _} {_ -, _} (ΓωΔ , msωns) (Δωϕ , nsωls)
-  = (<ω>-trans ΓωΔ Δωϕ) , ωᵥ-trans msωns nsωls
 
 -- Capable of of contexts
 
-_⊆_ : CCtx ss → CCtx ss → Set
+_⊆_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Set
 ϕ ⊆ Γ = Σ[ Δ ∈ _ ] Δ ⊎ ϕ ≡ Γ
 
-⊆-refl : {Γ : CCtx ss} → Γ ⊆ Γ
-⊆-refl = 0Δ , ⊎-idˡ _
+⊆-refl : {ss : Shapes n} {cs : Cards ss} {Γ : Mults cs} → Γ ⊆ Γ
+⊆-refl = ε , ⊎-idˡ _
 
-⊆-trans : {Γ Ξ ϕ : CCtx ss} → Γ ⊆ Ξ → Ξ ⊆ ϕ → Γ ⊆ ϕ
+⊆-trans : {ss : Shapes n} {cs : Cards ss} {Γ Ξ Θ : Mults cs} → Γ ⊆ Ξ → Ξ ⊆ Θ → Γ ⊆ Θ
 ⊆-trans (Δ₁ , refl) (Δ₂ , refl) = Δ₂ ⊎ Δ₁ , ⊎-assoc _ _ _
 
+⊆-cong : {ss : Shapes n} {cs : Cards ss} {Γ Δ : Mults cs}
+       → {s : Shape} {c : Card s} {m l : Mult s c}
+       → Δ ⊆ Γ → l ≤ᵥ m → _⊆_ {ss = ss -, s} (Δ , l) (Γ , m)
+⊆-cong (ctx , refl) (card , refl) = (ctx , card) , _,_ & refl ⊗ refl
+
+{-
 ⊆-⊎ˡ : {Γ Ξ : CCtx ss} (ϕ : CCtx ss) → Γ ⊆ Ξ → Γ ⊆ (ϕ ⊎ Ξ)
 ⊆-⊎ˡ ϕ (Δ , refl) = ϕ ⊎ Δ , ⊎-assoc _ _ _
 
@@ -107,3 +102,4 @@ _/_ : CCtx ss → CCtx ss → CCtx ss
   rewrite ⊎-/-assoc Γ ϕ⊆Δ
         | +ᵥ-∸ᵥ-assoc ms ns≥ᵥls = refl
         -}
+-}

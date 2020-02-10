@@ -27,7 +27,7 @@ SubjectCongruence = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {�
 
 maybe-consume : {n : ℕ} {ss : Shapes n} {cs : Cards ss} → Mults cs → Channel n → Mults cs
 maybe-consume Γ nothing = Γ
-maybe-consume {ss = _ -, _} (Γ , m) (just zero) = Γ , ω0s
+maybe-consume {ss = _ -, _} (Γ , m) (just zero) = Γ , replicate ω0
 maybe-consume {ss = _ -, _} (Γ , m) (just (suc i)) = maybe-consume Γ (just i) , m
 
 SubjectReduction : Set
