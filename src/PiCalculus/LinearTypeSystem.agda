@@ -79,22 +79,22 @@ private
     P Q : Scoped n
 
 data _w_∋_w_⊠_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs
-               → {s : Shape} → Type s → (∀ (c : Card s) → Mult s c)
+               → {s : Shape} {c : Card s} → Type s → Mult s c
                → Mults cs → Set where
 
   zero : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
-       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c} {f : ∀ (c : Card s) → Mult s c}
-       → γ -, t w Γ , (m +ᵥ f c) ∋ t w f ⊠ Γ , m
+       → {s : Shape} {c : Card s} {t : Type s} {m n : Mult s c}
+       → γ -, t w Γ , (m +ᵥ n) ∋ t w n ⊠ Γ , m
 
   suc : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
-      → {s : Shape} {t : Type s} {f : ∀ (c : Card s) → Mult s c}
+      → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
       → {s' : Shape} {c' : Card s'} {t' : Type s'} {m' : Mult s' c'}
-      → γ w Γ ∋ t w f ⊠ Δ
-      → γ -, t' w Γ , m' ∋ t w f ⊠ Δ , m'
+      → γ w Γ ∋ t w m ⊠ Δ
+      → γ -, t' w Γ , m' ∋ t w m ⊠ Δ , m'
 
 toFin : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
-      → {s : Shape} {t : Type s} {f : ∀ (c : Card s) → Mult s c}
-      → γ w Γ ∋ t w f ⊠ Δ
+      → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+      → γ w Γ ∋ t w m ⊠ Δ
       → Fin n
 toFin zero = zero
 toFin (suc x) = suc (toFin x)
@@ -123,18 +123,18 @@ data _w_⊢_⊠_ : {ss : Shapes n} {cs : Cards ss}
 
   recv : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (x : γ      w Γ      ∋ C[ t w m ] w rebaseᵥ (0∙ ↑ 1∙ ↓) ⊠ Δ)
-       →      γ -, t w Δ , m  ⊢ P                                ⊠ Ξ , ω0s
-       -------------------------------------------------------------------
-       →      γ      w Γ      ⊢ toFin x ⦅⦆ P                     ⊠ Ξ
+       → (x : γ      w Γ      ∋ C[ t w m ] w (ω0 {M}) ↑ (ω1 {N}) ↓ ⊠ Δ)
+       →      γ -, t w Δ , m  ⊢ P                                  ⊠ Ξ , ω0s
+       ---------------------------------------------------------------------
+       →      γ      w Γ      ⊢ toFin x ⦅⦆ P                       ⊠ Ξ
 
   send : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (x : γ w Γ ∋ C[ t w m ] w rebaseᵥ (1∙ ↑ 0∙ ↓) ⊠ Δ)
-       → (y : γ w Δ ∋ t          w rebaseᵥ m           ⊠ Ξ)
-       →      γ w Ξ ⊢ P                                ⊠ Θ
-       ---------------------------------------------------
-       →      γ w Γ ⊢ toFin x ⟨ toFin y ⟩ P            ⊠ Θ
+       → (x : γ w Γ ∋ C[ t w m ] w ω1 {M} ↑ ω0 {N} ↓ ⊠ Δ)
+       → (y : γ w Δ ∋ t          w  m                ⊠ Ξ)
+       →      γ w Ξ ⊢ P                              ⊠ Θ
+       -------------------------------------------------
+       →      γ w Γ ⊢ toFin x ⟨ toFin y ⟩ P          ⊠ Θ
 
   comp : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ : Mults cs}
        → γ w Γ ⊢ P     ⊠ Δ

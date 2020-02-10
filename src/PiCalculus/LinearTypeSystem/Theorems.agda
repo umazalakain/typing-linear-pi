@@ -2,7 +2,7 @@ open import Relation.Binary.PropositionalEquality using (refl)
 
 open import Data.Nat.Base using (ℕ)
 open import Data.Sum using (_⊎_)
-open import Data.Product using (Σ-syntax)
+open import Data.Product using (_,_)
 open import Data.Fin using (Fin; zero; suc)
 open import Data.Maybe using (nothing; just)
 open import Level using (Level) renaming (suc to lsuc)
@@ -20,18 +20,18 @@ open Scoped
 module PiCalculus.LinearTypeSystem.Theorems where
 
 SubjectCongruence : Set
-SubjectCongruence = {n : ℕ} {ss : SCtx n} {γ : TCtx ss} {Γ Δ : CCtx ss} {P Q : Scoped n}
+SubjectCongruence = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs} {P Q : Scoped n}
                   → P ≅ Q
                   → γ w Γ ⊢ P ⊠ Δ
                   → γ w Γ ⊢ Q ⊠ Δ
 
-maybe-consume : {n : ℕ} {ss : SCtx n} → CCtx ss → Channel n → CCtx ss
+maybe-consume : {n : ℕ} {ss : Shapes n} {cs : Cards ss} → Mults cs → Channel n → Mults cs
 maybe-consume Γ nothing = Γ
-maybe-consume (Γ -, μs) (just zero) = Γ -, Vec.map consume μs
-maybe-consume (Γ -, μs) (just (suc i)) = maybe-consume Γ (just i) -, μs
+maybe-consume {ss = _ -, _} (Γ , m) (just zero) = Γ , ω0s
+maybe-consume {ss = _ -, _} (Γ , m) (just (suc i)) = maybe-consume Γ (just i) , m
 
 SubjectReduction : Set
-SubjectReduction = {n : ℕ} {ss : SCtx n} {γ : TCtx ss} {Γ Δ : CCtx ss}
+SubjectReduction = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
                    {c : Channel n} {P Q : Scoped n}
                  → P =[ c ]⇒ Q
                  → γ w Γ                 ⊢ P ⊠ Δ

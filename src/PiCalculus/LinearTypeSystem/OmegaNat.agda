@@ -60,14 +60,13 @@ n∙ x + n∙ y = n∙ (x ℕ.+ y)
 +-+-assoc (n∙ x) (n∙ y) (n∙ z) rewrite ℕₚ.+-assoc x y z = refl
 +-+-assoc ω∙ ω∙ ω∙ = refl
 
-rebase : ωℕ M → ∀ N → ωℕ N
-rebase _ nonlin = ω∙
-rebase (n∙ x) lin = n∙ x
-rebase ω∙ lin = 1∙
-
 ω0 : ωℕ M
 ω0 {nonlin} = ω∙
 ω0 {lin} = 0∙
+
+ω1 : ωℕ M
+ω1 {nonlin} = ω∙
+ω1 {lin} = 1∙
 
 ω0s : {Ms : Vec MType n} → All ωℕ Ms
 ω0s {_} {[]} = []
@@ -76,7 +75,3 @@ rebase ω∙ lin = 1∙
 _+ᵥ_ : {Ms : Vec MType n} → All ωℕ Ms → All ωℕ Ms → All ωℕ Ms
 [] +ᵥ [] = []
 (x ∷ xs) +ᵥ (y ∷ ys) = x + y ∷ xs +ᵥ ys
-
-rebaseᵥ : {Ms : Vec MType n} → All ωℕ Ms → (Ns : Vec MType n) → All ωℕ Ns
-rebaseᵥ [] [] = []
-rebaseᵥ (x ∷ xs) (n ∷ ns) = rebase x n ∷ rebaseᵥ xs ns
