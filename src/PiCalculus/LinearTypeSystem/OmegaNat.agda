@@ -1,4 +1,4 @@
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; cong)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; cong; sym)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Relation.Nullary using (Dec; yes; no)
 open import Function using (_∘_)
@@ -40,6 +40,9 @@ private
 pattern 0∙ = n∙ 0
 pattern 1∙ = n∙ 1
 
+n-injective : ∀ {x y} → n∙ x ≡ n∙ y → x ≡ y
+n-injective refl = refl
+
 ω0 : ωℕ M
 ω0 {nonlin} = ω∙
 ω0 {lin} = 0∙
@@ -69,18 +72,18 @@ n∙ x + n∙ y = n∙ (x ℕ.+ y)
 +-assoc ω∙ ω∙ ω∙ = refl
 
 _≤_ : ωℕ M → ωℕ M → Set
-x ≤ y = Σ[ z ∈ _ ] z + x ≡ y
+x ≤ y = Σ[ z ∈ _ ] x + z ≡ y
+
+_≤?_ : (x y : ωℕ M) → Dec (x ≤ y)
+ω∙ ≤? ω∙ = yes (ω∙ , refl)
+n∙ zero ≤? n∙ y = yes (n∙ y , refl)
+n∙ (suc x) ≤? n∙ zero = no λ { (n∙ _ , ())}
+n∙ (suc x) ≤? n∙ (suc y) with n∙ x ≤? n∙ y
+(n∙ (suc x) ≤? n∙ (suc y)) | yes (n∙ _ , refl) = yes (n∙ _ , refl)
+(n∙ (suc x) ≤? n∙ (suc y)) | no ¬p = no λ { (n∙ _ , refl) → ¬p (n∙ _ , refl)}
 
 ≤-+ʳ : {x y : ωℕ M} (z : ωℕ M) → x ≤ y → x ≤ (y + z)
-≤-+ʳ {x = x} z (diff , refl) = (diff + z) , (begin
-  (diff + z) + x
-    ≡⟨ +-assoc _ _ _ ⟩
-  diff + (z + x)
-    ≡⟨ cong (_ +_) (+-comm _ _) ⟩
-  diff + (x + z)
-    ≡˘⟨ +-assoc _ _ _ ⟩
-  (diff + x) + z
-    ∎)
+≤-+ʳ {x = x} z (diff , refl) = (diff + z) , sym (+-assoc _ _ _)
 
 replicate : {Ms : Vec MType n} → (∀ {M} → ωℕ M) → All ωℕ Ms
 replicate {Ms = []} f = []
@@ -107,18 +110,17 @@ _+ᵥ_ : {Ms : Vec MType n} → All ωℕ Ms → All ωℕ Ms → All ωℕ Ms
 +ᵥ-comm (x ∷ m) (y ∷ n) rewrite +ᵥ-comm m n | +-comm x y = refl
 
 _≤ᵥ_ : {Ms : Vec MType n} → All ωℕ Ms → All ωℕ Ms → Set
-m ≤ᵥ n = Σ[ l ∈ _ ] l +ᵥ m ≡ n
+m ≤ᵥ n = Σ[ l ∈ _ ] m +ᵥ l ≡ n
+
+_≤ᵥ?_ : {Ms : Vec MType n} (m l : All ωℕ Ms) → Dec (m ≤ᵥ l)
+[] ≤ᵥ? [] = yes ([] , refl)
+(x ∷ xs) ≤ᵥ? (y ∷ ys) with x ≤? y | xs ≤ᵥ? ys
+((x ∷ xs) ≤ᵥ? (y ∷ ys)) | yes (_ , p) | yes (_ , q) = yes (_ , (_∷_ & p ⊗ q))
+((x ∷ xs) ≤ᵥ? (y ∷ ys)) | yes p | no ¬q = no λ {(_ ∷ _ , refl) → ¬q (_ , refl)}
+((x ∷ xs) ≤ᵥ? (y ∷ ys)) | no ¬p | _     = no λ {(_ ∷ _ , refl) → ¬p (_ , refl)}
 
 ≤ᵥ-refl : {Ms : Vec MType n} (m : All ωℕ Ms) → m ≤ᵥ m
-≤ᵥ-refl m = replicate ω0 , +ᵥ-idˡ _
+≤ᵥ-refl m = replicate ω0 , +ᵥ-idʳ _
 
 ≤ᵥ-+ᵥʳ : {Ms : Vec MType n} {m n : All ωℕ Ms} (l : All ωℕ Ms) → m ≤ᵥ n → m ≤ᵥ (n +ᵥ l)
-≤ᵥ-+ᵥʳ {m = m} l (diff , refl) = (diff +ᵥ l) , (begin
-  (diff +ᵥ l) +ᵥ m
-    ≡⟨ +ᵥ-assoc _ _ _ ⟩
-  diff +ᵥ (l +ᵥ m)
-    ≡⟨ cong (_ +ᵥ_) (+ᵥ-comm _ _) ⟩
-  diff +ᵥ (m +ᵥ l)
-    ≡˘⟨ +ᵥ-assoc _ _ _ ⟩
-  (diff +ᵥ m) +ᵥ l
-    ∎)
+≤ᵥ-+ᵥʳ {m = m} l (diff , refl) = (diff +ᵥ l) , sym (+ᵥ-assoc _ _ _)

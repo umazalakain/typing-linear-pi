@@ -1,4 +1,4 @@
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; cong; trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; cong; trans; inspect; [_])
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Decidable using (fromWitness; toWitness)
@@ -7,6 +7,7 @@ open import Function.Reasoning
 
 import Data.Empty as Empty
 import Data.Product as Product
+import Data.Product.Properties as Productₚ
 import Data.Unit as Unit
 import Data.Maybe as Maybe
 import Data.Nat as Nat
@@ -49,34 +50,20 @@ private
 ∋-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
     → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
     → γ w Γ ∋ t w m ⊠ Δ → Δ ⊆ Γ
-∋-⊆ {ss = ss -, s} zero = ⊆-cong {ss = ss} {s = s} ⊆-refl (≤ᵥ-+ᵥʳ _ (≤ᵥ-refl _))
-∋-⊆ (suc ⊢P) = {!!}
+∋-⊆ (zero {Γ = Γ}) = (ε , _) , _,_ & ⊎-idʳ _ ⊗ +ᵥ-comm _ _
+∋-⊆ (suc ⊢P) with ∋-⊆ ⊢P
+∋-⊆ (suc ⊢P) | Γ , refl = (Γ , replicate ω0) , _,_ & refl ⊗ +ᵥ-idʳ _
 
-{-
-⊢-⊆ : γ w Γ ⊢ P ⊠ ϕ → ϕ ⊆ Γ
+⊢-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+    → γ w Γ ⊢ P ⊠ Δ → Δ ⊆ Γ
 ⊢-⊆ end = ⊆-refl
-⊢-⊆ (base ⊢P) = ⊆-tail (⊢-⊆ ⊢P)
-⊢-⊆ (chan t c μ ⊢P) = ⊆-tail (⊢-⊆ ⊢P)
-⊢-⊆ (recv x ⊢P) = ⊆-trans (⊆-tail (⊢-⊆ ⊢P)) (∋-⊆ x)
+⊢-⊆ (base ⊢P) = ⊆-tail {s = < 0 & _ , [] >} (⊢-⊆ ⊢P)
+⊢-⊆ (chan {s = s} t m μ ⊢P) = ⊆-tail {s = < 2 & _ , s ∷ [] >} (⊢-⊆ ⊢P)
+⊢-⊆ (recv {s = s} x ⊢P) = ⊆-trans (⊆-tail {s = s} (⊢-⊆ ⊢P) ) (∋-⊆ x)
 ⊢-⊆ (send x y ⊢P) = ⊆-trans (⊢-⊆ ⊢P) (⊆-trans (∋-⊆ y) (∋-⊆ x))
 ⊢-⊆ (comp ⊢P ⊢Q) = ⊆-trans (⊢-⊆ ⊢Q) (⊢-⊆ ⊢P)
 
-∋-<ω> : {s : Shape} {t : Type s} {c : Capability s}
-      → γ w Γ ∋ t w c ⊠ Δ → Δ <ω> Γ
-∋-<ω> (zero ⦃ p ⦄) = <ω>-refl , ωᵥ-sym (toWitness p)
-∋-<ω> (suc Γ∋c) = (∋-<ω> Γ∋c) , ωᵥ-refl
-
-⊢-<ω> : γ w Γ ⊢ P ⊠ Δ → Δ <ω> Γ
-⊢-<ω> end = <ω>-refl
-⊢-<ω> (base ⊢P) with ⊢-<ω> ⊢P
-⊢-<ω> (base ⊢P) | Γ<ω>Δ , _ = Γ<ω>Δ
-⊢-<ω> (chan t c μ ⊢P) with ⊢-<ω> ⊢P
-⊢-<ω> (chan t c μ ⊢P) | Γ<ω>Δ , _ = Γ<ω>Δ
-⊢-<ω> (recv x ⊢P) with ⊢-<ω> ⊢P
-⊢-<ω> (recv x ⊢P) | Δωϕ , _ = <ω>-trans Δωϕ (∋-<ω> x)
-⊢-<ω> (send x y ⊢P) = <ω>-trans (⊢-<ω> ⊢P) (<ω>-trans (∋-<ω> y) (∋-<ω> x))
-⊢-<ω> (comp ⊢P ⊢Q) = <ω>-trans (⊢-<ω> ⊢Q) (⊢-<ω> ⊢P)
-
+{-
 ⊎-toFin : {ss : SCtx n} {γ : TCtx ss} {Γ Δ : CCtx ss}
         → {s : Shape} {t : Type s} {c : Capability s}
         → (ϕ : CCtx ss) (x : γ w Γ ∋ t w c ⊠ Δ)
@@ -87,45 +74,26 @@ private
   = zero ⦃ fromWitness {!ωᵥ-cong ?!} ⦄ , refl
 ⊎-toFin (ϕ -, ls) (suc x) with ⊎-toFin ϕ x
 ⊎-toFin (ϕ -, ls) (suc x) | x' , eq = suc x' , suc & eq
-
-
-weaken : ∀ {n} {P : Scoped n} {ss : SCtx n} {γ : TCtx ss}
-       → {Γ Δ : CCtx ss} (ϕ : CCtx ss)
-       → γ w Γ       ⊢ P ⊠ Δ
-       → γ w (ϕ ⊎ Γ) ⊢ P ⊠ (ϕ ⊎ Δ)
-weaken ϕ end = end
-weaken ϕ (base ⊢P) = base (weaken (ϕ -, []) ⊢P)
-weaken ϕ (chan t c μ ⊢P) = chan t c μ (weaken (ϕ -, Vec.replicate 0∙) ⊢P
-  |> subst (λ ● → _ w _ -, ● ↑ ● ↓ ⊢ _ ⊠ _ -, ((0∙ + (μ ∸ μ)) ↑ 0∙ + (μ ∸ μ) ↓)) (+-idˡ μ)
-  |> subst (λ ● → _ w _ -, μ ↑ μ ↓ ⊢ _ ⊠ _ -, (●              ↑ ●            ↓)) (+-idˡ (μ ∸ μ))
-  )
-weaken ϕ (recv {c = c} x ⊢P) rewrite (proj₂ (⊎-toFin ϕ x)) = recv _ (weaken (ϕ -, Vec.replicate 0∙) ⊢P
-  |> subst (λ ● → _ w _ -, ● ⊢ _ ⊠ _ -, (0s +ᵥ (c ∸ᵥ c))) (+ᵥ-idˡ c)
-  |> subst (λ ● → _ w _ -, c ⊢ _ ⊠ _ -, ●) (+ᵥ-idˡ (c ∸ᵥ c))
-  )
-weaken ϕ (send x y ⊢P) rewrite (proj₂ (⊎-toFin ϕ x)) | (proj₂ (⊎-toFin ϕ y )) = send _ _ (weaken ϕ ⊢P)
-weaken ϕ (comp ⊢P ⊢Q) = comp (weaken ϕ ⊢P) (weaken ϕ ⊢Q)
-
-postulate
-
-  strengthen : ∀ {n} {P : Scoped n} {ss : SCtx n} {γ : TCtx ss} {Γ Δ : CCtx ss}
-             → γ w Γ       ⊢ P ⊠ Δ
-             → γ w (Γ / Δ) ⊢ P ⊠ (Δ / Δ)
+             -}
 
 frame : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
-      → γ w Γ ⊢ P ⊠ Δ
-             -}
+      → Γ ≡ Θ ⊎ Δ
+      → γ w Γ ⊢ P ⊠ Θ
+      → γ w (Ξ ⊎ Δ) ⊢ P ⊠ Θ
+frame eq end = {!!}
+frame eq (base ⊢P) = base (frame (_,_ & eq ⊗ refl) ⊢P)
+frame {Ξ = Ξ} eq (chan t m μ ⊢P) with frame {Ξ = Ξ , ω0 ↑ ω0 ↓} (_,_ & eq ⊗ sym (+ᵥ-idˡ _)) ⊢P
+frame {Ξ = Ξ} eq (chan t m μ ⊢P) | ⊢P' rewrite +-idˡ μ = chan t m μ ⊢P'
+frame eq (recv x ⊢P) with frame (_,_ & {!!} ⊗ {!!}) ⊢P
+frame eq (recv x ⊢P) | ⊢P' = {!recv x ?!}
+frame eq (send x y ⊢P) = {!!}
+frame eq (comp ⊢P ⊢Q) = comp {!!} {!!}
 
 comp-comm : {ss : Shapes n} {cs : Cards ss} {γ : Types ss}
           → (Γ Ξ : Mults cs)
           → γ w Γ ⊢ P ∥ Q ⊠ Ξ
           → γ w Γ ⊢ Q ∥ P ⊠ Ξ
 
-comp-comm Γ Ξ (comp {Δ = Δ} ⊢P ⊢Q) =
-  (⊢Q |> {!!} ∶ {!!}
-      |> {!!} ∶ {!!}
-      )
-      {!!}
 {-
   (⊢Q |> weaken Γ                        ∶ _ w  Γ ⊎ Δ      ⊢ _ ⊗  Γ ⊎ ϕ
       |> strengthen (⊆-⊎ʳ ϕ (⊢-to-⊆ ⊢P)) ∶ _ w (Γ ⊎ Δ) / Δ ⊢ _ ⊗ (Γ ⊎ ϕ) / Δ
