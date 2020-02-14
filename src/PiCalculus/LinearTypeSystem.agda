@@ -84,7 +84,7 @@ data _w_∋_w_⊠_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs
 
   zero : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m n : Mult s c}
-       → γ -, t w Γ , (n +ᵥ m) ∋ t w n ⊠ Γ , m
+       → γ -, t w Γ , (m +ᵥ n) ∋ t w n ⊠ Γ , m
 
   suc : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
@@ -121,12 +121,12 @@ data _w_⊢_⊠_ : {ss : Shapes n} {cs : Cards ss}
        -------------------------------------------------------
        → γ               w Γ           ⊢ new P ⊠ Δ
 
-  recv : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ : Mults cs}
+  recv : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Ξ Θ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (x : γ      w Γ      ∋ C[ t w m ] w (ω0 {M}) ↑ (ω1 {N}) ↓ ⊠ Δ)
-       →      γ -, t w Δ , m  ⊢ P                                  ⊠ Ξ , replicate ω0
+       → (x : γ      w Γ      ∋ C[ t w m ] w (ω0 {M}) ↑ (ω1 {N}) ↓ ⊠ Ξ)
+       →      γ -, t w Ξ , m  ⊢ P                                  ⊠ Θ , replicate ω0
        ------------------------------------------------------------------------------
-       →      γ      w Γ      ⊢ toFin x ⦅⦆ P                       ⊠ Ξ
+       →      γ      w Γ      ⊢ toFin x ⦅⦆ P                       ⊠ Θ
 
   send : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}

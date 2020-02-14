@@ -57,6 +57,13 @@ _⊎_ {ss = _ -, _} (Γ , m) (Δ , n) = Γ ⊎ Δ , m +ᵥ n
 ⊎-assoc {ss = []} tt tt tt = refl
 ⊎-assoc {ss = _ -, _} (Γ , m) (Δ , n) (Ξ , l) rewrite ⊎-assoc Γ Δ Ξ | +ᵥ-assoc m n l = refl
 
+⊎-cancelˡ-≡ : {ss : Shapes n} {cs : Cards ss} {Γ Δ Ξ : Mults cs} → Γ ⊎ Δ ≡ Γ ⊎ Ξ → Δ ≡ Ξ
+⊎-cancelˡ-≡ {ss = []} {tt} {tt} {tt} _ = refl
+⊎-cancelˡ-≡ {ss = _ -, _} {_ , _} {_ , _} {_ , _} eq
+  rewrite +ᵥ-cancelˡ-≡ (Productₚ.,-injectiveʳ eq)
+  | ⊎-cancelˡ-≡ (Productₚ.,-injectiveˡ eq)
+  = refl
+
 _⊆_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Set
 ϕ ⊆ Γ = Σ[ Δ ∈ _ ] ϕ ⊎ Δ ≡ Γ
 

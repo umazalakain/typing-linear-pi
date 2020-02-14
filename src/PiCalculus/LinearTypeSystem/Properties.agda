@@ -50,7 +50,7 @@ private
 ∋-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
     → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
     → γ w Γ ∋ t w m ⊠ Δ → Δ ⊆ Γ
-∋-⊆ (zero {Γ = Γ}) = (ε , _) , _,_ & ⊎-idʳ _ ⊗ +ᵥ-comm _ _
+∋-⊆ zero = (ε , _) , _,_ & ⊎-idʳ _ ⊗ refl
 ∋-⊆ (suc ⊢P) with ∋-⊆ ⊢P
 ∋-⊆ (suc ⊢P) | Γ , refl = (Γ , replicate ω0) , _,_ & refl ⊗ +ᵥ-idʳ _
 
@@ -63,59 +63,83 @@ private
 ⊢-⊆ (send x y ⊢P) = ⊆-trans (⊢-⊆ ⊢P) (⊆-trans (∋-⊆ y) (∋-⊆ x))
 ⊢-⊆ (comp ⊢P ⊢Q) = ⊆-trans (⊢-⊆ ⊢Q) (⊢-⊆ ⊢P)
 
-{-
-⊎-toFin : {ss : SCtx n} {γ : TCtx ss} {Γ Δ : CCtx ss}
-        → {s : Shape} {t : Type s} {c : Capability s}
-        → (ϕ : CCtx ss) (x : γ w Γ ∋ t w c ⊠ Δ)
-        → Σ[ y ∈ γ w ϕ ⊎ Γ ∋ t w c ⊠ ϕ ⊎ Δ ]
-          toFin x ≡ toFin y
-⊎-toFin (ϕ -, ls) (zero {ms = ms} {ns = ns} ⦃ p ⦄)
-  rewrite sym (+ᵥ-+ᵥ-assoc ls ms ns)
-  = zero ⦃ fromWitness {!ωᵥ-cong ?!} ⦄ , refl
-⊎-toFin (ϕ -, ls) (suc x) with ⊎-toFin ϕ x
-⊎-toFin (ϕ -, ls) (suc x) | x' , eq = suc x' , suc & eq
-             -}
+--  x : (Θ ⊎ Δ₁) ⊠ (Θ ⊎ Δ₂)
+-- ⊢P : (Θ ⊎ Δ₂) ⊠ Θ
 
-frame : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
-      → Γ ≡ Θ ⊎ Δ
-      → γ w Γ ⊢ P ⊠ Θ
-      → γ w (Ξ ⊎ Δ) ⊢ P ⊠ Θ
-frame eq end = {!!}
-frame eq (base ⊢P) = base (frame (_,_ & eq ⊗ refl) ⊢P)
-frame {Ξ = Ξ} eq (chan t m μ ⊢P) with frame {Ξ = Ξ , ω0 ↑ ω0 ↓} (_,_ & eq ⊗ sym (+ᵥ-idˡ _)) ⊢P
-frame {Ξ = Ξ} eq (chan t m μ ⊢P) | ⊢P' rewrite +-idˡ μ = chan t m μ ⊢P'
-frame eq (recv x ⊢P) with frame (_,_ & {!!} ⊗ {!!}) ⊢P
-frame eq (recv x ⊢P) | ⊢P' = {!recv x ?!}
-frame eq (send x y ⊢P) = {!!}
-frame eq (comp ⊢P ⊢Q) = comp {!!} {!!}
+∋-frame : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Θ : Mults cs}
+        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+        → (Ξ : Mults cs)
+        → Θ ⊎ Δ ≡ Γ
+        → (x : γ w Γ ∋ t w m ⊠ Θ)
+        → Σ[ y ∈ γ w (Ξ ⊎ Δ) ∋ t w m ⊠ Ξ ]
+          toFin x ≡ toFin y
+∋-frame {Δ = Δ , l} (Ξ , n) eq zero
+  rewrite ⊎-cancelˡ-≡ (trans (Productₚ.,-injectiveˡ eq) (sym (⊎-idʳ _)))
+        | ⊎-idʳ Ξ
+        | +ᵥ-cancelˡ-≡ (Productₚ.,-injectiveʳ eq)
+        = zero , refl
+∋-frame (Ξ , m) eq (suc x) with ∋-frame Ξ (Productₚ.,-injectiveˡ eq) x
+∋-frame (Ξ , m) eq (suc x) | x' , p'
+  rewrite +ᵥ-cancelˡ-≡ (trans (Productₚ.,-injectiveʳ eq) (sym (+ᵥ-idʳ _)))
+        | +ᵥ-idʳ m
+        = suc x' , suc & p'
+
+⊢-frame : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Θ : Mults cs}
+        → (Ξ : Mults cs)
+        → Θ ⊎ Δ ≡ Γ
+        → γ w Γ ⊢ P ⊠ Θ
+        → γ w (Ξ ⊎ Δ) ⊢ P ⊠ Ξ
+⊢-frame Ξ eq end rewrite ⊎-cancelˡ-≡ (trans eq (sym (⊎-idʳ _))) | ⊎-idʳ Ξ = end
+⊢-frame Ξ eq (base ⊢P) = base (⊢-frame (Ξ , _) (_,_ & eq ⊗ refl) ⊢P)
+⊢-frame Ξ eq (chan t m μ ⊢P) with ⊢-frame (Ξ , ω0 ↑ ω0 ↓) (_,_ & eq ⊗ +ᵥ-idˡ _) ⊢P
+⊢-frame Ξ eq (chan t m μ ⊢P) | ⊢P' rewrite +-idˡ μ = chan t m μ ⊢P'
+⊢-frame Ξ eq (recv x ⊢P) with ∋-⊆ x | ⊢-⊆ ⊢P
+⊢-frame Ξ eq (recv x ⊢P) | l , refl | (r , _) , refl = recv _ (⊢-frame _ refl ⊢P)
+  |> subst (λ ● → _ w _ ⊢ ● ⦅⦆ _ ⊠ _) (sym (proj₂ (∋-frame (Ξ ⊎ r) refl x)))
+  |> subst (λ ● → _ w ● ⊢ _ ⊠ Ξ) (begin
+    ((Ξ ⊎ r) ⊎ l)
+      ≡⟨ ⊎-assoc _ _ _ ⟩
+    (Ξ ⊎ (r ⊎ l))
+      ≡˘⟨ cong (λ ● → _ ⊎ ●) (⊎-cancelˡ-≡ (trans eq (⊎-assoc _ _ _))) ⟩
+    (Ξ ⊎ _)
+      ∎)
+⊢-frame Ξ eq (send x y ⊢P) with ∋-⊆ x | ∋-⊆ y | ⊢-⊆ ⊢P
+⊢-frame Ξ eq (send x y ⊢P) | l , refl | m , refl | r , refl = send _ _ (⊢-frame _ refl ⊢P)
+  |> subst (λ ● → _ w _ ⊢ ● ⟨ _ ⟩ _ ⊠ _) (sym (proj₂ (∋-frame ((Ξ ⊎ r) ⊎ m) refl x)))
+  |> subst (λ ● → _ w _ ⊢ _ ⟨ ● ⟩ _ ⊠ _) (sym (proj₂ (∋-frame ((Ξ ⊎ r)) refl y)))
+  |> subst (λ ● → _ w ● ⊢ _ ⊠ Ξ) (begin
+    (((Ξ ⊎ r) ⊎ m) ⊎ l)
+      ≡⟨ cong (λ ● → ● ⊎ _) (⊎-assoc _ _ _) ⟩
+    ((Ξ ⊎ (r ⊎ m)) ⊎ l)
+      ≡⟨ ⊎-assoc _ _ _ ⟩
+    (Ξ ⊎ ((r ⊎ m) ⊎ l))
+      ≡˘⟨ cong (λ ● → _ ⊎ ●) (⊎-cancelˡ-≡ (trans eq (trans (cong (λ ● → ● ⊎ _) (⊎-assoc _ _ _)) (⊎-assoc _ _ _)))) ⟩
+    (Ξ ⊎ _)
+      ∎)
+⊢-frame Ξ eq (comp ⊢P ⊢Q) with ⊢-⊆ ⊢P | ⊢-⊆ ⊢Q
+⊢-frame Ξ eq (comp ⊢P ⊢Q) | l , refl | r , refl = comp (⊢-frame _ refl ⊢P) (⊢-frame _ refl ⊢Q)
+  |> subst (λ ● → _ w ● ⊢ _ ⊠ Ξ) (begin
+    ((Ξ ⊎ r) ⊎ l)
+      ≡⟨ ⊎-assoc _ _ _ ⟩
+    (Ξ ⊎ (r ⊎ l))
+      ≡˘⟨ cong (λ ● → _ ⊎ ●) (⊎-cancelˡ-≡ (trans eq (⊎-assoc _ _ _))) ⟩
+    (Ξ ⊎ _)
+      ∎)
 
 comp-comm : {ss : Shapes n} {cs : Cards ss} {γ : Types ss}
           → (Γ Ξ : Mults cs)
           → γ w Γ ⊢ P ∥ Q ⊠ Ξ
           → γ w Γ ⊢ Q ∥ P ⊠ Ξ
+comp-comm Γ Ξ (comp ⊢P ⊢Q) with ⊢-⊆ ⊢P | ⊢-⊆ ⊢Q
+comp-comm Γ Ξ (comp ⊢P ⊢Q) | l , refl | r , refl = comp
+  (⊢Q |> ⊢-frame (Ξ ⊎ l) refl              ∶ _ w (Ξ ⊎ l) ⊎ r ⊢ _ ⊠ (Ξ ⊎ l)
+      |> subst (λ ●                        → _ w ●           ⊢ _ ⊠ (Ξ ⊎ l))
+        (trans (⊎-assoc _ _ _)
+        (trans (_⊎_ & refl ⊗ ⊎-comm _ _)
+               (sym (⊎-assoc _ _ _))))     ∶ _ w (Ξ ⊎ r) ⊎ l ⊢ _ ⊠ (Ξ ⊎ l))
+  (⊢P |> ⊢-frame _ refl                    ∶ _ w Ξ ⊎ l       ⊢ _ ⊠ Ξ)
 
-{-
-  (⊢Q |> weaken Γ                        ∶ _ w  Γ ⊎ Δ      ⊢ _ ⊗  Γ ⊎ ϕ
-      |> strengthen (⊆-⊎ʳ ϕ (⊢-to-⊆ ⊢P)) ∶ _ w (Γ ⊎ Δ) / Δ ⊢ _ ⊗ (Γ ⊎ ϕ) / Δ
-      |> subst (λ ●                      → _ w ●           ⊢ _ ⊗ (Γ ⊎ ϕ) / Δ)
-      (trans
-        (⊎-/-assoc Γ ⊆-refl )
-        (⊎-idʳ (<ω>-sym (⊢-to-<ω> ⊢P)))
-      )                                  ∶ _ w Γ           ⊢ _ ⊗ (Γ ⊎ ϕ) / Δ
-      |> subst (λ ●                      → _ w _           ⊢ _ ⊗ ●)
-      (trans
-        (cong (_/ Δ) (⊎-comm Γ ϕ))
-        (⊎-/-assoc ϕ (⊢-to-⊆ ⊢P))
-      )                                  ∶ _ w Γ           ⊢ _ ⊗ ϕ ⊎ (Γ / Δ)
-      )
-  (⊢P |> strengthen ⊆-refl               ∶ _ w      Γ / Δ  ⊢ _ ⊗      (Δ / Δ)
-      |> weaken ϕ                        ∶ _ w ϕ ⊎ (Γ / Δ) ⊢ _ ⊗ (ϕ ⊎ (Δ / Δ))
-      |> subst (λ ●                      → _ w ϕ ⊎ (Γ / Δ) ⊢ _ ⊗ ●)
-      (⊎-idʳ (⊢-to-<ω> ⊢Q))              ∶ _ w ϕ ⊎ (Γ / Δ) ⊢ _ ⊗ ϕ
-      )
-      -}
 
-{-
 subject-cong : SubjectCongruence
 subject-cong comp-assoc (comp ⊢P (comp ⊢Q ⊢R)) = comp (comp ⊢P ⊢Q) ⊢R
 subject-cong comp-symm (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
@@ -162,4 +186,3 @@ subject-reduction (base {c = nothing} P⇒Q) (base ⊢P) = base (subject-reducti
 subject-reduction (base {c = just zero} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (base {c = just (suc x)} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (struct P≅P' P'⇒Q) ⊢P = subject-reduction P'⇒Q (subject-cong P≅P' ⊢P)
--}

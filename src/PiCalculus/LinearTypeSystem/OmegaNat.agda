@@ -71,6 +71,10 @@ n∙ x + n∙ y = n∙ (x ℕ.+ y)
 +-assoc (n∙ x) (n∙ y) (n∙ z) rewrite ℕₚ.+-assoc x y z = refl
 +-assoc ω∙ ω∙ ω∙ = refl
 
++-cancelˡ-≡ : {x y z : ωℕ M} → x + y ≡ x + z → y ≡ z
++-cancelˡ-≡ {x = n∙ _} {n∙ _} {n∙ _} eq = n∙ & ℕₚ.+-cancelˡ-≡ _ (n-injective eq)
++-cancelˡ-≡ {x = ω∙} {ω∙} {ω∙} _ = refl
+
 _≤_ : ωℕ M → ωℕ M → Set
 x ≤ y = Σ[ z ∈ _ ] x + z ≡ y
 
@@ -108,6 +112,13 @@ _+ᵥ_ : {Ms : Vec MType n} → All ωℕ Ms → All ωℕ Ms → All ωℕ Ms
 +ᵥ-comm : {Ms : Vec MType n} (m n : All ωℕ Ms) → m +ᵥ n ≡ n +ᵥ m
 +ᵥ-comm [] [] = refl
 +ᵥ-comm (x ∷ m) (y ∷ n) rewrite +ᵥ-comm m n | +-comm x y = refl
+
++ᵥ-cancelˡ-≡ : {Ms : Vec MType n} {xs ys zs : All ωℕ Ms} → xs +ᵥ ys ≡ xs +ᵥ zs → ys ≡ zs
++ᵥ-cancelˡ-≡ {xs = []} {[]} {[]} _ = refl
++ᵥ-cancelˡ-≡ {xs = _ ∷ _} {_ ∷ _} {_ ∷ _} eq
+  rewrite +-cancelˡ-≡ (cong All.head eq)
+  | +ᵥ-cancelˡ-≡ (cong All.tail eq)
+  = refl
 
 _≤ᵥ_ : {Ms : Vec MType n} → All ωℕ Ms → All ωℕ Ms → Set
 m ≤ᵥ n = Σ[ l ∈ _ ] m +ᵥ l ≡ n
