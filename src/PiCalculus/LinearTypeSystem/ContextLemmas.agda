@@ -24,6 +24,8 @@ open Bool using (T)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 open import PiCalculus.Function
+import PiCalculus.Syntax
+open PiCalculus.Syntax.Scoped
 open import PiCalculus.LinearTypeSystem
 open import PiCalculus.LinearTypeSystem.OmegaNat
 
@@ -32,8 +34,7 @@ module PiCalculus.LinearTypeSystem.ContextLemmas where
 private
   variable
     n : ℕ
-    ss : Shapes n
-    cs : Cards ss
+    P Q : Scoped n
 
 -- Addition of contexts
 
@@ -88,31 +89,18 @@ _⊆?_ {_} {_ -, _} (xs , x) (ys , y) | no ¬p | _     = no λ {(_ , refl) → �
 ⊆-⊎ˡ : {ss : Shapes n} {cs : Cards ss} {Γ Ξ : Mults cs} (Δ : Mults cs) → Γ ⊆ Ξ → Γ ⊆ (Δ ⊎ Ξ)
 ⊆-⊎ˡ Δ (diff , refl) = Δ ⊎ diff , trans (⊎-comm _ _) (trans (⊎-assoc _ _ _) (cong (_ ⊎_) (⊎-comm _ _)))
 
-_/_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Mults cs
-Γ / Δ with Δ ⊆? Γ
-(Γ / Δ) | yes (d , _) = d
-(Γ / Δ) | no _ = ε
+∋-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+    → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+    → γ w Γ ∋ t w m ⊠ Δ → Δ ⊆ Γ
+∋-⊆ zero = (ε , _) , _,_ & ⊎-idʳ _ ⊗ refl
+∋-⊆ (suc ⊢P) with ∋-⊆ ⊢P
+∋-⊆ (suc ⊢P) | Γ , refl = (Γ , replicate ω0) , _,_ & refl ⊗ +ᵥ-idʳ _
 
-{-
-
-⊆-⊎ʳ : {Γ Ξ : CCtx ss} (ϕ : CCtx ss) → Γ ⊆ Ξ → Γ ⊆ (Ξ ⊎ ϕ)
-⊆-⊎ʳ ϕ (Δ , refl) = ϕ ⊎ Δ , trans (⊎-assoc _ _ _) (⊎-comm _ _)
-
-⊆-tail : ∀ {Γ Ξ : CCtx ss} {s : Shape} {ms ns : Capability s} → _⊆_ {ss = s ∷ ss} (Γ -, ms) (Ξ -, ns) → Γ ⊆ Ξ
-⊆-tail (_ -, _ , eq) = _ , cong All.tail eq
-
--- Substraction of contexts
-
-_/_ : CCtx ss → CCtx ss → CCtx ss
-[] / [] = []
-(Γ -, ms) / (Δ -, ns) = (Γ / Δ) -, (ms ∸ᵥ ns)
-
-{-
-⊎-/-assoc : (Γ : CCtx ss) {Δ ϕ : CCtx ss}
-          → (ϕ⊆Δ : ϕ ⊆ Δ) → (Γ ⊎ Δ) / ϕ ≡ Γ ⊎ (Δ / ϕ)
-⊎-/-assoc [] {[]} {[]} tt = refl
-⊎-/-assoc (Γ -, ms) {Δ -, _} {ϕ -, _} (ns≥ᵥls , ϕ⊆Δ)
-  rewrite ⊎-/-assoc Γ ϕ⊆Δ
-        | +ᵥ-∸ᵥ-assoc ms ns≥ᵥls = refl
-        -}
--}
+⊢-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+    → γ w Γ ⊢ P ⊠ Δ → Δ ⊆ Γ
+⊢-⊆ end = ⊆-refl
+⊢-⊆ (base ⊢P) = ⊆-tail {s = < 0 & _ , [] >} (⊢-⊆ ⊢P)
+⊢-⊆ (chan {s = s} t m μ ⊢P) = ⊆-tail {s = < 2 & _ , s ∷ [] >} (⊢-⊆ ⊢P)
+⊢-⊆ (recv {s = s} x ⊢P) = ⊆-trans (⊆-tail {s = s} (⊢-⊆ ⊢P) ) (∋-⊆ x)
+⊢-⊆ (send x y ⊢P) = ⊆-trans (⊢-⊆ ⊢P) (⊆-trans (∋-⊆ y) (∋-⊆ x))
+⊢-⊆ (comp ⊢P ⊢Q) = ⊆-trans (⊢-⊆ ⊢Q) (⊢-⊆ ⊢P)
