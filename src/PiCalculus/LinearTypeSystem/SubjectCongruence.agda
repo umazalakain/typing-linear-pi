@@ -30,11 +30,13 @@ open import PiCalculus.LinearTypeSystem.OmegaNat
 open import PiCalculus.LinearTypeSystem.ContextLemmas
 open import PiCalculus.LinearTypeSystem.Framing
 open import PiCalculus.LinearTypeSystem.Weakening
+open import PiCalculus.LinearTypeSystem.Strengthening
 
 module PiCalculus.LinearTypeSystem.SubjectCongruence where
 
 SubjectCongruence : Set
-SubjectCongruence = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs} {P Q : Scoped n}
+SubjectCongruence = {n : ℕ} {ss : Shapes n} {cs : Cards ss}
+                  → {γ : Types ss} {Γ Δ : Mults cs} {P Q : Scoped n}
                   → P ≅ Q
                   → γ w Γ ⊢ P ⊠ Δ
                   → γ w Γ ⊢ Q ⊠ Δ
@@ -50,12 +52,12 @@ comp-comm : {ss : Shapes n} {cs : Cards ss} {γ : Types ss}
           → γ w Γ ⊢ Q ∥ P ⊠ Ξ
 comp-comm Γ Ξ (comp ⊢P ⊢Q) with ⊢-⊆ ⊢P | ⊢-⊆ ⊢Q
 comp-comm Γ Ξ (comp ⊢P ⊢Q) | l , refl | r , refl = comp
-  (⊢Q |> ⊢-frame (Ξ ⊎ l) refl              ∶ _ w (Ξ ⊎ l) ⊎ r ⊢ _ ⊠ (Ξ ⊎ l)
-      |> subst (λ ●                        → _ w ●           ⊢ _ ⊠ (Ξ ⊎ l))
+  (⊢Q |> ⊢-frame (Ξ ⊎ l) refl            ∶ _ w (Ξ ⊎ l) ⊎ r ⊢ _ ⊠ (Ξ ⊎ l)
+      |> subst (λ ●                      → _ w ●           ⊢ _ ⊠ (Ξ ⊎ l))
         (trans (⊎-assoc _ _ _)
         (trans (_⊎_ & refl ⊗ ⊎-comm _ _)
-               (sym (⊎-assoc _ _ _))))     ∶ _ w (Ξ ⊎ r) ⊎ l ⊢ _ ⊠ (Ξ ⊎ l))
-  (⊢P |> ⊢-frame _ refl                    ∶ _ w Ξ ⊎ l       ⊢ _ ⊠ Ξ)
+               (sym (⊎-assoc _ _ _))))   ∶ _ w (Ξ ⊎ r) ⊎ l ⊢ _ ⊠ (Ξ ⊎ l))
+  (⊢P |> ⊢-frame _ refl                  ∶ _ w Ξ ⊎ l       ⊢ _ ⊠ Ξ)
 
 
 subject-cong : SubjectCongruence
@@ -64,8 +66,14 @@ subject-cong comp-symm (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
 subject-cong comp-end (comp ⊢P end) = ⊢P
 subject-cong scope-end (chan t c .ω0 end) = end
 subject-cong base-end (base end) = end
-subject-cong (scope-ext u) (chan t c μ (comp ⊢P ⊢Q)) = comp {!!} {!!}
-subject-cong (base-ext u) (base (comp ⊢P ⊢Q)) = comp {!!} {!!}
+subject-cong (scope-ext u) (chan t c μ (comp ⊢P ⊢Q)) = comp
+  (⊢-strengthen zero u ⊢P)
+  (chan t c μ (subst (λ ● → _ w _ , ● ⊢ _ ⊠ _)
+                     (sym (⊢-unused _ u ⊢P)) ⊢Q))
+subject-cong (base-ext u) (base (comp ⊢P ⊢Q)) = comp
+  (⊢-strengthen zero u ⊢P)
+  (base (subst (λ ● → _ w _ , ● ⊢ _ ⊠ _)
+               (sym (⊢-unused _ u ⊢P)) ⊢Q))
 subject-cong scope-scope-comm (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan t₁ c₁ μ₁ (chan t c μ {!!})
 subject-cong scope-base-comm (chan t c μ (base ⊢P)) = base (chan t c μ {!!})
 subject-cong base-base-comm (base (base ⊢P)) = {!!}
@@ -76,7 +84,7 @@ subject-cong (cong-symm comp-end) ⊢P = comp ⊢P end
 subject-cong (cong-symm scope-end) end = chan B[ 0 ] [] 0∙ end
 subject-cong (cong-symm base-end) end = base end
 subject-cong (cong-symm (scope-ext u)) (comp ⊢P (chan t c μ ⊢Q)) = chan t c μ (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
-subject-cong (cong-symm (base-ext u)) (comp ⊢P (base ⊢Q)) = base (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) {!lift-lower zero _ u!} (⊢-weaken zero ⊢P)) ⊢Q)
+subject-cong (cong-symm (base-ext u)) (comp ⊢P (base ⊢Q)) = base (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm scope-scope-comm) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = {!!}
 subject-cong (cong-symm scope-base-comm) (base (chan t c μ ⊢P)) = {!!}
 subject-cong (cong-symm base-base-comm) (base (base ⊢P)) = {!!}

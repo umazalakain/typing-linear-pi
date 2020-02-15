@@ -1,7 +1,9 @@
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; cong; trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; subst; cong; trans)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Function.Reasoning
+open import Function using (_∘_)
 
+import Data.Empty as Empty
 import Data.Product as Product
 import Data.Product.Properties as Productₚ
 import Data.Unit as Unit
@@ -13,6 +15,7 @@ import Data.Bool as Bool
 import Data.Fin as Fin
 import Data.Vec.Relation.Unary.All as All
 
+open Empty using (⊥-elim)
 open Unit using (⊤; tt)
 open Nat using (ℕ; zero; suc)
 open Vec using (Vec; []; _∷_)
@@ -95,3 +98,43 @@ private
       ≡˘⟨ cong (λ ● → _ ⊎ ●) (⊎-cancelˡ-≡ (trans eq (⊎-assoc _ _ _))) ⟩
     (Ξ ⊎ _)
       ∎)
+
+get-card : {ss : Shapes n} → Cards ss → (i : Fin n) → Card (Vec.lookup ss i)
+get-card {ss = _ -, _} (cs , c) zero = c
+get-card {ss = _ -, _} (cs , c) (suc i) = get-card cs i
+
+get-mult : {ss : Shapes n} {cs : Cards ss} → Mults cs → (i : Fin n)
+         → Mult (Vec.lookup ss i) (get-card cs i)
+get-mult {ss = _ -, _} (ms , m) zero = m
+get-mult {ss = _ -, _} (ms , m) (suc i) = get-mult ms i
+
+
+∋-unused : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
+         → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+         → (i : Fin n)
+         → (x : γ w Γ ∋ t w m ⊠ Θ)
+         → i ≢ toFin x
+         → get-mult Γ i ≡ get-mult Θ i
+∋-unused zero zero i≢x = ⊥-elim (i≢x refl)
+∋-unused zero (suc x) i≢x = refl
+∋-unused (suc i) zero i≢x = refl
+∋-unused (suc i) (suc x) i≢x = ∋-unused i x (i≢x ∘ cong suc)
+
+⊢-unused : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
+         → (i : Fin n)
+         → Unused i P
+         → γ w Γ ⊢ P ⊠ Θ
+         → get-mult Γ i ≡ get-mult Θ i
+⊢-unused i uP end = refl
+⊢-unused i uP (base ⊢P) = ⊢-unused (suc i) uP ⊢P
+⊢-unused i uP (chan t m μ ⊢P) = ⊢-unused (suc i) uP ⊢P
+⊢-unused i (i≢x , uP) (recv x ⊢P) = trans
+  (∋-unused i x i≢x)
+  (⊢-unused (suc i) uP ⊢P)
+⊢-unused i (i≢x , i≢y , uP) (send x y ⊢P) = trans (trans
+  (∋-unused i x i≢x)
+  (∋-unused i y i≢y))
+  (⊢-unused i uP ⊢P)
+⊢-unused i (uP , uQ) (comp ⊢P ⊢Q) = trans
+  (⊢-unused i uP ⊢P)
+  (⊢-unused i uQ ⊢Q)
