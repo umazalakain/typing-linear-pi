@@ -2,14 +2,16 @@ open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Nat.Base
 open import Data.Maybe using (Maybe; nothing; just)
-open import Data.Fin using (Fin ; zero ; suc ; #_ ; cast; punchOut; punchIn)
 open import Data.Bool.Base using (false; true)
 open import Data.Product hiding (swap)
 open import Relation.Nullary using (_because_; ofʸ; ofⁿ)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
+import Data.Fin as Fin
 import Data.Nat.Properties as ℕₚ
 import Data.Fin.Properties as Finₚ
+
+open Fin using (Fin ; zero ; suc; #_)
 
 open import PiCalculus.Syntax
 open Syntax
@@ -29,12 +31,20 @@ module PiCalculus.Semantics where
   Unused i (x ⟨ y ⟩ P) = i ≢ x × i ≢ y × Unused i P
   Unused i (+[] P) = Unused (suc i) P
 
+  lift : (i : Fin (suc n)) → Scoped n → Scoped (suc n)
+  lift i 𝟘 = 𝟘
+  lift i (new P) = new lift (suc i) P
+  lift i (P ∥ Q) = lift i P ∥ lift i Q
+  lift i (x ⦅⦆ P) = Fin.punchIn i x ⦅⦆ lift (suc i) P
+  lift i (x ⟨ y ⟩ P) = Fin.punchIn i x ⟨ Fin.punchIn i y ⟩ lift i P
+  lift i (+[] P) = +[] lift (suc i) P
+
   lower : (i : Fin (suc n)) (P : Scoped (suc n)) → Unused i P → Scoped n
   lower i 𝟘 uP = 𝟘
   lower i (new P) uP = new lower (suc i) P uP
   lower i (P ∥ Q) (uP , uQ) = lower i P uP ∥ lower i Q uQ
-  lower i (x ⦅⦆ P) (i≢x , uP) = punchOut i≢x ⦅⦆ lower (suc i) P uP
-  lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = punchOut i≢x ⟨ punchOut i≢y ⟩ lower i P uP
+  lower i (x ⦅⦆ P) (i≢x , uP) = Fin.punchOut i≢x ⦅⦆ lower (suc i) P uP
+  lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = Fin.punchOut i≢x ⟨ Fin.punchOut i≢y ⟩ lower i P uP
   lower i (+[] P) uP = +[] lower (suc i) P uP
 
   swapFin : Fin n → Fin n → Fin n → Fin n

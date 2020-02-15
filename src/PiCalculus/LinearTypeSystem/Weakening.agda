@@ -36,14 +36,6 @@ private
     n : ℕ
     P Q : Scoped n
 
-lift : (i : Fin (suc n)) → Scoped n → Scoped (suc n)
-lift i 𝟘 = 𝟘
-lift i (new P) = new lift (suc i) P
-lift i (P ∥ Q) = lift i P ∥ lift i Q
-lift i (x ⦅⦆ P) = Fin.punchIn i x ⦅⦆ lift (suc i) P
-lift i (x ⟨ y ⟩ P) = Fin.punchIn i x ⟨ Fin.punchIn i y ⟩ lift i P
-lift i (+[] P) = +[] lift (suc i) P
-
 insert-card : {s : Shape} {ss : Shapes n}
             → (i : Fin (suc n))
             → Card s
