@@ -139,6 +139,7 @@ swap-card i j cs = subst-card i j (subst-card j i cs)
 swap-mult : {ss : Shapes n} {cs : Cards ss} → (i j : Fin n) → Mults cs → Mults (swap-card i j cs)
 swap-mult i j ms = subst-mult i j (subst-mult j i ms)
 
+{-
 ∋-subst : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
         → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
         → (i j : Fin n)
@@ -170,3 +171,4 @@ swap-mult i j ms = subst-mult i j (subst-mult j i ms)
 ⊢-swap i j (recv x ⊢P) rewrite proj₂ (∋-swap i j x) = recv _ (⊢-swap (suc i) (suc j) ⊢P)
 ⊢-swap i j (send x y ⊢P) rewrite proj₂ (∋-swap i j x) | proj₂ (∋-swap i j y) = send _ _ (⊢-swap i j ⊢P)
 ⊢-swap i j (comp ⊢P ⊢Q) = comp (⊢-swap i j ⊢P) (⊢-swap i j ⊢Q)
+-}

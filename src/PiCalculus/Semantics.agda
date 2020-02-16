@@ -21,7 +21,10 @@ module PiCalculus.Semantics where
 
   private
     variable
-      n m : ℕ
+      n : ℕ
+      P P' Q R : Scoped n
+      x y : Fin n
+
 
   Unused : ∀ {n} → Fin n → Scoped n → Set
   Unused i 𝟘 = ⊤
@@ -62,75 +65,54 @@ module PiCalculus.Semantics where
   swap i j (x ⟨ y ⟩ P)  = swapFin i j x ⟨ swapFin i j y ⟩ swap i j P
   swap i j (+[] P) = +[] swap (suc i) (suc j) P
 
-  infixl 5 _≅_
-  data _≅_ : Scoped n → Scoped n → Set where
-    -- Structural congruence
-    comp-assoc : ∀ {P Q R : Scoped n}
-               → P ∥ (Q ∥ R) ≅ (P ∥ Q) ∥ R
+  infixl 10 _≈_
+  data _≈_ : Scoped n → Scoped n → Set where
+    comp-assoc : P ∥ (Q ∥ R) ≈ (P ∥ Q) ∥ R
 
-    comp-symm : ∀ {P Q : Scoped n}
-              → P ∥ Q ≅ Q ∥ P
+    comp-symm : P ∥ Q ≈ Q ∥ P
 
-    comp-end : ∀ {P : Scoped n}
-             → P ∥ 𝟘 ≅ P
+    comp-end : P ∥ 𝟘 ≈ P
 
-    scope-end : ∀ {n} → _≅_ {n} (new 𝟘) 𝟘
+    scope-end : _≈_ {n} (new 𝟘) 𝟘
 
-    base-end : ∀ {n} → _≅_ {n} (+[] 𝟘) 𝟘
+    base-end : _≈_ {n} (+[] 𝟘) 𝟘
 
-    scope-ext : ∀ {P Q : Scoped (1 + n)}
-              → (u : Unused zero P)
-              → new (P ∥ Q) ≅ lower zero P u ∥ (new Q)
+    scope-ext : (u : Unused zero P)
+              → new (P ∥ Q) ≈ lower zero P u ∥ (new Q)
 
-    base-ext : ∀ {P Q : Scoped (1 + n)}
-             → (u : Unused zero P)
-             → +[] (P ∥ Q) ≅ lower zero P u ∥ (+[] Q)
+    base-ext : (u : Unused zero P)
+             → +[] (P ∥ Q) ≈ lower zero P u ∥ (+[] Q)
 
-    scope-scope-comm : ∀ {P : Scoped (2 + n)}
-                     → new (new P) ≅ new (new swap (# 0) (# 1) P)
+    scope-scope-comm : new (new P) ≈ new (new swap (# 0) (# 1) P)
 
-    scope-base-comm : ∀ {P : Scoped (2 + n)}
-                    → new (+[] P) ≅ +[] (new swap (# 0) (# 1) P)
+    scope-base-comm : new (+[] P) ≈ +[] (new swap (# 0) (# 1) P)
 
-    base-base-comm : ∀ {P : Scoped (2 + n)}
-                   → +[] (+[] P) ≅ +[] (+[] swap (# 0) (# 1) P)
+    base-base-comm : +[] (+[] P) ≈ +[] (+[] swap (# 0) (# 1) P)
 
-    -- Equality
-    cong-refl : ∀ {P : Scoped n}
-              → P ≅ P
+  data RecTree : Set where
+    zero : RecTree
+    one : RecTree → RecTree
+    two : RecTree → RecTree → RecTree
 
-    cong-symm : ∀ {P Q : Scoped n}
-              → P ≅ Q
-              → Q ≅ P
+  private
+    variable
+      r p : RecTree
 
-{-
-    cong-trans : ∀ {P Q R : Scoped n}
-               → P ≅ Q
-               → Q ≅ R
-               → P ≅ R
-               -}
+  infixl 5 _≅⟨_⟩_
+  data _≅⟨_⟩_ : Scoped n → RecTree → Scoped n → Set where
+    stop_ : P ≈ Q → P ≅⟨ zero ⟩ Q
+
+    -- Equivalence relation
+    cong-refl  : P ≅⟨ zero ⟩ P
+    cong-symm_ : P ≅⟨ r ⟩ Q → Q ≅⟨ one r ⟩ P
+    cong-trans : P ≅⟨ r ⟩ Q → Q ≅⟨ p ⟩ R → P ≅⟨ two r p ⟩ R
 
     -- Congruent relation
-
-    new-cong : ∀ {P P' : Scoped (1 + n)}
-             → P ≅ P'
-             → new P ≅ new P'
-
-    comp-cong : ∀ {P P' Q : Scoped n}
-              → P ≅ P'
-              → P ∥ Q ≅ P' ∥ Q
-
-    input-cong : ∀ {x} {P P' : Scoped (suc n)}
-               → P ≅ P'
-               → x ⦅⦆ P ≅ x ⦅⦆ P'
-
-    output-cong : ∀ {x y} {P P' : Scoped n}
-                → P ≅ P'
-                → x ⟨ y ⟩ P ≅ x ⟨ y ⟩ P'
-
-    base-cong : ∀ {P P' : Scoped (suc n)}
-              → P ≅ P'
-              → +[] P ≅ +[] P'
+    new-cong_    : P ≅⟨ r ⟩ P' → new P ≅⟨ one r ⟩ new P'
+    comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q ≅⟨ one r ⟩ P' ∥ Q
+    input-cong_  : P ≅⟨ r ⟩ P' → x ⦅⦆ P ≅⟨ one r ⟩ x ⦅⦆ P'
+    output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P ≅⟨ one r ⟩ x ⟨ y ⟩ P'
+    base-cong_   : P ≅⟨ r ⟩ P' → +[] P ≅⟨ one r ⟩ +[] P'
 
   substFin : Fin n → Fin n → Fin n → Fin n
   substFin i j x with j Finₚ.≟ x
@@ -167,7 +149,7 @@ module PiCalculus.Semantics where
   decrementChannel : Channel (suc n) → Channel n
   decrementChannel nothing = nothing
   decrementChannel (just zero) = nothing
-  decrementChannel (just (suc i)) = just i  
+  decrementChannel (just (suc i)) = just i
 
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
@@ -175,19 +157,19 @@ module PiCalculus.Semantics where
          → let uP = subst-unused (λ ()) P in
            (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ just i ]⇒ lower zero ([ suc j / zero ] P) uP ∥ Q
 
-    par : ∀ {c} {P P' Q : Scoped n}
-        → P =[ c ]⇒ P'
-        → P ∥ Q =[ c ]⇒ P' ∥ Q
+    par_ : ∀ {c} {P P' Q : Scoped n}
+         → P =[ c ]⇒ P'
+         → P ∥ Q =[ c ]⇒ P' ∥ Q
 
-    res : ∀ {c} {P Q : Scoped (1 + n)}
-        → P =[ c ]⇒ Q
-        → new P =[ decrementChannel c ]⇒ new Q
+    res_ : ∀ {c} {P Q : Scoped (1 + n)}
+         → P =[ c ]⇒ Q
+         → new P =[ decrementChannel c ]⇒ new Q
 
-    base : ∀ {c} {P Q : Scoped (1 + n)}
-        → P =[ c ]⇒ Q
-        → +[] P =[ decrementChannel c ]⇒ +[] Q
+    intro_ : ∀ {c} {P Q : Scoped (1 + n)}
+           → P =[ c ]⇒ Q
+           → +[] P =[ decrementChannel c ]⇒ +[] Q
 
     struct : ∀ {c} {P Q P' : Scoped n}
-           → P ≅ P'
+           → P ≅⟨ r ⟩ P'
            → P' =[ c ]⇒ Q
            → P =[ c ]⇒ Q

@@ -2,7 +2,7 @@ open import Data.Nat using (ℕ)
 open import Data.Unit using (⊤; tt)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Fin using (#_; zero; suc)
-open import Data.Product using (_,_)
+open import Data.Product using (_,_; Σ-syntax)
 open import Data.Vec using ([]; _∷_)
 open import Data.Vec.Relation.Unary.All using ([]; _∷_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
@@ -80,7 +80,7 @@ channel-over-channel₁₀ = 𝟘
 
 _≅raw≅_ : Raw tt → Raw tt → Set
 P ≅raw≅ Q with raw→scoped P | raw→scoped Q
-(P ≅raw≅ Q) | just sP | just sQ = sP ≅ sQ
+(P ≅raw≅ Q) | just sP | just sQ = Σ[ r ∈ RecTree ] sP ≅⟨ r ⟩ sQ
 (P ≅raw≅ Q) | _       | _       = ⊤
 
 _=raw⇒_ : Raw tt → Raw tt → Set
@@ -89,34 +89,34 @@ P =raw⇒ Q with raw→scoped P | raw→scoped Q
 (P =raw⇒ Q) | _       | _       = ⊤
 
 _ : channel-over-channel₀ ≅raw≅ channel-over-channel₁
-_ = new-cong (cong-symm (scope-ext ((λ ()) , (λ ()) , tt)))
+_ = _ , new-cong cong-symm stop scope-ext ((λ ()) , (λ ()) , tt)
 
 _ : channel-over-channel₁ ≅raw≅ channel-over-channel₂
-_ = new-cong (new-cong (cong-symm (base-ext ((λ ()) , (λ ()) , tt))))
+_ = _ , new-cong new-cong cong-symm stop base-ext ((λ ()) , (λ ()) , tt)
 
 _ : channel-over-channel₂ ≅raw≅ channel-over-channel₃
-_ = scope-scope-comm
+_ = _ , stop scope-scope-comm
 
 _ : channel-over-channel₃ ≅raw≅ channel-over-channel₄
-_ = new-cong scope-base-comm
+_ = _ , new-cong (stop scope-base-comm)
 
 _ : channel-over-channel₄ =raw⇒ channel-over-channel₅
-_ = res (base (res (comm)))
+_ = res intro res comm
 
 _ : channel-over-channel₅ =raw⇒ channel-over-channel₆
-_ = res (base (res comm))
+_ = res intro res comm
 
 _ : channel-over-channel₆ ≅raw≅ channel-over-channel₇
-_ = new-cong (base-cong (new-cong comp-end))
+_ = _ , new-cong base-cong new-cong stop comp-end
 
 _ : channel-over-channel₇ ≅raw≅ channel-over-channel₈
-_ = new-cong (base-cong scope-end)
+_ = _ , new-cong base-cong stop scope-end
 
 _ : channel-over-channel₈ ≅raw≅ channel-over-channel₉
-_ = new-cong base-end
+_ = _ , new-cong stop base-end
 
 _ : channel-over-channel₉ ≅raw≅ channel-over-channel₁₀
-_ = scope-end
+_ = _ , stop scope-end
 
 raw⊢_ : Raw tt → Set
 raw⊢ P with raw→scoped P

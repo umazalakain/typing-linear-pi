@@ -42,10 +42,10 @@ subject-reduction : SubjectReduction
 subject-reduction comm (comp (recv x ⊢P) ⊢Q) = {!⊢Q!}
 subject-reduction {c = nothing} (par P⇒P') (comp ⊢P ⊢Q) = comp (subject-reduction P⇒P' ⊢P) ⊢Q
 subject-reduction {c = just i} (par P⇒P') (comp ⊢P ⊢Q) = {!!}
-subject-reduction (res {c = nothing} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
-subject-reduction (res {c = just zero} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ ω0 (subject-reduction P⇒Q ⊢P)
-subject-reduction (res {c = just (suc i)} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
-subject-reduction (base {c = nothing} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
-subject-reduction (base {c = just zero} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
-subject-reduction (base {c = just (suc x)} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
+subject-reduction (res_ {c = nothing} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
+subject-reduction (res_ {c = just zero} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ ω0 (subject-reduction P⇒Q ⊢P)
+subject-reduction (res_ {c = just (suc i)} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
+subject-reduction (intro_ {c = nothing} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
+subject-reduction (intro_ {c = just zero} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
+subject-reduction (intro_ {c = just (suc x)} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
 subject-reduction (struct P≅P' P'⇒Q) ⊢P = subject-reduction P'⇒Q (subject-cong P≅P' ⊢P)

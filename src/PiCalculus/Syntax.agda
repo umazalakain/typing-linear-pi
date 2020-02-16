@@ -33,13 +33,14 @@ module Raw where
 
   open import Data.String.Base
 
-  p : Parameters
-  p = record
-    { Ctx  = ⊤
-    ; Bnd  = String
-    ; Var  = λ _ → String
-    ; _,-_ = _
-    }
+  private
+    p : Parameters
+    p = record
+      { Ctx  = ⊤
+      ; Bnd  = String
+      ; Var  = λ _ → String
+      ; _,-_ = _
+      }
 
   module Raw = Syntax.Process p
   Raw = Syntax.Process p
@@ -50,13 +51,14 @@ module Scoped where
   open import Data.Nat.Base
   open import Data.Fin.Base
 
-  p : Parameters
-  p = record
-    { Ctx  = ℕ
-    ; Bnd  = ⊤
-    ; Var  = Fin
-    ; _,-_ = λ n _ → suc n
-    }
+  private
+    p : Parameters
+    p = record
+      { Ctx  = ℕ
+      ; Bnd  = ⊤
+      ; Var  = Fin
+      ; _,-_ = λ n _ → suc n
+      }
 
   module Scoped = Syntax.Process p
   Scoped = Syntax.Process p
