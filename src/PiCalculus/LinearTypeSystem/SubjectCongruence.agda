@@ -82,7 +82,7 @@ subject-cong (cong-symm (stop comp-assoc)) (comp (comp ⊢P ⊢Q) ⊢R) = comp �
 subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
 subject-cong (cong-symm (stop comp-end)) ⊢P = comp ⊢P end
 subject-cong (cong-symm (stop scope-end)) end = chan B[ 0 ] [] 0∙ end
-subject-cong (cong-symm (stop base-end)) end = base end
+subject-cong (cong-symm (stop base-end)) end = base {t = zero} end
 subject-cong (cong-symm (stop (scope-ext u))) (comp ⊢P (chan t c μ ⊢Q)) = chan t c μ (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop (base-ext u))) (comp ⊢P (base ⊢Q)) = base (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = {!!}
