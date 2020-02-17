@@ -1,29 +1,16 @@
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; cong; sym)
-open Relation.Binary.PropositionalEquality.≡-Reasoning
-open import Relation.Nullary using (Dec; yes; no)
-open import Function using (_∘_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
 
-import Data.Nat.Base as ℕ
-import Data.Unit.Base as Unit
-import Data.Empty as Empty
-import Data.Nat.Properties as ℕₚ
-import Data.Vec.Base as Vec
-import Data.Vec.Properties as Vecₚ
-import Data.Vec.Relation.Unary.All as All
-import Data.Vec.Relation.Binary.Pointwise.Inductive as Pointwise
 import Data.Product as Product
+import Data.Vec as Vec
+import Data.Vec.Relation.Unary.All as All
+import Data.Nat as ℕ
 
-open Empty using (⊥)
-open Unit using (⊤; tt)
-open Product using (Σ; Σ-syntax; _×_; _,_; proj₁; proj₂)
-open ℕ using (ℕ; zero; suc)
+open ℕ using (ℕ)
+open Product using (Σ-syntax; _,_)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
-open Pointwise using (Pointwise; []; _∷_)
 
-open import PiCalculus.Function using (_⊗_; _&_)
-
-module PiCalculus.LinearTypeSystem.Quantifiers where
+module PiCalculus.Quantifiers where
 
 private
   variable

@@ -4,16 +4,12 @@ open import Function.Reasoning
 
 import Data.Product as Product
 import Data.Product.Properties as Productₚ
-import Data.Unit as Unit
-import Data.Maybe as Maybe
 import Data.Nat as Nat
 import Data.Vec as Vec
 import Data.Vec.Properties as Vecₚ
-import Data.Bool as Bool
 import Data.Fin as Fin
 import Data.Vec.Relation.Unary.All as All
 
-open Unit using (⊤; tt)
 open Nat using (ℕ; zero; suc)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
@@ -25,12 +21,12 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.Quantifiers
 
 module PiCalculus.LinearTypeSystem.Weakening (Ω : Quantifiers) where
 open Quantifiers Ω
-open import PiCalculus.LinearTypeSystem Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
+open import PiCalculus.LinearTypeSystem Ω
 
 private
   variable

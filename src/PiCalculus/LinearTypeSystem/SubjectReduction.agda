@@ -17,7 +17,7 @@ open Scoped
 open Syntax
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.Quantifiers
 
 module PiCalculus.LinearTypeSystem.SubjectReduction (Ω : Quantifiers) where
 open Quantifiers Ω

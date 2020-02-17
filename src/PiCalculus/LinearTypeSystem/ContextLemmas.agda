@@ -1,32 +1,24 @@
-open import Data.Unit using (⊤; tt)
-open import Data.Empty using (⊥; ⊥-elim)
-open import Data.Nat using (ℕ; zero; suc)
-open import Relation.Nullary using (yes; no; Dec)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
 open import Function using (_∘_)
 
-import Level as L
+import Data.Nat as ℕ
 import Data.Product as Product
-import Data.Fin.Properties as Finₚ
 import Data.Product.Properties as Productₚ
 import Data.Vec as Vec
-import Data.Vec.Properties as Vecₚ
 import Data.Vec.Relation.Unary.All as All
-import Data.Vec.Relation.Unary.All.Properties as Allₚ
 import Data.Fin as Fin
-import Data.Bool as Bool
 
+open ℕ using (ℕ; zero; suc)
 open Product using (Σ; Σ-syntax; _×_; _,_; proj₂; proj₁)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
-open Bool using (T)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 open import PiCalculus.Function
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.Quantifiers
 
 module PiCalculus.LinearTypeSystem.ContextLemmas (Ω : Quantifiers) where
 open Quantifiers Ω
@@ -36,8 +28,6 @@ private
   variable
     n : ℕ
     P Q : Scoped n
-
--- Addition of contexts
 
 _⊎_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Mults cs
 _⊎_ {ss = []} tt tt = tt

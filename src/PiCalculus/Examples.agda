@@ -15,12 +15,13 @@ open Raw
 open Scoped
 open Conversion
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.Quantifiers
+
 open import PiCalculus.LinearTypeSystem.LNL
+open Quantifiers LNL
 open import PiCalculus.LinearTypeSystem LNL
 
 module PiCalculus.Examples where
-open Quantifiers LNL
 
 variable
   n : ℕ

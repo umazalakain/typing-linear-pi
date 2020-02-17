@@ -1,28 +1,9 @@
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; cong; sym)
-open Relation.Binary.PropositionalEquality.≡-Reasoning
-open import Relation.Nullary using (Dec; yes; no)
-open import Function using (_∘_)
-
-import Data.Nat.Base as ℕ
-import Data.Unit.Base as Unit
-import Data.Empty as Empty
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
+import Data.Nat as ℕ
 import Data.Nat.Properties as ℕₚ
-import Data.Vec.Base as Vec
-import Data.Vec.Properties as Vecₚ
-import Data.Vec.Relation.Unary.All as All
-import Data.Vec.Relation.Binary.Pointwise.Inductive as Pointwise
-import Data.Product as Product
+open ℕ using (ℕ)
 
-open Empty using (⊥)
-open Unit using (⊤; tt)
-open Product using (Σ; Σ-syntax; _×_; _,_; proj₁; proj₂)
-open ℕ using (ℕ; zero; suc)
-open Vec using (Vec; []; _∷_)
-open All using (All; []; _∷_)
-open Pointwise using (Pointwise; []; _∷_)
-
-open import PiCalculus.Function using (_⊗_; _&_)
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.Quantifiers
 
 module PiCalculus.LinearTypeSystem.LNL where
 
@@ -71,7 +52,7 @@ private
   +-assoc ω∙ ω∙ ω∙ = refl
 
   +-cancelˡ-≡ : {x y z : ωℕ M} → x + y ≡ x + z → y ≡ z
-  +-cancelˡ-≡ {x = n∙ _} {n∙ _} {n∙ _} eq = n∙ & ℕₚ.+-cancelˡ-≡ _ (n-injective eq)
+  +-cancelˡ-≡ {x = n∙ x} {n∙ _} {n∙ _} eq rewrite ℕₚ.+-cancelˡ-≡ x (n-injective eq) = refl
   +-cancelˡ-≡ {x = ω∙} {ω∙} {ω∙} _ = refl
 
 LNL : Quantifiers

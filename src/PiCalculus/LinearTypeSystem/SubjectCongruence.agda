@@ -25,7 +25,7 @@ open Scoped
 open Syntax
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.Quantifiers
 
 
 module PiCalculus.LinearTypeSystem.SubjectCongruence (Ω : Quantifiers) where

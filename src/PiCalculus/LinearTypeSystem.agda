@@ -16,7 +16,7 @@ open All using (All; []; _∷_)
 open import PiCalculus.Syntax
 open Syntax
 open Scoped
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.Quantifiers
 
 module PiCalculus.LinearTypeSystem (Ω : Quantifiers) where
 open Quantifiers Ω
