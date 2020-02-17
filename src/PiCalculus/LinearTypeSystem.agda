@@ -16,10 +16,10 @@ open All using (All; []; _∷_)
 open import PiCalculus.Syntax
 open Syntax
 open Scoped
-open import PiCalculus.LinearTypeSystem.OmegaNat
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
-module PiCalculus.LinearTypeSystem where
-
+module PiCalculus.LinearTypeSystem (Ω : Quantifiers) where
+open Quantifiers Ω
 
 infix 50 _↑_↓
 infixl 20 _-,_
@@ -47,14 +47,14 @@ Shapes = Vec Shape
 -- Shapes interpreted as multiplicities
 
 Card : Shape → Set
-Card < v & _ > = Vec MType v
+Card < n & _ > = Vec I n
 
 Cards : ∀ {n} → Shapes n → Set
 Cards [] = ⊤
 Cards (xs -, x) = Cards xs × Card x
 
 Mult : (s : Shape) → Card s → Set
-Mult _ = All ωℕ
+Mult _ = All C
 
 Mults : ∀ {n} {ss : Shapes n} → Cards ss → Set
 Mults {ss = []} tt = ⊤
@@ -62,7 +62,7 @@ Mults {ss = ss -, s} (cs , c) = Mults cs × Mult s c
 
 ε : ∀ {n} {ss : Shapes n} {cs : Cards ss} → Mults cs
 ε {ss = []} {tt} = tt
-ε {ss = _ -, _} {_ , _} = ε , replicate ω0
+ε {ss = _ -, _} {_ , _} = ε , replicate 0∙
 
 data Type : Shape → Set where
   B[_]   : ℕ → Type < 0 & _ , [] >
@@ -75,7 +75,7 @@ Types = All Type
 private
   variable
     n : ℕ
-    M N : MType
+    M N : I
     P Q : Scoped n
 
 data _w_∋_w_⊠_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs
@@ -99,7 +99,7 @@ toFin : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
 toFin zero = zero
 toFin (suc x) = suc (toFin x)
 
-_↑_↓ : ωℕ M → ωℕ N → All ωℕ (N ∷ M ∷ [])
+_↑_↓ : C M → C N → All C (N ∷ M ∷ [])
 μ↑ ↑ μ↓ ↓ = μ↓ ∷ μ↑ ∷ []
 
 data _w_⊢_⊠_ : {ss : Shapes n} {cs : Cards ss}
@@ -116,21 +116,21 @@ data _w_⊢_⊠_ : {ss : Shapes n} {cs : Cards ss}
 
   chan : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
        → {s : Shape} {c : Card s} (t : Type s) (m : Mult s c)
-       → (μ : ωℕ M)
-       → γ -, C[ t w m ] w Γ , μ ↑ μ ↓ ⊢ P     ⊠ Δ , ω0 ↑ ω0 ↓
+       → (μ : C M)
+       → γ -, C[ t w m ] w Γ , μ ↑ μ ↓ ⊢ P     ⊠ Δ , 0∙ ↑ 0∙ ↓
        -------------------------------------------------------
        → γ               w Γ           ⊢ new P ⊠ Δ
 
   recv : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Ξ Θ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (x : γ      w Γ      ∋ C[ t w m ] w (ω0 {M}) ↑ (ω1 {N}) ↓ ⊠ Ξ)
-       →      γ -, t w Ξ , m  ⊢ P                                  ⊠ Θ , replicate ω0
+       → (x : γ      w Γ      ∋ C[ t w m ] w (0∙ {M}) ↑ (1∙ {N}) ↓ ⊠ Ξ)
+       →      γ -, t w Ξ , m  ⊢ P                                  ⊠ Θ , replicate 0∙
        ------------------------------------------------------------------------------
        →      γ      w Γ      ⊢ toFin x ⦅⦆ P                       ⊠ Θ
 
   send : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (x : γ w Γ ∋ C[ t w m ] w ω1 {M} ↑ ω0 {N} ↓ ⊠ Δ)
+       → (x : γ w Γ ∋ C[ t w m ] w 1∙ {M} ↑ 0∙ {N} ↓ ⊠ Δ)
        → (y : γ w Δ ∋ t          w  m                ⊠ Ξ)
        →      γ w Ξ ⊢ P                              ⊠ Θ
        -------------------------------------------------

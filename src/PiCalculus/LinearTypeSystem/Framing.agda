@@ -28,11 +28,12 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem
-open import PiCalculus.LinearTypeSystem.OmegaNat
-open import PiCalculus.LinearTypeSystem.ContextLemmas
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
-module PiCalculus.LinearTypeSystem.Framing where
+module PiCalculus.LinearTypeSystem.Framing (Ω : Quantifiers) where
+open Quantifiers Ω
+open import PiCalculus.LinearTypeSystem Ω
+open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 
 private
   variable
@@ -64,7 +65,7 @@ private
         → γ w (Ξ ⊎ Δ) ⊢ P ⊠ Ξ
 ⊢-frame Ξ eq end rewrite ⊎-cancelˡ-≡ (trans eq (sym (⊎-idʳ _))) | ⊎-idʳ Ξ = end
 ⊢-frame Ξ eq (base ⊢P) = base (⊢-frame (Ξ , _) (_,_ & eq ⊗ refl) ⊢P)
-⊢-frame Ξ eq (chan t m μ ⊢P) with ⊢-frame (Ξ , ω0 ↑ ω0 ↓) (_,_ & eq ⊗ +ᵥ-idˡ _) ⊢P
+⊢-frame Ξ eq (chan t m μ ⊢P) with ⊢-frame (Ξ , 0∙ ↑ 0∙ ↓) (_,_ & eq ⊗ +ᵥ-idˡ _) ⊢P
 ⊢-frame Ξ eq (chan t m μ ⊢P) | ⊢P' rewrite +-idˡ μ = chan t m μ ⊢P'
 ⊢-frame Ξ eq (recv x ⊢P) with ∋-⊆ x | ⊢-⊆ ⊢P
 ⊢-frame Ξ eq (recv x ⊢P) | l , refl | (r , _) , refl = recv _ (⊢-frame _ refl ⊢P)

@@ -25,11 +25,12 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem
-open import PiCalculus.LinearTypeSystem.OmegaNat
-open import PiCalculus.LinearTypeSystem.ContextLemmas
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
-module PiCalculus.LinearTypeSystem.Weakening where
+module PiCalculus.LinearTypeSystem.Weakening (Ω : Quantifiers) where
+open Quantifiers Ω
+open import PiCalculus.LinearTypeSystem Ω
+open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 
 private
   variable

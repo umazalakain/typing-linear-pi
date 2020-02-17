@@ -15,10 +15,12 @@ open Raw
 open Scoped
 open Conversion
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem
-open import PiCalculus.LinearTypeSystem.OmegaNat
+open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.LNL
+open import PiCalculus.LinearTypeSystem LNL
 
 module PiCalculus.Examples where
+open Quantifiers LNL
 
 variable
   n : ℕ
@@ -124,23 +126,23 @@ raw⊢ P with raw→scoped P
 (raw⊢ P) | nothing = L.Lift _ ⊤
 
 _ : raw⊢ (⦅new "x" ⦆ (+[ "a" ] ("x" ⟨ "a" ⟩ 𝟘)) ∥ ("x" ⦅ "b" ⦆ 𝟘))
-_ = chan B[ 0 ] [] 1∙
+_ = chan B[ 0 ] [] (n∙ 1)
     (comp
     (base (send  (suc zero) zero  end))
     (recv zero end))
 
 _ : raw⊢ channel-over-channel₀
-_ = chan C[ B[ 0 ] w [] ] (0∙ ↑ 1∙ ↓) 1∙ (comp
+_ = chan C[ B[ 0 ] w [] ] (n∙ 0 ↑ n∙ 1 ↓) (n∙ 1) (comp
          (recv zero
                (recv zero end))
-         (chan B[ 0 ] [] 1∙ (base
+         (chan B[ 0 ] [] (n∙ 1) (base
                (send (suc (suc zero)) (suc zero)
                      (send (suc zero) zero end)))))
 
 _ : raw⊢ channel-over-channel₀
-_ = chan C[ B[ 0 ] w [] ] (0∙ ↑ 1∙ ↓) ω∙ (comp
+_ = chan C[ B[ 0 ] w [] ] (n∙ 0 ↑ n∙ 1 ↓) ω∙ (comp
          (recv zero
                (recv zero end))
-         (chan B[ 0 ] [] 1∙ (base
+         (chan B[ 0 ] [] (n∙ 1) (base
                (send (suc (suc zero)) (suc zero)
                      (send (suc zero) zero end)))))

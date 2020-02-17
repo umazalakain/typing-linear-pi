@@ -26,10 +26,11 @@ open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import PiCalculus.Function
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
-open import PiCalculus.LinearTypeSystem
-open import PiCalculus.LinearTypeSystem.OmegaNat
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
-module PiCalculus.LinearTypeSystem.ContextLemmas where
+module PiCalculus.LinearTypeSystem.ContextLemmas (Ω : Quantifiers) where
+open Quantifiers Ω
+open import PiCalculus.LinearTypeSystem Ω
 
 private
   variable
@@ -68,13 +69,6 @@ _⊎_ {ss = _ -, _} (Γ , m) (Δ , n) = Γ ⊎ Δ , m +ᵥ n
 _⊆_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Set
 ϕ ⊆ Γ = Σ[ Δ ∈ _ ] ϕ ⊎ Δ ≡ Γ
 
-_⊆?_ : {ss : Shapes n} {cs : Cards ss} (Δ Γ : Mults cs) → Dec (Δ ⊆ Γ)
-_⊆?_ {ss = []} tt tt = yes (tt , refl)
-_⊆?_ {ss = _ -, _} (xs , x) (ys , y) with xs ⊆? ys | x ≤ᵥ? y
-_⊆?_ {_} {_ -, _} (xs , x) (ys , y) | yes (_ , p) | yes (_ , q) = yes (_ , _,_ & p ⊗ q)
-_⊆?_ {_} {_ -, _} (xs , x) (ys , y) | yes p | no ¬q = no λ {(_ , refl) → ¬q (_ , refl)}
-_⊆?_ {_} {_ -, _} (xs , x) (ys , y) | no ¬p | _     = no λ {(_ , refl) → ¬p (_ , refl)}
-
 ⊆-refl : {ss : Shapes n} {cs : Cards ss} {Γ : Mults cs} → Γ ⊆ Γ
 ⊆-refl = ε , ⊎-idʳ _
 
@@ -94,7 +88,7 @@ _⊆?_ {_} {_ -, _} (xs , x) (ys , y) | no ¬p | _     = no λ {(_ , refl) → �
     → γ w Γ ∋ t w m ⊠ Δ → Δ ⊆ Γ
 ∋-⊆ zero = (ε , _) , _,_ & ⊎-idʳ _ ⊗ refl
 ∋-⊆ (suc ⊢P) with ∋-⊆ ⊢P
-∋-⊆ (suc ⊢P) | Γ , refl = (Γ , replicate ω0) , _,_ & refl ⊗ +ᵥ-idʳ _
+∋-⊆ (suc ⊢P) | Γ , refl = (Γ , replicate 0∙) , _,_ & refl ⊗ +ᵥ-idʳ _
 
 ⊢-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
     → γ w Γ ⊢ P ⊠ Δ → Δ ⊆ Γ

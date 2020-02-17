@@ -25,15 +25,17 @@ open Scoped
 open Syntax
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
-open import PiCalculus.LinearTypeSystem
-open import PiCalculus.LinearTypeSystem.OmegaNat
-open import PiCalculus.LinearTypeSystem.ContextLemmas
-open import PiCalculus.LinearTypeSystem.Framing
-open import PiCalculus.LinearTypeSystem.Weakening
-open import PiCalculus.LinearTypeSystem.Strengthening
-open import PiCalculus.LinearTypeSystem.Swapping
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
-module PiCalculus.LinearTypeSystem.SubjectCongruence where
+
+module PiCalculus.LinearTypeSystem.SubjectCongruence (Ω : Quantifiers) where
+open Quantifiers Ω
+open import PiCalculus.LinearTypeSystem Ω
+open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
+open import PiCalculus.LinearTypeSystem.Framing Ω
+open import PiCalculus.LinearTypeSystem.Weakening Ω
+open import PiCalculus.LinearTypeSystem.Strengthening Ω
+open import PiCalculus.LinearTypeSystem.Swapping Ω
 
 SubjectCongruence : Set
 SubjectCongruence = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
@@ -65,7 +67,7 @@ subject-cong : SubjectCongruence
 subject-cong (stop comp-assoc) (comp ⊢P (comp ⊢Q ⊢R)) = comp (comp ⊢P ⊢Q) ⊢R
 subject-cong (stop comp-symm) (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
 subject-cong (stop comp-end) (comp ⊢P end) = ⊢P
-subject-cong (stop scope-end) (chan t c .ω0 end) = end
+subject-cong (stop scope-end) (chan t c ._ end) = end
 subject-cong (stop base-end) (base end) = end
 subject-cong (stop (scope-ext u)) (chan t c μ (comp ⊢P ⊢Q)) = comp
   (⊢-strengthen zero u ⊢P)
