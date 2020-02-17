@@ -41,23 +41,6 @@ private
     n : ℕ
     P Q : Scoped n
 
-get-shape : Shapes n → Fin n → Shape
-get-shape = Vec.lookup
-
-get-type : {ss : Shapes n} → Types ss → (i : Fin n) → Type (get-shape ss i)
-get-type {ss = _ -, _} (ts -, t) zero = t
-get-type {ss = _ -, _} (ts -, t) (suc i) = get-type ts i
-
-get-card : {ss : Shapes n} → Cards ss → (i : Fin n) → Card (get-shape ss i)
-get-card {ss = _ -, _} (cs , c) zero = c
-get-card {ss = _ -, _} (cs , c) (suc i) = get-card cs i
-
-get-mult : {ss : Shapes n} {cs : Cards ss} → Mults cs → (i : Fin n)
-         → Mult (get-shape ss i) (get-card cs i)
-get-mult {ss = _ -, _} (ms , m) zero = m
-get-mult {ss = _ -, _} (ms , m) (suc i) = get-mult ms i
-
-
 ∋-unused : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
          → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
          → (i : Fin n)
@@ -88,87 +71,50 @@ get-mult {ss = _ -, _} (ms , m) (suc i) = get-mult ms i
   (⊢-unused i uP ⊢P)
   (⊢-unused i uQ ⊢Q)
 
-update-shape : Fin n → Shape → Shapes n → Shapes n
-update-shape i s = Vec.updateAt i λ _ → s
+swap-shape : Fin n → Shapes (suc n) → Shapes (suc n)
+swap-shape zero (ss -, y -, x) = ss -, x -, y
+swap-shape (suc i) (ss -, z -, y -, x) = swap-shape i (ss -, z -, y) -, x
 
-update-type : {s : Shape} {ss : Shapes n}
-                → (i : Fin n)
-                → Type s
-                → Types ss
-                → Types (update-shape i s ss)
-update-type {ss = _ -, _} zero t' (ts -, t) = ts -, t'
-update-type {ss = _ -, _} (suc i) t' (ts -, t) = update-type i t' ts -, t
+swap-type : (i : Fin n) → {ss : Shapes (suc n)} → Types ss → Types (swap-shape i ss)
+swap-type zero {_ -, _ -, _} (ts -, y -, x) = ts -, x -, y
+swap-type (suc i) {_ -, _ -, _ -, _} (ts -, z -, y -, x) = swap-type i (ts -, z -, y) -, x
 
-update-card : {s : Shape} {ss : Shapes n}
-                → (i : Fin n)
-                → Card s
-                → Cards ss
-                → Cards (update-shape i s ss)
-update-card {ss = _ -, _} zero c' (cs , c) = cs , c'
-update-card {ss = _ -, _} (suc i) c' (cs , c) = update-card i c' cs , c
+swap-card : (i : Fin n) → {ss : Shapes (suc n)} → Cards ss → Cards (swap-shape i ss)
+swap-card zero {_ -, _ -, _} ((cs , y) , x) = (cs , x) , y
+swap-card (suc i) {_ -, _ -, _ -, _} (((cs , z) , y) , x) = swap-card i ((cs , z) , y) , x
 
-update-mult : {s : Shape} {ss : Shapes n} {c : Card s} {cs : Cards ss}
-                → (i : Fin n)
-                → Mult s c
-                → Mults cs
-                → Mults (update-card {s = s} i c cs)
-update-mult {ss = _ -, _} zero m' (ms , m) = ms , m'
-update-mult {ss = _ -, _} (suc i) m' (ms , m) = update-mult i m' ms , m
+swap-mult : (i : Fin n) → {ss : Shapes (suc n)} {cs : Cards ss} → Mults cs → Mults (swap-card i cs)
+swap-mult zero {_ -, _ -, _} ((ms , y) , x) = (ms , x) , y
+swap-mult (suc i) {_ -, _ -, _ -, _} (((ms , z) , y) , x) = swap-mult i ((ms , z) , y) , x
 
-subst-shape : Fin n → Fin n → Shapes n → Shapes n
-subst-shape i j ss = update-shape i (get-shape ss j) ss
-
-subst-type : {ss : Shapes n} (i j : Fin n) → Types ss → Types (subst-shape i j ss)
-subst-type i j ts = update-type i (get-type ts j) ts
-
-subst-card : {ss : Shapes n} (i j : Fin n) → Cards ss → Cards (subst-shape i j ss)
-subst-card i j cs = update-card i (get-card cs j) cs
-
-subst-mult : {ss : Shapes n} {cs : Cards ss} (i j : Fin n) → Mults cs → Mults (subst-card i j cs)
-subst-mult i j ms = update-mult i (get-mult ms j) ms
-
-swap-shape : Fin n → Fin n → Shapes n → Shapes n
-swap-shape i j ss = subst-shape i j (subst-shape j i ss)
-
-swap-type : {ss : Shapes n} → (i j : Fin n) → Types ss → Types (swap-shape i j ss)
-swap-type i j ts = subst-type i j (subst-type j i ts)
-
-swap-card : {ss : Shapes n} → (i j : Fin n) → Cards ss → Cards (swap-shape i j ss)
-swap-card i j cs = subst-card i j (subst-card j i cs)
-
-swap-mult : {ss : Shapes n} {cs : Cards ss} → (i j : Fin n) → Mults cs → Mults (swap-card i j cs)
-swap-mult i j ms = subst-mult i j (subst-mult j i ms)
-
-{-
-∋-subst : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
-        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-        → (i j : Fin n)
-        → (x : γ w Γ ∋ t w m ⊠ Θ)
-        → Σ[ y ∈ subst-type i j γ w subst-mult i j Γ ∋ t w m ⊠ subst-mult i j Θ ]
-          substFin j i (toFin x) ≡ toFin y
-∋-subst zero zero zero = zero , refl
-∋-subst {n = suc (suc n)} zero (suc j) zero with ∋-subst {n = suc n} zero j zero
-∋-subst {suc (suc n)} zero (suc j) zero | fst , snd = suc {!fst!} , {!!}
-∋-subst zero j (suc x) = {!suc ?!} , {!!}
-∋-subst (suc i) j zero = {!!} , {!!}
-∋-subst (suc i) j (suc x) = {!!}
-
-∋-swap : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
+∋-swap : {ss : Shapes (suc n)} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (i j : Fin n)
+       → (i : Fin n)
        → (x : γ w Γ ∋ t w m ⊠ Θ)
-       → Σ[ y ∈ swap-type i j γ w swap-mult i j Γ ∋ t w m ⊠ swap-mult i j Θ ]
-         swapFin i j (toFin x) ≡ toFin y
-∋-swap i j x = {!!}
+       → Σ[ y ∈ swap-type i γ w swap-mult i Γ ∋ t w m ⊠ swap-mult i Θ ]
+         swapFin i (toFin x) ≡ toFin y
+∋-swap {γ = _ -, _ -, _} zero zero = suc zero , refl
+∋-swap {γ = _ -, _ -, _} zero (suc zero) = zero , refl
+∋-swap {γ = _ -, _ -, _} {Γ = (_ , _) , _} zero (suc (suc x)) = suc (suc x) , refl
+∋-swap {γ = _ -, _ -, _ -, _} (suc i) zero = zero , refl
+∋-swap {γ = _ -, _ -, _ -, _} (suc zero) (suc zero) = suc (suc zero) , refl
+∋-swap {γ = _ -, _ -, _ -, _ -, _} (suc (suc zero)) (suc zero) = suc zero , refl
+∋-swap {γ = _ -, _ -, _ -, _ -, _} (suc (suc (suc i))) (suc zero) = suc zero , refl
+∋-swap {γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) with ∋-swap i sx
+∋-swap {γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq with Fin.inject₁ i Finₚ.≟ suc (toFin x)
+∋-swap {γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | yes p = suc x' , suc & trans (suc & (suc & Finₚ.lower₁-irrelevant _ _ _)) eq
+∋-swap {γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | no ¬p with i Finₚ.≟ (toFin x)
+∋-swap {γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | no ¬p | yes refl = suc x' , suc & eq
+∋-swap {γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | no ¬p | no ¬q = suc x' , suc & eq
 
-⊢-swap : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
-       → (i j : Fin n)
+
+⊢-swap : {ss : Shapes (suc n)} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
+       → (i : Fin n)
        → γ w Γ ⊢ P ⊠ Θ
-       → swap-type i j γ w swap-mult i j Γ ⊢ swap i j P ⊠ swap-mult i j Θ
-⊢-swap i j end = end
-⊢-swap i j (base ⊢P) = base (⊢-swap (suc i) (suc j) ⊢P)
-⊢-swap i j (chan t m μ ⊢P) = chan t m μ (⊢-swap (suc i) (suc j) ⊢P)
-⊢-swap i j (recv x ⊢P) rewrite proj₂ (∋-swap i j x) = recv _ (⊢-swap (suc i) (suc j) ⊢P)
-⊢-swap i j (send x y ⊢P) rewrite proj₂ (∋-swap i j x) | proj₂ (∋-swap i j y) = send _ _ (⊢-swap i j ⊢P)
-⊢-swap i j (comp ⊢P ⊢Q) = comp (⊢-swap i j ⊢P) (⊢-swap i j ⊢Q)
--}
+       → swap-type i γ w swap-mult i Γ ⊢ swap i P ⊠ swap-mult i Θ
+⊢-swap {γ = _ -, _ -, _} i end = end
+⊢-swap {γ = _ -, _ -, _} i (base ⊢P) = base (⊢-swap (suc i) ⊢P)
+⊢-swap {γ = _ -, _ -, _} i (chan t m μ ⊢P) = chan t m μ (⊢-swap (suc i) ⊢P)
+⊢-swap {γ = _ -, _ -, _} i (recv x ⊢P) rewrite proj₂ (∋-swap i x) = recv _ (⊢-swap (suc i) ⊢P)
+⊢-swap {γ = _ -, _ -, _} i (send x y ⊢P) rewrite proj₂ (∋-swap i x) | proj₂ (∋-swap i y) = send _ _ (⊢-swap i ⊢P)
+⊢-swap {γ = _ -, _ -, _} i (comp ⊢P ⊢Q) = comp (⊢-swap i ⊢P) (⊢-swap i ⊢Q)

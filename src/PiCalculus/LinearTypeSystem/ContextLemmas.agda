@@ -104,3 +104,33 @@ _⊆?_ {_} {_ -, _} (xs , x) (ys , y) | no ¬p | _     = no λ {(_ , refl) → �
 ⊢-⊆ (recv {s = s} x ⊢P) = ⊆-trans (⊆-tail {s = s} (⊢-⊆ ⊢P) ) (∋-⊆ x)
 ⊢-⊆ (send x y ⊢P) = ⊆-trans (⊢-⊆ ⊢P) (⊆-trans (∋-⊆ y) (∋-⊆ x))
 ⊢-⊆ (comp ⊢P ⊢Q) = ⊆-trans (⊢-⊆ ⊢Q) (⊢-⊆ ⊢P)
+
+get-shape : Shapes n → Fin n → Shape
+get-shape = Vec.lookup
+
+get-type : {ss : Shapes n} → Types ss → (i : Fin n) → Type (get-shape ss i)
+get-type {ss = _ -, _} (ts -, t) zero = t
+get-type {ss = _ -, _} (ts -, t) (suc i) = get-type ts i
+
+get-card : {ss : Shapes n} → Cards ss → (i : Fin n) → Card (get-shape ss i)
+get-card {ss = _ -, _} (cs , c) zero = c
+get-card {ss = _ -, _} (cs , c) (suc i) = get-card cs i
+
+get-mult : {ss : Shapes n} {cs : Cards ss} → Mults cs → (i : Fin n)
+         → Mult (get-shape ss i) (get-card cs i)
+get-mult {ss = _ -, _} (ms , m) zero = m
+get-mult {ss = _ -, _} (ms , m) (suc i) = get-mult ms i
+
+update-mult : {ss : Shapes n} {cs : Cards ss}
+            → (i : Fin n)
+            → Mult (get-shape ss i) (get-card cs i)
+            → Mults cs
+            → Mults cs
+update-mult {ss = _ -, _} zero m' (ms , m) = ms , m'
+update-mult {ss = _ -, _} (suc i) m' (ms , m) = update-mult i m' ms , m
+
+fromFin : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
+        → (i : Fin n) {m : Mult (get-shape ss i) (get-card cs i)}
+        → γ w update-mult i (get-mult Γ i +ᵥ m) Γ ∋ get-type γ i w m ⊠ Γ
+fromFin {ss = _ -, _} {γ = _ -, _} zero = zero
+fromFin {ss = _ -, _} {γ = _ -, _} (suc i) = suc (fromFin i)

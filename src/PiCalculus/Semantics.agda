@@ -1,11 +1,12 @@
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong)
+open import Relation.Nullary using (_because_; ofʸ; ofⁿ)
+
 open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Nat.Base
 open import Data.Maybe using (Maybe; nothing; just)
 open import Data.Bool.Base using (false; true)
 open import Data.Product hiding (swap)
-open import Relation.Nullary using (_because_; ofʸ; ofⁿ)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
 import Data.Fin as Fin
 import Data.Nat.Properties as ℕₚ
@@ -50,20 +51,23 @@ module PiCalculus.Semantics where
   lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = Fin.punchOut i≢x ⟨ Fin.punchOut i≢y ⟩ lower i P uP
   lower i (+[] P) uP = +[] lower (suc i) P uP
 
-  swapFin : Fin n → Fin n → Fin n → Fin n
-  swapFin i j x with i Finₚ.≟ x
-  swapFin i j x | true because _ = j
-  swapFin i j x | false because _ with j Finₚ.≟ x
-  swapFin i j x | false because _ | true because _ = i
-  swapFin i j x | false because _ | false because _ = x
+  notMax : (i : Fin n) (x : Fin (suc n)) → Fin.inject₁ i ≡ x → n ≢ Fin.toℕ x
+  notMax i x p n≡x = Finₚ.toℕ-inject₁-≢ i (trans n≡x (sym (cong Fin.toℕ p)))
 
-  swap : (i j : Fin n) → Scoped n → Scoped n
-  swap i j 𝟘 = 𝟘
-  swap i j (new P) = new swap (suc i) (suc j) P
-  swap i j (P ∥ Q) = swap i j P ∥ swap i j Q
-  swap i j (x ⦅⦆ P)  = swapFin i j x ⦅⦆ swap (suc i) (suc j) P
-  swap i j (x ⟨ y ⟩ P)  = swapFin i j x ⟨ swapFin i j y ⟩ swap i j P
-  swap i j (+[] P) = +[] swap (suc i) (suc j) P
+  swapFin : Fin n → Fin (suc n) → Fin (suc n)
+  swapFin i x with Fin.inject₁ i Fin.≟ x
+  swapFin i x | true because ofʸ p = suc (Fin.lower₁ x (notMax i x p))
+  swapFin i x | false because _ with (suc i) Fin.≟ x
+  swapFin i x | false because _ | true because _ = Fin.inject₁ i
+  swapFin i x | false because _ | false because _ = x
+
+  swap : Fin n → Scoped (suc n) → Scoped (suc n)
+  swap i 𝟘 = 𝟘
+  swap i (new P) = new swap (suc i) P
+  swap i (P ∥ Q) = swap i P ∥ swap i Q
+  swap i (x ⦅⦆ P)  = swapFin i x ⦅⦆ swap (suc i) P
+  swap i (x ⟨ y ⟩ P)  = swapFin i x ⟨ swapFin i y ⟩ swap i P
+  swap i (+[] P) = +[] swap (suc i) P
 
   infixl 10 _≈_
   data _≈_ : Scoped n → Scoped n → Set where
@@ -83,11 +87,11 @@ module PiCalculus.Semantics where
     base-ext : (u : Unused zero P)
              → +[] (P ∥ Q) ≈ lower zero P u ∥ (+[] Q)
 
-    scope-scope-comm : new (new P) ≈ new (new swap (# 0) (# 1) P)
+    scope-scope-comm : new (new P) ≈ new (new swap zero P)
 
-    scope-base-comm : new (+[] P) ≈ +[] (new swap (# 0) (# 1) P)
+    scope-base-comm : new (+[] P) ≈ +[] (new swap zero P)
 
-    base-base-comm : +[] (+[] P) ≈ +[] (+[] swap (# 0) (# 1) P)
+    base-base-comm : +[] (+[] P) ≈ +[] (+[] swap zero P)
 
   data RecTree : Set where
     zero : RecTree

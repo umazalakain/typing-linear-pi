@@ -75,9 +75,9 @@ subject-cong (stop (base-ext u)) (base (comp ⊢P ⊢Q)) = comp
   (⊢-strengthen zero u ⊢P)
   (base (subst (λ ● → _ w _ , ● ⊢ _ ⊠ _)
                (sym (⊢-unused _ u ⊢P)) ⊢Q))
-subject-cong (stop scope-scope-comm) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan t₁ c₁ μ₁ (chan t c μ {!!})
-subject-cong (stop scope-base-comm) (chan t c μ (base ⊢P)) = base (chan t c μ {!!})
-subject-cong (stop base-base-comm) (base (base ⊢P)) = {!!}
+subject-cong (stop scope-scope-comm) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan t₁ c₁ μ₁ (chan t c μ (⊢-swap zero ⊢P))
+subject-cong (stop scope-base-comm) (chan t c μ (base ⊢P)) = base (chan t c μ (⊢-swap zero ⊢P))
+subject-cong (stop base-base-comm) (base (base ⊢P)) = base (base (⊢-swap zero ⊢P))
 subject-cong (cong-symm (stop comp-assoc)) (comp (comp ⊢P ⊢Q) ⊢R) = comp ⊢P (comp ⊢Q ⊢R)
 subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
 subject-cong (cong-symm (stop comp-end)) ⊢P = comp ⊢P end
@@ -85,9 +85,9 @@ subject-cong (cong-symm (stop scope-end)) end = chan B[ 0 ] [] 0∙ end
 subject-cong (cong-symm (stop base-end)) end = base {t = zero} end
 subject-cong (cong-symm (stop (scope-ext u))) (comp ⊢P (chan t c μ ⊢Q)) = chan t c μ (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop (base-ext u))) (comp ⊢P (base ⊢Q)) = base (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
-subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = {!!}
-subject-cong (cong-symm (stop scope-base-comm)) (base (chan t c μ ⊢P)) = {!!}
-subject-cong (cong-symm (stop base-base-comm)) (base (base ⊢P)) = {!!}
+subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan _ _ _ (chan _ _ _ (subst (λ ● → _ w _ ⊢ ● ⊠ _) (swap-swap zero _) (⊢-swap zero ⊢P)))
+subject-cong (cong-symm (stop scope-base-comm)) (base (chan t c μ ⊢P)) = chan _ _ _ (base (subst (λ ● → _ w _ ⊢ ● ⊠ _) (swap-swap zero _) (⊢-swap zero ⊢P)))
+subject-cong (cong-symm (stop base-base-comm)) (base (base ⊢P)) = base (base (subst (λ ● → _ w _ ⊢ ● ⊠ _) (swap-swap zero _) (⊢-swap zero ⊢P)))
 -- Equivalence and congruence
 subject-cong cong-refl ⊢P = ⊢P
 subject-cong (cong-trans P≅Q Q≅R) ⊢P = subject-cong Q≅R (subject-cong P≅Q ⊢P)
