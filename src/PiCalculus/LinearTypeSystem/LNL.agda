@@ -57,6 +57,7 @@ private
 
 LNL : Quantifiers
 Quantifiers.I LNL = MType
+Quantifiers.∃I LNL = nonlin
 Quantifiers.C LNL = ωℕ
 Quantifiers.0∙ LNL = ω0
 Quantifiers.1∙ LNL = ω1

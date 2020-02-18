@@ -18,15 +18,16 @@ private
 
 record Quantifiers : Set₁ where
   field
-    I   : Set
-    C   : I → Set
-    0∙  : ∀ {i} → C i
-    1∙  : ∀ {i} → C i
-    _+_ : ∀ {i} → C i → C i → C i
-    +-idˡ : ∀ {i} (x : C i) → 0∙ + x ≡ x
-    +-idʳ : ∀ {i} (x : C i) → x + 0∙ ≡ x
-    +-assoc : ∀ {i} (x y z : C i) → (x + y) + z ≡ x + (y + z)
-    +-comm : ∀ {i} (x y : C i) → x + y ≡ y + x
+    I           : Set
+    ∃I          : I
+    C           : I → Set
+    0∙          : ∀ {i} → C i
+    1∙          : ∀ {i} → C i
+    _+_         : ∀ {i} → C i → C i → C i
+    +-idˡ       : ∀ {i} (x : C i) → 0∙ + x ≡ x
+    +-idʳ       : ∀ {i} (x : C i) → x + 0∙ ≡ x
+    +-assoc     : ∀ {i} (x y z : C i) → (x + y) + z ≡ x + (y + z)
+    +-comm      : ∀ {i} (x y : C i) → x + y ≡ y + x
     +-cancelˡ-≡ : ∀ {i} {x y z : C i} → x + y ≡ x + z → y ≡ z
 
   private
