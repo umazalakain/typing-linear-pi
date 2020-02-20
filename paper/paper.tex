@@ -115,17 +115,28 @@ keeping track of the variable on which communication occurs
 
 \subsection{Multiplicities}
 
-Generalisation over indexed sets of monoids
+\subsubsection{Partial constructive specification}
 
-$\inf$ and $\mathbb{N}$ as generalisations
+Not well suited for typing with leftovers: you need to be able to inspect the
+leftovers before producing them.
 
-properties of the underlaying monoid
+\subsubsection{Indexed addition}
 
-\subsubsection{Total definition}
+Keep $\omega$ and naturals separated.
 
-\subsubsection{Partial definition}
+Extra level for these indices in the context.
 
-partial vs total
+Cannot saturate at 1: $1 = 1 \boxtimes 1$ is bad.
+
+Needs cancelation.
+
+Only closed processes get typechecked.
+
+\subsubsection{Guarded subtraction}
+
+Subtraction of $x - y$ only when $x \geq y$.
+
+No cancellation: it is not the case that $n - n = 0$.
 
 \subsection{Variable types and multiplicities}
 
