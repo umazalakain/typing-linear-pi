@@ -1,4 +1,4 @@
-open import Relation.Binary.PropositionalEquality using (subst)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
 open import Function.Reasoning
 
 import Data.Maybe as Maybe
@@ -27,17 +27,19 @@ open import PiCalculus.LinearTypeSystem.Weakening Ω
 open import PiCalculus.LinearTypeSystem.Strengthening Ω
 open import PiCalculus.LinearTypeSystem.SubjectCongruence Ω
 
-maybe-consume : {n : ℕ} {ss : Shapes n} {cs : Cards ss} → Mults cs → Channel n → Mults cs
-maybe-consume Γ nothing = Γ
-maybe-consume {ss = _ -, _} (Γ , m) (just zero) = Γ , replicate 0∙
-maybe-consume {ss = _ -, _} (Γ , m) (just (suc i)) = maybe-consume Γ (just i) , m
+one-at : {n : ℕ} {ss : Shapes n} {cs : Cards ss} → Channel n → Mults cs
+one-at nothing = ε
+one-at {ss = _ -, _} (just zero) = ε , replicate 1∙
+one-at {ss = _ -, _} (just (suc i)) = one-at (just i) , replicate 0∙
 
 SubjectReduction : Set
-SubjectReduction = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+SubjectReduction = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Γ' Δ Δ' : Mults cs}
                    {c : Channel n} {P Q : Scoped n}
+                 → Γ ≡ one-at c ⊎ Γ'
+                 → Δ ≡ one-at c ⊎ Δ'
                  → P =[ c ]⇒ Q
-                 → γ w Γ                 ⊢ P ⊠ Δ
-                 → γ w maybe-consume Γ c ⊢ Q ⊠ maybe-consume Δ c
+                 → γ w Γ ⊢ P ⊠ Δ
+                 → γ w Γ' ⊢ Q ⊠ Δ'
 
 private
   variable
@@ -45,13 +47,13 @@ private
     P Q : Scoped n
 
 subject-reduction : SubjectReduction
-subject-reduction comm (comp (recv x ⊢P) ⊢Q) = {!⊢Q!}
-subject-reduction {c = nothing} (par P⇒P') (comp ⊢P ⊢Q) = comp (subject-reduction P⇒P' ⊢P) ⊢Q
-subject-reduction {γ = _ -, _} {c = just i} (par P⇒P') (comp ⊢P ⊢Q) = comp (subject-reduction P⇒P' ⊢P) {!!}
-subject-reduction (res_ {c = nothing} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
-subject-reduction (res_ {c = just zero} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ 0∙ (subject-reduction P⇒Q ⊢P)
-subject-reduction (res_ {c = just (suc i)} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction P⇒Q ⊢P)
-subject-reduction (intro_ {c = nothing} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
-subject-reduction (intro_ {c = just zero} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
-subject-reduction (intro_ {c = just (suc x)} P⇒Q) (base ⊢P) = base (subject-reduction P⇒Q ⊢P)
-subject-reduction (struct P≅P' P'⇒Q) ⊢P = subject-reduction P'⇒Q (subject-cong P≅P' ⊢P)
+subject-reduction eq refl comm (comp (recv x ⊢P) ⊢Q) = {!comp ? ?!}
+subject-reduction {Δ = Δ} {Δ'} {c = nothing} refl refl (par P⇒P') (comp ⊢P ⊢Q) rewrite sym (⊎-idˡ Δ) | sym (⊎-idˡ Δ') = comp (subject-reduction refl refl P⇒P' {!⊢P!}) {!⊢Q!} 
+subject-reduction {γ = _ -, _} {c = just i} eq qe (par P⇒P') (comp ⊢P ⊢Q) = comp (subject-reduction refl refl P⇒P' {!⊢P!}) {!⊢Q!}
+subject-reduction refl refl (res_ {c = nothing} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ μ (subject-reduction refl refl P⇒Q {!!})
+subject-reduction refl refl (res_ {c = just zero} P⇒Q) (chan γ δ μ ⊢P) = chan γ δ 0∙ (subject-reduction refl refl P⇒Q {!!})
+subject-reduction refl refl (res_ {c = just (suc i)} P⇒Q) (chan γ δ μ ⊢P) rewrite +-idˡ μ = chan γ δ μ (subject-reduction refl refl P⇒Q {!+-idˡ!})
+subject-reduction refl refl (intro_ {c = nothing} P⇒Q) (base ⊢P) = base (subject-reduction refl refl P⇒Q ⊢P)
+subject-reduction refl refl (intro_ {c = just zero} P⇒Q) (base ⊢P) = base (subject-reduction refl refl P⇒Q ⊢P)
+subject-reduction refl refl (intro_ {c = just (suc x)} P⇒Q) (base ⊢P) = base (subject-reduction refl refl P⇒Q ⊢P)
+subject-reduction refl refl (struct P≅P' P'⇒Q) ⊢P = subject-reduction refl refl P'⇒Q (subject-cong P≅P' ⊢P)
