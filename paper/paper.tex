@@ -13,7 +13,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{Typing a linear \picalc}
 \author{Uma Zalakain}{University of Glasgow, Scotland}
-       {uma.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
+       {u.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
 \author{Ornela Dardha}{University of Glasgow, Scotland}
        {ornela.dardha@glasgow.ac.uk}{https://orcid.org/0000-0001-9927-7875}{}
 \authorrunning{U. Zalakain and O. Dardha}
@@ -62,15 +62,19 @@
 \maketitle
 
 \begin{abstract}
-  We present the syntax, operational semantics, and typing rules for a \picalc{} with linear and shared types. We use leftover typing \cite{} to encode our typing rules. We build framing and weakening proofs that we then use to prove subject congruence and subject reduction.
+  We present the syntax, operational semantics, and typing rules of a \picalc{} with linear and shared types.
+  We abstract over types (using \emph{shapes} to untangle usage contexts from typing contexts) and generalize the algebras on multiplicities (using indexed sets of \emph{partial commutative monoids}).
+  We use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
+  We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
+  We show that the type system is stable under substitution and prove subject reduction.
+
+  This formalization has been fully mechanized with Agda and is available at \url{https://github.com/umazalakain/typing-linear-pi}.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Intensional (correct by construction) vs extensional
-
-same syntax and semantics, different typing rules
+extensional typing rules for a given syntax and operational semantics
 
 \subsection{Contribution}
 
@@ -78,7 +82,9 @@ machine verified formalisation of the pi calculus
 
 typing with leftovers applied to the pi calculus
 
-unique quirks: multiple multiplicities per variable, shared types
+multiple multiplicities per variable
+
+multiple multiplicity types
 
 full formalisation available in Agda
 
@@ -94,12 +100,21 @@ full formalisation available in Agda
 
 variable references (strings, locally named, de Bruijn)
 
-strings to maybe de Bruijn
+allows to ignore alpha conversion, or proofs of inequality between strings
+
+strings to maybe de Bruijn, names can be kept in context as well, just not doing it
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 
+\subsection{Structural congruence}
+
+congruence relationship indexed by recursive tree
+
+\subsection{Reduction}
+
 keeping track of the variable on which communication occurs
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Linear typing rules}
@@ -115,28 +130,9 @@ keeping track of the variable on which communication occurs
 
 \subsection{Multiplicities}
 
-\subsubsection{Partial constructive specification}
+Generalisation over indexed sets of \emph{partial commutative monoids}
 
-Not well suited for typing with leftovers: you need to be able to inspect the
-leftovers before producing them.
-
-\subsubsection{Indexed addition}
-
-Keep $\omega$ and naturals separated.
-
-Extra level for these indices in the context.
-
-Cannot saturate at 1: $1 = 1 \boxtimes 1$ is bad.
-
-Needs cancelation.
-
-Only closed processes get typechecked.
-
-\subsubsection{Guarded subtraction}
-
-Subtraction of $x - y$ only when $x \geq y$.
-
-No cancellation: it is not the case that $n - n = 0$.
+given two multiplicities, the third is uniquely determined. this is better modelled through a function rather than an inductive type.
 
 \subsection{Variable types and multiplicities}
 
@@ -166,20 +162,32 @@ $\Xi \type P \boxtimes \phi$ would imply that such a variable cannot appear in $
 
 \subsection{Weakening}
 
+\subsection{Strengthening}
+
+\subsection{Swapping}
+
+\subsection{Substitution}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Future work}
 
 Work that will be done time permiting:
 
-Decidable typechecking
+\begin{description}
 
-Proof of progress
+\item [Soundness and completeness with respect to an alternative formalization.]
 
-Product types
+\item [Proof of progress]
 
-Sum types
+\item [Product types]
 
-Encoding of session types
+\item [Sum types]
+
+\item [Decidable typechecking]
+
+\item [Encoding of session types]
+
+\end{description}
 
 
 \bibliography{paper}
