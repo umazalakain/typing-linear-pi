@@ -1,12 +1,16 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
+open import Relation.Nullary using (Dec; yes; no)
+open import Function using (_∘_)
 
+import Data.Unit as Unit
 import Data.Product as Product
 import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
 import Data.Nat as ℕ
 
+open Unit using (⊤; tt)
 open ℕ using (ℕ)
-open Product using (Σ-syntax; _,_)
+open Product using (∃-syntax; _,_; _×_; proj₁; proj₂)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 
@@ -18,64 +22,61 @@ private
 
 record Quantifiers : Set₁ where
   field
-    I           : Set
-    ∃I          : I
-    C           : I → Set
-    0∙          : ∀ {i} → C i
-    1∙          : ∀ {i} → C i
-    _+_         : ∀ {i} → C i → C i → C i
-    +-idˡ       : ∀ {i} (x : C i) → 0∙ + x ≡ x
-    +-idʳ       : ∀ {i} (x : C i) → x + 0∙ ≡ x
-    +-assoc     : ∀ {i} (x y z : C i) → (x + y) + z ≡ x + (y + z)
-    +-comm      : ∀ {i} (x y : C i) → x + y ≡ y + x
-    +-cancelˡ-≡ : ∀ {i} {x y z : C i} → x + y ≡ x + z → y ≡ z
+    I         : Set
+    ∃I        : I
+    C         : I → Set
+    0∙        : ∀ {i} → C i
+    1∙        : ∀ {i} → C i
+    _≔_∙_     : ∀ {i} → C i → C i → C i → Set
+    ∙-compute : ∀ {i} (y z       : C i) → Dec (∃[ x ] (x ≔ y ∙ z))
+    ∙-idˡ     : ∀ {i} (x         : C i) → x ≔ 0∙ ∙ x
+    ∙-unique  : ∀ {i} {x x' y z  : C i} → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
+    ∙-cancelˡ : ∀ {i} {x y y' z  : C i} → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
+    ∙-comm    : ∀ {i} {x y z     : C i} → x ≔ y ∙ z → x ≔ z ∙ y
+    ∙-assoc   : ∀ {i} {x y z u v : C i} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
+
+  ∙-idʳ : ∀ {i} (x : C i) → x ≔ x ∙ 0∙
+  ∙-idʳ x = ∙-comm (∙-idˡ x)
 
   private
     variable
       Is : Vec I n
 
-  _≤_ : ∀ {i} → C i → C i → Set
-  x ≤ y = Σ[ z ∈ _ ] x + z ≡ y
-
-  ≤-+ʳ : ∀ {i} {x y : C i} (z : C i) → x ≤ y → x ≤ (y + z)
-  ≤-+ʳ {x = x} z (δ , refl) = (δ + z) , sym (+-assoc _ _ _)
-
   replicate : {Is : Vec I n} → (∀ {i} → C i) → All C Is
   replicate {Is = []} f = []
   replicate {Is = I ∷ Is} f = f {I} ∷ replicate f
 
-  _+ᵥ_ : All C Is → All C Is → All C Is
-  [] +ᵥ [] = []
-  (x ∷ xs) +ᵥ (y ∷ ys) = x + y ∷ xs +ᵥ ys
+  infix 50 _-,_
+  pattern _-,_ xs x = _∷_ x xs
 
-  +ᵥ-idˡ : (xs : All C Is) → replicate 0∙ +ᵥ xs ≡ xs
-  +ᵥ-idˡ [] = refl
-  +ᵥ-idˡ (x ∷ xs) rewrite +ᵥ-idˡ xs | +-idˡ x = refl
+  _≔_∙ᵥ_ : All C Is → All C Is → All C Is → Set
+  [] ≔ [] ∙ᵥ [] = ⊤
+  xs -, x ≔ ys -, y ∙ᵥ zs -, z = xs ≔ ys ∙ᵥ zs × x ≔ y ∙ z
 
-  +ᵥ-idʳ : (xs : All C Is) → xs +ᵥ replicate 0∙ ≡ xs
-  +ᵥ-idʳ [] = refl
-  +ᵥ-idʳ (x ∷ xs) rewrite +ᵥ-idʳ xs | +-idʳ x = refl
+  ∙ᵥ-compute : (ys zs : All C Is) → Dec (∃[ xs ] (xs ≔ ys ∙ᵥ zs))
+  ∙ᵥ-compute [] [] = yes ([] , tt)
+  ∙ᵥ-compute (ys -, y) (zs -, z) with ∙ᵥ-compute ys zs | ∙-compute y z
+  ... | yes (_ , ps) | yes (_ , p) = yes ((_ -, _) , (ps , p))
+  ... | yes (_ , ps) | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
+  ... | no ¬ps       | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
-  +ᵥ-assoc : (xs ys zs : All C Is) → (xs +ᵥ ys) +ᵥ zs ≡ xs +ᵥ (ys +ᵥ zs)
-  +ᵥ-assoc [] [] [] = refl
-  +ᵥ-assoc (x ∷ xs) (y ∷ ys) (z ∷ zs) rewrite +ᵥ-assoc xs ys zs | +-assoc x y z = refl
+  ∙ᵥ-idˡ : (xs : All C Is) → xs ≔ replicate 0∙ ∙ᵥ xs
+  ∙ᵥ-idˡ [] = tt
+  ∙ᵥ-idˡ (xs -, x) = ∙ᵥ-idˡ xs , ∙-idˡ x
 
-  +ᵥ-comm : (xs ys : All C Is) → xs +ᵥ ys ≡ ys +ᵥ xs
-  +ᵥ-comm [] [] = refl
-  +ᵥ-comm (x ∷ xs) (y ∷ ys) rewrite +ᵥ-comm xs ys | +-comm x y = refl
+  ∙ᵥ-unique : {xs xs' ys zs : All C Is} → xs' ≔ ys ∙ᵥ zs → xs ≔ ys ∙ᵥ zs → xs' ≡ xs
+  ∙ᵥ-unique {xs = []} {[]} {[]} {[]} tt tt = refl
+  ∙ᵥ-unique {xs = _ -, _} {_ -, _} {_ -, _} {_ -, _} (ps , p) (qs , q)
+    rewrite ∙ᵥ-unique ps qs | ∙-unique p q = refl
 
-  +ᵥ-cancelˡ-≡ : {xs ys zs : All C Is} → xs +ᵥ ys ≡ xs +ᵥ zs → ys ≡ zs
-  +ᵥ-cancelˡ-≡ {xs = []} {[]} {[]} _ = refl
-  +ᵥ-cancelˡ-≡ {xs = _ ∷ _} {_ ∷ _} {_ ∷ _} eq
-    rewrite +-cancelˡ-≡ (cong All.head eq)
-    | +ᵥ-cancelˡ-≡ (cong All.tail eq)
-    = refl
+  ∙ᵥ-cancelˡ : {xs ys ys' zs : All C Is} → xs ≔ ys' ∙ᵥ zs → xs ≔ ys ∙ᵥ zs → ys' ≡ ys
+  ∙ᵥ-cancelˡ {xs = []} {[]} {[]} {[]} tt tt = refl
+  ∙ᵥ-cancelˡ {xs = _ -, _} {_ -, _} {_ -, _} {_ -, _} (ps , p) (qs , q)
+    rewrite ∙ᵥ-cancelˡ ps qs | ∙-cancelˡ p q = refl
 
-  _≤ᵥ_ : All C Is → All C Is → Set
-  xs ≤ᵥ ys = Σ[ zs ∈ _ ] xs +ᵥ zs ≡ ys
+  ∙ᵥ-comm : {xs ys zs : All C Is} → xs ≔ ys ∙ᵥ zs → xs ≔ zs ∙ᵥ ys
+  ∙ᵥ-comm {xs = []} {[]} {[]} tt = tt
+  ∙ᵥ-comm {xs = _ -, _} {_ -, _} {_ -, _} (ps , p) = ∙ᵥ-comm ps , ∙-comm p
 
-  ≤ᵥ-refl : (xs : All C Is) → xs ≤ᵥ xs
-  ≤ᵥ-refl xs = replicate 0∙ , +ᵥ-idʳ _
-
-  ≤ᵥ-+ᵥʳ : {xs ys : All C Is} (zs : All C Is) → xs ≤ᵥ ys → xs ≤ᵥ (ys +ᵥ zs)
-  ≤ᵥ-+ᵥʳ zs (δ , refl) = (δ +ᵥ zs) , sym (+ᵥ-assoc _ _ _)
+  ∙ᵥ-idʳ : (xs : All C Is) → xs ≔ xs ∙ᵥ replicate 0∙
+  ∙ᵥ-idʳ xs = ∙ᵥ-comm (∙ᵥ-idˡ xs)

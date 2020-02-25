@@ -1,12 +1,14 @@
-open import Relation.Nullary.Decidable using (True)
-open import Data.Product using (Σ; Σ-syntax; _×_; _,_)
+open import Relation.Nullary.Decidable using (True; toWitness)
 
+import Data.Product as Product
 import Data.Unit as Unit
 import Data.Fin as Fin
 import Data.Nat as Nat
 import Data.Bool as Bool
 import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
+
+open Product using (Σ; Σ-syntax; _×_; _,_; proj₁)
 open Unit using (⊤; tt)
 open Nat using (ℕ; zero; suc)
 open Fin using (Fin; zero; suc)
@@ -22,12 +24,9 @@ module PiCalculus.LinearTypeSystem (Ω : Quantifiers) where
 open Quantifiers Ω
 
 infix 50 _↑_↓
-infixl 20 _-,_
 infixr 4 _w_⊢_⊠_
 infixr 4 _w_∋_w_⊠_
 infixr 10 base chan recv send
-
-pattern _-,_ Γ σ = σ ∷ Γ
 
 -- Shapes
 
@@ -83,8 +82,9 @@ data _w_∋_w_⊠_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs
                → Mults cs → Set where
 
   zero : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
-       → {s : Shape} {c : Card s} {t : Type s} {m n : Mult s c}
-       → γ -, t w Γ , (m +ᵥ n) ∋ t w n ⊠ Γ , m
+       → {s : Shape} {c : Card s} {t : Type s} {ys zs : Mult s c}
+       → {check : True (∙ᵥ-compute ys zs )}
+       → γ -, t w Γ , proj₁ (toWitness check) ∋ t w ys ⊠ Γ , zs
 
   suc : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
