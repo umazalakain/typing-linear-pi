@@ -78,5 +78,10 @@ record Quantifiers : Set₁ where
   ∙ᵥ-comm {xs = []} {[]} {[]} tt = tt
   ∙ᵥ-comm {xs = _ -, _} {_ -, _} {_ -, _} (ps , p) = ∙ᵥ-comm ps , ∙-comm p
 
+  ∙ᵥ-assoc : {m l r ll lr : All C Is} → m ≔ l ∙ᵥ r → l ≔ ll ∙ᵥ lr → ∃[ r' ] (m ≔ ll ∙ᵥ r' × r' ≔ lr ∙ᵥ r)
+  ∙ᵥ-assoc {m = []} {[]} {[]} {[]} {[]} tt tt = [] , tt , tt
+  ∙ᵥ-assoc {m = _ -, _} {_ -, _} {_ -, _} {_ -, _} {_ -, _} (ms , m) (ls , l) with ∙ᵥ-assoc ms ls | ∙-assoc m l
+  ... | (_ , ms' , rs') | (_ , m' , r') = _ , ((ms' , m') , (rs' , r'))
+
   ∙ᵥ-idʳ : (xs : All C Is) → xs ≔ xs ∙ᵥ replicate 0∙
   ∙ᵥ-idʳ xs = ∙ᵥ-comm (∙ᵥ-idˡ xs)

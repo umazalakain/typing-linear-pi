@@ -1,6 +1,9 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
+open import Relation.Nullary using (Dec; yes; no)
+open import Relation.Nullary.Decidable using (toWitness)
 open import Function using (_∘_)
 
+import Data.Unit as Unit
 import Data.Nat as ℕ
 import Data.Product as Product
 import Data.Product.Properties as Productₚ
@@ -8,8 +11,9 @@ import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
 import Data.Fin as Fin
 
+open Unit using (⊤; tt)
 open ℕ using (ℕ; zero; suc)
-open Product using (Σ; Σ-syntax; _×_; _,_; proj₂; proj₁)
+open Product using (∃-syntax; _×_; _,_; proj₂; proj₁)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
@@ -29,59 +33,65 @@ private
     n : ℕ
     P Q : Scoped n
 
-_⊎_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Mults cs
-_⊎_ {ss = []} tt tt = tt
-_⊎_ {ss = _ -, _} (Γ , m) (Δ , n) = Γ ⊎ Δ , m +ᵥ n
+_≔_⊎_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Mults cs → Set
+_≔_⊎_ {ss = []} tt tt tt = ⊤
+_≔_⊎_ {ss = _ -, _} (Γ , xs) (Δ , ys) (Ξ , zs) = Γ ≔ Δ ⊎ Ξ × xs ≔ ys ∙ᵥ zs
 
-⊎-idˡ : {ss : Shapes n} {cs : Cards ss} (Γ : Mults cs) → ε ⊎ Γ ≡ Γ
-⊎-idˡ {ss = []} tt = refl
-⊎-idˡ {ss = _ -, _} (Γ , m) rewrite ⊎-idˡ Γ | +ᵥ-idˡ m = refl
+⊎-compute : {ss : Shapes n} {cs : Cards ss} (Δ Ξ : Mults cs) → Dec (∃[ Γ ] (Γ ≔ Δ ⊎ Ξ))
+⊎-compute {ss = []} tt tt = yes (tt , tt)
+⊎-compute {ss = _ -, _} (Δ , ys) (Ξ , zs) with ⊎-compute Δ Ξ | ∙ᵥ-compute ys zs
+...                                       | yes (_ , ps)     | yes (_ , p) = yes ((_ , _) , (ps , p))
+...                                       | yes (_ , ps)     | no ¬p       = no λ {((_ , _) , (_ , p)) → ¬p (_ , p)}
+...                                       | no ¬ps           | _           = no λ {((_ , _) , (ps , _)) → ¬ps (_ , ps)}
 
-⊎-idʳ : {ss : Shapes n} {cs : Cards ss} (Γ : Mults cs) → Γ ⊎ ε ≡ Γ
-⊎-idʳ {ss = []} tt = refl
-⊎-idʳ {ss = _ -, _} (Γ , m) rewrite ⊎-idʳ Γ | +ᵥ-idʳ m = refl
+⊎-idˡ : {ss : Shapes n} {cs : Cards ss} (Γ : Mults cs) → Γ ≔ ε ⊎ Γ
+⊎-idˡ {ss = []} tt = tt
+⊎-idˡ {ss = _ -, _} (Γ , xs) = ⊎-idˡ Γ , ∙ᵥ-idˡ xs
 
-⊎-comm : {ss : Shapes n} {cs : Cards ss} (Γ Δ : Mults cs) → Γ ⊎ Δ ≡ Δ ⊎ Γ
-⊎-comm {ss = []} tt tt = refl
-⊎-comm {ss = _ -, _} (Γ , m) (Δ , n) rewrite ⊎-comm Γ Δ | +ᵥ-comm m n = refl
+⊎-unique : {ss : Shapes n} {cs : Cards ss} {Γ Γ' Δ Ξ  : Mults cs} → Γ' ≔ Δ ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Γ' ≡ Γ
+⊎-unique {ss = []} tt tt = refl
+⊎-unique {ss = _ -, _} {Γ = _ , _} {Γ' = _ , _} (Γ'≔ , xs'≔) (Γ≔ , xs≔)
+  rewrite ⊎-unique Γ'≔ Γ≔ | ∙ᵥ-unique xs'≔ xs≔ = refl
 
-⊎-assoc : {ss : Shapes n} {cs : Cards ss} (Γ Δ Ξ : Mults cs) → (Γ ⊎ Δ) ⊎ Ξ ≡ Γ ⊎ (Δ ⊎ Ξ)
-⊎-assoc {ss = []} tt tt tt = refl
-⊎-assoc {ss = _ -, _} (Γ , m) (Δ , n) (Ξ , l) rewrite ⊎-assoc Γ Δ Ξ | +ᵥ-assoc m n l = refl
+⊎-cancelˡ : {ss : Shapes n} {cs : Cards ss} {Γ Δ Δ' Ξ  : Mults cs} → Γ ≔ Δ' ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Δ' ≡ Δ
+⊎-cancelˡ {ss = []} tt tt = refl
+⊎-cancelˡ {ss = _ -, _} {Δ = _ , _} {Δ' = _ , _} (Δ'≔ , ys'≔) (Δ≔ , ys≔)
+  rewrite ⊎-cancelˡ Δ'≔ Δ≔ | ∙ᵥ-cancelˡ ys'≔ ys≔ = refl
 
-⊎-cancelˡ-≡ : {ss : Shapes n} {cs : Cards ss} {Γ Δ Ξ : Mults cs} → Γ ⊎ Δ ≡ Γ ⊎ Ξ → Δ ≡ Ξ
-⊎-cancelˡ-≡ {ss = []} {tt} {tt} {tt} _ = refl
-⊎-cancelˡ-≡ {ss = _ -, _} {_ , _} {_ , _} {_ , _} eq
-  rewrite +ᵥ-cancelˡ-≡ (Productₚ.,-injectiveʳ eq)
-  | ⊎-cancelˡ-≡ (Productₚ.,-injectiveˡ eq)
-  = refl
+⊎-comm : {ss : Shapes n} {cs : Cards ss} {Γ Δ Ξ : Mults cs} → Γ ≔ Δ ⊎ Ξ → Γ ≔ Ξ ⊎ Δ
+⊎-comm {ss = []} tt = tt
+⊎-comm {ss = _ -, _} (Γ≔ , xs≔) = ⊎-comm Γ≔ , ∙ᵥ-comm xs≔
 
-_⊆_ : {ss : Shapes n} {cs : Cards ss} → Mults cs → Mults cs → Set
-ϕ ⊆ Γ = Σ[ Δ ∈ _ ] ϕ ⊎ Δ ≡ Γ
+⊎-assoc : {ss : Shapes n} {cs : Cards ss} {Γₘ Γₗ Γᵣ Γₗₗ Γₗᵣ : Mults cs}
+        → Γₘ ≔ Γₗ ⊎ Γᵣ → Γₗ ≔ Γₗₗ ⊎ Γₗᵣ → ∃[ Γᵣ' ] (Γₘ ≔ Γₗₗ ⊎ Γᵣ' × Γᵣ' ≔ Γₗᵣ ⊎ Γᵣ)
+⊎-assoc {ss = []} tt tt = tt , tt , tt
+⊎-assoc {ss = _ -, _} (Γₘ≔ , xsₘ≔) (Γₗ≔ , xsₗ≔) with ⊎-assoc Γₘ≔ Γₗ≔ | ∙ᵥ-assoc xsₘ≔ xsₗ≔
+... | (_ , Γₘ'≔ , Γᵣ'≔)  | (_ , xsₘ'≔ , xsᵣ'≔) = _ , ((Γₘ'≔ , xsₘ'≔) , (Γᵣ'≔ , xsᵣ'≔))
 
-⊆-refl : {ss : Shapes n} {cs : Cards ss} {Γ : Mults cs} → Γ ⊆ Γ
-⊆-refl = ε , ⊎-idʳ _
+⊎-idʳ : {ss : Shapes n} {cs : Cards ss} (Γ : Mults cs) → Γ ≔ Γ ⊎ ε
+⊎-idʳ Γ = ⊎-comm (⊎-idˡ Γ)
 
-⊆-trans : {ss : Shapes n} {cs : Cards ss} {Γ Ξ Θ : Mults cs} → Γ ⊆ Ξ → Ξ ⊆ Θ → Γ ⊆ Θ
-⊆-trans (Δ₁ , refl) (Δ₂ , refl) = _ , sym (⊎-assoc _ _ _)
-
-⊆-tail : {ss : Shapes n} {cs : Cards ss} {Γ Δ : Mults cs}
-       → {s : Shape} {c : Card s} {m l : Mult s c}
-       → _⊆_ {ss = _ -, s} (Δ , m) (Γ , l) → Δ ⊆ Γ
-⊆-tail = Product.map proj₁ Productₚ.,-injectiveˡ
-
-⊆-⊎ˡ : {ss : Shapes n} {cs : Cards ss} {Γ Ξ : Mults cs} (Δ : Mults cs) → Γ ⊆ Ξ → Γ ⊆ (Δ ⊎ Ξ)
-⊆-⊎ˡ Δ (diff , refl) = Δ ⊎ diff , trans (⊎-comm _ _) (trans (⊎-assoc _ _ _) (cong (_ ⊎_) (⊎-comm _ _)))
-
-∋-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+∋-⊎ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Ξ : Mults cs}
     → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-    → γ w Γ ∋ t w m ⊠ Δ → Δ ⊆ Γ
-∋-⊆ zero = (ε , _) , _,_ & ⊎-idʳ _ ⊗ refl
-∋-⊆ (suc ⊢P) with ∋-⊆ ⊢P
-∋-⊆ (suc ⊢P) | Γ , refl = (Γ , replicate 0∙) , _,_ & refl ⊗ +ᵥ-idʳ _
+    → γ w Γ ∋ t w m ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
+∋-⊎ (zero {check = check}) = (ε , _) , ((⊎-idˡ _) , proj₂ (toWitness check))
+∋-⊎ (suc i) with ∋-⊎ i
+∋-⊎ (suc i) | (Δ , Γ≔) = (Δ , replicate 0∙) , Γ≔ , (∙ᵥ-idˡ _)
 
-⊢-⊆ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
-    → γ w Γ ⊢ P ⊠ Δ → Δ ⊆ Γ
+⊢-⊎ : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Ξ : Mults cs}
+    → γ w Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
+⊢-⊎ end = ε , ⊎-idˡ _
+⊢-⊎ (base ⊢P) = let (_ , Γ≔ , _) = ⊢-⊎ ⊢P in _ , Γ≔
+⊢-⊎ (chan t m μ ⊢P) = let (_ , Γ≔ , _) = ⊢-⊎ ⊢P in _ , Γ≔
+⊢-⊎ (recv x ⊢P) = let (_ , x≔) = ∋-⊎ x; (_ , Γ≔ , _) = ⊢-⊎ ⊢P in _ , {!!}
+⊢-⊎ (send x y ⊢P) = let (_ , x≔) = ∋-⊎ x; (_ , y≔) = ∋-⊎ y; (_ , ⊢P≔) = ⊢-⊎ ⊢P in _ , ⊎-comm {!!}
+⊢-⊎ (comp ⊢P ⊢Q) = let (_ , Γ≔) = ⊢-⊎ ⊢P
+                       (_ , Θ≔) = ⊢-⊎ ⊢Q
+                       (_ , R≔ , _) = ⊎-assoc (⊎-comm Γ≔) (⊎-comm Θ≔)
+                    in _ , ⊎-comm R≔
+
+{-
+
 ⊢-⊆ end = ⊆-refl
 ⊢-⊆ (base ⊢P) = ⊆-tail {s = < 0 & _ , [] >} (⊢-⊆ ⊢P)
 ⊢-⊆ (chan {s = s} t m μ ⊢P) = ⊆-tail {s = < 2 & _ , s ∷ [] >} (⊢-⊆ ⊢P)
@@ -118,3 +128,4 @@ fromFin : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
         → γ w update-mult i (get-mult Γ i +ᵥ m) Γ ∋ get-type γ i w m ⊠ Γ
 fromFin {ss = _ -, _} {γ = _ -, _} zero = zero
 fromFin {ss = _ -, _} {γ = _ -, _} (suc i) = suc (fromFin i)
+-}
