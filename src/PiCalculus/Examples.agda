@@ -132,7 +132,7 @@ _ = chan B[ 0 ] [] 1∙
     (recv zero end))
 
 _ : raw⊢ channel-over-channel₀
-_ = chan C[ B[ 0 ] w [] ] (0∙ ↑ 1∙ ↓) 1∙ (comp
+_ = chan (C[ B[ 0 ] w [] ]) (0∙ ↑ 1∙ ↓) 1∙ (comp
          (recv zero
                (recv zero end))
          (chan B[ 0 ] [] 1∙ (base

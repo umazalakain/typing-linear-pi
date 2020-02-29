@@ -1,4 +1,5 @@
 open import Relation.Nullary.Decidable using (True; toWitness)
+open import Function using (_∘_)
 
 import Data.Product as Product
 import Data.Unit as Unit
@@ -30,100 +31,84 @@ infixr 10 base chan recv send
 
 private
   variable
+    i i' : I
     n : ℕ
 
--- Shapes
+data Type : Set
+shape : Type → ℕ
+Usage : I × Type → Set
 
-record Tree (A : Set) : Set where
-  constructor <_&_>
-  inductive
-  field
-    value : A
-    children : Σ ℕ (Vec (Tree A))
+Usage (i , t) = Vec (Cs i) (shape t)
 
-Shape : Set
-Shape = Tree (ℕ × I)
+data Type where
+  B[_]   : ℕ → Type
+  C[_w_] : (t : Type) → Usage (i , t) → Type
+  P[_&_] : Type → Type → Type
 
-Shapes : ℕ → Set
-Shapes = Vec Shape
+shape B[ _ ] = 0
+shape C[ _ w _ ] = 2
+shape P[ _ & _ ] = 0
 
--- Shapes interpreted as multiplicities
+PreCtx : ℕ → Set
+PreCtx = Vec (I × Type)
 
-Mult : Shape → Set
-Mult < n , i & _ > = Vec (Cs i) n
+Ctx : ∀ {n} → PreCtx n → Set
+Ctx = All Usage
 
-Mults : ∀ {n} → Shapes n → Set
-Mults = All Mult
+private
+  variable
+    γ : PreCtx n
+    Γ Δ Ξ Θ : Ctx γ
+    b : ℕ
+    t t' : Type
+    xs ys zs : Usage (i , t)
+    P Q : Scoped n
 
-ε : ∀ {n} {ss : Shapes n} → Mults ss
-ε {ss = []} = []
-ε {ss = _ -, _} = ε -, Vec.replicate 0∙
+ε : {γ : PreCtx n} → Ctx γ
+ε {γ = []} = []
+ε {γ = _ -, _} = ε -, Vec.replicate 0∙
 
-data Type : Shape → Set where
-  B[_]   : ℕ → Type < 0 , ∃I & _ , [] >
-  C[_w_] : ∀ {s i} → Type s → Mult s → Type < 2 , i & _ , s ∷ [] >
-  P[_&_] : ∀ {s r} → Type s → Type r → Type < 0 , ∃I & _ , s ∷ r ∷ [] >
+data _w_∋_w_⊠_ : (γ : PreCtx n) → Ctx γ
+               → (t : Type) → Usage (i , t)
+               → Ctx γ → Set where
 
-Types : ∀ {n} → Shapes n → Set
-Types = All Type
-
-data _w_∋_w_⊠_ : {ss : Shapes n} → Types ss → Mults ss
-               → {s : Shape} → Type s → Mult s
-               → Mults ss → Set where
-
-  zero : {ss : Shapes n} {γ : Types ss} {Γ : Mults ss}
-       → {s : Shape} {t : Type s} {ys zs : Mult s}
+  zero : {Γ : Ctx γ} {ys zs : Usage (i , t)}
        → {check : True (∙ᵥ-compute ys zs)}
-       → γ -, t w Γ -, proj₁ (toWitness check) ∋ t w ys ⊠ Γ -, zs
+       → γ -, (i , t) w Γ -, proj₁ (toWitness check) ∋ t w ys ⊠ Γ -, zs
 
-  suc : {ss : Shapes n} {γ : Types ss} {Γ Δ : Mults ss}
-      → {s : Shape} {t : Type s} {m : Mult s}
-      → {s' : Shape} {t' : Type s'} {m' : Mult s'}
-      → γ w Γ ∋ t w m ⊠ Δ
-      → γ -, t' w Γ -, m' ∋ t w m ⊠ Δ -, m'
+  suc : {Γ Δ : Ctx γ} {xs : Usage (i , t)} {xs' : Usage (i' , t')}
+      → γ w Γ ∋ t w xs ⊠ Δ
+      → γ -, (i' , t') w Γ -, xs' ∋ t w xs ⊠ Δ -, xs'
 
-toFin : {ss : Shapes n} {γ : Types ss} {Γ Δ : Mults ss}
-      → {s : Shape} {t : Type s} {m : Mult s}
-      → γ w Γ ∋ t w m ⊠ Δ
+toFin : {γ : PreCtx n} {Γ Δ : Ctx γ} {xs : Usage (i , t)}
+      → γ w Γ ∋ t w xs ⊠ Δ
       → Fin n
 toFin zero = zero
 toFin (suc x) = suc (toFin x)
 
-private
-  variable
-    i : I
-    ss : Shapes n
-    γ : Types ss
-    Γ Δ Ξ Θ : Mults ss
-    b : ℕ
-    s : Shape
-    t : Type s
-    m : Mult s
-    P Q : Scoped n
-
 _↑_↓ : Cs i → Cs i → Vec (Cs i) 2
 μ↑ ↑ μ↓ ↓ = μ↓ ∷ μ↑ ∷ []
 
-data _w_⊢_⊠_ : {ss : Shapes n} → Types ss → Mults ss → Scoped n → Mults ss → Set where
+data _w_⊢_⊠_ : (γ : PreCtx n) → Ctx γ → Scoped n → Ctx γ → Set where
 
   end : γ w Γ ⊢ 𝟘 ⊠ Γ
 
-  base : γ -, B[ b ] w Γ -, [] ⊢ P     ⊠ Δ -, []
-       -----------------------------------------
-       → γ           w Γ       ⊢ +[] P ⊠ Δ
+  base : γ -, (∃I , B[ b ]) w Γ -, [] ⊢ P     ⊠ Δ -, []
+       ------------------------------------------------
+       → γ                  w Γ       ⊢ +[] P ⊠ Δ
 
-  chan : (t : Type s) (m : Mult s) (μ : Cs i)
-       → γ -, C[ t w m ] w Γ -, μ ↑ μ ↓ ⊢ P     ⊠ Δ -, 0∙ ↑ 0∙ ↓
-       ---------------------------------------------------------
-       → γ               w Γ            ⊢ new P ⊠ Δ
+  chan : (t : Type) (m : Usage (i' , t)) (μ : Cs i)
+       → γ -, (_ , C[ t w m ]) w Γ -, μ ↑ μ ↓ ⊢ P     ⊠ Δ -, 0∙ ↑ 0∙ ↓
+       ---------------------------------------------------------------
+       → γ                     w Γ            ⊢ new P ⊠ Δ
 
-  recv : {t : Type s} {m : Mult s}
-       → (x : γ      w Γ       ∋ C[ t w m ] w 0∙ {i} ↑ 1∙ ↓ ⊠ Ξ)
-       →      γ -, t w Ξ -, m  ⊢ P                          ⊠ Θ -, Vec.replicate 0∙
-       ----------------------------------------------------------------------------
-       →      γ      w Γ       ⊢ toFin x ⦅⦆ P               ⊠ Θ
+  recv : {t : Type} {m : Usage (i' , t)}
+       → (x : γ            w Γ       ∋ C[ t w m ] w 0∙ {i} ↑ 1∙ ↓ ⊠ Ξ)
+       →      γ -, (_ , t) w Ξ -, m  ⊢ P                          ⊠ Θ -, Vec.replicate 0∙
+       ----------------------------------------------------------------------------------
+       →      γ            w Γ       ⊢ toFin x ⦅⦆ P               ⊠ Θ
 
-  send : {t : Type s} {m : Mult s}
+  send : {t : Type} {m : Usage (i' , t)}
        → (x : γ w Γ ∋ C[ t w m ] w 1∙ {i} ↑ 0∙ ↓ ⊠ Δ)
        → (y : γ w Δ ∋ t          w m             ⊠ Ξ)
        →      γ w Ξ ⊢ P                          ⊠ Θ
@@ -135,5 +120,5 @@ data _w_⊢_⊠_ : {ss : Shapes n} → Types ss → Mults ss → Scoped n → Mu
        -------------------
        → γ w Γ ⊢ P ∥ Q ⊠ Ξ
 
-_w_⊢_ : {ss : Shapes n} → Types ss → Mults ss → Scoped n → Set
+_w_⊢_ : (γ : PreCtx n) → Ctx γ → Scoped n → Set
 γ w Γ ⊢ P = γ w Γ ⊢ P ⊠ ε

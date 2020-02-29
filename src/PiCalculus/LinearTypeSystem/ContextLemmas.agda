@@ -31,64 +31,65 @@ open import PiCalculus.LinearTypeSystem Ω
 private
   variable
     n : ℕ
+    γ : PreCtx n
+    i : I
+    t : Type
     P Q : Scoped n
 
-_≔_⊎_ : {ss : Shapes n} → Mults ss → Mults ss → Mults ss → Set
-_≔_⊎_ {ss = []} [] [] [] = ⊤
-_≔_⊎_ {ss = _ -, _} (Γ -, xs) (Δ -, ys) (Ξ -, zs) = Γ ≔ Δ ⊎ Ξ × xs ≔ ys ∙ᵥ zs
+_≔_⊎_ : Ctx γ → Ctx γ → Ctx γ → Set
+_≔_⊎_ [] [] [] = ⊤
+_≔_⊎_ (Γ -, xs) (Δ -, ys) (Ξ -, zs) = Γ ≔ Δ ⊎ Ξ × xs ≔ ys ∙ᵥ zs
 
-⊎-compute : {ss : Shapes n} (Δ Ξ : Mults ss) → Dec (∃[ Γ ] (Γ ≔ Δ ⊎ Ξ))
+⊎-compute : (Δ Ξ : Ctx γ) → Dec (∃[ Γ ] (Γ ≔ Δ ⊎ Ξ))
 ⊎-compute [] [] = yes ([] , tt)
 ⊎-compute (Δ -, ys) (Ξ -, zs) with ⊎-compute Δ Ξ | ∙ᵥ-compute ys zs
 ... | yes (_ , ps)     | yes (_ , p) = yes ((_ -, _) , (ps , p))
 ... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
 ... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
-⊎-idˡ : {ss : Shapes n} (Γ : Mults ss) → Γ ≔ ε ⊎ Γ
+⊎-idˡ : (Γ : Ctx γ) → Γ ≔ ε ⊎ Γ
 ⊎-idˡ [] = tt
 ⊎-idˡ (Γ -, xs) = ⊎-idˡ Γ , ∙ᵥ-idˡ xs
 
-⊎-unique : {ss : Shapes n} {Γ Γ' Δ Ξ  : Mults ss} → Γ' ≔ Δ ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Γ' ≡ Γ
+⊎-unique : {Γ Γ' Δ Ξ  : Ctx γ} → Γ' ≔ Δ ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Γ' ≡ Γ
 ⊎-unique {Γ = []} {[]} {[]} {[]} tt tt = refl
 ⊎-unique {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Γ'≔ , xs'≔) (Γ≔ , xs≔)
   rewrite ⊎-unique Γ'≔ Γ≔ | ∙ᵥ-unique xs'≔ xs≔ = refl
 
-⊎-cancelˡ : {ss : Shapes n} {Γ Δ Δ' Ξ  : Mults ss} → Γ ≔ Δ' ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Δ' ≡ Δ
+⊎-cancelˡ : {Γ Δ Δ' Ξ  : Ctx γ} → Γ ≔ Δ' ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Δ' ≡ Δ
 ⊎-cancelˡ {Γ = []} {[]} {[]} {[]} tt tt = refl
 ⊎-cancelˡ {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Δ'≔ , ys'≔) (Δ≔ , ys≔)
   rewrite ⊎-cancelˡ Δ'≔ Δ≔ | ∙ᵥ-cancelˡ ys'≔ ys≔ = refl
 
-⊎-comm : {ss : Shapes n} {Γ Δ Ξ : Mults ss} → Γ ≔ Δ ⊎ Ξ → Γ ≔ Ξ ⊎ Δ
+⊎-comm : {Γ Δ Ξ : Ctx γ} → Γ ≔ Δ ⊎ Ξ → Γ ≔ Ξ ⊎ Δ
 ⊎-comm {Γ = []} {[]} {[]} tt = tt
 ⊎-comm {Γ = _ -, _} {_ -, _} {_ -, _} (Γ≔ , xs≔) = ⊎-comm Γ≔ , ∙ᵥ-comm xs≔
 
-⊎-assoc : {ss : Shapes n} {Γₘ Γₗ Γᵣ Γₗₗ Γₗᵣ : Mults ss}
+⊎-assoc : {Γₘ Γₗ Γᵣ Γₗₗ Γₗᵣ : Ctx γ}
         → Γₘ ≔ Γₗ ⊎ Γᵣ → Γₗ ≔ Γₗₗ ⊎ Γₗᵣ → ∃[ Γᵣ' ] (Γₘ ≔ Γₗₗ ⊎ Γᵣ' × Γᵣ' ≔ Γₗᵣ ⊎ Γᵣ)
 ⊎-assoc {Γₘ = []} {[]} {[]} {[]} {[]}  tt tt = [] , tt , tt
 ⊎-assoc {Γₘ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {_ -, _} (Γₘ≔ , xsₘ≔) (Γₗ≔ , xsₗ≔) with ⊎-assoc Γₘ≔ Γₗ≔ | ∙ᵥ-assoc xsₘ≔ xsₗ≔
 ... | (_ , Γₘ'≔ , Γᵣ'≔)  | (_ , xsₘ'≔ , xsᵣ'≔) = _ , ((Γₘ'≔ , xsₘ'≔) , (Γᵣ'≔ , xsᵣ'≔))
 
-⊎-trans : {ss : Shapes n} {m l r rl rr : Mults ss}
+⊎-trans : {m l r rl rr : Ctx γ}
         → (t : m ≔ l ⊎ r) → (b : r ≔ rl ⊎ rr)
         → m ≔ proj₁ (⊎-assoc (⊎-comm t) (⊎-comm b)) ⊎ rr
 ⊎-trans t b = ⊎-comm (proj₁ (proj₂ (⊎-assoc (⊎-comm t) (⊎-comm b))))
 
-⊎-tail : {ss : Shapes n} {s : Shape} {xs ys zs : Mults (ss -, s)}
+⊎-tail : {xs ys zs : Ctx (γ -, (i , t))}
        → xs ≔ ys ⊎ zs → All.tail xs ≔ All.tail ys ⊎ All.tail zs
 ⊎-tail {xs = _ -, _} {_ -, _} {_ -, _} (tail , _) = tail
 
-⊎-idʳ : {ss : Shapes n} (Γ : Mults ss) → Γ ≔ Γ ⊎ ε
+⊎-idʳ : (Γ : Ctx γ) → Γ ≔ Γ ⊎ ε
 ⊎-idʳ Γ = ⊎-comm (⊎-idˡ Γ)
 
-∋-⊎ : {ss : Shapes n} {γ : Types ss} {Γ Ξ : Mults ss}
-    → {s : Shape} {t : Type s} {m : Mult s}
+∋-⊎ : {Γ Ξ : Ctx γ} {m : Usage (i , t)}
     → γ w Γ ∋ t w m ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ∋-⊎ (zero {check = check}) = (ε -, _) , ((⊎-idˡ _) , proj₂ (toWitness check))
 ∋-⊎ (suc i) with ∋-⊎ i
 ∋-⊎ (suc i) | (Δ , Γ≔) = (Δ -, Vec.replicate 0∙) , Γ≔ , (∙ᵥ-idˡ _)
 
-⊢-⊎ : {ss : Shapes n} {γ : Types ss} {Γ Ξ : Mults ss}
-    → γ w Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
+⊢-⊎ : {Γ Ξ : Ctx γ} → γ w Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ _
 ⊢-⊎ (base ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
                  in _ , ⊎-tail Γ≔
@@ -105,7 +106,6 @@ _≔_⊎_ {ss = _ -, _} (Γ -, xs) (Δ -, ys) (Ξ -, zs) = Γ ≔ Δ ⊎ Ξ × x
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
 
-update-mult : {ss : Shapes n} → (i : Fin n) → Mult (Vec.lookup ss i)
-            → Mults ss → Mults ss
-update-mult {ss = _ -, _} zero m' (ms -, m) = ms -, m'
-update-mult {ss = _ -, _} (suc i) m' (ms -, m) = update-mult i m' ms -, m
+update-mult : (i : Fin n) → Usage (Vec.lookup γ i) → Ctx γ → Ctx γ
+update-mult zero m' (ms -, m) = ms -, m'
+update-mult (suc i) m' (ms -, m) = update-mult i m' ms -, m

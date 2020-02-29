@@ -60,22 +60,22 @@ data _≔_∙_ : Mult lin → Mult lin → Mult lin → Set where
 LNL : Quantifiers
 Quantifiers.I LNL = Type
 Quantifiers.∃I LNL = nonlin
-Quantifiers.C LNL = Mult
-Quantifier.0∙ (Quantifiers.Q LNL nonlin) = ω∙
-Quantifier.1∙ (Quantifiers.Q LNL nonlin) = ω∙
-Quantifier._≔_∙_ (Quantifiers.Q LNL nonlin) _ _ _ = ⊤
-Quantifier.∙-compute (Quantifiers.Q LNL nonlin) _ _ = yes (ω∙ , tt)
-Quantifier.∙-idˡ (Quantifiers.Q LNL nonlin) _ = tt
-Quantifier.∙-unique (Quantifiers.Q LNL nonlin) {x = ω∙} {x' = ω∙} _ _ = refl
-Quantifier.∙-cancelˡ (Quantifiers.Q LNL nonlin) {y = ω∙} {y' = ω∙} _ _ = refl
-Quantifier.∙-comm (Quantifiers.Q LNL nonlin) _ = tt
-Quantifier.∙-assoc (Quantifiers.Q LNL nonlin) _ _ = ω∙ , (_ , _)
-Quantifier.0∙ (Quantifiers.Q LNL lin) = 0∙
-Quantifier.1∙ (Quantifiers.Q LNL lin) = 1∙
-Quantifier._≔_∙_ (Quantifiers.Q LNL lin) = _≔_∙_
-Quantifier.∙-compute (Quantifiers.Q LNL lin) = ∙-compute
-Quantifier.∙-idˡ (Quantifiers.Q LNL lin) = ∙-idˡ
-Quantifier.∙-unique (Quantifiers.Q LNL lin) = ∙-unique
-Quantifier.∙-cancelˡ (Quantifiers.Q LNL lin) = ∙-cancelˡ
-Quantifier.∙-comm (Quantifiers.Q LNL lin) = ∙-comm
-Quantifier.∙-assoc (Quantifiers.Q LNL lin) = ∙-assoc
+Quantifiers.Cs LNL = Mult
+Quantifier.0∙ (Quantifiers.Qs LNL nonlin) = ω∙
+Quantifier.1∙ (Quantifiers.Qs LNL nonlin) = ω∙
+Quantifier._≔_∙_ (Quantifiers.Qs LNL nonlin) _ _ _ = ⊤
+Quantifier.∙-compute (Quantifiers.Qs LNL nonlin) _ _ = yes (ω∙ , tt)
+Quantifier.∙-idˡ (Quantifiers.Qs LNL nonlin) _ = tt
+Quantifier.∙-unique (Quantifiers.Qs LNL nonlin) {x = ω∙} {x' = ω∙} _ _ = refl
+Quantifier.∙-cancelˡ (Quantifiers.Qs LNL nonlin) {y = ω∙} {y' = ω∙} _ _ = refl
+Quantifier.∙-comm (Quantifiers.Qs LNL nonlin) _ = tt
+Quantifier.∙-assoc (Quantifiers.Qs LNL nonlin) _ _ = ω∙ , (_ , _)
+Quantifier.0∙ (Quantifiers.Qs LNL lin) = 0∙
+Quantifier.1∙ (Quantifiers.Qs LNL lin) = 1∙
+Quantifier._≔_∙_ (Quantifiers.Qs LNL lin) = _≔_∙_
+Quantifier.∙-compute (Quantifiers.Qs LNL lin) = ∙-compute
+Quantifier.∙-idˡ (Quantifiers.Qs LNL lin) = ∙-idˡ
+Quantifier.∙-unique (Quantifiers.Qs LNL lin) = ∙-unique
+Quantifier.∙-cancelˡ (Quantifiers.Qs LNL lin) = ∙-cancelˡ
+Quantifier.∙-comm (Quantifiers.Qs LNL lin) = ∙-comm
+Quantifier.∙-assoc (Quantifiers.Qs LNL lin) = ∙-assoc
