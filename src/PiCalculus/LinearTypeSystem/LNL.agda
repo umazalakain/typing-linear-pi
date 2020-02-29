@@ -1,10 +1,12 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
 open import Relation.Nullary using (Dec; yes; no)
 
+import Data.Unit as Unit
 import Data.Product as Product
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕₚ
 
+open Unit using (⊤; tt)
 open Product using (∃-syntax; _×_; _,_)
 open ℕ using (ℕ)
 
@@ -19,53 +21,37 @@ data Mult : Type → Set where
   0∙ 1∙ : Mult lin
   ω∙ : Mult nonlin
 
-ω0 : ∀ {i} → Mult i
-ω0 {lin} = 0∙
-ω0 {nonlin} = ω∙
-
-ω1 : ∀ {i} → Mult i
-ω1 {lin} = 1∙
-ω1 {nonlin} = ω∙
-
-data _≔_∙_ : ∀ {i} → Mult i → Mult i → Mult i → Set where
-  share : ω∙ ≔ ω∙ ∙ ω∙
+data _≔_∙_ : Mult lin → Mult lin → Mult lin → Set where
   left  : 1∙ ≔ 1∙ ∙ 0∙
   right : 1∙ ≔ 0∙ ∙ 1∙
   skip  : 0∙ ≔ 0∙ ∙ 0∙
 
-∙-compute : ∀ {i} (y z : Mult i) → Dec (∃[ x ] (x ≔ y ∙ z))
+∙-compute : ∀ y z → Dec (∃[ x ] (x ≔ y ∙ z))
 ∙-compute 0∙ 0∙ = yes (0∙ , skip)
 ∙-compute 0∙ 1∙ = yes (1∙ , right)
 ∙-compute 1∙ 0∙ = yes (1∙ , left)
 ∙-compute 1∙ 1∙ = no λ ()
-∙-compute ω∙ ω∙ = yes (ω∙ , share)
 
-∙-idˡ : ∀ {i} (x : Mult i) → x ≔ ω0 ∙ x
+∙-idˡ : ∀ x → x ≔ 0∙ ∙ x
 ∙-idˡ 0∙ = skip
 ∙-idˡ 1∙ = right
-∙-idˡ ω∙ = share
 
-∙-unique : ∀ {i} {x x' y z : Mult i} → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
-∙-unique share share = refl
+∙-unique : ∀ {x x' y z} → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
 ∙-unique left left = refl
 ∙-unique right right = refl
 ∙-unique skip skip = refl
 
-∙-cancelˡ : ∀ {i} {x y y' z : Mult i} → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
-∙-cancelˡ share share = refl
+∙-cancelˡ : ∀ {x y y' z} → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
 ∙-cancelˡ left left = refl
 ∙-cancelˡ right right = refl
 ∙-cancelˡ skip skip = refl
 
-∙-comm : ∀ {i} {x y z : Mult i} → x ≔ y ∙ z → x ≔ z ∙ y
-∙-comm share = share
+∙-comm : ∀ {x y z} → x ≔ y ∙ z → x ≔ z ∙ y
 ∙-comm left = right
 ∙-comm right = left
 ∙-comm skip = skip
 
-∙-assoc : ∀ {i} {x y z u v : Mult i} → x ≔ y ∙ z → y ≔ u ∙ v
-        → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
-∙-assoc share share = ω∙ , share , share
+∙-assoc : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
 ∙-assoc left left = 0∙ , left , skip
 ∙-assoc left right = 1∙ , right , left
 ∙-assoc right skip = 1∙ , right , right
@@ -75,12 +61,21 @@ LNL : Quantifiers
 Quantifiers.I LNL = Type
 Quantifiers.∃I LNL = nonlin
 Quantifiers.C LNL = Mult
-Quantifiers.0∙ LNL = ω0
-Quantifiers.1∙ LNL = ω1
-Quantifiers._≔_∙_ LNL = _≔_∙_
-Quantifiers.∙-compute LNL = ∙-compute
-Quantifiers.∙-idˡ LNL = ∙-idˡ
-Quantifiers.∙-unique LNL = ∙-unique
-Quantifiers.∙-cancelˡ LNL = ∙-cancelˡ
-Quantifiers.∙-comm LNL = ∙-comm
-Quantifiers.∙-assoc LNL = ∙-assoc
+Quantifier.0∙ (Quantifiers.Q LNL nonlin) = ω∙
+Quantifier.1∙ (Quantifiers.Q LNL nonlin) = ω∙
+Quantifier._≔_∙_ (Quantifiers.Q LNL nonlin) _ _ _ = ⊤
+Quantifier.∙-compute (Quantifiers.Q LNL nonlin) _ _ = yes (ω∙ , tt)
+Quantifier.∙-idˡ (Quantifiers.Q LNL nonlin) _ = tt
+Quantifier.∙-unique (Quantifiers.Q LNL nonlin) {x = ω∙} {x' = ω∙} _ _ = refl
+Quantifier.∙-cancelˡ (Quantifiers.Q LNL nonlin) {y = ω∙} {y' = ω∙} _ _ = refl
+Quantifier.∙-comm (Quantifiers.Q LNL nonlin) _ = tt
+Quantifier.∙-assoc (Quantifiers.Q LNL nonlin) _ _ = ω∙ , (_ , _)
+Quantifier.0∙ (Quantifiers.Q LNL lin) = 0∙
+Quantifier.1∙ (Quantifiers.Q LNL lin) = 1∙
+Quantifier._≔_∙_ (Quantifiers.Q LNL lin) = _≔_∙_
+Quantifier.∙-compute (Quantifiers.Q LNL lin) = ∙-compute
+Quantifier.∙-idˡ (Quantifiers.Q LNL lin) = ∙-idˡ
+Quantifier.∙-unique (Quantifiers.Q LNL lin) = ∙-unique
+Quantifier.∙-cancelˡ (Quantifiers.Q LNL lin) = ∙-cancelˡ
+Quantifier.∙-comm (Quantifiers.Q LNL lin) = ∙-comm
+Quantifier.∙-assoc (Quantifiers.Q LNL lin) = ∙-assoc

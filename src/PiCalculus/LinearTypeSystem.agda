@@ -28,6 +28,10 @@ infixr 4 _w_⊢_⊠_
 infixr 4 _w_∋_w_⊠_
 infixr 10 base chan recv send
 
+private
+  variable
+    n : ℕ
+
 -- Shapes
 
 record Tree (A : Set) : Set where
@@ -38,109 +42,98 @@ record Tree (A : Set) : Set where
     children : Σ ℕ (Vec (Tree A))
 
 Shape : Set
-Shape = Tree ℕ
+Shape = Tree (ℕ × I)
 
 Shapes : ℕ → Set
 Shapes = Vec Shape
 
 -- Shapes interpreted as multiplicities
 
-Card : Shape → Set
-Card < n & _ > = Vec I n
+Mult : Shape → Set
+Mult < n , i & _ > = Vec (Cs i) n
 
-Cards : ∀ {n} → Shapes n → Set
-Cards [] = ⊤
-Cards (xs -, x) = Cards xs × Card x
+Mults : ∀ {n} → Shapes n → Set
+Mults = All Mult
 
-Mult : (s : Shape) → Card s → Set
-Mult _ = All C
-
-Mults : ∀ {n} {ss : Shapes n} → Cards ss → Set
-Mults {ss = []} tt = ⊤
-Mults {ss = ss -, s} (cs , c) = Mults cs × Mult s c
-
-ε : ∀ {n} {ss : Shapes n} {cs : Cards ss} → Mults cs
-ε {ss = []} {tt} = tt
-ε {ss = _ -, _} {_ , _} = ε , replicate 0∙
+ε : ∀ {n} {ss : Shapes n} → Mults ss
+ε {ss = []} = []
+ε {ss = _ -, _} = ε -, Vec.replicate 0∙
 
 data Type : Shape → Set where
-  B[_]   : ℕ → Type < 0 & _ , [] >
-  C[_w_] : {s : Shape} {c : Card s} → Type s → Mult s c → Type < 2 & _ , s ∷ [] >
-  P[_&_] : {s r : Shape} → Type s → Type r → Type < 0 & _ , s ∷ r ∷ [] >
+  B[_]   : ℕ → Type < 0 , ∃I & _ , [] >
+  C[_w_] : ∀ {s i} → Type s → Mult s → Type < 2 , i & _ , s ∷ [] >
+  P[_&_] : ∀ {s r} → Type s → Type r → Type < 0 , ∃I & _ , s ∷ r ∷ [] >
 
 Types : ∀ {n} → Shapes n → Set
 Types = All Type
 
-private
-  variable
-    n : ℕ
-    M N : I
-    P Q : Scoped n
+data _w_∋_w_⊠_ : {ss : Shapes n} → Types ss → Mults ss
+               → {s : Shape} → Type s → Mult s
+               → Mults ss → Set where
 
-data _w_∋_w_⊠_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs
-               → {s : Shape} {c : Card s} → Type s → Mult s c
-               → Mults cs → Set where
+  zero : {ss : Shapes n} {γ : Types ss} {Γ : Mults ss}
+       → {s : Shape} {t : Type s} {ys zs : Mult s}
+       → {check : True (∙ᵥ-compute ys zs)}
+       → γ -, t w Γ -, proj₁ (toWitness check) ∋ t w ys ⊠ Γ -, zs
 
-  zero : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
-       → {s : Shape} {c : Card s} {t : Type s} {ys zs : Mult s c}
-       → {check : True (∙ᵥ-compute ys zs )}
-       → γ -, t w Γ , proj₁ (toWitness check) ∋ t w ys ⊠ Γ , zs
-
-  suc : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
-      → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-      → {s' : Shape} {c' : Card s'} {t' : Type s'} {m' : Mult s' c'}
+  suc : {ss : Shapes n} {γ : Types ss} {Γ Δ : Mults ss}
+      → {s : Shape} {t : Type s} {m : Mult s}
+      → {s' : Shape} {t' : Type s'} {m' : Mult s'}
       → γ w Γ ∋ t w m ⊠ Δ
-      → γ -, t' w Γ , m' ∋ t w m ⊠ Δ , m'
+      → γ -, t' w Γ -, m' ∋ t w m ⊠ Δ -, m'
 
-toFin : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
-      → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
+toFin : {ss : Shapes n} {γ : Types ss} {Γ Δ : Mults ss}
+      → {s : Shape} {t : Type s} {m : Mult s}
       → γ w Γ ∋ t w m ⊠ Δ
       → Fin n
 toFin zero = zero
 toFin (suc x) = suc (toFin x)
 
-_↑_↓ : C M → C N → All C (N ∷ M ∷ [])
+private
+  variable
+    i : I
+    ss : Shapes n
+    γ : Types ss
+    Γ Δ Ξ Θ : Mults ss
+    b : ℕ
+    s : Shape
+    t : Type s
+    m : Mult s
+    P Q : Scoped n
+
+_↑_↓ : Cs i → Cs i → Vec (Cs i) 2
 μ↑ ↑ μ↓ ↓ = μ↓ ∷ μ↑ ∷ []
 
-data _w_⊢_⊠_ : {ss : Shapes n} {cs : Cards ss}
-             → Types ss → Mults cs → Scoped n → Mults cs → Set where
+data _w_⊢_⊠_ : {ss : Shapes n} → Types ss → Mults ss → Scoped n → Mults ss → Set where
 
-  end : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ : Mults cs}
-      → γ w Γ ⊢ 𝟘 ⊠ Γ
+  end : γ w Γ ⊢ 𝟘 ⊠ Γ
 
-  base : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
-       → {t : ℕ}
-       → γ -, B[ t ] w Γ , [] ⊢ P     ⊠ Δ , []
-       ---------------------------------------
-       → γ           w Γ      ⊢ +[] P ⊠ Δ
+  base : γ -, B[ b ] w Γ -, [] ⊢ P     ⊠ Δ -, []
+       -----------------------------------------
+       → γ           w Γ       ⊢ +[] P ⊠ Δ
 
-  chan : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
-       → {s : Shape} {c : Card s} (t : Type s) (m : Mult s c)
-       → (μ : C M)
-       → γ -, C[ t w m ] w Γ , μ ↑ μ ↓ ⊢ P     ⊠ Δ , 0∙ ↑ 0∙ ↓
-       -------------------------------------------------------
-       → γ               w Γ           ⊢ new P ⊠ Δ
+  chan : (t : Type s) (m : Mult s) (μ : Cs i)
+       → γ -, C[ t w m ] w Γ -, μ ↑ μ ↓ ⊢ P     ⊠ Δ -, 0∙ ↑ 0∙ ↓
+       ---------------------------------------------------------
+       → γ               w Γ            ⊢ new P ⊠ Δ
 
-  recv : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Ξ Θ : Mults cs}
-       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (x : γ      w Γ      ∋ C[ t w m ] w (0∙ {M}) ↑ (1∙ {N}) ↓ ⊠ Ξ)
-       →      γ -, t w Ξ , m  ⊢ P                                  ⊠ Θ , replicate 0∙
-       ------------------------------------------------------------------------------
-       →      γ      w Γ      ⊢ toFin x ⦅⦆ P                       ⊠ Θ
+  recv : {t : Type s} {m : Mult s}
+       → (x : γ      w Γ       ∋ C[ t w m ] w 0∙ {i} ↑ 1∙ ↓ ⊠ Ξ)
+       →      γ -, t w Ξ -, m  ⊢ P                          ⊠ Θ -, Vec.replicate 0∙
+       ----------------------------------------------------------------------------
+       →      γ      w Γ       ⊢ toFin x ⦅⦆ P               ⊠ Θ
 
-  send : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ Θ : Mults cs}
-       → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-       → (x : γ w Γ ∋ C[ t w m ] w 1∙ {M} ↑ 0∙ {N} ↓ ⊠ Δ)
-       → (y : γ w Δ ∋ t          w  m                ⊠ Ξ)
-       →      γ w Ξ ⊢ P                              ⊠ Θ
-       -------------------------------------------------
-       →      γ w Γ ⊢ toFin x ⟨ toFin y ⟩ P          ⊠ Θ
+  send : {t : Type s} {m : Mult s}
+       → (x : γ w Γ ∋ C[ t w m ] w 1∙ {i} ↑ 0∙ ↓ ⊠ Δ)
+       → (y : γ w Δ ∋ t          w m             ⊠ Ξ)
+       →      γ w Ξ ⊢ P                          ⊠ Θ
+       ---------------------------------------------
+       →      γ w Γ ⊢ toFin x ⟨ toFin y ⟩ P      ⊠ Θ
 
-  comp : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Ξ : Mults cs}
-       → γ w Γ ⊢ P     ⊠ Δ
+  comp : γ w Γ ⊢ P     ⊠ Δ
        → γ w Δ ⊢ Q     ⊠ Ξ
        -------------------
        → γ w Γ ⊢ P ∥ Q ⊠ Ξ
 
-_w_⊢_ : {ss : Shapes n} {cs : Cards ss} → Types ss → Mults cs → Scoped n → Set
+_w_⊢_ : {ss : Shapes n} → Types ss → Mults ss → Scoped n → Set
 γ w Γ ⊢ P = γ w Γ ⊢ P ⊠ ε

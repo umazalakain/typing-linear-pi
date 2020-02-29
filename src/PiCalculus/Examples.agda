@@ -122,13 +122,13 @@ _ = _ , stop scope-end
 
 raw⊢_ : Raw tt → Set
 raw⊢ P with raw→scoped P
-(raw⊢ P) | just P' = [] w tt ⊢ P'
+(raw⊢ P) | just P' = [] w [] ⊢ P'
 (raw⊢ P) | nothing = L.Lift _ ⊤
 
 _ : raw⊢ (⦅new "x" ⦆ (+[ "a" ] ("x" ⟨ "a" ⟩ 𝟘)) ∥ ("x" ⦅ "b" ⦆ 𝟘))
 _ = chan B[ 0 ] [] 1∙
     (comp
-    (base (send  (suc zero) zero  end))
+    (base (send (suc zero) zero end))
     (recv zero end))
 
 _ : raw⊢ channel-over-channel₀
