@@ -1,6 +1,8 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
 open import Relation.Nullary using (Dec; yes; no)
+open import Relation.Nullary.Decidable using (fromWitness; toWitness)
 open import Function using (_∘_)
+open import Data.Empty using (⊥-elim)
 
 import Data.Unit as Unit
 import Data.Product as Product
@@ -42,7 +44,7 @@ record Quantifiers : Set₁ where
     Cs : I → Set
     Qs : ∀ i → Quantifier (Cs i)
 
-  infix 40 _-,_
+  infixl 40 _-,_
   pattern _-,_ xs x = _∷_ x xs
 
   module _ {i : I} where
@@ -85,3 +87,8 @@ record Quantifiers : Set₁ where
 
     ∙ᵥ-idʳ : (xs : Vec A n) → xs ≔ xs ∙ᵥ Vec.replicate 0∙
     ∙ᵥ-idʳ xs = ∙ᵥ-comm (∙ᵥ-idˡ xs)
+
+    ∙ᵥ-compute-unique : ∀ {xs ys zs : Vec A n} (p : xs ≔ ys ∙ᵥ zs) → xs ≡ proj₁ (toWitness (fromWitness {Q = ∙ᵥ-compute _ _} (_ , p)))
+    ∙ᵥ-compute-unique {ys = ys} {zs} p with ∙ᵥ-compute ys zs
+    ∙ᵥ-compute-unique {ys = ys} {zs} p | yes (xs' , p') = ∙ᵥ-unique p p'
+    ∙ᵥ-compute-unique {ys = ys} {zs} p | no ¬q = ⊥-elim (¬q (_ , p))

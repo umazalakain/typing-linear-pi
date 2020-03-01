@@ -31,54 +31,37 @@ open import PiCalculus.LinearTypeSystem Ω
 private
   variable
     n : ℕ
+    i i' : I
     P Q : Scoped n
 
-insert-card : {s : Shape} {ss : Shapes n}
-            → (i : Fin (suc n))
-            → Card s
-            → Cards ss
-            → Cards (Vec.insert ss i s)
-insert-card {ss = _} zero c' cs = cs , c'
-insert-card {ss = _ -, _} (suc i) c' (cs , c) = insert-card i c' cs , c
+insert-mult : {γ : PreCtx n} (i : Fin (suc n)) {t' : Type}
+            → Usage (i' , t') → Ctx γ → Ctx (Vec.insert γ i (i' , t'))
+insert-mult zero xs' Γ = Γ -, xs'
+insert-mult (suc i) xs' (Γ -, xs) = insert-mult i xs' Γ -, xs
 
-insert-type : {s : Shape} {ss : Shapes n}
-            → (i : Fin (suc n))
-            → Type s → Types ss → Types (Vec.insert ss i s)
-insert-type {ss = _} zero t' ts = ts -, t'
-insert-type {ss = _ -, _} (suc i) t' (ts -, t) = insert-type i t' ts -, t
-
-insert-mult : {s : Shape} {c : Card s} {ss : Shapes n} {cs : Cards ss}
-            → (i : Fin (suc n))
-            → Mult s c → Mults cs → Mults (insert-card {s = s} i c cs)
-insert-mult {ss = _} zero m' ms = ms , m'
-insert-mult {ss = _ -, _} (suc i) m' (ms , m) = insert-mult i m' ms , m
-
-∋-weaken : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
-         → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-         → {s' : Shape} {c' : Card s'} {t' : Type s'} {m' : Mult s' c'}
-         → (i : Fin (suc n))
-         → (  x : γ                 w Γ                 ∋ t' w m' ⊠ Θ)
-         → Σ[ y ∈ insert-type i t γ w insert-mult i m Γ ∋ t' w m' ⊠ insert-mult i m Θ ]
-           Fin.punchIn i (toFin x) ≡ toFin y
+∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx γ} {t t' : Type} {xs : Usage (i , t)} {xs' : Usage (i' , t')}
+         → (f : Fin (suc n))
+         → (  x : γ                      w Γ                  ∋ t' w xs' ⊠ Θ)
+         → Σ[ y ∈ Vec.insert γ f (i , t) w insert-mult f xs Γ ∋ t' w xs' ⊠ insert-mult f xs Θ ]
+           Fin.punchIn f (toFin x) ≡ toFin y
 ∋-weaken zero x = suc x , refl
 ∋-weaken (suc i) zero = zero , refl
 ∋-weaken (suc i) (suc x) with ∋-weaken i x
 ∋-weaken (suc i) (suc x) | x' , eq = suc x' , suc & eq
 
-⊢-weaken : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Θ : Mults cs}
-         → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-         → (i : Fin (suc n))
+⊢-weaken : {γ : PreCtx n} {Γ Θ : Ctx γ} {t : Type} {xs : Usage (i , t)}
+         → (f : Fin (suc n))
          → {P : Scoped n}
          → γ w Γ ⊢ P ⊠ Θ
-         → insert-type i t γ w insert-mult i m Γ ⊢ lift i P ⊠ insert-mult i m Θ
+         → Vec.insert γ f (i , t) w insert-mult f xs Γ ⊢ lift f P ⊠ insert-mult f xs Θ
 ⊢-weaken i {𝟘} end = end
 ⊢-weaken i {new P} (chan t m μ ⊢P) = chan t m μ (⊢-weaken (suc i) ⊢P)
 ⊢-weaken i {P ∥ Q} (comp ⊢P ⊢Q) = comp (⊢-weaken i ⊢P) (⊢-weaken i ⊢Q)
-⊢-weaken {t = t} {m = m} i {.(toFin x) ⦅⦆ P} (recv x ⊢P)
-  rewrite proj₂ (∋-weaken {t = t} {m = m} i x)
+⊢-weaken {t = t} {xs = xs} i {.(toFin x) ⦅⦆ P} (recv x ⊢P)
+  rewrite proj₂ (∋-weaken {t = t} {xs = xs} i x)
         = recv _ (⊢-weaken (suc i) ⊢P)
-⊢-weaken {t = t} {m = m} i {.(toFin x) ⟨ .(toFin y) ⟩ P} (send x y ⊢P)
-  rewrite proj₂ (∋-weaken {t = t} {m = m} i x)
-        | proj₂ (∋-weaken {t = t} {m = m} i y)
+⊢-weaken {t = t} {xs = xs} i {.(toFin x) ⟨ .(toFin y) ⟩ P} (send x y ⊢P)
+  rewrite proj₂ (∋-weaken {t = t} {xs = xs} i x)
+        | proj₂ (∋-weaken {t = t} {xs = xs} i y)
         = send _ _ (⊢-weaken i ⊢P)
 ⊢-weaken i {+[] P} (base ⊢P) = base (⊢-weaken (suc i) ⊢P)

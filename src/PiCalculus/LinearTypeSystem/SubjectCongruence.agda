@@ -15,6 +15,7 @@ import Data.Vec.Relation.Unary.All as All
 
 open Unit using (⊤; tt)
 open ℕ using (ℕ; zero; suc)
+open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
 open Product using (Σ-syntax; _×_; _,_; proj₁; proj₂)
@@ -38,7 +39,7 @@ open import PiCalculus.LinearTypeSystem.Strengthening Ω
 open import PiCalculus.LinearTypeSystem.Swapping Ω
 
 SubjectCongruence : Set
-SubjectCongruence = {n : ℕ} {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ : Mults cs}
+SubjectCongruence = {n : ℕ} {γ : PreCtx n} {Γ Δ : Ctx γ}
                   → {r : RecTree} {P Q : Scoped n}
                   → P ≅⟨ r ⟩ Q
                   → γ w Γ ⊢ P ⊠ Δ
@@ -49,10 +50,10 @@ private
     n : ℕ
     P Q : Scoped n
 
-comp-comm : {ss : Shapes n} {cs : Cards ss} {γ : Types ss}
-          → (Γ Ξ : Mults cs)
+comp-comm : {γ : PreCtx n} (Γ Ξ : Ctx γ)
           → γ w Γ ⊢ P ∥ Q ⊠ Ξ
           → γ w Γ ⊢ Q ∥ P ⊠ Ξ
+{-
 comp-comm Γ Ξ (comp ⊢P ⊢Q) with ⊢-⊆ ⊢P | ⊢-⊆ ⊢Q
 comp-comm Γ Ξ (comp ⊢P ⊢Q) | l , refl | r , refl = comp
   (⊢Q |> ⊢-frame (Ξ ⊎ l) refl            ∶ _ w (Ξ ⊎ l) ⊎ r ⊢ _ ⊠ (Ξ ⊎ l)
@@ -61,7 +62,7 @@ comp-comm Γ Ξ (comp ⊢P ⊢Q) | l , refl | r , refl = comp
         (trans (_⊎_ & refl ⊗ ⊎-comm _ _)
                (sym (⊎-assoc _ _ _))))   ∶ _ w (Ξ ⊎ r) ⊎ l ⊢ _ ⊠ (Ξ ⊎ l))
   (⊢P |> ⊢-frame _ refl                  ∶ _ w Ξ ⊎ l       ⊢ _ ⊠ Ξ)
-
+  -}
 
 subject-cong : SubjectCongruence
 subject-cong (stop comp-assoc) (comp ⊢P (comp ⊢Q ⊢R)) = comp (comp ⊢P ⊢Q) ⊢R
@@ -69,22 +70,20 @@ subject-cong (stop comp-symm) (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
 subject-cong (stop comp-end) (comp ⊢P end) = ⊢P
 subject-cong (stop scope-end) (chan t c ._ end) = end
 subject-cong (stop base-end) (base end) = end
-subject-cong (stop (scope-ext u)) (chan t c μ (comp ⊢P ⊢Q)) = comp
-  (⊢-strengthen zero u ⊢P)
-  (chan t c μ (subst (λ ● → _ w _ , ● ⊢ _ ⊠ _)
-                     (sym (⊢-unused _ u ⊢P)) ⊢Q))
-subject-cong (stop (base-ext u)) (base (comp ⊢P ⊢Q)) = comp
-  (⊢-strengthen zero u ⊢P)
-  (base (subst (λ ● → _ w _ , ● ⊢ _ ⊠ _)
-               (sym (⊢-unused _ u ⊢P)) ⊢Q))
+subject-cong (stop (scope-ext u)) (chan t c μ (comp {Δ = _ -, _} ⊢P ⊢Q))
+  rewrite sym (⊢-unused _ u ⊢P)
+  = comp (⊢-strengthen zero u ⊢P) (chan t c μ ⊢Q)
+subject-cong (stop (base-ext u)) (base (comp {Δ = _ -, _} ⊢P ⊢Q))
+  rewrite sym (⊢-unused _ u ⊢P)
+  = comp (⊢-strengthen zero u ⊢P) (base ⊢Q)
 subject-cong (stop scope-scope-comm) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan t₁ c₁ μ₁ (chan t c μ (⊢-swap zero ⊢P))
 subject-cong (stop scope-base-comm) (chan t c μ (base ⊢P)) = base (chan t c μ (⊢-swap zero ⊢P))
 subject-cong (stop base-base-comm) (base (base ⊢P)) = base (base (⊢-swap zero ⊢P))
 subject-cong (cong-symm (stop comp-assoc)) (comp (comp ⊢P ⊢Q) ⊢R) = comp ⊢P (comp ⊢Q ⊢R)
 subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
 subject-cong (cong-symm (stop comp-end)) ⊢P = comp ⊢P end
-subject-cong (cong-symm (stop scope-end)) end = chan B[ 0 ] [] (0∙ {∃I}) end
-subject-cong (cong-symm (stop base-end)) end = base {t = zero} end
+subject-cong (cong-symm (stop scope-end)) end = chan {i' = ∃I} {i = ∃I} B[ 0 ] [] 0∙ end
+subject-cong (cong-symm (stop base-end)) end = base {b = 0} end
 subject-cong (cong-symm (stop (scope-ext u))) (comp ⊢P (chan t c μ ⊢Q)) = chan t c μ (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop (base-ext u))) (comp ⊢P (base ⊢Q)) = base (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan _ _ _ (chan _ _ _ (subst (λ ● → _ w _ ⊢ ● ⊠ _) (swap-swap zero _) (⊢-swap zero ⊢P)))

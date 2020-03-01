@@ -1,5 +1,7 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; subst; cong; trans)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
+open import Relation.Nullary.Decidable using (toWitness; fromWitness)
+open import Relation.Nullary using (yes; no)
 open import Function.Reasoning
 open import Function using (_∘_)
 
@@ -13,11 +15,13 @@ import Data.Vec.Properties as Vecₚ
 import Data.Fin.Base as Fin
 import Data.Vec.Relation.Unary.All as All
 
+open Empty using (⊥-elim)
+open Unit using (tt)
 open Nat using (ℕ; zero; suc)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
-open Product using (Σ-syntax; _×_; _,_; proj₁; proj₂)
+open Product using (Σ-syntax; ∃-syntax; _×_; _,_; proj₁; proj₂)
 
 open import PiCalculus.Function
 import PiCalculus.Syntax
@@ -34,31 +38,39 @@ open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 private
   variable
     n : ℕ
+    i : I
+    γ : PreCtx n
+    t : Type
+    xs ys zs : Usage (i , t)
+    Γ Θ Δ Ξ : Ctx γ
     P Q : Scoped n
 
-∋-frame : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Θ : Mults cs}
-        → {s : Shape} {c : Card s} {t : Type s} {m : Mult s c}
-        → (Ξ : Mults cs)
-        → Θ ⊎ Δ ≡ Γ
-        → (x : γ w Γ ∋ t w m ⊠ Θ)
-        → Σ[ y ∈ γ w (Ξ ⊎ Δ) ∋ t w m ⊠ Ξ ]
+∋-frame : {γ : PreCtx n} {Γ Θ Δ Ξ Ψ : Ctx γ} {t : Type} {xs : Usage (i , t)}
+        → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
+        → (x : γ w Γ ∋ t w xs ⊠ Θ)
+        → Σ[ y ∈ γ w Ξ ∋ t w xs ⊠ Ψ ]
           toFin x ≡ toFin y
-∋-frame {Δ = Δ , l} (Ξ , n) eq zero
-  rewrite ⊎-cancelˡ-≡ (trans (Productₚ.,-injectiveˡ eq) (sym (⊎-idʳ _)))
-        | ⊎-idʳ Ξ
-        | +ᵥ-cancelˡ-≡ (Productₚ.,-injectiveʳ eq)
-        = zero , refl
-∋-frame (Ξ , m) eq (suc x) with ∋-frame Ξ (Productₚ.,-injectiveˡ eq) x
-∋-frame (Ξ , m) eq (suc x) | x' , p'
-  rewrite +ᵥ-cancelˡ-≡ (trans (Productₚ.,-injectiveʳ eq) (sym (+ᵥ-idʳ _)))
-        | +ᵥ-idʳ m
-        = suc x' , suc & p'
 
-⊢-frame : {ss : Shapes n} {cs : Cards ss} {γ : Types ss} {Γ Δ Θ : Mults cs}
-        → (Ξ : Mults cs)
-        → Θ ⊎ Δ ≡ Γ
-        → γ w Γ ⊢ P ⊠ Θ
-        → γ w (Ξ ⊎ Δ) ⊢ P ⊠ Ξ
+∋-frame {Γ = _ -, _} {_ -, ys} {_ -, _} {_ -, _} {Ψ -, _} {xs = xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero {check = check}) with ∙ᵥ-compute xs ys
+∋-frame {Γ = _ -, _} {_ -, ys} {_ -, _} {_ -, _} {Ψ -, _} {xs = xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero {check = tt}) | yes (_ , p)
+  rewrite ⊎-cancelˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) | ∙ᵥ-cancelˡ x≔ p | ∙ᵥ-compute-unique x'≔ = zero {check = fromWitness (_ , x'≔)} , refl
+∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x) with ∋-frame Γ≔ Ξ≔ x
+∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x) | (y≔ , eq)
+  rewrite ∙ᵥ-cancelˡ x≔ (∙ᵥ-idˡ _) | ∙ᵥ-unique x'≔ (∙ᵥ-idˡ xs) = suc y≔ , cong suc eq
+
+postulate
+  ⊢-frame : {γ : PreCtx n} {Γ Δ Θ Ξ Ψ : Ctx γ}
+          → Γ ≔ Δ ⊎ Θ → γ w Γ ⊢ P ⊠ Θ
+          → Ξ ≔ Δ ⊎ Ψ → γ w Ξ ⊢ P ⊠ Ψ
+
+{-
+⊢-frame {Ψ = Ψ} Γ≔ end Ξ≔ rewrite ⊎-cancelˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
+⊢-frame Γ≔ (base ⊢P) Ξ≔ = base (⊢-frame {Δ = _ -, []} (Γ≔ , _) ⊢P (Ξ≔ , _))
+⊢-frame Γ≔ (chan t m μ ⊢P) Ξ≔ = chan t m μ (⊢-frame {Δ = _ -, μ ↑ μ ↓} (Γ≔  , (_ , ∙-idʳ _) , ∙-idʳ _ ) ⊢P (Ξ≔ , (_ , (∙-idʳ _)) , (∙-idʳ _)))
+⊢-frame Γ≔ (recv x ⊢P) Ξ≔ = {!!}
+⊢-frame Γ≔ (send x y ⊢P) Ξ≔ = {!!}
+⊢-frame Γ≔ (comp ⊢P ⊢Q) Ξ≔ = comp (⊢-frame (proj₂ (⊢-⊎ ⊢P)) ⊢P _) (⊢-frame (proj₂ (⊢-⊎ ⊢Q)) ⊢Q _)
+
 ⊢-frame Ξ eq end rewrite ⊎-cancelˡ-≡ (trans eq (sym (⊎-idʳ _))) | ⊎-idʳ Ξ = end
 ⊢-frame Ξ eq (base ⊢P) = base (⊢-frame (Ξ , _) (_,_ & eq ⊗ refl) ⊢P)
 ⊢-frame Ξ eq (chan t m μ ⊢P) with ⊢-frame (Ξ , 0∙ ↑ 0∙ ↓) (_,_ & eq ⊗ +ᵥ-idˡ _) ⊢P
@@ -95,3 +107,4 @@ private
       ≡˘⟨ cong (λ ● → _ ⊎ ●) (⊎-cancelˡ-≡ (trans eq (⊎-assoc _ _ _))) ⟩
     (Ξ ⊎ _)
       ∎)
+-}
