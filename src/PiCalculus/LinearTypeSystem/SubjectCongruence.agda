@@ -1,9 +1,6 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; cong; trans; inspect; [_])
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; cong; trans)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Relation.Nullary using (yes; no)
-open import Function.Reasoning
 
 import Data.Product as Product
 import Data.Product.Properties as Productₚ
@@ -50,23 +47,17 @@ private
     n : ℕ
     P Q : Scoped n
 
-comp-comm : {γ : PreCtx n} (Γ Ξ : Ctx γ)
+comp-comm : {γ : PreCtx n} {Γ Ξ : Ctx γ}
           → γ w Γ ⊢ P ∥ Q ⊠ Ξ
           → γ w Γ ⊢ Q ∥ P ⊠ Ξ
-{-
-comp-comm Γ Ξ (comp ⊢P ⊢Q) with ⊢-⊆ ⊢P | ⊢-⊆ ⊢Q
-comp-comm Γ Ξ (comp ⊢P ⊢Q) | l , refl | r , refl = comp
-  (⊢Q |> ⊢-frame (Ξ ⊎ l) refl            ∶ _ w (Ξ ⊎ l) ⊎ r ⊢ _ ⊠ (Ξ ⊎ l)
-      |> subst (λ ●                      → _ w ●           ⊢ _ ⊠ (Ξ ⊎ l))
-        (trans (⊎-assoc _ _ _)
-        (trans (_⊎_ & refl ⊗ ⊎-comm _ _)
-               (sym (⊎-assoc _ _ _))))   ∶ _ w (Ξ ⊎ r) ⊎ l ⊢ _ ⊠ (Ξ ⊎ l))
-  (⊢P |> ⊢-frame _ refl                  ∶ _ w Ξ ⊎ l       ⊢ _ ⊠ Ξ)
-  -}
+comp-comm (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q
+comp-comm (comp ⊢P ⊢Q) | _ , P≔ | _ , Q≔ =
+  let _ , (Q'≔ , P'≔) = ⊎-assoc (⊎-comm P≔) Q≔ in
+  comp (⊢-frame Q≔ Q'≔ ⊢Q) (⊢-frame P≔ (⊎-comm P'≔) ⊢P)
 
 subject-cong : SubjectCongruence
 subject-cong (stop comp-assoc) (comp ⊢P (comp ⊢Q ⊢R)) = comp (comp ⊢P ⊢Q) ⊢R
-subject-cong (stop comp-symm) (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
+subject-cong (stop comp-symm) (comp ⊢P ⊢Q) = comp-comm (comp ⊢P ⊢Q)
 subject-cong (stop comp-end) (comp ⊢P end) = ⊢P
 subject-cong (stop scope-end) (chan t c ._ end) = end
 subject-cong (stop base-end) (base end) = end
@@ -80,7 +71,7 @@ subject-cong (stop scope-scope-comm) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) =
 subject-cong (stop scope-base-comm) (chan t c μ (base ⊢P)) = base (chan t c μ (⊢-swap zero ⊢P))
 subject-cong (stop base-base-comm) (base (base ⊢P)) = base (base (⊢-swap zero ⊢P))
 subject-cong (cong-symm (stop comp-assoc)) (comp (comp ⊢P ⊢Q) ⊢R) = comp ⊢P (comp ⊢Q ⊢R)
-subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm _ _ (comp ⊢P ⊢Q)
+subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm (comp ⊢P ⊢Q)
 subject-cong (cong-symm (stop comp-end)) ⊢P = comp ⊢P end
 subject-cong (cong-symm (stop scope-end)) end = chan {i' = ∃I} {i = ∃I} B[ 0 ] [] 0∙ end
 subject-cong (cong-symm (stop base-end)) end = base {b = 0} end

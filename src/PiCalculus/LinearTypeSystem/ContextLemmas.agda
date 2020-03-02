@@ -76,6 +76,12 @@ _≔_⊎_ (Γ -, xs) (Δ -, ys) (Ξ -, zs) = Γ ≔ Δ ⊎ Ξ × xs ≔ ys ∙�
         → m ≔ proj₁ (⊎-assoc (⊎-comm t) (⊎-comm b)) ⊎ rr
 ⊎-trans t b = ⊎-comm (proj₁ (proj₂ (⊎-assoc (⊎-comm t) (⊎-comm b))))
 
+⊎-comp : {γ : PreCtx n} {Γ Δₗ Δᵣ Δ Ξ Θ : Ctx γ}
+       → Γ ≔ Δₗ ⊎ Ξ → Ξ ≔ Δᵣ ⊎ Θ
+       → Γ ≔ Δ  ⊎ Θ → Δ ≔ Δₗ ⊎ Δᵣ
+⊎-comp l≔ r≔ Γ≔ with ⊎-assoc (⊎-comm l≔) (⊎-comm r≔)
+⊎-comp l≔ r≔ Γ≔ | _ , Γ'≔ , R'≔ rewrite ⊎-cancelˡ Γ≔ (⊎-comm Γ'≔) = ⊎-comm R'≔
+
 ⊎-tail : {xs ys zs : Ctx (γ -, (i , t))}
        → xs ≔ ys ⊎ zs → All.tail xs ≔ All.tail ys ⊎ All.tail zs
 ⊎-tail {xs = _ -, _} {_ -, _} {_ -, _} (tail , _) = tail
