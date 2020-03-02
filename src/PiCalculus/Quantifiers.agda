@@ -24,15 +24,21 @@ private
 
 record Quantifier (Q : Set) : Set₁ where
   field
-    0∙        : Q
-    1∙        : Q
-    _≔_∙_     : Q → Q → Q → Set
-    ∙-compute : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
-    ∙-idˡ     : ∀ x           → x ≔ 0∙ ∙ x
-    ∙-unique  : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
-    ∙-cancelˡ : ∀ {x y y' z}  → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
-    ∙-comm    : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y
-    ∙-assoc   : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
+    0∙         : Q
+    1∙         : Q
+    _≔_∙_      : Q → Q → Q → Set
+
+    -- Given two operands, we can decide whether a third one exists
+    ∙-compute  : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
+    ∙-computeˡ : ∀ x z         → Dec (∃[ y ] (x ≔ y ∙ z))
+
+    -- If a third operand exists, it must be unique
+    ∙-unique   : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
+    ∙-uniqueˡ  : ∀ {x y y' z}  → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
+
+    ∙-idˡ      : ∀ x           → x ≔ 0∙ ∙ x
+    ∙-comm     : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
+    ∙-assoc    : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
 
   ∙-idʳ : ∀ x → x ≔ x ∙ 0∙
   ∙-idʳ x = ∙-comm (∙-idˡ x)
@@ -62,6 +68,13 @@ record Quantifiers : Set₁ where
     ... | yes (_ , ps) | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
     ... | no ¬ps       | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
+    ∙ᵥ-computeˡ : (xs zs : Vec A n) → Dec (∃[ ys ] (xs ≔ ys ∙ᵥ zs))
+    ∙ᵥ-computeˡ [] [] = yes ([] , tt)
+    ∙ᵥ-computeˡ (xs -, x) (zs -, z) with ∙ᵥ-computeˡ xs zs | ∙-computeˡ x z
+    ... | yes (_ , ps) | yes (_ , p) = yes ((_ -, _) , (ps , p))
+    ... | yes (_ , ps) | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
+    ... | no ¬ps       | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
+
     ∙ᵥ-idˡ : (xs : Vec A n) → xs ≔ Vec.replicate 0∙ ∙ᵥ xs
     ∙ᵥ-idˡ [] = tt
     ∙ᵥ-idˡ (xs -, x) = ∙ᵥ-idˡ xs , ∙-idˡ x
@@ -71,10 +84,10 @@ record Quantifiers : Set₁ where
     ∙ᵥ-unique {xs = _ -, _} {_ -, _} {_ -, _} {_ -, _} (ps , p) (qs , q)
       rewrite ∙ᵥ-unique ps qs | ∙-unique p q = refl
 
-    ∙ᵥ-cancelˡ : {xs ys ys' zs : Vec A n} → xs ≔ ys' ∙ᵥ zs → xs ≔ ys ∙ᵥ zs → ys' ≡ ys
-    ∙ᵥ-cancelˡ {xs = []} {[]} {[]} {[]} tt tt = refl
-    ∙ᵥ-cancelˡ {xs = _ -, _} {_ -, _} {_ -, _} {_ -, _} (ps , p) (qs , q)
-      rewrite ∙ᵥ-cancelˡ ps qs | ∙-cancelˡ p q = refl
+    ∙ᵥ-uniqueˡ : {xs ys ys' zs : Vec A n} → xs ≔ ys' ∙ᵥ zs → xs ≔ ys ∙ᵥ zs → ys' ≡ ys
+    ∙ᵥ-uniqueˡ {xs = []} {[]} {[]} {[]} tt tt = refl
+    ∙ᵥ-uniqueˡ {xs = _ -, _} {_ -, _} {_ -, _} {_ -, _} (ps , p) (qs , q)
+      rewrite ∙ᵥ-uniqueˡ ps qs | ∙-uniqueˡ p q = refl
 
     ∙ᵥ-comm : {xs ys zs : Vec A n} → xs ≔ ys ∙ᵥ zs → xs ≔ zs ∙ᵥ ys
     ∙ᵥ-comm {xs = []} {[]} {[]} tt = tt

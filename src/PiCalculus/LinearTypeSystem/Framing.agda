@@ -52,18 +52,18 @@ private
           toFin y ≡ toFin x
 
 ∋-frame {Γ = _ -, _} {_ -, ys} {_ -, _} {_ -, _} {Ψ -, _} {xs = xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero {check = check})
-  rewrite ⊎-cancelˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ)
-  | ∙ᵥ-cancelˡ x≔ (proj₂ (toWitness check)) | ∙ᵥ-compute-unique x'≔
+  rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ)
+  | ∙ᵥ-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙ᵥ-compute-unique x'≔
   = zero {check = fromWitness (_ , x'≔)} , refl
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x) with ∋-frame Γ≔ Ξ≔ x
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x) | (y≔ , eq)
-  rewrite ∙ᵥ-cancelˡ x≔ (∙ᵥ-idˡ _) | ∙ᵥ-unique x'≔ (∙ᵥ-idˡ xs) = suc y≔ , cong suc eq
+  rewrite ∙ᵥ-uniqueˡ x≔ (∙ᵥ-idˡ _) | ∙ᵥ-unique x'≔ (∙ᵥ-idˡ xs) = suc y≔ , cong suc eq
 
 ⊢-frame : {γ : PreCtx n} {Γ Δ Θ Ξ Ψ : Ctx γ}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
         → γ w Γ ⊢ P ⊠ Θ → γ w Ξ ⊢ P ⊠ Ψ
 
-⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-cancelˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
+⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
 ⊢-frame Γ≔ Ξ≔ (base ⊢P) = base (⊢-frame {Δ = _ -, []} (Γ≔ , _) (Ξ≔ , _) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
   = chan t m μ (⊢-frame {Δ = _ -, μ ↑ μ ↓}
