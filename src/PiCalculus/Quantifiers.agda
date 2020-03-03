@@ -25,8 +25,12 @@ private
 record Quantifier (Q : Set) : Set₁ where
   field
     0∙         : Q
+    +∙         : Q
+    -∙         : Q
     1∙         : Q
     _≔_∙_      : Q → Q → Q → Set
+
+    ∙-split    : 1∙ ≔ +∙ ∙ -∙
 
     -- Given two operands, we can decide whether a third one exists
     ∙-compute  : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
@@ -43,6 +47,11 @@ record Quantifier (Q : Set) : Set₁ where
   ∙-idʳ : ∀ x → x ≔ x ∙ 0∙
   ∙-idʳ x = ∙-comm (∙-idˡ x)
 
+  ∙-compute-unique : ∀ {x y z} (p : x ≔ y ∙ z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙-compute _ _} (_ , p)))
+  ∙-compute-unique {y = y} {z} p with ∙-compute y z
+  ∙-compute-unique {y = y} {z} p | yes (x' , p') = ∙-unique p p'
+  ∙-compute-unique {y = y} {z} p | no ¬q = ⊥-elim (¬q (_ , p))
+
 record Quantifiers : Set₁ where
   field
     I  : Set
@@ -54,54 +63,77 @@ record Quantifiers : Set₁ where
   pattern _-,_ xs x = _∷_ x xs
 
   module _ {i : I} where
-    A = Cs i
     open Quantifier (Qs i) public
 
-    _≔_∙ᵥ_ : Vec A n → Vec A n → Vec A n → Set
-    [] ≔ [] ∙ᵥ [] = ⊤
-    xs -, x ≔ ys -, y ∙ᵥ zs -, z = xs ≔ ys ∙ᵥ zs × (x ≔ y ∙ z)
+  private
+    Ctx : Vec I n → Set
+    Ctx = All Cs
 
-    ∙ᵥ-compute : (ys zs : Vec A n) → Dec (∃[ xs ] (xs ≔ ys ∙ᵥ zs))
-    ∙ᵥ-compute [] [] = yes ([] , tt)
-    ∙ᵥ-compute (ys -, y) (zs -, z) with ∙ᵥ-compute ys zs | ∙-compute y z
-    ... | yes (_ , ps) | yes (_ , p) = yes ((_ -, _) , (ps , p))
-    ... | yes (_ , ps) | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
-    ... | no ¬ps       | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
+    variable
+      i : I
+      is : Vec I n
 
-    ∙ᵥ-computeˡ : (xs zs : Vec A n) → Dec (∃[ ys ] (xs ≔ ys ∙ᵥ zs))
-    ∙ᵥ-computeˡ [] [] = yes ([] , tt)
-    ∙ᵥ-computeˡ (xs -, x) (zs -, z) with ∙ᵥ-computeˡ xs zs | ∙-computeˡ x z
-    ... | yes (_ , ps) | yes (_ , p) = yes ((_ -, _) , (ps , p))
-    ... | yes (_ , ps) | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
-    ... | no ¬ps       | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
-    ∙ᵥ-idˡ : (xs : Vec A n) → xs ≔ Vec.replicate 0∙ ∙ᵥ xs
-    ∙ᵥ-idˡ [] = tt
-    ∙ᵥ-idˡ (xs -, x) = ∙ᵥ-idˡ xs , ∙-idˡ x
+  _≔_⊎_ : Ctx is → Ctx is → Ctx is → Set
+  _≔_⊎_ [] [] [] = ⊤
+  _≔_⊎_ (Γ -, x) (Δ -, y) (Ξ -, z) = Γ ≔ Δ ⊎ Ξ × x ≔ y ∙ z
 
-    ∙ᵥ-unique : {xs xs' ys zs : Vec A n} → xs' ≔ ys ∙ᵥ zs → xs ≔ ys ∙ᵥ zs → xs' ≡ xs
-    ∙ᵥ-unique {xs = []} {[]} {[]} {[]} tt tt = refl
-    ∙ᵥ-unique {xs = _ -, _} {_ -, _} {_ -, _} {_ -, _} (ps , p) (qs , q)
-      rewrite ∙ᵥ-unique ps qs | ∙-unique p q = refl
+  ε : {is : Vec I n} → Ctx is
+  ε {is = []} = []
+  ε {is = _ -, _} = ε -, 0∙
 
-    ∙ᵥ-uniqueˡ : {xs ys ys' zs : Vec A n} → xs ≔ ys' ∙ᵥ zs → xs ≔ ys ∙ᵥ zs → ys' ≡ ys
-    ∙ᵥ-uniqueˡ {xs = []} {[]} {[]} {[]} tt tt = refl
-    ∙ᵥ-uniqueˡ {xs = _ -, _} {_ -, _} {_ -, _} {_ -, _} (ps , p) (qs , q)
-      rewrite ∙ᵥ-uniqueˡ ps qs | ∙-uniqueˡ p q = refl
+  ⊎-compute : (Δ Ξ : Ctx is) → Dec (∃[ Γ ] (Γ ≔ Δ ⊎ Ξ))
+  ⊎-compute [] [] = yes ([] , tt)
+  ⊎-compute (Δ -, y) (Ξ -, z) with ⊎-compute Δ Ξ | ∙-compute y z
+  ... | yes (_ , ps)     | yes (_ , p) = yes ((_ -, _) , (ps , p))
+  ... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
+  ... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
-    ∙ᵥ-comm : {xs ys zs : Vec A n} → xs ≔ ys ∙ᵥ zs → xs ≔ zs ∙ᵥ ys
-    ∙ᵥ-comm {xs = []} {[]} {[]} tt = tt
-    ∙ᵥ-comm {xs = _ -, _} {_ -, _} {_ -, _} (ps , p) = ∙ᵥ-comm ps , ∙-comm p
+  ⊎-computeˡ : (Γ Ξ : Ctx is) → Dec (∃[ Δ ] (Γ ≔ Δ ⊎ Ξ))
+  ⊎-computeˡ [] [] = yes ([] , tt)
+  ⊎-computeˡ (Γ -, x) (Ξ -, z) with ⊎-computeˡ Γ Ξ | ∙-computeˡ x z
+  ... | yes (_ , ps)     | yes (_ , p) = yes ((_ -, _) , (ps , p))
+  ... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
+  ... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
-    ∙ᵥ-assoc : {m l r ll lr : Vec A n} → m ≔ l ∙ᵥ r → l ≔ ll ∙ᵥ lr → ∃[ r' ] (m ≔ ll ∙ᵥ r' × r' ≔ lr ∙ᵥ r)
-    ∙ᵥ-assoc {m = []} {[]} {[]} {[]} {[]} tt tt = [] , tt , tt
-    ∙ᵥ-assoc {m = _ -, _} {_ -, _} {_ -, _} {_ -, _} {_ -, _} (ms , m) (ls , l) with ∙ᵥ-assoc ms ls | ∙-assoc m l
-    ... | (_ , ms' , rs') | (_ , m' , r') = _ , ((ms' , m') , (rs' , r'))
+  ⊎-idˡ : (Γ : Ctx is) → Γ ≔ ε ⊎ Γ
+  ⊎-idˡ [] = tt
+  ⊎-idˡ (Γ -, x) = ⊎-idˡ Γ , ∙-idˡ x
 
-    ∙ᵥ-idʳ : (xs : Vec A n) → xs ≔ xs ∙ᵥ Vec.replicate 0∙
-    ∙ᵥ-idʳ xs = ∙ᵥ-comm (∙ᵥ-idˡ xs)
+  ⊎-unique : {Γ Γ' Δ Ξ  : Ctx is} → Γ' ≔ Δ ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Γ' ≡ Γ
+  ⊎-unique {Γ = []} {[]} {[]} {[]} tt tt = refl
+  ⊎-unique {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Γ'≔ , x'≔) (Γ≔ , x≔)
+    rewrite ⊎-unique Γ'≔ Γ≔ | ∙-unique x'≔ x≔ = refl
 
-    ∙ᵥ-compute-unique : ∀ {xs ys zs : Vec A n} (p : xs ≔ ys ∙ᵥ zs) → xs ≡ proj₁ (toWitness (fromWitness {Q = ∙ᵥ-compute _ _} (_ , p)))
-    ∙ᵥ-compute-unique {ys = ys} {zs} p with ∙ᵥ-compute ys zs
-    ∙ᵥ-compute-unique {ys = ys} {zs} p | yes (xs' , p') = ∙ᵥ-unique p p'
-    ∙ᵥ-compute-unique {ys = ys} {zs} p | no ¬q = ⊥-elim (¬q (_ , p))
+  ⊎-uniqueˡ : {Γ Δ Δ' Ξ  : Ctx is} → Γ ≔ Δ' ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Δ' ≡ Δ
+  ⊎-uniqueˡ {Γ = []} {[]} {[]} {[]} tt tt = refl
+  ⊎-uniqueˡ {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Δ'≔ , y'≔) (Δ≔ , y≔)
+    rewrite ⊎-uniqueˡ Δ'≔ Δ≔ | ∙-uniqueˡ y'≔ y≔ = refl
+
+  ⊎-comm : {Γ Δ Ξ : Ctx is} → Γ ≔ Δ ⊎ Ξ → Γ ≔ Ξ ⊎ Δ
+  ⊎-comm {Γ = []} {[]} {[]} tt = tt
+  ⊎-comm {Γ = _ -, _} {_ -, _} {_ -, _} (Γ≔ , x≔) = ⊎-comm Γ≔ , ∙-comm x≔
+
+  ⊎-assoc : {Γₘ Γₗ Γᵣ Γₗₗ Γₗᵣ : Ctx is}
+          → Γₘ ≔ Γₗ ⊎ Γᵣ → Γₗ ≔ Γₗₗ ⊎ Γₗᵣ → ∃[ Γᵣ' ] (Γₘ ≔ Γₗₗ ⊎ Γᵣ' × Γᵣ' ≔ Γₗᵣ ⊎ Γᵣ)
+  ⊎-assoc {Γₘ = []} {[]} {[]} {[]} {[]}  tt tt = [] , tt , tt
+  ⊎-assoc {Γₘ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {_ -, _} (Γₘ≔ , xₘ≔) (Γₗ≔ , xₗ≔) with ⊎-assoc Γₘ≔ Γₗ≔ | ∙-assoc xₘ≔ xₗ≔
+  ... | (_ , Γₘ'≔ , Γᵣ'≔)  | (_ , xₘ'≔ , xᵣ'≔) = _ , ((Γₘ'≔ , xₘ'≔) , (Γᵣ'≔ , xᵣ'≔))
+
+  ⊎-trans : {m l r rl rr : Ctx is}
+          → (t : m ≔ l ⊎ r) → (b : r ≔ rl ⊎ rr)
+          → m ≔ proj₁ (⊎-assoc (⊎-comm t) (⊎-comm b)) ⊎ rr
+  ⊎-trans t b = ⊎-comm (proj₁ (proj₂ (⊎-assoc (⊎-comm t) (⊎-comm b))))
+
+  ⊎-comp : {Γ Δₗ Δᵣ Δ Ξ Θ : Ctx is}
+         → Γ ≔ Δₗ ⊎ Ξ → Ξ ≔ Δᵣ ⊎ Θ
+         → Γ ≔ Δ  ⊎ Θ → Δ ≔ Δₗ ⊎ Δᵣ
+  ⊎-comp l≔ r≔ Γ≔ with ⊎-assoc (⊎-comm l≔) (⊎-comm r≔)
+  ⊎-comp l≔ r≔ Γ≔ | _ , Γ'≔ , R'≔ rewrite ⊎-uniqueˡ Γ≔ (⊎-comm Γ'≔) = ⊎-comm R'≔
+
+  ⊎-tail : {x y z : Ctx (is -, i)}
+         → x ≔ y ⊎ z → All.tail x ≔ All.tail y ⊎ All.tail z
+  ⊎-tail {x = _ -, _} {_ -, _} {_ -, _} (tail , _) = tail
+
+  ⊎-idʳ : (Γ : Ctx is) → Γ ≔ Γ ⊎ ε
+  ⊎-idʳ Γ = ⊎-comm (⊎-idˡ Γ)

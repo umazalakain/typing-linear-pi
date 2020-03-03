@@ -35,14 +35,15 @@ open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 private
   variable
     n : ℕ
+    is : Vec I n
     P Q : Scoped n
 
-delete-mult : {γ : PreCtx (suc n)} → Ctx γ → (i : Fin (suc n)) → Ctx (Vec.remove γ i)
+delete-mult : Ctx is → (i : Fin (suc n)) → Ctx (Vec.remove is i)
 delete-mult (Γ -, _) zero = Γ
 delete-mult (Γ -, ys -, xs) (suc i) = delete-mult (Γ -, ys) i -, xs
 
-∋-strengthen : {γ : PreCtx (suc n)} {Γ Θ : Ctx γ}
-             → {i' : I} {t' : Type} {m' : Usage (i' , t')}
+∋-strengthen : {γ : PreCtx (suc n)} {is : Vec I (suc n)} {Γ Θ : Ctx is}
+             → {i' : I} {t' : Type} {m' : Cs i'}
              → (i : Fin (suc n))
              → (  x : γ               w Γ               ∋ t' w m' ⊠ Θ)
              → (i≢x : i ≢ toFin x)
@@ -50,22 +51,22 @@ delete-mult (Γ -, ys -, xs) (suc i) = delete-mult (Γ -, ys) i -, xs
                Fin.punchOut i≢x ≡ toFin y
 ∋-strengthen zero zero i≢x = ⊥-elim (i≢x refl)
 ∋-strengthen zero (suc x) i≢x = x , refl
-∋-strengthen {Γ = _ -, _ -, _} (suc i) zero i≢x = zero , refl
-∋-strengthen {Γ = _ -, _ -, _} (suc i) (suc x) i≢x with ∋-strengthen i x (i≢x ∘ cong suc)
-∋-strengthen {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} (suc i) (suc x) i≢x | x' , eq = suc x' , cong suc eq
+∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) zero i≢x = zero , refl
+∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) (suc x) i≢x with ∋-strengthen i x (i≢x ∘ cong suc)
+∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) (suc x) i≢x | x' , eq = suc x' , cong suc eq
 
-⊢-strengthen : {γ : PreCtx (suc n)} {Γ Θ : Ctx γ}
+⊢-strengthen : {γ : PreCtx (suc n)} {is : Vec I (suc n)} {Γ Θ : Ctx is}
              → {P : Scoped (suc n)}
              → (i : Fin (suc n))
              → (uP : Unused i P)
              → γ w Γ ⊢ P ⊠ Θ
              → Vec.remove γ i w delete-mult Γ i ⊢ lower i P uP ⊠ delete-mult Θ i
 ⊢-strengthen i uP end = end
-⊢-strengthen {Γ = _ -, _} {Θ = _ -, _} i uP (base ⊢P)
+⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (base ⊢P)
   = base (⊢-strengthen (suc i) uP ⊢P)
-⊢-strengthen {Γ = _ -, _} {Θ = _ -, _} i uP (chan t m μ ⊢P)
+⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (chan t m μ ⊢P)
   = chan t m μ (⊢-strengthen (suc i) uP ⊢P)
-⊢-strengthen {Γ = _ -, _} {Θ = _ -, _} i (i≢x , uP) (recv {Ξ = _ -, _} x ⊢P)
+⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i (i≢x , uP) (recv {Ξ = _ -, _} x ⊢P)
   rewrite proj₂ (∋-strengthen i x i≢x)
   = recv _ (⊢-strengthen (suc i) uP ⊢P)
 ⊢-strengthen {γ = _ -, _} i (i≢x , i≢y , uP) (send x y ⊢P)

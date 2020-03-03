@@ -39,13 +39,14 @@ private
   variable
     n : ℕ
     i : I
+    is : Vec I n
     γ : PreCtx n
     t : Type
-    xs ys zs : Usage (i , t)
-    Γ Θ Δ Ξ : Ctx γ
+    xs ys zs : Cs i
+    Γ Θ Δ Ξ : Ctx is
     P Q : Scoped n
 
-∋-frame : {γ : PreCtx n} {Γ Θ Δ Ξ Ψ : Ctx γ} {t : Type} {xs : Usage (i , t)}
+∋-frame : {γ : PreCtx n} {Γ Θ Δ Ξ Ψ : Ctx is} {t : Type} {xs : Cs i}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
         → (x : γ w Γ ∋ t w xs ⊠ Θ)
         → Σ[ y ∈ γ w Ξ ∋ t w xs ⊠ Ψ ]
@@ -53,22 +54,20 @@ private
 
 ∋-frame {Γ = _ -, _} {_ -, ys} {_ -, _} {_ -, _} {Ψ -, _} {xs = xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero {check = check})
   rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ)
-  | ∙ᵥ-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙ᵥ-compute-unique x'≔
+  | ∙-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙-compute-unique x'≔
   = zero {check = fromWitness (_ , x'≔)} , refl
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x) with ∋-frame Γ≔ Ξ≔ x
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x) | (y≔ , eq)
-  rewrite ∙ᵥ-uniqueˡ x≔ (∙ᵥ-idˡ _) | ∙ᵥ-unique x'≔ (∙ᵥ-idˡ xs) = suc y≔ , cong suc eq
+  rewrite ∙-uniqueˡ x≔ (∙-idˡ _) | ∙-unique x'≔ (∙-idˡ xs) = suc y≔ , cong suc eq
 
-⊢-frame : {γ : PreCtx n} {Γ Δ Θ Ξ Ψ : Ctx γ}
+⊢-frame : {γ : PreCtx n} {Γ Δ Θ Ξ Ψ : Ctx is}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
         → γ w Γ ⊢ P ⊠ Θ → γ w Ξ ⊢ P ⊠ Ψ
 
 ⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
-⊢-frame Γ≔ Ξ≔ (base ⊢P) = base (⊢-frame {Δ = _ -, []} (Γ≔ , _) (Ξ≔ , _) ⊢P)
+⊢-frame Γ≔ Ξ≔ (base ⊢P) = base (⊢-frame {Δ = _ -, 0∙} (Γ≔ , ∙-idˡ _) (Ξ≔ , ∙-idˡ _) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
-  = chan t m μ (⊢-frame {Δ = _ -, μ ↑ μ ↓}
-                        (Γ≔ , (_ , ∙-idʳ _) , ∙-idʳ _ )
-                        (Ξ≔ , (_ , ∙-idʳ _) , ∙-idʳ _) ⊢P)
+  = chan t m μ (⊢-frame {Δ = _ -, μ} (Γ≔ , ∙-idʳ _) (Ξ≔ , ∙-idʳ _) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (recv x ⊢P) with ∋-⊎ x | ⊢-⊎ ⊢P
 ⊢-frame Γ≔ Ξ≔ (recv x ⊢P) | _ , x≔ | (_ -, _) , (P≔ , xs≔) =
   let xP≔           = ⊎-comp x≔ P≔ Γ≔

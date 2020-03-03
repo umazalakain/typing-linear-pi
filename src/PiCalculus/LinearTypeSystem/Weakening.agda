@@ -32,36 +32,32 @@ private
   variable
     n : ℕ
     i i' : I
+    is : Vec I n
     P Q : Scoped n
 
-insert-mult : {γ : PreCtx n} (i : Fin (suc n)) {t' : Type}
-            → Usage (i' , t') → Ctx γ → Ctx (Vec.insert γ i (i' , t'))
+insert-mult : (i : Fin (suc n)) → Cs i' → Ctx is → Ctx (Vec.insert is i i')
 insert-mult zero xs' Γ = Γ -, xs'
 insert-mult (suc i) xs' (Γ -, xs) = insert-mult i xs' Γ -, xs
 
-∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx γ} {t t' : Type} {xs : Usage (i , t)} {xs' : Usage (i' , t')}
+∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx is} {t t' : Type} {xs : Cs i} {xs' : Cs i'}
          → (f : Fin (suc n))
          → (  x : γ                      w Γ                  ∋ t' w xs' ⊠ Θ)
-         → Σ[ y ∈ Vec.insert γ f (i , t) w insert-mult f xs Γ ∋ t' w xs' ⊠ insert-mult f xs Θ ]
+         → Σ[ y ∈ Vec.insert γ f t w insert-mult f xs Γ ∋ t' w xs' ⊠ insert-mult f xs Θ ]
            Fin.punchIn f (toFin x) ≡ toFin y
 ∋-weaken zero x = suc x , refl
 ∋-weaken (suc i) zero = zero , refl
 ∋-weaken (suc i) (suc x) with ∋-weaken i x
 ∋-weaken (suc i) (suc x) | x' , eq = suc x' , suc & eq
 
-⊢-weaken : {γ : PreCtx n} {Γ Θ : Ctx γ} {t : Type} {xs : Usage (i , t)}
+⊢-weaken : {γ : PreCtx n} {Γ Θ : Ctx is} {t : Type} {xs : Cs i}
          → (f : Fin (suc n))
          → {P : Scoped n}
          → γ w Γ ⊢ P ⊠ Θ
-         → Vec.insert γ f (i , t) w insert-mult f xs Γ ⊢ lift f P ⊠ insert-mult f xs Θ
-⊢-weaken i {𝟘} end = end
-⊢-weaken i {new P} (chan t m μ ⊢P) = chan t m μ (⊢-weaken (suc i) ⊢P)
-⊢-weaken i {P ∥ Q} (comp ⊢P ⊢Q) = comp (⊢-weaken i ⊢P) (⊢-weaken i ⊢Q)
-⊢-weaken {t = t} {xs = xs} i {.(toFin x) ⦅⦆ P} (recv x ⊢P)
-  rewrite proj₂ (∋-weaken {t = t} {xs = xs} i x)
-        = recv _ (⊢-weaken (suc i) ⊢P)
-⊢-weaken {t = t} {xs = xs} i {.(toFin x) ⟨ .(toFin y) ⟩ P} (send x y ⊢P)
-  rewrite proj₂ (∋-weaken {t = t} {xs = xs} i x)
-        | proj₂ (∋-weaken {t = t} {xs = xs} i y)
-        = send _ _ (⊢-weaken i ⊢P)
-⊢-weaken i {+[] P} (base ⊢P) = base (⊢-weaken (suc i) ⊢P)
+         → Vec.insert γ f t w insert-mult f xs Γ ⊢ lift f P ⊠ insert-mult f xs Θ
+⊢-weaken i end = end
+⊢-weaken i (chan t m μ ⊢P) = chan t m μ (⊢-weaken (suc i) ⊢P)
+⊢-weaken i (comp ⊢P ⊢Q) = comp (⊢-weaken i ⊢P) (⊢-weaken i ⊢Q)
+⊢-weaken i (recv x ⊢P) rewrite proj₂ (∋-weaken i x) = recv _ (⊢-weaken (suc i) ⊢P)
+⊢-weaken i (send x y ⊢P) rewrite proj₂ (∋-weaken i x) | proj₂ (∋-weaken i y)
+  = send _ _ (⊢-weaken i ⊢P)
+⊢-weaken i (base ⊢P) = base (⊢-weaken (suc i) ⊢P)

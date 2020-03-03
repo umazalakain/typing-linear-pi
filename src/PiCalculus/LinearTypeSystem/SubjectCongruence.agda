@@ -36,7 +36,7 @@ open import PiCalculus.LinearTypeSystem.Strengthening Ω
 open import PiCalculus.LinearTypeSystem.Swapping Ω
 
 SubjectCongruence : Set
-SubjectCongruence = {n : ℕ} {γ : PreCtx n} {Γ Δ : Ctx γ}
+SubjectCongruence = {n : ℕ} {γ : PreCtx n} {is : Vec I n} {Γ Δ : Ctx is}
                   → {r : RecTree} {P Q : Scoped n}
                   → P ≅⟨ r ⟩ Q
                   → γ w Γ ⊢ P ⊠ Δ
@@ -45,9 +45,10 @@ SubjectCongruence = {n : ℕ} {γ : PreCtx n} {Γ Δ : Ctx γ}
 private
   variable
     n : ℕ
+    is : Vec I n
     P Q : Scoped n
 
-comp-comm : {γ : PreCtx n} {Γ Ξ : Ctx γ}
+comp-comm : {γ : PreCtx n} {Γ Ξ : Ctx is}
           → γ w Γ ⊢ P ∥ Q ⊠ Ξ
           → γ w Γ ⊢ Q ∥ P ⊠ Ξ
 comp-comm (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q
@@ -73,8 +74,8 @@ subject-cong (stop base-base-comm) (base (base ⊢P)) = base (base (⊢-swap zer
 subject-cong (cong-symm (stop comp-assoc)) (comp (comp ⊢P ⊢Q) ⊢R) = comp ⊢P (comp ⊢Q ⊢R)
 subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm (comp ⊢P ⊢Q)
 subject-cong (cong-symm (stop comp-end)) ⊢P = comp ⊢P end
-subject-cong (cong-symm (stop scope-end)) end = chan {i' = ∃I} {i = ∃I} B[ 0 ] [] 0∙ end
-subject-cong (cong-symm (stop base-end)) end = base {b = 0} end
+subject-cong (cong-symm (stop scope-end)) end = chan {i' = ∃I} {i = ∃I} B[ 0 ] 0∙ 0∙ end
+subject-cong (cong-symm (stop base-end)) end = base {b = 0} {i = ∃I} end
 subject-cong (cong-symm (stop (scope-ext u))) (comp ⊢P (chan t c μ ⊢Q)) = chan t c μ (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop (base-ext u))) (comp ⊢P (base ⊢Q)) = base (comp (subst (λ ● → _ w _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan _ _ _ (chan _ _ _ (subst (λ ● → _ w _ ⊢ ● ⊠ _) (swap-swap zero _) (⊢-swap zero ⊢P)))
