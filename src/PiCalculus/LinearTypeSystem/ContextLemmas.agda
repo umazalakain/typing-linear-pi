@@ -3,6 +3,7 @@ open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Decidable using (toWitness)
 open import Function using (_∘_)
 
+import Data.Empty as Empty
 import Data.Unit as Unit
 import Data.Nat as ℕ
 import Data.Product as Product
@@ -11,6 +12,7 @@ import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
 import Data.Fin as Fin
 
+open Empty using (⊥)
 open Unit using (⊤; tt)
 open ℕ using (ℕ; zero; suc)
 open Product using (∃-syntax; _×_; _,_; proj₂; proj₁)
@@ -37,17 +39,20 @@ private
     t : Type
     P Q : Scoped n
 
-∋-I : {m : Cs i'} {y : Cs i} {Γ Δ : Ctx is}
-    → (x : γ w Γ ∋ C[ t w m ] w y ⊠ Δ)
-    → i ≡ Vec.lookup is (toFin x)
-∋-I zero = refl
-∋-I (suc x) = ∋-I x
+∋-∙ : {m : Cs i'} (δ : ∀ {i} → Cs i) {Γ Δ : Ctx is}
+    → (x : γ w Γ ∋ C[ t w m ] w (δ {i}) ⊠ Δ)
+    → ∃[ z ] (All.lookup (toFin x) Γ ≔ (δ {Vec.lookup is (toFin x)}) ∙ z)
+∋-∙ δ (zero {check = check}) = _ , proj₂ (toWitness check)
+∋-∙ δ (suc x) = ∋-∙ δ x
 
-∋-∙ : {m : Cs i'} {y : Cs i} {Γ Δ : Ctx is}
-    → (x : γ w Γ ∋ C[ t w m ] w y ⊠ Δ)
-    → ∃[ z ] (All.lookup (toFin x) Γ ≔ cast (∋-I x) y ∙ z)
-∋-∙ (zero {check = check}) = _ , proj₂ (toWitness check)
-∋-∙ (suc x) = ∋-∙ x
+∋-t : {m : Cs i} {Γ Δ : Ctx is}
+    → (x : γ w Γ ∋ t w m ⊠ Δ)
+    → Vec.lookup γ (toFin x) ≡ t
+∋-t zero = refl
+∋-t (suc x) = ∋-t x
+
+C≢B : {t : Type} {m : Cs i} {b : ℕ} → C[ t w m ] ≡ B[ b ] → ⊥
+C≢B ()
 
 ∋-⊎ : {Γ Ξ : Ctx is} {x : Cs i} → γ w Γ ∋ t w x ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ∋-⊎ (zero {check = check}) = (ε -, _) , ((⊎-idˡ _) , proj₂ (toWitness check))
