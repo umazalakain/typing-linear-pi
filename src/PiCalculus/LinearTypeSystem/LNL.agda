@@ -125,6 +125,9 @@ data _≔_∙_ : Mult lin → Mult lin → Mult lin → Set where
 ∙-assoc splitʳ -≔ˡ = +∙ , splitʳ , +≔ʳ
 ∙-assoc splitʳ -≔ʳ = 1∙ , 1≔ʳ , splitʳ
 
+∙-join : ∀ {x y z} → x ≔ y ∙ +∙ → x ≔ z ∙ -∙ → ∃-syntax (λ w → x ≔ w ∙ 1∙)
+∙-join splitʳ splitˡ = _ , 1≔ʳ
+
 LNL : Quantifiers
 Quantifiers.I LNL = Type
 Quantifiers.∃I LNL = nonlin
@@ -134,7 +137,7 @@ Quantifier.+∙ (Quantifiers.Qs LNL nonlin) = ω∙
 Quantifier.-∙ (Quantifiers.Qs LNL nonlin) = ω∙
 Quantifier.1∙ (Quantifiers.Qs LNL nonlin) = ω∙
 Quantifier._≔_∙_ (Quantifiers.Qs LNL nonlin) _ _ _ = ⊤
-Quantifier.∙-split (Quantifiers.Qs LNL nonlin) = tt
+Quantifier.∙-join (Quantifiers.Qs LNL nonlin) _ _ = ω∙ , tt
 Quantifier.∙-compute (Quantifiers.Qs LNL nonlin) _ _ = yes (ω∙ , tt)
 Quantifier.∙-computeˡ (Quantifiers.Qs LNL nonlin) _ _ = yes (ω∙ , tt)
 Quantifier.∙-unique (Quantifiers.Qs LNL nonlin) {x = ω∙} {x' = ω∙} _ _ = refl
@@ -147,7 +150,7 @@ Quantifier.+∙ (Quantifiers.Qs LNL lin) = +∙
 Quantifier.-∙ (Quantifiers.Qs LNL lin) = -∙
 Quantifier.1∙ (Quantifiers.Qs LNL lin) = 1∙
 Quantifier._≔_∙_ (Quantifiers.Qs LNL lin) = _≔_∙_
-Quantifier.∙-split (Quantifiers.Qs LNL lin) = splitˡ
+Quantifier.∙-join (Quantifiers.Qs LNL lin) = ∙-join
 Quantifier.∙-compute (Quantifiers.Qs LNL lin) = ∙-compute
 Quantifier.∙-computeˡ (Quantifiers.Qs LNL lin) = ∙-computeˡ
 Quantifier.∙-unique (Quantifiers.Qs LNL lin) = ∙-unique

@@ -33,9 +33,21 @@ private
     n : ℕ
     is : Vec I n
     γ : PreCtx n
-    i : I
+    i i' : I
     t : Type
     P Q : Scoped n
+
+∋-I : {m : Cs i'} {y : Cs i} {Γ Δ : Ctx is}
+    → (x : γ w Γ ∋ C[ t w m ] w y ⊠ Δ)
+    → i ≡ Vec.lookup is (toFin x)
+∋-I zero = refl
+∋-I (suc x) = ∋-I x
+
+∋-∙ : {m : Cs i'} {y : Cs i} {Γ Δ : Ctx is}
+    → (x : γ w Γ ∋ C[ t w m ] w y ⊠ Δ)
+    → ∃[ z ] (All.lookup (toFin x) Γ ≔ cast (∋-I x) y ∙ z)
+∋-∙ (zero {check = check}) = _ , proj₂ (toWitness check)
+∋-∙ (suc x) = ∋-∙ x
 
 ∋-⊎ : {Γ Ξ : Ctx is} {x : Cs i} → γ w Γ ∋ t w x ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ∋-⊎ (zero {check = check}) = (ε -, _) , ((⊎-idˡ _) , proj₂ (toWitness check))

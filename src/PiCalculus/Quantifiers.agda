@@ -4,12 +4,14 @@ open import Relation.Nullary.Decidable using (fromWitness; toWitness)
 open import Function using (_∘_)
 open import Data.Empty using (⊥-elim)
 
+import Data.Fin as Fin
 import Data.Unit as Unit
 import Data.Product as Product
 import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
 import Data.Nat as ℕ
 
+open Fin using (Fin; zero; suc)
 open Unit using (⊤; tt)
 open ℕ using (ℕ)
 open Product using (∃-syntax; _,_; _×_; proj₁; proj₂)
@@ -30,7 +32,7 @@ record Quantifier (Q : Set) : Set₁ where
     1∙         : Q
     _≔_∙_      : Q → Q → Q → Set
 
-    ∙-split    : 1∙ ≔ +∙ ∙ -∙
+    ∙-join     : ∀ {x y z} → x ≔ y ∙ +∙ → x ≔ z ∙ -∙ → ∃[ w ] (x ≔ w ∙ 1∙)
 
     -- Given two operands, we can decide whether a third one exists
     ∙-compute  : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
@@ -73,6 +75,8 @@ record Quantifiers : Set₁ where
       i : I
       is : Vec I n
 
+  cast : {i j : I} → i ≡ j → Cs i → Cs j
+  cast refl x = x
 
   _≔_⊎_ : Ctx is → Ctx is → Ctx is → Set
   _≔_⊎_ [] [] [] = ⊤
@@ -81,6 +85,10 @@ record Quantifiers : Set₁ where
   ε : {is : Vec I n} → Ctx is
   ε {is = []} = []
   ε {is = _ -, _} = ε -, 0∙
+
+  ⊎-get : {is : Vec I n} {Γ Δ Ξ : Ctx is} (i : Fin n) → Γ ≔ Δ ⊎ Ξ → All.lookup i Γ ≔ All.lookup i Δ ∙ All.lookup i Ξ
+  ⊎-get {Γ = _ -, _} {_ -, _} {_ -, _} zero (Γ≔ , x≔) = x≔
+  ⊎-get {Γ = _ -, _} {_ -, _} {_ -, _} (suc i) (Γ≔ , x≔) = ⊎-get i Γ≔
 
   ⊎-compute : (Δ Ξ : Ctx is) → Dec (∃[ Γ ] (Γ ≔ Δ ⊎ Ξ))
   ⊎-compute [] [] = yes ([] , tt)

@@ -1,6 +1,6 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
-open import Function.Reasoning
 open import Relation.Nullary using (yes; no)
+open import Relation.Nullary.Decidable using (toWitness)
 
 import Data.Empty as Empty
 import Data.Maybe as Maybe
@@ -16,7 +16,7 @@ open Nat using (ℕ; zero; suc)
 open Fin using (Fin ; zero ; suc)
 open Vec using (Vec; []; _∷_)
 open Maybe using (nothing; just)
-open Product using (∃-syntax; _,_)
+open Product using (∃-syntax; _,_; proj₁; proj₂)
 
 open import PiCalculus.Syntax
 open Scoped
@@ -49,13 +49,25 @@ SubjectReduction = {n : ℕ} {γ : PreCtx n} {is : Vec I n} {Γ Γ' Δ : Ctx is}
 private
   variable
     n : ℕ
-    i : Fin n
+    i j : Fin n
     is : Vec I n
     P Q : Scoped n
 
+send-≥-∙ : {γ : PreCtx n} {Γ Δ : Ctx is}
+         → γ w Γ ⊢ i ⟨ j ⟩ P ⊠ Δ → ∃[ y ] (All.lookup i Γ ≔ y ∙ -∙)
+send-≥-∙ (send x _ _) = {!∋-∙ x!}
+
+recv-≥+∙ : {γ : PreCtx n} {Γ Δ : Ctx is}
+         → γ w Γ ⊢ i ⦅⦆ P ⊠ Δ → ∃[ y ] (All.lookup i Γ ≔ y ∙ +∙)
+recv-≥+∙ (recv x _) = _ , {! ∙-comm (proj₂ (∋-∙ x))!}
+
 ⊢-≥1∙ : {γ : PreCtx n} {Γ Δ : Ctx is} {c : Channel n}
       → P =[ c ]⇒ Q → γ w Γ ⊢ P ⊠ Δ → c ≡ just i → ∃[ y ] (All.lookup i Γ ≔ y ∙ 1∙)
-⊢-≥1∙ comm (comp (recv x ⊢P) ⊢Q) refl = {!⊢Q!}
+⊢-≥1∙ {i = i} comm (comp ⊢P ⊢Q) refl = let _ , ≥+∙ = recv-≥+∙ ⊢P
+                                           _ , ≥-∙ = send-≥-∙ ⊢Q
+                                           _ , Γ≔  = ⊢-⊎ ⊢P
+                                           _ , i≔ , _ = ∙-assoc (∙-comm (⊎-get i Γ≔)) (∙-comm ≥-∙)
+                                        in ∙-join ≥+∙ (∙-comm i≔)
 ⊢-≥1∙ (par P→P') (comp ⊢P ⊢Q) refl = ⊢-≥1∙ P→P' ⊢P refl
 ⊢-≥1∙ (res_ {c = nothing} P→Q) (chan t m μ ⊢P) ()
 ⊢-≥1∙ (res_ {c = just zero} P→Q) (chan t m μ ⊢P) ()
@@ -69,7 +81,7 @@ subject-reduction : SubjectReduction
 subject-reduction Γ≔ comm (comp (recv x ⊢P) ⊢Q) = comp {!⊢P!} {!!}
 subject-reduction Γ≔ (par P→P') (comp ⊢P ⊢Q) = comp (subject-reduction Γ≔ P→P' ⊢P) ⊢Q
 subject-reduction Γ≔ (res_ {c = nothing} P→Q) (chan t m μ ⊢P) = chan t m μ (subject-reduction (Γ≔ , ∙-idʳ _) P→Q ⊢P)
-subject-reduction Γ≔ (res_ {c = just zero} P→Q) (chan t m μ ⊢P) = chan t m {!!} (subject-reduction (Γ≔ , {!!}) P→Q ⊢P)
+subject-reduction Γ≔ (res_ {c = just zero} P→Q) (chan t m μ ⊢P) = chan t m _ (subject-reduction (Γ≔ , proj₂ (⊢-≥1∙ P→Q ⊢P refl)) P→Q ⊢P)
 subject-reduction Γ≔ (res_ {c = just (suc i)} P→Q) (chan t m μ ⊢P) = chan t m μ (subject-reduction (Γ≔ , ∙-idʳ _) P→Q ⊢P)
 subject-reduction Γ≔ (intro_ {c = nothing} P→Q) (base ⊢P) = base (subject-reduction (Γ≔ , _) P→Q ⊢P)
 subject-reduction Γ≔ (intro_ {c = just zero} P→Q) (base ⊢P) = base (subject-reduction (Γ≔ , _) P→Q ⊢P)
