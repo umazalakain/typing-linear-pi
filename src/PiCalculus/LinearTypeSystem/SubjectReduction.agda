@@ -23,7 +23,7 @@ open Scoped
 open Syntax
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
-open import PiCalculus.Quantifiers
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
 module PiCalculus.LinearTypeSystem.SubjectReduction (Ω : Quantifiers) where
 open Quantifiers Ω
@@ -33,15 +33,15 @@ open import PiCalculus.LinearTypeSystem.Weakening Ω
 open import PiCalculus.LinearTypeSystem.Strengthening Ω
 open import PiCalculus.LinearTypeSystem.SubjectCongruence Ω
 
-1∙-at : {n : ℕ} → Channel n → {is : Vec I n} → Ctx is
-1∙-at nothing = ε
-1∙-at (just zero) {_ -, _} = ε -, 1∙
-1∙-at (just (suc i)) {_ -, _} = 1∙-at (just i) -, 0∙
+_at_ : (∀ {i} → Cs i) → {n : ℕ} → Channel n → {is : Vec I n} → Ctx is
+_at_ x nothing = ε
+_at_ x (just zero) {_ -, _} = ε -, x
+_at_ x (just (suc e)) {_ -, _} = (x at (just e)) -, 0∙
 
 SubjectReduction : Set
 SubjectReduction = {n : ℕ} {γ : PreCtx n} {is : Vec I n} {Γ Γ' Δ : Ctx is}
                    {c : Channel n} {P Q : Scoped n}
-                 → Γ ≔ Γ' ⊎ 1∙-at c
+                 → Γ ≔ Γ' ⊎ (1∙ at c)
                  → P =[ c ]⇒ Q
                  → γ w Γ  ⊢ P ⊠ Δ
                  → γ w Γ' ⊢ Q ⊠ Δ
@@ -87,8 +87,14 @@ comm-≥1∙ (struct P≅P' P'→Q) ⊢P refl = comm-≥1∙ P'→Q (subject-con
 ⊬-base (base ⊢P) (intro_ {c = just (suc _)} P→Q) qe eq = ⊬-base ⊢P P→Q (cong (Maybe.map suc) qe) eq
 ⊬-base ⊢P (struct P≅P' P'→Q) qe eq = ⊬-base (subject-cong P≅P' ⊢P) P'→Q qe eq
 
+postulate
+  ⊢-recv : {γ : PreCtx n} {Γ Γ' Δ : Ctx is} {uP : Unused zero ([ suc j / zero ] P)}
+         → Γ ≔ Γ' ⊎ (1∙ at (just i))
+         → γ w Γ  ⊢ i ⦅⦆ P ⊠ Δ
+         → γ w Γ' ⊢ lower zero ([ suc j / zero ] P) uP ⊠ {!!}
+
 subject-reduction : SubjectReduction
-subject-reduction Γ≔ comm (comp (recv x ⊢P) ⊢Q) = comp {!⊢P!} {!!}
+subject-reduction Γ≔ comm (comp ⊢P ⊢Q) = comp (⊢-recv Γ≔ ⊢P) {!!}
 subject-reduction Γ≔ (par P→P') (comp ⊢P ⊢Q) = comp (subject-reduction Γ≔ P→P' ⊢P) ⊢Q
 subject-reduction Γ≔ (res_ {c = nothing} P→Q) (chan t m μ ⊢P) = chan t m μ (subject-reduction (Γ≔ , ∙-idʳ _) P→Q ⊢P)
 subject-reduction Γ≔ (res_ {c = just zero} P→Q) (chan t m μ ⊢P) = chan t m _ (subject-reduction (Γ≔ , proj₂ (comm-≥1∙ P→Q ⊢P refl)) P→Q ⊢P)

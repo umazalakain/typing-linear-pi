@@ -18,7 +18,7 @@ open Product using (∃-syntax; _,_; _×_; proj₁; proj₂)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 
-module PiCalculus.Quantifiers where
+module PiCalculus.LinearTypeSystem.Quantifiers where
 
 private
   variable

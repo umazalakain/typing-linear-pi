@@ -25,7 +25,7 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.Quantifiers
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
 module PiCalculus.LinearTypeSystem.Strengthening (Ω : Quantifiers) where
 open Quantifiers Ω

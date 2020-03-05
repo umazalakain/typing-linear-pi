@@ -1,4 +1,5 @@
 open import Data.Nat using (ℕ)
+open import Data.Bool using (Bool; true; false)
 open import Data.Unit using (⊤; tt)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Fin using (#_; zero; suc)
@@ -15,10 +16,15 @@ open Raw
 open Scoped
 open Conversion
 open import PiCalculus.Semantics
-open import PiCalculus.Quantifiers
-
-open import PiCalculus.LinearTypeSystem.LNL
-open import PiCalculus.LinearTypeSystem LNL
+open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Quantifiers.Linear
+open import PiCalculus.LinearTypeSystem.Quantifiers.Shared
+open import PiCalculus.LinearTypeSystem (record
+  { I = Bool
+  ; ∃I = false
+  ; Cs = λ {false → Ω      ; true → Mult}
+  ; Qs = λ {false → Shared ; true → Linear}
+  })
 
 module PiCalculus.Examples where
 

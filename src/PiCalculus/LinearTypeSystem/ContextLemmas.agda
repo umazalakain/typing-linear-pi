@@ -24,7 +24,7 @@ open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import PiCalculus.Function
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
-open import PiCalculus.Quantifiers
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
 module PiCalculus.LinearTypeSystem.ContextLemmas (Ω : Quantifiers) where
 open Quantifiers Ω

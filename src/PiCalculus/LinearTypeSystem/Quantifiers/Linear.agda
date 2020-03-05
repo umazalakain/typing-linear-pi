@@ -10,18 +10,14 @@ open Unit using (⊤; tt)
 open Product using (∃-syntax; _×_; _,_)
 open ℕ using (ℕ)
 
-open import PiCalculus.Quantifiers
+open import PiCalculus.LinearTypeSystem.Quantifiers
 
-module PiCalculus.LinearTypeSystem.LNL where
+module PiCalculus.LinearTypeSystem.Quantifiers.Linear where
 
-data Type : Set where
-  nonlin lin : Type
+data Mult : Set where
+  0∙ +∙ -∙ 1∙ : Mult
 
-data Mult : Type → Set where
-  ω∙          : Mult nonlin
-  0∙ +∙ -∙ 1∙ : Mult lin
-
-data _≔_∙_ : Mult lin → Mult lin → Mult lin → Set where
+data _≔_∙_ : Mult → Mult → Mult → Set where
   0≔ : 0∙ ≔ 0∙ ∙ 0∙
   1≔ˡ : 1∙ ≔ 1∙ ∙ 0∙
   1≔ʳ : 1∙ ≔ 0∙ ∙ 1∙
@@ -128,33 +124,17 @@ data _≔_∙_ : Mult lin → Mult lin → Mult lin → Set where
 ∙-join : ∀ {x y z} → x ≔ y ∙ +∙ → x ≔ z ∙ -∙ → ∃-syntax (λ w → x ≔ w ∙ 1∙)
 ∙-join splitʳ splitˡ = _ , 1≔ʳ
 
-LNL : Quantifiers
-Quantifiers.I LNL = Type
-Quantifiers.∃I LNL = nonlin
-Quantifiers.Cs LNL = Mult
-Quantifier.0∙ (Quantifiers.Qs LNL nonlin) = ω∙
-Quantifier.+∙ (Quantifiers.Qs LNL nonlin) = ω∙
-Quantifier.-∙ (Quantifiers.Qs LNL nonlin) = ω∙
-Quantifier.1∙ (Quantifiers.Qs LNL nonlin) = ω∙
-Quantifier._≔_∙_ (Quantifiers.Qs LNL nonlin) _ _ _ = ⊤
-Quantifier.∙-join (Quantifiers.Qs LNL nonlin) _ _ = ω∙ , tt
-Quantifier.∙-compute (Quantifiers.Qs LNL nonlin) _ _ = yes (ω∙ , tt)
-Quantifier.∙-computeˡ (Quantifiers.Qs LNL nonlin) _ _ = yes (ω∙ , tt)
-Quantifier.∙-unique (Quantifiers.Qs LNL nonlin) {x = ω∙} {x' = ω∙} _ _ = refl
-Quantifier.∙-uniqueˡ (Quantifiers.Qs LNL nonlin) {y = ω∙} {y' = ω∙} _ _ = refl
-Quantifier.∙-idˡ (Quantifiers.Qs LNL nonlin) _ = tt
-Quantifier.∙-comm (Quantifiers.Qs LNL nonlin) _ = tt
-Quantifier.∙-assoc (Quantifiers.Qs LNL nonlin) _ _ = ω∙ , (_ , _)
-Quantifier.0∙ (Quantifiers.Qs LNL lin) = 0∙
-Quantifier.+∙ (Quantifiers.Qs LNL lin) = +∙
-Quantifier.-∙ (Quantifiers.Qs LNL lin) = -∙
-Quantifier.1∙ (Quantifiers.Qs LNL lin) = 1∙
-Quantifier._≔_∙_ (Quantifiers.Qs LNL lin) = _≔_∙_
-Quantifier.∙-join (Quantifiers.Qs LNL lin) = ∙-join
-Quantifier.∙-compute (Quantifiers.Qs LNL lin) = ∙-compute
-Quantifier.∙-computeˡ (Quantifiers.Qs LNL lin) = ∙-computeˡ
-Quantifier.∙-unique (Quantifiers.Qs LNL lin) = ∙-unique
-Quantifier.∙-uniqueˡ (Quantifiers.Qs LNL lin) = ∙-uniqueˡ
-Quantifier.∙-idˡ (Quantifiers.Qs LNL lin) = ∙-idˡ
-Quantifier.∙-comm (Quantifiers.Qs LNL lin) = ∙-comm
-Quantifier.∙-assoc (Quantifiers.Qs LNL lin) = ∙-assoc
+Linear : Quantifier Mult
+Quantifier.0∙ Linear = 0∙
+Quantifier.+∙ Linear = +∙
+Quantifier.-∙ Linear = -∙
+Quantifier.1∙ Linear = 1∙
+Quantifier._≔_∙_ Linear = _≔_∙_
+Quantifier.∙-join Linear = ∙-join
+Quantifier.∙-compute Linear = ∙-compute
+Quantifier.∙-computeˡ Linear = ∙-computeˡ
+Quantifier.∙-unique Linear = ∙-unique
+Quantifier.∙-uniqueˡ Linear = ∙-uniqueˡ
+Quantifier.∙-idˡ Linear = ∙-idˡ
+Quantifier.∙-comm Linear = ∙-comm
+Quantifier.∙-assoc Linear = ∙-assoc
