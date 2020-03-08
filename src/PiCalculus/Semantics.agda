@@ -112,11 +112,11 @@ module PiCalculus.Semantics where
     cong-trans : P ≅⟨ r ⟩ Q → Q ≅⟨ p ⟩ R → P ≅⟨ two r p ⟩ R
 
     -- Congruent relation
-    new-cong_    : P ≅⟨ r ⟩ P' → new P ≅⟨ one r ⟩ new P'
-    comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q ≅⟨ one r ⟩ P' ∥ Q
-    input-cong_  : P ≅⟨ r ⟩ P' → x ⦅⦆ P ≅⟨ one r ⟩ x ⦅⦆ P'
+    new-cong_    : P ≅⟨ r ⟩ P' → new P     ≅⟨ one r ⟩ new P'
+    comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q     ≅⟨ one r ⟩ P' ∥ Q
+    input-cong_  : P ≅⟨ r ⟩ P' → x ⦅⦆ P    ≅⟨ one r ⟩ x ⦅⦆ P'
     output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P ≅⟨ one r ⟩ x ⟨ y ⟩ P'
-    base-cong_   : P ≅⟨ r ⟩ P' → +[] P ≅⟨ one r ⟩ +[] P'
+    base-cong_   : P ≅⟨ r ⟩ P' → +[] P     ≅⟨ one r ⟩ +[] P'
 
   substFin : Fin n → Fin n → Fin n → Fin n
   substFin i j x with j Finₚ.≟ x

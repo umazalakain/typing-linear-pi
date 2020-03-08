@@ -38,16 +38,12 @@ private
     is : Vec I n
     P Q : Scoped n
 
-delete-mult : Ctx is → (i : Fin (suc n)) → Ctx (Vec.remove is i)
-delete-mult (Γ -, _) zero = Γ
-delete-mult (Γ -, ys -, xs) (suc i) = delete-mult (Γ -, ys) i -, xs
-
 ∋-strengthen : {γ : PreCtx (suc n)} {is : Vec I (suc n)} {Γ Θ : Ctx is}
              → {i' : I} {t' : Type} {m' : Cs i'}
              → (i : Fin (suc n))
              → (  x : γ               w Γ               ∋ t' w m' ⊠ Θ)
              → (i≢x : i ≢ toFin x)
-             → Σ[ y ∈ Vec.remove γ i w delete-mult Γ i ∋ t' w m' ⊠ delete-mult Θ i ]
+             → Σ[ y ∈ Vec.remove γ i w mult-remove Γ i ∋ t' w m' ⊠ mult-remove Θ i ]
                Fin.punchOut i≢x ≡ toFin y
 ∋-strengthen zero zero i≢x = ⊥-elim (i≢x refl)
 ∋-strengthen zero (suc x) i≢x = x , refl
@@ -60,7 +56,7 @@ delete-mult (Γ -, ys -, xs) (suc i) = delete-mult (Γ -, ys) i -, xs
              → (i : Fin (suc n))
              → (uP : Unused i P)
              → γ w Γ ⊢ P ⊠ Θ
-             → Vec.remove γ i w delete-mult Γ i ⊢ lower i P uP ⊠ delete-mult Θ i
+             → Vec.remove γ i w mult-remove Γ i ⊢ lower i P uP ⊠ mult-remove Θ i
 ⊢-strengthen i uP end = end
 ⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (base ⊢P)
   = base (⊢-strengthen (suc i) uP ⊢P)
