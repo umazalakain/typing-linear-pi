@@ -14,7 +14,6 @@ record Parameters : Set₁ where
 
 module Syntax (P : Parameters) where
   infix 20 _∥_
-  infixr 15 +[_]_
   infixr 15 ⦅new_⦆_
   infixr 9 _⦅_⦆_
   infixr 9 _⟨_⟩_
@@ -27,7 +26,6 @@ module Syntax (P : Parameters) where
     _∥_     : Process Γ → Process Γ → Process Γ
     _⦅_⦆_   : Var Γ → (b : Bnd) → Process (Γ ,- b) → Process Γ
     _⟨_⟩_   : Var Γ → Var Γ → Process Γ → Process Γ
-    +[_]_   : (b : Bnd) → Process (Γ ,- b) → Process Γ
 
 module Raw where
 
@@ -65,7 +63,6 @@ module Scoped where
 
   pattern new_ P = Syntax.⦅new_⦆_ _ P
   pattern _⦅⦆_ x P = Syntax._⦅_⦆_ x _ P
-  pattern +[]_ P = Syntax.+[_]_ _ P
 
 module Conversion where
   open Syntax
@@ -97,8 +94,6 @@ module Conversion where
   raw→scoped' ctx (x ⟨ y ⟩ P)  | yes xp | yes yp = do P' ← raw→scoped' ctx P
                                                       just (index xp ⟨ index yp ⟩ P')
   raw→scoped' ctx (x ⟨ y ⟩ P)  | _      | _      = nothing
-  raw→scoped' ctx (+[ b ] P)                     = do P' ← raw→scoped' (b ∷ ctx) P
-                                                      just (+[] P')
 
 
   raw→scoped : Raw tt → Maybe (Scoped 0)

@@ -26,7 +26,7 @@ open Quantifiers Ω
 
 infixr 4 _w_⊢_⊠_
 infixr 4 _w_∋_w_⊠_
-infixr 10 base chan recv send
+infixr 10 chan recv send
 
 private
   variable
@@ -75,10 +75,6 @@ toFin (suc x) = suc (toFin x)
 data _w_⊢_⊠_ : PreCtx n → Ctx is → Scoped n → Ctx is → Set where
 
   end : γ w Γ ⊢ 𝟘 ⊠ Γ
-
-  base : γ -, B[ b ] w Γ -, 0∙ {i} ⊢ P     ⊠ Δ -, 0∙
-       ---------------------------------------------
-       → γ           w Γ       ⊢ +[] P ⊠ Δ
 
   chan : (t : Type) (m : Cs i') (μ : Cs i)
        → γ -, C[ t w m ] w Γ -, μ ⊢ P     ⊠ Δ -, 0∙

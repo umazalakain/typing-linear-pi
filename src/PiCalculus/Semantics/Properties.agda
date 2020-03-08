@@ -41,8 +41,6 @@ lift-lower i (x ⟨ y ⟩ P) (i≢x , i≢y , uP)
   rewrite lift-lower i P uP
   | Finₚ.punchIn-punchOut i≢x
   | Finₚ.punchIn-punchOut i≢y = refl
-lift-lower i (+[] P) uP
-  rewrite lift-lower (suc i) P uP = refl
 
 swapFin-suc : (i : Fin n) (x : Fin (suc n)) → suc (swapFin i x) ≡ swapFin (suc i) (suc x)
 swapFin-suc i x with Fin.inject₁ i Finₚ.≟ x
@@ -89,4 +87,3 @@ swap-swap i (new P) rewrite swap-swap (suc i) P = refl
 swap-swap i (P ∥ Q) rewrite swap-swap i P | swap-swap i Q = refl
 swap-swap i (x ⦅⦆ P) rewrite swapFin-swapFin i x | swap-swap (suc i) P = refl
 swap-swap i (x ⟨ y ⟩ P) rewrite swapFin-swapFin i x | swapFin-swapFin i y | swap-swap i P = refl
-swap-swap i (+[] P) rewrite swap-swap (suc i) P = refl

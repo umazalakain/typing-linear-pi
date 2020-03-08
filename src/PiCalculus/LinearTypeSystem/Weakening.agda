@@ -56,4 +56,3 @@ private
 ⊢-weaken i (recv x ⊢P) rewrite proj₂ (∋-weaken i x) = recv _ (⊢-weaken (suc i) ⊢P)
 ⊢-weaken i (send x y ⊢P) rewrite proj₂ (∋-weaken i x) | proj₂ (∋-weaken i y)
   = send _ _ (⊢-weaken i ⊢P)
-⊢-weaken i (base ⊢P) = base (⊢-weaken (suc i) ⊢P)

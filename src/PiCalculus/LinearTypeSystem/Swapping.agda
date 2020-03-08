@@ -54,7 +54,6 @@ private
          → γ w Γ ⊢ P ⊠ Θ
          → All.lookup i Γ ≡ All.lookup i Θ
 ⊢-unused i uP end = refl
-⊢-unused i uP (base ⊢P) = ⊢-unused (suc i) uP ⊢P
 ⊢-unused i uP (chan t m μ ⊢P) = ⊢-unused (suc i) uP ⊢P
 ⊢-unused i (i≢x , uP) (recv x ⊢P) = trans
   (∋-unused i x i≢x)
@@ -101,7 +100,6 @@ module _ {a} {A : Set a} where
        → γ w Γ ⊢ P ⊠ Θ
        → swapᵥ i γ w swapₐ i Γ ⊢ swap i P ⊠ swapₐ i Θ
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i end = end
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (base ⊢P) = base (⊢-swap (suc i) ⊢P)
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (chan t m μ ⊢P) = chan t m μ (⊢-swap (suc i) ⊢P)
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (recv {Ξ = _ -, _ -, _} x ⊢P) rewrite proj₂ (∋-swap i x) = recv _ (⊢-swap (suc i) ⊢P)
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (send x y ⊢P) rewrite proj₂ (∋-swap i x) | proj₂ (∋-swap i y) = send _ _ (⊢-swap i ⊢P)

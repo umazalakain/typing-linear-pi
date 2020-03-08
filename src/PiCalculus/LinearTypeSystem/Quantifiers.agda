@@ -29,13 +29,16 @@ record Quantifier (Q : Set) : Set₁ where
     0∙         : Q
     +∙         : Q
     -∙         : Q
-    1∙         : Q
     _≔_∙_      : Q → Q → Q → Set
 
+    -- FIXME: we might not need this
+    1∙         : Q
     ∙-join     : ∀ {x y z} → x ≔ y ∙ +∙ → x ≔ z ∙ -∙ → ∃[ w ] (x ≔ w ∙ 1∙)
 
     -- Given two operands, we can decide whether a third one exists
     ∙-compute  : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
+
+    -- FIXME: we might not need this
     ∙-computeˡ : ∀ x z         → Dec (∃[ y ] (x ≔ y ∙ z))
 
     -- If a third operand exists, it must be unique

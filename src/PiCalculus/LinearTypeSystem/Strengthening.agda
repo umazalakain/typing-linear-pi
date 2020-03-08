@@ -58,8 +58,6 @@ private
              → γ w Γ ⊢ P ⊠ Θ
              → Vec.remove γ i w mult-remove Γ i ⊢ lower i P uP ⊠ mult-remove Θ i
 ⊢-strengthen i uP end = end
-⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (base ⊢P)
-  = base (⊢-strengthen (suc i) uP ⊢P)
 ⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (chan t m μ ⊢P)
   = chan t m μ (⊢-strengthen (suc i) uP ⊢P)
 ⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i (i≢x , uP) (recv {Ξ = _ -, _} x ⊢P)

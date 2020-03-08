@@ -65,8 +65,6 @@ C≢B ()
 
 ⊢-⊎ : {Γ Ξ : Ctx is} → γ w Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ _
-⊢-⊎ (base ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
-                 in _ , ⊎-tail Γ≔
 ⊢-⊎ (chan t m μ ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
                        in _ , ⊎-tail Γ≔
 ⊢-⊎ (recv x ⊢P) = let _ , x≔ = ∋-⊎ x

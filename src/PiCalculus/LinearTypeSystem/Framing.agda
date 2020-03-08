@@ -65,7 +65,6 @@ private
         → γ w Γ ⊢ P ⊠ Θ → γ w Ξ ⊢ P ⊠ Ψ
 
 ⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
-⊢-frame Γ≔ Ξ≔ (base ⊢P) = base (⊢-frame {Δ = _ -, 0∙} (Γ≔ , ∙-idˡ _) (Ξ≔ , ∙-idˡ _) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
   = chan t m μ (⊢-frame {Δ = _ -, μ} (Γ≔ , ∙-idʳ _) (Ξ≔ , ∙-idʳ _) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (recv x ⊢P) with ∋-⊎ x | ⊢-⊎ ⊢P
