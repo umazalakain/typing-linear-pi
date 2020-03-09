@@ -7,8 +7,15 @@
 \setlist{parsep=0pt,listparindent=\parindent}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{amsbsy}
 \usepackage[many]{tcolorbox}
 \bibliographystyle{plainurl}
+
+% Inference rules
+\usepackage{mathpartir}
+
+% TODO notes -- TODO: remove
+\usepackage{todonotes}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{Typing a linear \picalc}
@@ -33,38 +40,44 @@
 \acknowledgements{I want to thank \dots}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Commands for the pi-calculus
+% Processes
 \newcommand{\PO}{\mathbf{0}}
-\newcommand{\comp}[2]{#1 \mid #2}
-\newcommand{\new}[2]{(\boldsymbol{\nu} #1 #2)\,}
-\newcommand{\cout}[2]{\overline{#1}\langle#2\rangle.}
-\newcommand{\cin}[2]{#1(#2).}
-\newcommand{\select}[2]{#1\triangleleft#2.}
-\newcommand{\branch}[2]{#1\triangleright#2}
+\newcommand{\comp}[2]{#1 \parallel #2}
+\newcommand{\new}{\boldsymbol{\nu} \,}
+\newcommand{\send}[2]{#1 \, \langle#2\rangle \,}
+\newcommand{\recv}[1]{#1 \, \mathbb{()} \,}
 
 \newcommand{\subst}[3]{#1[#2/#3]}
-
 \newcommand{\picalc}{$\pi$-calculus}
 \newcommand{\Picalc}{$\pi$-Calculus}
+\newcommand{\reduce}{\longrightarrow}
+\newcommand{\types}[4]{#1 \propto #2 \vdash #3 \boxtimes #4}
+\newcommand{\suc}{{\scriptscriptstyle 1+}}
 
-\newcommand{\type}{\texttt}
-\newcommand{\End}{\type{End}}
-\newcommand{\Send}[1]{!#1.}
-\newcommand{\Recv}[1]{?#1.}
-\newcommand{\Select}{\oplus}
-\newcommand{\Branch}{\&}
-\newcommand{\dual}{\overline}
+% Types
+\newcommand{\Var}{\mathrm{VAR}}
+\newcommand{\Process}{\mathrm{PROCESS}}
+\newcommand{\Unused}{\mathrm{UNUSED}}
+\newcommand{\PreCtx}{\mathrm{PRECTX}}
+\newcommand{\Ctx}{\mathrm{CTX}}
+\newcommand{\Type}{\mathrm{TYPE}\;}
+\newcommand{\Idx}{\mathrm{IDX}\;}
+\newcommand{\Idxs}{\mathrm{IDXS}}
+\newcommand{\Carrier}{\mathrm{CARRIER}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Channel}{\mathrm{CHANNEL}}
+\newcommand{\Rec}{\mathrm{REC}}
 
-\newcommand{\reduce}{\rightarrow}
 
 \begin{document}
 
 \maketitle
+\todo{remove todo notes}
 
 \begin{abstract}
   We present the syntax, operational semantics, and typing rules of a \picalc{} with linear and shared types.
-  We abstract over types (using \emph{shapes} to untangle usage contexts from typing contexts) and generalize the algebras on multiplicities (using indexed sets of \emph{partial commutative monoids}).
   We use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
+  We generalize the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, affine, gradual and shared typing.
   We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 
@@ -74,19 +87,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
+The \picalc models communication.
+
+why resource-aware typing
+
 extensional typing rules for a given syntax and operational semantics
+
+leftover typing
 
 \subsection{Contribution}
 
-machine verified formalisation of the pi calculus
+\begin{description}
+  \item [Machine verified formalisation of the linear pi calculus]
 
-typing with leftovers applied to the pi calculus
+  \item [Typing with leftovers applied to the pi calculus]
 
-multiple multiplicities per variable
+  \item [Abstraction over multiplicities]
 
-multiple multiplicity types
-
-full formalisation available in Agda
+  \item [Full formalisation available in Agda]
+\end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Related work}
@@ -104,14 +123,187 @@ allows to ignore alpha conversion, or proofs of inequality between strings
 
 strings to maybe de Bruijn, names can be kept in context as well, just not doing it
 
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule
+    {n : \N}
+    {\Var_n : Set}}
+
+  \inferrule
+  {n : \N}
+  {0 : \Var_n}
+
+  \inferrule
+  {x : \Var_n}
+  {\suc x : \Var_{\suc n}}
+\end{mathpar}
+\caption{Types of size $n$}
+\end{figure}
+
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule
+    {n : \N}
+    {\Process_n : Set}}
+\end{mathpar}
+  
+\begin{equation*} \label{pi-calc-syntax}
+\begin{split}
+  \Process_n ::=& \; \PO_n                    \\
+              |& \; \new{} \Process_{\suc n}          \\
+              |& \; \comp{\Process_n}{\Process_n}          \\
+              |& \; \recv{\Var_n}{}\Process_{\suc n} \\
+              |& \; \send{\Var_n}{\Var_n}\Process_n
+\end{split}
+\end{equation*}
+\caption{Well-scoped grammar using de Bruijn indices}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 
 \subsection{Structural congruence}
 
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule
+    {P \, Q : \Process_n}
+    {P \equiv_n Q : Set}}
+
+  \inferrule
+  {P \; Q \; R : \Process_n}
+  {comp-assoc : \comp{P}{\comp{Q}{R}} \equiv_n \comp{\comp{P}{Q}}{R}}
+
+  \inferrule
+  {P \; Q : \Process_n}
+  {comp-sym : \comp{P}{Q} \equiv_n \comp{Q}{P}}
+  
+  \inferrule
+  {P : \Process_n}
+  {comp-end : \comp{P}{\PO_n} \equiv_n P}
+  
+  \inferrule
+  { }
+  {scope-end : \new \PO_{\suc n} \equiv_n \PO_n}
+  
+  \inferrule
+  {P \, Q : \Process_{\suc n} \\ uQ : \Unused_0 \, Q}
+  {scope-ext : \new (\comp{P}{Q}) \equiv_n \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
+
+  \inferrule
+  {P : \Process_{\suc \suc n}}
+  {scope-comm : \new \new P \equiv_n \new \new swap \; 0 \; P}
+\end{mathpar}
+\caption{Structural rewriting rules}
+\end{figure}
+
+\begin{figure}[h]
+\begin{mathpar}
+  \mprset{flushleft}
+  
+  {\mprset{fraction={===}}
+    \inferrule
+    { }
+    {\Rec : Set}}
+
+  \inferrule
+  { }
+  {zero : \Rec}
+  
+  \inferrule
+  {r : \Rec}
+  {one \; r : \Rec}
+
+  \inferrule
+  {r \; s : \Rec}
+  {two \; r \; s : \Rec}
+  
+  {\mprset{fraction={===}}
+    \inferrule
+    {P \, Q : \Process_n \\ r : \Rec}
+    {P =_r Q : Set}}
+
+  \inferrule
+  {P \; Q : \Process_n \\ P \equiv_n Q}
+  {struct : P =_{zero} Q}
+
+  \inferrule
+  {P \; P' : \Process_{\suc n} \\ P =_r P'}
+  {cong-scope : \new P =_{one \; r} \new P'}
+
+  \inferrule
+  {P \; P' : \Process_n \\ P =_r P'}
+  {cong-comp : \comp{P}{Q} =_{one \; r} \comp{P'}{Q}}
+
+  \inferrule
+  {P \; P' : \Process_{\suc n} \\ P =_r P'}
+  {cong-recv : \recv{x}P =_{one \; r} \recv{x}P'}
+
+  \inferrule
+  {P \; P' : \Process_n \\ P =_r P'}
+  {cong-send : \send{x}{y}P =_{one \; r} \send{x}{y}P'}
+
+  \inferrule
+  {P : \Process_n}
+  {refl : P =_{zero} P}
+
+  \inferrule
+  {P \; Q : \Process_n \\ P =_r Q}
+  {sym : Q =_{one \; r} P}
+
+  \inferrule
+  {P \; Q \; R : \Process_n \\ P =_r Q \\ Q =_s R}
+  {trans : P =_{two \; r \; s} R}
+\end{mathpar}
+\caption{Structural rewriting rules lifted to a congruent equivalence relation}
+\end{figure}
+  
+
 congruence relationship indexed by recursive tree
 
 \subsection{Reduction}
+
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule
+    {n : \N}
+    {\Channel_n : Set}}
+
+  \inferrule
+  { }
+  {nothing : \Channel_n}
+
+  \inferrule
+  {i : \Var_n}
+  {just \; i : \Channel_n}
+
+  {\mprset{fraction={===}}
+    \inferrule
+    {i : \Channel_n \\ P \; Q : \Process_n}
+    {P \reduce_i Q : Set}}
+
+  \inferrule
+  {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
+  {comm : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce_{just \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
+
+  \inferrule
+  {P \reduce_i P'}
+  {par : \comp{P}{Q} \reduce_i \comp{P'}{Q}}
+
+  \inferrule
+  {P \reduce_i Q}
+  {res : \new P \reduce_{dec\; i} \new Q}
+
+  \inferrule
+  {P = P' \\ P' \reduce_i Q}
+  {struct : P \reduce_i Q}
+\end{mathpar}
+\caption{Operational semantics indexed by reducing channel}
+\end{figure}
 
 keeping track of the variable on which communication occurs
 
@@ -119,25 +311,64 @@ keeping track of the variable on which communication occurs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Linear typing rules}
 
-\subsection{Variable references}
-
-\begin{description}
-  \item[Polarities]
-  \item[Multiple variables]
-  \item[Vectors]
-    Most general solution, $n$ possible multiplicities
-\end{description}
-
 \subsection{Multiplicities}
 
-Generalisation over indexed sets of \emph{partial commutative monoids}
+A type system with both linear and shared resources has multiplicities $0$, $1$ and $\omega$.
 
-given two multiplicities, the third is uniquely determined. this is better modelled through a function rather than an inductive type.
+\subsection{Variable references}
 
-polarities could be encoded into an albelian group. however these processes still need to be closed to be well-typed, or have some kind of predicate on the input context.
 
-\subsection{Variable types and multiplicities}
+\subsection{Contexts}
 
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule
+    {n : \N}
+    {\PreCtx_n : Set}
+  }
+
+  \inferrule
+  { }
+  {[] : \PreCtx_0}
+
+  \inferrule
+  {\gamma : \PreCtx_n \\ t : \Type}
+  {\gamma , t : \PreCtx_{\suc n}}
+\end{mathpar}
+\end{figure}
+  
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule
+    {n : \N}
+    {\Idxs_n : Set}}
+
+  \inferrule
+  { }
+  {[] : \Idxs_0}
+
+  \inferrule
+  {\imath : \Idxs_n \\ x : \Idx}
+  {\imath , x : \Idxs_{\suc n}}
+
+  \\
+  
+  {\mprset{fraction={===}}
+    \inferrule
+    {\imath : \Idxs n}
+    {\Ctx_\imath : Set}}
+  
+  \inferrule
+  { }
+  {[] : Ctx_{[]}}
+  
+  \inferrule
+  {\Gamma : \Ctx_\imath \\ c : \Carrier_x}
+  {\Gamma , c : \Ctx_{\imath , x}}
+\end{mathpar}
+\end{figure}
 two-layered approach: types on one hand, capabilities on the other
 removing from context vs keeping in context but marking it used
 
@@ -149,20 +380,29 @@ Variable references as proofs of capability
 
 Context splits at each variable reference
 
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule{
+      \gamma : \PreCtx_n \\
+      \inferrule*{}{
+        \imath : \Idxs_n \\\\
+        \Gamma : \Ctx_\imath} \\
+      P : \Process_n \\
+      \Delta : \Ctx_\imath}
+    {\types{\gamma}{\Gamma}{P}{\Delta} : Set}}
+  
+\end{mathpar}
+\end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Subject reduction}
 
 \subsection{Framing}
 
-Definition
-Let $\Gamma \type P \boxtimes \Delta$ and $\Gamma - Delta \equiv \Xi - \phi$.
-Then $\Xi \type P \boxtimes \phi$.
-
-By defining of $\uplus$ as a total function, $\Gamma - \Delta$ is no longer
-functional: $\omega - \omega$ results in any multiplicity, including $0$. Therefore
-$\Xi \type P \boxtimes \phi$ would imply that such a variable cannot appear in $P$.
 
 \subsection{Weakening}
+
+Suffices to model as a series of insertions.
 
 \subsection{Strengthening}
 
@@ -177,8 +417,8 @@ Work that will be done time permiting:
 
 \begin{description}
 
-\item [Soundness and completeness with respect to an alternative formalization.]
-
+\item [Affine types]
+  
 \item [Proof of progress]
 
 \item [Product types]
@@ -186,6 +426,8 @@ Work that will be done time permiting:
 \item [Sum types]
 
 \item [Decidable typechecking]
+
+\item [Soundness and completeness with respect to an alternative formalization.]
 
 \item [Encoding of session types]
 

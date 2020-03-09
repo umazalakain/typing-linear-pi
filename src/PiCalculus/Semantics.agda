@@ -89,6 +89,7 @@ module PiCalculus.Semantics where
     variable
       r p : RecTree
 
+  -- TODO: change names as per paper
   infixl 5 _≅⟨_⟩_
   data _≅⟨_⟩_ : Scoped n → RecTree → Scoped n → Set where
     stop_ : P ≈ Q → P ≅⟨ zero ⟩ Q
