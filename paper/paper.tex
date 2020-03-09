@@ -223,11 +223,14 @@ In the \picalc{} wowever, the syntax introduces unnecessary distinctions
 There are several ways around this, a structural congruence relation being one of the historical ones.
 (Others include labeled transition systems and higher inductive types.)
 
-\subsection{Structural congruence}
+\subsection{Structural Congruence}
 
 Structural congruence is a congruent equivalence relation on processes.
 Any two structurally congruent processes are strongly bisimilar: they are can follow each other's reduction steps \cite{}.
 Figure \ref{struct-cong-base} lists the base cases of structural congruence.
+The type $\Unused_0 \; Q$ witnesses that index $0$ does not appear nor in the inputs nor in the outputs of process $Q$ --- it does so by traversing $Q$.
+The function $lower \; 0 \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $0$.
+Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps variable references $0$ and $\suc 0$.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -326,15 +329,28 @@ To show that the doubly recursive call terminates we index the equivalence relat
   {\constr{sym} \; eq : Q =_{\constr{one} \; r} P}
 
   \inferrule
-  {eq_1 P =_r Q \\ \; eq_2 Q =_s R}
+  {eq_1 : P =_r Q \\ \; eq_2 : Q =_s R}
   {\constr{trans} \; eq_1 \; eq_2 : P =_{\constr{two} \; r \; s} R}
 \end{mathpar}
 \caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.
-  Premises $P$, $P'$, $Q$, and $R$ are of type $\Process_n$ where $n$ can be inferred}
+  Premises $P$, $P'$, $Q$, and $R$ are of type $\Process_n$ where $n$ can be inferred.}
 \label{struct-cong}
 \end{figure}
   
-\subsection{Reduction}
+\subsection{Operational Semantics}
+
+Figure \ref{reduction} models the operational semantics of the \picalc{}.
+Processes put in parallel reduce when they communicate over a common variable.
+The receiving process substitutes references to its most immediate variable with references to the variable sent by the process doing the output, and is then \emph{lowered} --- all variable references are decreased by one.
+Reduction is closed under structural congruence and goes under parallel composition and scope restriction
+--- but notably not under input nor output, otherwise the sequencing of actions would not be preserved.
+In \S \ref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
+However, this reduction operation is effectful: it consumes the variable over which communication happens.
+If this variable is external to $P$ (it resides in its context) then the context in which $Q$ is typed must change.
+To keep track of this information, we lift the variable index over which communication occurs to the type level.
+Every time we come out of a binder we decrement this variable.
+To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ --- as opposed to an $inc$ function that would not.
+
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -345,11 +361,11 @@ To show that the doubly recursive call terminates we index the equivalence relat
 
   \inferrule
   { }
-  {\constr{nothing} : \Channel_n}
+  {\constr{internal} : \Channel_n}
 
   \inferrule
   {i : \Var_n}
-  {\constr{just} \; i : \Channel_n}
+  {\constr{external} \; i : \Channel_n}
 
   {\mprset{fraction={===}}
     \inferrule
@@ -358,7 +374,7 @@ To show that the doubly recursive call terminates we index the equivalence relat
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce_{just \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce_{external \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
 
   \inferrule
   {red : P \reduce_i P'}
@@ -372,14 +388,12 @@ To show that the doubly recursive call terminates we index the equivalence relat
   {eq : P = P' \\ red : P' \reduce_i Q}
   {\constr{struct} \; eq \; red : P \reduce_i Q}
 \end{mathpar}
-\caption{Operational semantics indexed by reducing channel}
+\caption{Operational semantics indexed by the channel over which reduction occurs.}
+\label{reduction}
 \end{figure}
 
-keeping track of the variable on which communication occurs
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Linear typing rules}
+\section{Resource-aware Typing System}
 
 \subsection{Multiplicities}
 
@@ -419,12 +433,9 @@ A type system with both linear and shared resources has multiplicities $0$, $1$ 
 \caption{Indexed set of partial commutative monoids}
 \end{figure}
 
-\subsubsection{Example type systems}
+\subsubsection{Example Type Systems}
 
 Shared. Gradual. Affine. Linear.
-
-\subsection{Variable references}
-
 
 \subsection{Contexts}
 
@@ -482,9 +493,7 @@ Shared. Gradual. Affine. Linear.
 two-layered approach: types on one hand, capabilities on the other
 removing from context vs keeping in context but marking it used
 
-\subsection{Typing with leftovers}
-
-\subsubsection{Typing relation}
+\subsection{Typing with Leftovers}
 
 Variable references as proofs of capability
 
@@ -557,7 +566,7 @@ Context splits at each variable reference
 \caption{This is...}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Subject reduction}\label{subject-reduction}
+\section{Subject Reduction}\label{subject-reduction}
 
 \subsection{Framing}
 
@@ -570,12 +579,12 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 
 \subsection{Swapping}
 
-\subsection{Subject congruence}\label{subject-congruence}
+\subsection{Subject Congruence}\label{subject-congruence}
 
 \subsection{Substitution}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\section{Related work}
+\section{Related Work}
 
 \cite{previous-work} polymorphic tokens, HOAS
 
@@ -589,7 +598,7 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Future work}
+\section{Future Work}
 
 Work that will be done time permiting:
 
