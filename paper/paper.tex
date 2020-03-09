@@ -147,11 +147,27 @@ Some constructors are shared across types. They can however always be disambigua
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 
-variable references (strings, locally named, de Bruijn)
+Abstraction is one of the key reasoning tools in a language: it allows for features to be defined over a range of inputs.
+Such is the case of the \picalc{} too, where both scope restriction and input introduce abstractions.
+The bodies of these constructs must have a way of referring to their argument.
+Using names as variable references is a popular option amongst humans.
+However, names are cumbersome to mechanize: inserting a new variable into an environment means proving that the name of such variable is different to all other variable names in the environment.
+Moreover, to a machine names are of no significance whatsoever.
 
-allows to ignore alpha conversion, or proofs of inequality between strings
+Machines prefer things they can algorithmically act upon. Like natural numbers!
+What does it mean to use a number as a variable reference?
+The idea de Bruijn had \cite{} was to use the index $n$ to refer to the variable introduced $n$ binders ago.
+The binders themselves introduce no names anymore.
+The expression $\lambda g . (\lambda f . f g) g$ in the $\lambda$-calculus would translate as $\lambda (\lambda 0 1) 0$.
+That is, terms at different \emph{depths} must use different indices to refer to the same binding.
+Humans find this often confusing.
+There is however no reason not to keep the original names bestowed by the humans together with the indices.
+Machines can then manipulate references mechanically and still use names to present them to humans.
 
-strings to maybe de Bruijn, names can be kept in context as well, just not doing it
+A variable occurring under $n$ abstractions has $n$ things to refer to.
+References outside of that range have no associated meaning.
+It is useful to rule out these nonsensical terms syntactically.
+In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -162,14 +178,19 @@ strings to maybe de Bruijn, names can be kept in context as well, just not doing
 
   \inferrule
   {n : \N}
-  {0 : \Var_n}
+  {0 : \Var_{\suc n}}
 
   \inferrule
   {x : \Var_n}
   {\suc x : \Var_{\suc n}}
 \end{mathpar}
 \caption{Types of size $n$}
+\label{var}
 \end{figure}
+
+Every time we go under a binder, the number of binders a variable might refer to increments by one.
+To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
+As shown in Figure \ref{process}, we increase the \emph{depth} counter every time we create a new channel or receive some input.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -189,7 +210,16 @@ strings to maybe de Bruijn, names can be kept in context as well, just not doing
 \end{split}
 \end{equation*}
 \caption{Well-scoped grammar using de Bruijn indices}
+\label{process}
 \end{figure}
+
+Unlike with names, using type-level de Bruijn indices makes our syntax well-scoped by construction.
+As a consequence, the semantics of our language can be defined on the totality of the syntax.
+User-friendliness can still be recovered through a function that converts processes with names into (possibly) processes with indices.
+This function would keep track of what index is associated with what name, and would traverse the process recursively, taking note of new binders and substituting variable references.
+If the process is ill-scoped, the function would return nothing.
+To print things back to the user names can be substituted with an index together with the name.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
