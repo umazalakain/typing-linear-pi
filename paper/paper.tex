@@ -6,7 +6,7 @@
 \usepackage{enumitem}
 \setlist{parsep=0pt,listparindent=\parindent}
 \usepackage{amssymb}
-\usepackage{amsmath}
+\usepackage[fleqn]{amsmath}
 \usepackage{amsbsy}
 \usepackage[many]{tcolorbox}
 \bibliographystyle{plainurl}
@@ -52,7 +52,9 @@
 \newcommand{\Picalc}{$\pi$-Calculus}
 \newcommand{\reduce}{\longrightarrow}
 \newcommand{\types}[4]{#1 \propto #2 \vdash #3 \boxtimes #4}
+\newcommand{\contains}[5]{#1 \propto #2 \ni #3 \propto #4 \boxtimes #5}
 \newcommand{\suc}{{\scriptscriptstyle 1+}}
+\newcommand{\op}[3]{#1 := #2 \cdot #3}
 
 % Types
 \newcommand{\Var}{\mathrm{VAR}}
@@ -67,6 +69,9 @@
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\Channel}{\mathrm{CHANNEL}}
 \newcommand{\Rec}{\mathrm{REC}}
+\newcommand{\Quantifier}{\mathrm{QUANTIFIER}}
+\newcommand{\Quantifiers}{\mathrm{QUANTIFIERS}}
+\newcommand{\constr}[1]{\mathtt{#1}}
 
 
 \begin{document}
@@ -106,6 +111,31 @@ leftover typing
 
   \item [Full formalisation available in Agda]
 \end{description}
+
+\subsection{Notation}
+
+\begin{figure}[h]
+  \begin{mathpar}
+    {\mprset{fraction={===}}
+      \inferrule
+      { }
+      {\N : Set}}
+
+    \inferrule
+    { }
+    {0 : \N}
+
+    \inferrule
+    {n : \N}
+    {\suc n : \N}
+  \end{mathpar}
+  \caption{Notation used in this paper}
+\end{figure}
+
+Double rule for type-level definitions.
+We omit universe levels for brevity.
+Constructors are $\constr{teletyped}$ unless they are symbols.
+Some constructors are shared across types. They can however always be disambiguated through the type of the goal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Related work}
@@ -170,34 +200,34 @@ strings to maybe de Bruijn, names can be kept in context as well, just not doing
 \begin{mathpar}
   {\mprset{fraction={===}}
     \inferrule
-    {P \, Q : \Process_n}
+    { }
     {P \equiv_n Q : Set}}
 
   \inferrule
-  {P \; Q \; R : \Process_n}
-  {comp-assoc : \comp{P}{\comp{Q}{R}} \equiv_n \comp{\comp{P}{Q}}{R}}
+  { }
+  {\constr{comp-assoc} : \comp{P}{\comp{Q}{R}} \equiv_n \comp{\comp{P}{Q}}{R}}
 
   \inferrule
-  {P \; Q : \Process_n}
-  {comp-sym : \comp{P}{Q} \equiv_n \comp{Q}{P}}
-  
-  \inferrule
-  {P : \Process_n}
-  {comp-end : \comp{P}{\PO_n} \equiv_n P}
+  { }
+  {\constr{comp-sym} : \comp{P}{Q} \equiv_n \comp{Q}{P}}
   
   \inferrule
   { }
-  {scope-end : \new \PO_{\suc n} \equiv_n \PO_n}
+  {\constr{comp-end} : \comp{P}{\PO_n} \equiv_n P}
+  
+  \inferrule
+  { }
+  {\constr{scope-end} : \new \PO_{\suc n} \equiv_n \PO_n}
   
   \inferrule
   {P \, Q : \Process_{\suc n} \\ uQ : \Unused_0 \, Q}
-  {scope-ext : \new (\comp{P}{Q}) \equiv_n \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
+  {\constr{scope-ext} : \new (\comp{P}{Q}) \equiv_n \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
 
   \inferrule
   {P : \Process_{\suc \suc n}}
-  {scope-comm : \new \new P \equiv_n \new \new swap \; 0 \; P}
+  {\constr{scope-comm} : \new \new P \equiv_n \new \new swap \; 0 \; P}
 \end{mathpar}
-\caption{Structural rewriting rules}
+\caption{Structural rewriting rules indexed by recursion tree. $P \; Q \; R : \Process_n$ where $P$, $Q$, or $R$ have been omitted for brevity.}
 \end{figure}
 
 \begin{figure}[h]
@@ -211,15 +241,15 @@ strings to maybe de Bruijn, names can be kept in context as well, just not doing
 
   \inferrule
   { }
-  {zero : \Rec}
+  {\constr{zero} : \Rec}
   
   \inferrule
   {r : \Rec}
-  {one \; r : \Rec}
+  {\constr{one} \; r : \Rec}
 
   \inferrule
   {r \; s : \Rec}
-  {two \; r \; s : \Rec}
+  {\constr{two} \; r \; s : \Rec}
   
   {\mprset{fraction={===}}
     \inferrule
@@ -227,38 +257,38 @@ strings to maybe de Bruijn, names can be kept in context as well, just not doing
     {P =_r Q : Set}}
 
   \inferrule
-  {P \; Q : \Process_n \\ P \equiv_n Q}
-  {struct : P =_{zero} Q}
+  {P \equiv_n Q}
+  {\constr{struct} : P =_{\constr{zero}} Q}
 
   \inferrule
   {P \; P' : \Process_{\suc n} \\ P =_r P'}
-  {cong-scope : \new P =_{one \; r} \new P'}
+  {\constr{cong-scope} : \new P =_{\constr{one} \; r} \new P'}
 
   \inferrule
-  {P \; P' : \Process_n \\ P =_r P'}
-  {cong-comp : \comp{P}{Q} =_{one \; r} \comp{P'}{Q}}
+  {P =_r P'}
+  {\constr{cong-comp} : \comp{P}{Q} =_{\constr{one} \; r} \comp{P'}{Q}}
 
   \inferrule
   {P \; P' : \Process_{\suc n} \\ P =_r P'}
-  {cong-recv : \recv{x}P =_{one \; r} \recv{x}P'}
+  {\constr{cong-recv} : \recv{x}P =_{\constr{one} \; r} \recv{x}P'}
 
   \inferrule
-  {P \; P' : \Process_n \\ P =_r P'}
-  {cong-send : \send{x}{y}P =_{one \; r} \send{x}{y}P'}
+  {P =_r P'}
+  {\constr{cong-send} : \send{x}{y}P =_{\constr{one} \; r} \send{x}{y}P'}
 
   \inferrule
   {P : \Process_n}
-  {refl : P =_{zero} P}
+  {\constr{refl} : P =_{\constr{zero}} P}
 
   \inferrule
-  {P \; Q : \Process_n \\ P =_r Q}
-  {sym : Q =_{one \; r} P}
+  {P =_r Q}
+  {\constr{sym} : Q =_{\constr{one} \; r} P}
 
   \inferrule
-  {P \; Q \; R : \Process_n \\ P =_r Q \\ Q =_s R}
-  {trans : P =_{two \; r \; s} R}
+  {P =_r Q \\ Q =_s R}
+  {\constr{trans} : P =_{\constr{two} \; r \; s} R}
 \end{mathpar}
-\caption{Structural rewriting rules lifted to a congruent equivalence relation}
+\caption{Structural rewriting rules lifted to a congruent equivalence relation. $P \; P' \; Q\; R : \Process_n$ where $P$, $P'$, $Q$, or $R$ have been omitted for brevity.}
 \end{figure}
   
 
@@ -275,11 +305,11 @@ congruence relationship indexed by recursive tree
 
   \inferrule
   { }
-  {nothing : \Channel_n}
+  {\constr{nothing} : \Channel_n}
 
   \inferrule
   {i : \Var_n}
-  {just \; i : \Channel_n}
+  {\constr{just} \; i : \Channel_n}
 
   {\mprset{fraction={===}}
     \inferrule
@@ -288,19 +318,19 @@ congruence relationship indexed by recursive tree
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
-  {comm : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce_{just \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce_{just \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
 
   \inferrule
   {P \reduce_i P'}
-  {par : \comp{P}{Q} \reduce_i \comp{P'}{Q}}
+  {\constr{par} : \comp{P}{Q} \reduce_i \comp{P'}{Q}}
 
   \inferrule
   {P \reduce_i Q}
-  {res : \new P \reduce_{dec\; i} \new Q}
+  {\constr{res} : \new P \reduce_{dec\; i} \new Q}
 
   \inferrule
   {P = P' \\ P' \reduce_i Q}
-  {struct : P \reduce_i Q}
+  {\constr{struct} : P \reduce_i Q}
 \end{mathpar}
 \caption{Operational semantics indexed by reducing channel}
 \end{figure}
@@ -314,6 +344,44 @@ keeping track of the variable on which communication occurs
 \subsection{Multiplicities}
 
 A type system with both linear and shared resources has multiplicities $0$, $1$ and $\omega$.
+
+\begin{figure}[h]
+\begin{equation}
+\begin{split}
+  \constr{0\cdot}          &: C \\
+  \constr{+\cdot}          &: C \\
+  \constr{-\cdot}          &: C \\
+  \constr{\op{\_}{\_}{\_}} &: C \to C \to C \to Set \\
+  \constr{1\cdot}          &: C \\
+  \constr{\cdot-join}      &: \forall \{x y z\} \to \op{x}{y}{+\cdot} \to \op{x}{z}{-\cdot} \to \exists w . (\op{x}{w}{1\cdot}) \\
+  \constr{\cdot-compute}   &: \forall y z \to Dec (\exists x . (\op{x}{y}{z})) \\
+  \constr{\cdot-compute^l} &: \forall x z \to Dec (\exists y . (\op{x}{y}{z})) \\
+  \constr{\cdot-unique}    &: \forall \{x x' y z\} \to \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+  \constr{\cdot-unique^l}  &: \forall \{x y y' z\} \to \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+  \constr{\cdot-id^l}      &: \forall x \to \op{x}{0\cdot}{x} \\
+  \constr{\cdot-comm}      &: \forall \{x y z\} \to \op{x}{y}{z} \to \op{x}{z}{y} \\
+  \constr{\cdot-assoc}     &: \forall \{x y z u v\} \to \op{x}{y}{z} \to \op{y}{u}{v} \to \exists w . (\op{x}{u}{w} \times \op{w}{v}{z})
+\end{split}
+\end{equation}
+\caption{Partial commutative monoid}
+\end{figure}
+\todo{alignment, get rid of $1\cdot$, $\cdot-join$, $\cdot-compute^l$}
+
+\begin{figure}[h]
+\begin{equation}
+\begin{split}
+  \constr{\Idx}          &: Set \\
+  \constr{\exists \Idx}  &: Idx \\
+  \constr{\Carrier}      &: \Idx \to Set \\
+  \constr{\Quantifiers}  &: \forall i : \Idx \to \Quantifier_{\Carrier_i}
+\end{split}
+\end{equation}
+\caption{Indexed set of partial commutative monoids}
+\end{figure}
+
+\subsubsection{Example type systems}
+
+Shared. Gradual. Affine. Linear.
 
 \subsection{Variable references}
 
@@ -350,23 +418,23 @@ A type system with both linear and shared resources has multiplicities $0$, $1$ 
   {[] : \Idxs_0}
 
   \inferrule
-  {\imath : \Idxs_n \\ x : \Idx}
-  {\imath , x : \Idxs_{\suc n}}
+  {is : \Idxs_n \\ i : \Idx}
+  {is , i : \Idxs_{\suc n}}
 
   \\
   
   {\mprset{fraction={===}}
     \inferrule
-    {\imath : \Idxs n}
-    {\Ctx_\imath : Set}}
+    {is : \Idxs_n}
+    {\Ctx_{is} : Set}}
   
   \inferrule
   { }
   {[] : Ctx_{[]}}
   
   \inferrule
-  {\Gamma : \Ctx_\imath \\ c : \Carrier_x}
-  {\Gamma , c : \Ctx_{\imath , x}}
+  {\Gamma : \Ctx_{is} \\ x : \Carrier_i}
+  {\Gamma , x : \Ctx_{is , i}}
 \end{mathpar}
 \end{figure}
 two-layered approach: types on one hand, capabilities on the other
@@ -386,12 +454,62 @@ Context splits at each variable reference
     \inferrule{
       \gamma : \PreCtx_n \\
       \inferrule*{}{
-        \imath : \Idxs_n \\\\
-        \Gamma : \Ctx_\imath} \\
+        is : \Idxs_n \\\\
+        \Gamma : \Ctx_{is}} \\
+      t : \Type \\
+      x : \Carrier_i \\
+      \Delta : \Ctx_{is}}
+    {\contains{\gamma}{\Gamma}{t}{x}{\Delta} : Set}}
+
+  \inferrule
+  {\Gamma : \Ctx_{is} \\ y \; z : \Carrier_i \\ True (\constr{\cdot-compute} \; y \; z)}
+  {\constr{zero} : \contains{\gamma , t}{\Gamma , x}{t}{y}{\Gamma , z}}
+  
+  \inferrule
+  {\Gamma : \Ctx_{is} \\ x : \Carrier_i \\ x' : \Carrier_j \\ \Delta : \Ctx_{is} \\\\
+    loc_x : \contains{\gamma}{\Gamma}{t}{x}{\Delta}}
+  {\constr{suc} : \contains{\gamma , t}{\Gamma , x'}{t}{x}{\Delta , x'}}
+\end{mathpar}
+\end{figure}
+
+\begin{figure}[h]
+\begin{mathpar}
+  \mprset{flushleft}
+  
+  {\mprset{fraction={===}}
+    \inferrule{
+      \gamma : \PreCtx_n \\
+      \inferrule*{}{
+        is : \Idxs_n \\\\
+        \Gamma : \Ctx_{is}} \\
       P : \Process_n \\
-      \Delta : \Ctx_\imath}
+      \Delta : \Ctx_{is}}
     {\types{\gamma}{\Gamma}{P}{\Delta} : Set}}
   
+  \inferrule
+  { }
+  {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
+
+  \inferrule
+  {t : \Type \\ x : \Carrier_i \\ y : \Carrier_j \\\\
+   cont : \types{\gamma , C[ t \propto x ]}{\Gamma , y}{P}{\Delta , 0.}}
+  {\constr{chan} : \types{\gamma}{\Gamma}{\new P}{\Delta}}
+
+  \inferrule
+  {chan_x : \contains{\gamma}{\Gamma}{C[ t \propto x]}{+\cdot}{\Xi} \\\\
+   cont : \types{\gamma , t}{\Xi , x}{P}{\Theta , 0\cdot}}
+  {\constr{recv} : \types{\gamma}{\Gamma}{\recv{toFin \; chan_x}{P}}{\Theta}}
+
+  \inferrule
+  {chan_x : \contains{\gamma}{\Gamma}{C[t \propto x]}{-\cdot}{\Delta} \\\\
+   loc_y : \contains{\gamma}{\Delta}{t}{x}{\Xi} \\\\
+   cont : \types{\gamma}{\Xi}{P}{\Theta}}
+  {\constr{send} : \types{\gamma}{\Gamma}{\send{toFin \; chan_x}{toFin \; loc_y}P}{\Theta}}
+
+  \inferrule
+  {left : \types{\gamma}{\Gamma}{P}{\Delta} \\\\
+    right : \types{\gamma}{\Delta}{Q}{\Xi}}
+  {\constr{comp} : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
 \end{mathpar}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -402,7 +520,7 @@ Context splits at each variable reference
 
 \subsection{Weakening}
 
-Suffices to model as a series of insertions.
+Order preserving embeddings model a series of insertions. We only ever need one insertion to prove subject congruence, but there is no loss of generality.
 
 \subsection{Strengthening}
 
