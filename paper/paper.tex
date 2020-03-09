@@ -48,6 +48,7 @@
 \newcommand{\recv}[1]{#1 \, \mathbb{()} \,}
 
 \newcommand{\subst}[3]{#1[#2/#3]}
+\newcommand{\lamcalc}{$\lambda$-calculus}
 \newcommand{\picalc}{$\pi$-calculus}
 \newcommand{\Picalc}{$\pi$-Calculus}
 \newcommand{\reduce}{\longrightarrow}
@@ -138,13 +139,6 @@ Constructors are $\constr{teletyped}$ unless they are symbols.
 Some constructors are shared across types. They can however always be disambiguated through the type of the goal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Related work}
-
-\cite{previous-work} polymorphic tokens, HOAS
-
-\cite{typing-with-leftovers}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 
 Abstraction is one of the key reasoning tools in a language: it allows for features to be defined over a range of inputs.
@@ -158,7 +152,7 @@ Machines prefer things they can algorithmically act upon. Like natural numbers!
 What does it mean to use a number as a variable reference?
 The idea de Bruijn had \cite{} was to use the index $n$ to refer to the variable introduced $n$ binders ago.
 The binders themselves introduce no names anymore.
-The expression $\lambda g . (\lambda f . f g) g$ in the $\lambda$-calculus would translate as $\lambda (\lambda 0 1) 0$.
+The expression $\lambda g . (\lambda f . f g) g$ in the \lamcalc{} would translate as $\lambda (\lambda 0 1) 0$.
 That is, terms at different \emph{depths} must use different indices to refer to the same binding.
 Humans find this often confusing.
 There is however no reason not to keep the original names bestowed by the humans together with the indices.
@@ -220,45 +214,62 @@ This function would keep track of what index is associated with what name, and w
 If the process is ill-scoped, the function would return nothing.
 To print things back to the user names can be substituted with an index together with the name.
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 
+In the \lamcalc{} $\beta$-reduction operates on syntactically adjacent terms.
+In the \picalc{} wowever, the syntax introduces unnecessary distinctions
+(e.g. semantically parallel composition is defined modulo associativity and commutativity).
+There are several ways around this, a structural congruence relation being one of the historical ones.
+(Others include labeled transition systems and higher inductive types.)
+
 \subsection{Structural congruence}
+
+Structural congruence is a congruent equivalence relation on processes.
+Any two structurally congruent processes are strongly bisimilar: they are can follow each other's reduction steps \cite{}.
+Figure \ref{struct-cong-base} lists the base cases of structural congruence.
 
 \begin{figure}[h]
 \begin{mathpar}
   {\mprset{fraction={===}}
     \inferrule
     { }
-    {P \equiv_n Q : Set}}
+    {P \equiv Q : Set}}
 
   \inferrule
   { }
-  {\constr{comp-assoc} : \comp{P}{\comp{Q}{R}} \equiv_n \comp{\comp{P}{Q}}{R}}
+  {\constr{comp-assoc} : \comp{P}{\comp{Q}{R}} \equiv \comp{\comp{P}{Q}}{R}}
 
   \inferrule
   { }
-  {\constr{comp-sym} : \comp{P}{Q} \equiv_n \comp{Q}{P}}
+  {\constr{comp-sym} : \comp{P}{Q} \equiv \comp{Q}{P}}
   
   \inferrule
   { }
-  {\constr{comp-end} : \comp{P}{\PO_n} \equiv_n P}
+  {\constr{comp-end} : \comp{P}{\PO_n} \equiv P}
   
   \inferrule
   { }
-  {\constr{scope-end} : \new \PO_{\suc n} \equiv_n \PO_n}
+  {\constr{scope-end} : \new \PO_{\suc n} \equiv \PO_n}
   
   \inferrule
-  {P \, Q : \Process_{\suc n} \\ uQ : \Unused_0 \, Q}
-  {\constr{scope-ext} : \new (\comp{P}{Q}) \equiv_n \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
+  {uQ : \Unused_0 \, Q}
+  {\constr{scope-ext} : \new (\comp{P}{Q}) \equiv \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
 
   \inferrule
-  {P : \Process_{\suc \suc n}}
-  {\constr{scope-comm} : \new \new P \equiv_n \new \new swap \; 0 \; P}
+  { }
+  {\constr{scope-comm} : \new \new P \equiv \new \new swap \; 0 \; P}
 \end{mathpar}
-\caption{Structural rewriting rules indexed by recursion tree. $P \; Q \; R : \Process_n$ where $P$, $Q$, or $R$ have been omitted for brevity.}
+\caption{Structural rewriting rules. Premises $P$, $Q$ and $R$ are of type $\Process_n$ where $n$ can be inferred.}
+\label{struct-cong-base}
 \end{figure}
+
+Structural congruence is a congruent equivalence relation ship.
+As such, rewrites can happen at any point in a process' recursive definition, and they are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{struct-cong}.
+In \S \ref{subject-congruence} we will prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then $Q$ is well-typed.
+Specifically, in the case of transitivity we must prove that if $P$ is structurally congruent with $Q$ and $Q$ with $R$, and $P$ is well-typed, then so is $R$.
+To do so, we will have to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
+To show that the doubly recursive call terminates we index the equivalence relation $=$ by the type $\Rec$, which models the structure of the recursion.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -287,43 +298,42 @@ To print things back to the user names can be substituted with an index together
     {P =_r Q : Set}}
 
   \inferrule
-  {P \equiv_n Q}
-  {\constr{struct} : P =_{\constr{zero}} Q}
+  {eq : P \equiv Q}
+  {\constr{struct} \; eq : P =_{\constr{zero}} Q}
 
   \inferrule
-  {P \; P' : \Process_{\suc n} \\ P =_r P'}
-  {\constr{cong-scope} : \new P =_{\constr{one} \; r} \new P'}
+  {eq : P =_r P'}
+  {\constr{cong-scope} \; eq : \new P =_{\constr{one} \; r} \new P'}
 
   \inferrule
-  {P =_r P'}
-  {\constr{cong-comp} : \comp{P}{Q} =_{\constr{one} \; r} \comp{P'}{Q}}
+  {eq : P =_r P'}
+  {\constr{cong-comp} \; eq : \comp{P}{Q} =_{\constr{one} \; r} \comp{P'}{Q}}
 
   \inferrule
-  {P \; P' : \Process_{\suc n} \\ P =_r P'}
-  {\constr{cong-recv} : \recv{x}P =_{\constr{one} \; r} \recv{x}P'}
+  {eq : P =_r P'}
+  {\constr{cong-recv} \; eq : \recv{x}P =_{\constr{one} \; r} \recv{x}P'}
 
   \inferrule
-  {P =_r P'}
-  {\constr{cong-send} : \send{x}{y}P =_{\constr{one} \; r} \send{x}{y}P'}
+  {eq : P =_r P'}
+  {\constr{cong-send} \; eq : \send{x}{y}P =_{\constr{one} \; r} \send{x}{y}P'}
 
   \inferrule
-  {P : \Process_n}
+  { }
   {\constr{refl} : P =_{\constr{zero}} P}
 
   \inferrule
-  {P =_r Q}
-  {\constr{sym} : Q =_{\constr{one} \; r} P}
+  {eq : P =_r Q}
+  {\constr{sym} \; eq : Q =_{\constr{one} \; r} P}
 
   \inferrule
-  {P =_r Q \\ Q =_s R}
-  {\constr{trans} : P =_{\constr{two} \; r \; s} R}
+  {eq_1 P =_r Q \\ \; eq_2 Q =_s R}
+  {\constr{trans} \; eq_1 \; eq_2 : P =_{\constr{two} \; r \; s} R}
 \end{mathpar}
-\caption{Structural rewriting rules lifted to a congruent equivalence relation. $P \; P' \; Q\; R : \Process_n$ where $P$, $P'$, $Q$, or $R$ have been omitted for brevity.}
+\caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.
+  Premises $P$, $P'$, $Q$, and $R$ are of type $\Process_n$ where $n$ can be inferred}
+\label{struct-cong}
 \end{figure}
   
-
-congruence relationship indexed by recursive tree
-
 \subsection{Reduction}
 
 \begin{figure}[h]
@@ -351,16 +361,16 @@ congruence relationship indexed by recursive tree
   {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce_{just \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
 
   \inferrule
-  {P \reduce_i P'}
-  {\constr{par} : \comp{P}{Q} \reduce_i \comp{P'}{Q}}
+  {red : P \reduce_i P'}
+  {\constr{par} \; red : \comp{P}{Q} \reduce_i \comp{P'}{Q}}
 
   \inferrule
-  {P \reduce_i Q}
-  {\constr{res} : \new P \reduce_{dec\; i} \new Q}
+  {red : P \reduce_i Q}
+  {\constr{res} \; red : \new P \reduce_{dec\; i} \new Q}
 
   \inferrule
-  {P = P' \\ P' \reduce_i Q}
-  {\constr{struct} : P \reduce_i Q}
+  {eq : P = P' \\ red : P' \reduce_i Q}
+  {\constr{struct} \; eq \; red : P \reduce_i Q}
 \end{mathpar}
 \caption{Operational semantics indexed by reducing channel}
 \end{figure}
@@ -500,7 +510,7 @@ Context splits at each variable reference
   \inferrule
   {\Gamma : \Ctx_{is} \\ x : \Carrier_i \\ x' : \Carrier_j \\ \Delta : \Ctx_{is} \\\\
     loc_x : \contains{\gamma}{\Gamma}{t}{x}{\Delta}}
-  {\constr{suc} : \contains{\gamma , t}{\Gamma , x'}{t}{x}{\Delta , x'}}
+  {\constr{suc} \; loc_x : \contains{\gamma , t}{\Gamma , x'}{t}{x}{\Delta , x'}}
 \end{mathpar}
 \caption{This is...}
 \end{figure}
@@ -526,28 +536,28 @@ Context splits at each variable reference
   \inferrule
   {t : \Type \\ x : \Carrier_i \\ y : \Carrier_j \\\\
    cont : \types{\gamma , C[ t \propto x ]}{\Gamma , y}{P}{\Delta , 0.}}
-  {\constr{chan} : \types{\gamma}{\Gamma}{\new P}{\Delta}}
+  {\constr{chan} \; t \; x \; y : \types{\gamma}{\Gamma}{\new P}{\Delta}}
 
   \inferrule
   {chan_x : \contains{\gamma}{\Gamma}{C[ t \propto x]}{+\cdot}{\Xi} \\\\
    cont : \types{\gamma , t}{\Xi , x}{P}{\Theta , 0\cdot}}
-  {\constr{recv} : \types{\gamma}{\Gamma}{\recv{toFin \; chan_x}{P}}{\Theta}}
+  {\constr{recv} \; chan_x \; cont : \types{\gamma}{\Gamma}{\recv{toFin \; chan_x}{P}}{\Theta}}
 
   \inferrule
   {chan_x : \contains{\gamma}{\Gamma}{C[t \propto x]}{-\cdot}{\Delta} \\\\
    loc_y : \contains{\gamma}{\Delta}{t}{x}{\Xi} \\\\
    cont : \types{\gamma}{\Xi}{P}{\Theta}}
-  {\constr{send} : \types{\gamma}{\Gamma}{\send{toFin \; chan_x}{toFin \; loc_y}P}{\Theta}}
+  {\constr{send} \; chan_x \; loc_y \; cont : \types{\gamma}{\Gamma}{\send{toFin \; chan_x}{toFin \; loc_y}P}{\Theta}}
 
   \inferrule
-  {left : \types{\gamma}{\Gamma}{P}{\Delta} \\\\
-    right : \types{\gamma}{\Delta}{Q}{\Xi}}
-  {\constr{comp} : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
+  {l : \types{\gamma}{\Gamma}{P}{\Delta} \\\\
+   r : \types{\gamma}{\Delta}{Q}{\Xi}}
+  {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
 \end{mathpar}
 \caption{This is...}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Subject reduction}
+\section{Subject reduction}\label{subject-reduction}
 
 \subsection{Framing}
 
@@ -560,7 +570,23 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 
 \subsection{Swapping}
 
+\subsection{Subject congruence}\label{subject-congruence}
+
 \subsection{Substitution}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Related work}
+
+\cite{previous-work} polymorphic tokens, HOAS
+
+\cite{typing-with-leftovers}
+
+\cite{Higher-inductive-types-for-congruence}
+
+\cite{LTS-semantics}
+
+\cite{work-on-session-types}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Future work}
