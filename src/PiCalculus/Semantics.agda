@@ -4,7 +4,6 @@ open import Relation.Nullary using (_because_; ofʸ; ofⁿ)
 open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Nat.Base
-open import Data.Maybe using (Maybe; nothing; just)
 open import Data.Bool.Base using (false; true)
 open import Data.Product hiding (swap)
 
@@ -132,19 +131,21 @@ module PiCalculus.Semantics where
   subst-unused j≢suci (x ⦅⦆ P) = substFin-unused x j≢suci , subst-unused (λ j≡suci → j≢suci (Finₚ.suc-injective j≡suci)) P
   subst-unused j≢suci (x ⟨ y ⟩ P) = substFin-unused x j≢suci , substFin-unused y j≢suci , subst-unused j≢suci P
 
-  Channel : (n : ℕ) → Set
-  Channel n = Maybe (Fin n)
+  data Channel : ℕ → Set where
+    internal : ∀ {n}         → Channel n
+    external : ∀ {n} → Fin n → Channel n
 
-  decrementChannel : Channel (suc n) → Channel n
-  decrementChannel nothing = nothing
-  decrementChannel (just zero) = nothing
-  decrementChannel (just (suc i)) = just i
+  dec : Channel (suc n) → Channel n
+  dec internal = internal
+  dec (external zero) = internal
+  dec (external (suc i)) = external i
 
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
-    comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
+    comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i i' j : Fin n}
+         → i ≡ i'
          → let uP = subst-unused (λ ()) P in
-           (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ just i ]⇒ lower zero ([ suc j / zero ] P) uP ∥ Q
+           (i ⦅⦆ P) ∥ (i' ⟨ j ⟩ Q) =[ external i ]⇒ lower zero ([ suc j / zero ] P) uP ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'
@@ -152,7 +153,7 @@ module PiCalculus.Semantics where
 
     res_ : ∀ {c} {P Q : Scoped (1 + n)}
          → P =[ c ]⇒ Q
-         → new P =[ decrementChannel c ]⇒ new Q
+         → new P =[ dec c ]⇒ new Q
 
     struct : ∀ {c} {P Q P' : Scoped n}
            → P ≅⟨ r ⟩ P'

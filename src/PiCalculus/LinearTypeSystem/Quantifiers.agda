@@ -31,15 +31,10 @@ record Quantifier (Q : Set) : Set₁ where
     -∙         : Q
     _≔_∙_      : Q → Q → Q → Set
 
-    -- FIXME: we might not need this
-    1∙         : Q
-    ∙-join     : ∀ {x y z} → x ≔ y ∙ +∙ → x ≔ z ∙ -∙ → ∃[ w ] (x ≔ w ∙ 1∙)
+    ∙-join     : ∃[ 1∙ ] (1∙ ≔ +∙ ∙ -∙)
 
     -- Given two operands, we can decide whether a third one exists
     ∙-compute  : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
-
-    -- FIXME: we might not need this
-    ∙-computeˡ : ∀ x z         → Dec (∃[ y ] (x ≔ y ∙ z))
 
     -- If a third operand exists, it must be unique
     ∙-unique   : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
@@ -49,8 +44,14 @@ record Quantifier (Q : Set) : Set₁ where
     ∙-comm     : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
     ∙-assoc    : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
 
+  1∙ : Q
+  1∙ = proj₁ ∙-join
+
   ∙-idʳ : ∀ x → x ≔ x ∙ 0∙
   ∙-idʳ x = ∙-comm (∙-idˡ x)
+
+  ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ w ] (x ≔ w ∙ v × w ≔ y ∙ u)
+  ∙-assoc⁻¹ a b = let _ , a' , b' = ∙-assoc (∙-comm a) (∙-comm b) in _ , ∙-comm a' , ∙-comm b'
 
   ∙-compute-unique : ∀ {x y z} (p : x ≔ y ∙ z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙-compute _ _} (_ , p)))
   ∙-compute-unique {y = y} {z} p with ∙-compute y z
@@ -78,9 +79,6 @@ record Quantifiers : Set₁ where
       i : I
       is : Vec I n
 
-  cast : {i j : I} → i ≡ j → Cs i → Cs j
-  cast refl x = x
-
   _≔_⊎_ : Ctx is → Ctx is → Ctx is → Set
   _≔_⊎_ [] [] [] = ⊤
   _≔_⊎_ (Γ -, x) (Δ -, y) (Ξ -, z) = Γ ≔ Δ ⊎ Ξ × x ≔ y ∙ z
@@ -100,12 +98,14 @@ record Quantifiers : Set₁ where
   ... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
   ... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
+{-
   ⊎-computeˡ : (Γ Ξ : Ctx is) → Dec (∃[ Δ ] (Γ ≔ Δ ⊎ Ξ))
   ⊎-computeˡ [] [] = yes ([] , tt)
   ⊎-computeˡ (Γ -, x) (Ξ -, z) with ⊎-computeˡ Γ Ξ | ∙-computeˡ x z
   ... | yes (_ , ps)     | yes (_ , p) = yes ((_ -, _) , (ps , p))
   ... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
   ... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
+  -}
 
   ⊎-idˡ : (Γ : Ctx is) → Γ ≔ ε ⊎ Γ
   ⊎-idˡ [] = tt

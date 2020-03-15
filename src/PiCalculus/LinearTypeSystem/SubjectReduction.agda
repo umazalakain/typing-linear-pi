@@ -17,7 +17,7 @@ open Nat using (ℕ; zero; suc)
 open Fin using (Fin ; zero ; suc)
 open Vec using (Vec; []; _∷_)
 open Maybe using (nothing; just)
-open Product using (∃-syntax; _,_; proj₁; proj₂)
+open Product using (Σ-syntax; ∃-syntax; _,_; proj₁; proj₂)
 
 open import PiCalculus.Syntax
 open Scoped

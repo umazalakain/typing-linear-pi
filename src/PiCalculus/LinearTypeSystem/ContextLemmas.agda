@@ -17,7 +17,7 @@ open Maybe using (nothing; just)
 open Empty using (⊥)
 open Unit using (⊤; tt)
 open ℕ using (ℕ; zero; suc)
-open Product using (∃-syntax; _×_; _,_; proj₂; proj₁)
+open Product using (Σ-syntax; ∃-syntax; _×_; _,_; proj₂; proj₁)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
@@ -91,18 +91,18 @@ mult-update zero m' (ms -, m) = ms -, m'
 mult-update (suc i) m' (ms -, m) = mult-update i m' ms -, m
 
 _at_ : (∀ {i} → Cs i) → {n : ℕ} → Channel n → {is : Vec I n} → Ctx is
-_at_ x nothing = ε
-_at_ x (just zero) {_ -, _} = ε -, x
-_at_ x (just (suc e)) {_ -, _} = (x at (just e)) -, 0∙
+_at_ x internal = ε
+_at_ x (external zero) {_ -, _} = ε -, x
+_at_ x (external (suc e)) {_ -, _} = (x at (external e)) -, 0∙
 
 lookup-at : ∀ {n} (i : Fin n) {is : Vec I n} {x : ∀ {i} → Cs i}
-          → x ≡ All.lookup i (_at_ x (just i) {is})
+          → x ≡ All.lookup i (_at_ x (external i) {is})
 lookup-at zero {_ -, _} = refl
 lookup-at (suc i) {_ -, _} = lookup-at i
 
 ∋-at : {Γ Ξ Ξ' : Ctx is} {m : ∀ {i} → Cs i}
      → (x : γ w Γ ∋ t w m {i} ⊠ Ξ)
-     → Γ ≔ Ξ' ⊎ (m at (just (toFin x)))
+     → Γ ≔ Ξ' ⊎ (m at (external (toFin x)))
      → Ξ ≡ Ξ'
 ∋-at {Ξ' = _ -, _} (zero {check = check}) (Γ≔ , s≔) = _-,_
   & ⊎-unique Γ≔ (⊎-idʳ _)

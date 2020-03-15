@@ -37,7 +37,7 @@
 \ccsdesc[300]{Theory of computation~Process calculi}
 \keywords{pi calculus, linear, types, concurrency}
 \supplement{\url{https://github/umazalakain/typing-linear-pi}}
-\acknowledgements{I want to thank \dots}
+\acknowledgements{We want to thank Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Processes
@@ -93,7 +93,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
+We live in a concurrent world where any given state is often decided by the interaction between a myriad of parties --- people, machines, processors, services, networks.
+As humans, we aim to model, predict, and even construct such interactive systems.
+As mathematicians, abstraction is our tool of choice to do so.
+
 The \picalc models communication.
+
+The properties guaranteed by the picalc
 
 why resource-aware typing
 
@@ -218,7 +224,7 @@ To print things back to the user names can be substituted with an index together
 \section{Semantics}
 
 In the \lamcalc{} $\beta$-reduction operates on syntactically adjacent terms.
-In the \picalc{} wowever, the syntax introduces unnecessary distinctions
+In the \picalc{} however, the syntax introduces unnecessary distinctions
 (e.g. semantically parallel composition is defined modulo associativity and commutativity).
 There are several ways around this, a structural congruence relation being one of the historical ones.
 (Others include labeled transition systems and higher inductive types.)
@@ -267,7 +273,7 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
 \label{struct-cong-base}
 \end{figure}
 
-Structural congruence is a congruent equivalence relation ship.
+Structural congruence is a congruent equivalence relation.
 As such, rewrites can happen at any point in a process' recursive definition, and they are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{struct-cong}.
 In \S \ref{subject-congruence} we will prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then $Q$ is well-typed.
 Specifically, in the case of transitivity we must prove that if $P$ is structurally congruent with $Q$ and $Q$ with $R$, and $P$ is well-typed, then so is $R$.
