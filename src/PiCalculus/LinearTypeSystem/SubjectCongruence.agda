@@ -45,10 +45,9 @@ SubjectCongruence = {n : ℕ} {γ : PreCtx n} {is : Vec I n} {Γ Δ : Ctx is}
 private
   variable
     n : ℕ
-    is : Vec I n
     P Q : Scoped n
 
-comp-comm : {γ : PreCtx n} {Γ Ξ : Ctx is}
+comp-comm : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs}
           → γ w Γ ⊢ P ∥ Q ⊠ Ξ
           → γ w Γ ⊢ Q ∥ P ⊠ Ξ
 comp-comm (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q

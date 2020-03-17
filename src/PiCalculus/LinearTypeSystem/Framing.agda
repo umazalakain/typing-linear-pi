@@ -46,7 +46,7 @@ private
     Γ Θ Δ Ξ : Ctx is
     P Q : Scoped n
 
-∋-frame : {γ : PreCtx n} {Γ Θ Δ Ξ Ψ : Ctx is} {t : Type} {xs : Cs i}
+∋-frame : {γ : PreCtx n} {idxs : Vec I n} {Γ Θ Δ Ξ Ψ : Ctx idxs} {t : Type} {xs : Cs i}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
         → (x : γ w Γ ∋ t w xs ⊠ Θ)
         → Σ[ y ∈ γ w Ξ ∋ t w xs ⊠ Ψ ]
@@ -60,28 +60,30 @@ private
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x) | (y≔ , eq)
   rewrite ∙-uniqueˡ x≔ (∙-idˡ _) | ∙-unique x'≔ (∙-idˡ xs) = suc y≔ , cong suc eq
 
-⊢-frame : {γ : PreCtx n} {Γ Δ Θ Ξ Ψ : Ctx is}
+⊢-frame : {γ : PreCtx n} {idxs : Vec I n} {Γ Δ Θ Ξ Ψ : Ctx idxs}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
         → γ w Γ ⊢ P ⊠ Θ → γ w Ξ ⊢ P ⊠ Ψ
 
 ⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
   = chan t m μ (⊢-frame {Δ = _ -, μ} (Γ≔ , ∙-idʳ _) (Ξ≔ , ∙-idʳ _) ⊢P)
-⊢-frame Γ≔ Ξ≔ (recv x ⊢P) with ∋-⊎ x | ⊢-⊎ ⊢P
-⊢-frame Γ≔ Ξ≔ (recv x ⊢P) | _ , x≔ | (_ -, _) , (P≔ , xs≔) =
-  let xP≔           = ⊎-comp x≔ P≔ Γ≔
+⊢-frame Γ≔ Ξ≔ (recv x ⊢P) with ⊢-⊎ ⊢P
+⊢-frame Γ≔ Ξ≔ (recv x ⊢P) | (_ -, _) , (P≔ , xs≔) =
+  let xP≔           = ⊎-comp (∋-⊎ x) P≔ Γ≔
       _ , x'≔ , P'≔ = ⊎-assoc Ξ≔ xP≔
    in recv _ (⊢-frame {Δ = _ -, _} (P≔ , xs≔) (P'≔ , xs≔) ⊢P)
-      |> subst (λ ● → _ w _ ⊢ ● ⦅⦆ _ ⊠ _) (proj₂ (∋-frame x≔ x'≔ x))
+      |> subst (λ ● → _ w _ ⊢ ● ⦅⦆ _ ⊠ _) (proj₂ (∋-frame (∋-⊎ x) x'≔ x))
 ⊢-frame Γ≔ Ξ≔ (send x y ⊢P) with ∋-⊎ x | ∋-⊎ y | ⊢-⊎ ⊢P
-⊢-frame Γ≔ Ξ≔ (send x y ⊢P) | _ , x≔ | _ , y≔ | _ , P≔ =
+⊢-frame Γ≔ Ξ≔ (send x y ⊢P) | x≔ | y≔ | _ , P≔ =
   let [xy]P≔         = ⊎-comp (⊎-trans x≔ y≔) P≔ Γ≔
       _ , xy'≔ , P'≔ = ⊎-assoc Ξ≔ [xy]P≔
       xy≔            = ⊎-comp x≔ y≔ (⊎-trans x≔ y≔)
       _ , x'≔ , y'≔  = ⊎-assoc xy'≔ xy≔
    in send _ _ (⊢-frame P≔ P'≔ ⊢P)
-      |> subst (λ ● → _ w _ ⊢ ● ⟨ _ ⟩ _ ⊠ _) (proj₂ (∋-frame x≔ x'≔ x))
-      |> subst (λ ● → _ w _ ⊢ _ ⟨ ● ⟩ _ ⊠ _) (proj₂ (∋-frame y≔ y'≔ y))
+      |> subst (λ ● → _ w _ ⊢ ● ⟨ toFin (proj₁ (∋-frame y≔ y'≔ y)) ⟩ _ ⊠ _)
+               (proj₂ (∋-frame x≔ x'≔ x))
+      |> subst (λ ● → _ w _ ⊢ _ ⟨ ● ⟩ _ ⊠ _)
+               (proj₂ (∋-frame y≔ y'≔ y))
 ⊢-frame Γ≔ Ξ≔ (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q
 ⊢-frame Γ≔ Ξ≔ (comp ⊢P ⊢Q) | _ , P≔ | _ , Q≔ =
   let PQ≔           = ⊎-comp P≔ Q≔ Γ≔

@@ -36,77 +36,70 @@ open import PiCalculus.LinearTypeSystem Ω
 private
   variable
     n : ℕ
-    is : Vec I n
+    idxs : Vec I n
     γ : PreCtx n
-    i i' : I
+    idx idx' : I
     t : Type
     P Q : Scoped n
 
-∋-∙ : (δ : ∀ {i} → Cs i) {Γ Δ : Ctx is}
-    → (x : γ w Γ ∋ t w (δ {i}) ⊠ Δ)
-    → All.lookup (toFin x) Γ ≔ (δ {Vec.lookup is (toFin x)}) ∙ All.lookup (toFin x) Δ
-∋-∙ δ (zero {check = check}) = proj₂ (toWitness check)
-∋-∙ δ (suc x) = ∋-∙ δ x
+only : {idxs : Vec I n} (i : Fin n) → Cs (Vec.lookup idxs i) → Ctx idxs
+only {idxs = _ -, _} zero x = ε -, x
+only {idxs = _ -, _} (suc i) x = only i x -, 0∙
 
-∋-t : {m : Cs i} {Γ Δ : Ctx is}
-    → (x : γ w Γ ∋ t w m ⊠ Δ)
-    → Vec.lookup γ (toFin x) ≡ t
-∋-t zero = refl
-∋-t (suc x) = ∋-t x
+channel-1∙ : {idxs : Vec I n} (c : Channel n) → Ctx idxs
+channel-1∙ internal = ε
+channel-1∙ (external x) = only x 1∙
 
-C≢B : {t : Type} {m : Cs i} {b : ℕ} → C[ t w m ] ≡ B[ b ] → ⊥
-C≢B ()
+∋-I : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
+    → (x : γ w Γ ∋ t w c ⊠ Ξ)
+    → idx ≡ Vec.lookup idxs (toFin x)
+∋-I zero = refl
+∋-I (suc x) = ∋-I x
 
--- TODO: Δ ≡ x
-∋-⊎ : {Γ Ξ : Ctx is} {x : Cs i} → γ w Γ ∋ t w x ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
-∋-⊎ (zero {check = check}) = (ε -, _) , ((⊎-idˡ _) , proj₂ (toWitness check))
-∋-⊎ (suc i) with ∋-⊎ i
-∋-⊎ (suc i) | (Δ , Γ≔) = (Δ -, 0∙) , Γ≔ , (∙-idˡ _)
+∋-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
+    → (x : γ w Γ ∋ t w c ⊠ Ξ)
+    → Γ ≔ only (toFin x) (subst Cs (∋-I x) c) ⊎ Ξ
+∋-⊎ (zero {check = check}) = ⊎-idˡ _ , proj₂ (toWitness check)
+∋-⊎ (suc x) = ∋-⊎ x , ∙-idˡ _
 
-⊢-⊎ : {Γ Ξ : Ctx is} → γ w Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
+lookup-only : {idxs : Vec I n} (i : Fin n) {c : Cs (Vec.lookup idxs i)}
+            → All.lookup i (only {idxs = idxs} i c) ≡ c
+lookup-only {idxs = _ -, _} zero = refl
+lookup-only {idxs = _ -, _} (suc i) = lookup-only i
+
+subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → Cs idx) → subst Cs eq δ ≡ δ
+subst-idx {eq = refl} δ = refl
+
+∋-∙ : {γ : PreCtx n} {idx : I} {idxs : Vec I n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → Cs idx)
+    → (x : γ w Γ ∋ t w c {idx} ⊠ Ξ)
+    → All.lookup (toFin x) Γ ≔ c ∙ All.lookup (toFin x) Ξ
+∋-∙ {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup (toFin x) Γ ≔ ● ∙ All.lookup (toFin x) Ξ)
+                                (trans (lookup-only (toFin x)) (subst-idx c))
+                                (⊎-get (toFin x) (∋-⊎ x))
+
+⊢-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} → γ w Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ _
 ⊢-⊎ (chan t m μ ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
                        in _ , ⊎-tail Γ≔
-⊢-⊎ (recv x ⊢P) = let _ , x≔ = ∋-⊎ x
+⊢-⊎ (recv x ⊢P) = let x≔ = ∋-⊎ x
                       _ , P≔ = ⊢-⊎ ⊢P
                    in _ , ⊎-trans x≔ (⊎-tail P≔)
-⊢-⊎ (send x y ⊢P) = let _ , x≔ = ∋-⊎ x
-                        _ , y≔ = ∋-⊎ y
+⊢-⊎ (send x y ⊢P) = let x≔ = ∋-⊎ x
+                        y≔ = ∋-⊎ y
                         _ , P≔ = ⊢-⊎ ⊢P
                      in _ , ⊎-trans (⊎-trans x≔ y≔) P≔
 ⊢-⊎ (comp ⊢P ⊢Q) = let _ , P≔ = ⊢-⊎ ⊢P
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
 
-mult-insert : (i : Fin (suc n)) → Cs i' → Ctx is → Ctx (Vec.insert is i i')
+mult-insert : (i : Fin (suc n)) → Cs idx → Ctx idxs → Ctx (Vec.insert idxs i idx)
 mult-insert zero xs' Γ = Γ -, xs'
 mult-insert (suc i) xs' (Γ -, xs) = mult-insert i xs' Γ -, xs
 
-mult-remove : Ctx is → (i : Fin (suc n)) → Ctx (Vec.remove is i)
+mult-remove : Ctx idxs → (i : Fin (suc n)) → Ctx (Vec.remove idxs i)
 mult-remove (Γ -, _) zero = Γ
 mult-remove (Γ -, ys -, xs) (suc i) = mult-remove (Γ -, ys) i -, xs
 
-mult-update : (i : Fin n) → Cs (Vec.lookup is i) → Ctx is → Ctx is
+mult-update : (i : Fin n) → Cs (Vec.lookup idxs i) → Ctx idxs → Ctx idxs
 mult-update zero m' (ms -, m) = ms -, m'
 mult-update (suc i) m' (ms -, m) = mult-update i m' ms -, m
-
-_at_ : (∀ {i} → Cs i) → {n : ℕ} → Channel n → {is : Vec I n} → Ctx is
-_at_ x internal = ε
-_at_ x (external zero) {_ -, _} = ε -, x
-_at_ x (external (suc e)) {_ -, _} = (x at (external e)) -, 0∙
-
-lookup-at : ∀ {n} (i : Fin n) {is : Vec I n} {x : ∀ {i} → Cs i}
-          → x ≡ All.lookup i (_at_ x (external i) {is})
-lookup-at zero {_ -, _} = refl
-lookup-at (suc i) {_ -, _} = lookup-at i
-
-∋-at : {Γ Ξ Ξ' : Ctx is} {m : ∀ {i} → Cs i}
-     → (x : γ w Γ ∋ t w m {i} ⊠ Ξ)
-     → Γ ≔ Ξ' ⊎ (m at (external (toFin x)))
-     → Ξ ≡ Ξ'
-∋-at {Ξ' = _ -, _} (zero {check = check}) (Γ≔ , s≔) = _-,_
-  & ⊎-unique Γ≔ (⊎-idʳ _)
-  ⊗ ∙-uniqueˡ (∙-comm (proj₂ (toWitness check))) s≔
-∋-at {Ξ' = _ -, _} {m = m} (suc x) (Γ≔ , s≔) = _-,_
-  & ∋-at {m = m} x Γ≔
-  ⊗ ∙-uniqueˡ (∙-idʳ _) s≔
