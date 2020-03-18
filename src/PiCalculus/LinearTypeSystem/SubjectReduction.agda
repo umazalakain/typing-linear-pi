@@ -72,31 +72,15 @@ comm-≥1∙ (res_ {c = external zero} P→Q) (chan t m μ ⊢P) ()
 comm-≥1∙ (res_ {c = external (suc i)} P→Q) (chan t m μ ⊢P) refl = comm-≥1∙ P→Q ⊢P refl
 comm-≥1∙ (struct P≅P' P'→Q) ⊢P refl = comm-≥1∙ P'→Q (subject-cong P≅P' ⊢P) refl
 
-tor : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ' Δ Θ Ψ : Ctx idxs} {t t'} {idx idx' idx'' idx'''} {m : Cs idx} {m' : Cs idx'}
-    → (x  : γ w Γ' ∋ C[ t' w m' ] w +∙ {idx''} ⊠ Θ)
-    → (x' : γ w Δ ∋ C[ t w m ] w -∙ {idx'''} ⊠ Ψ)
-    → toFin x ≡ toFin x'
-    → idx' ≡ idx
-tor zero zero refl = refl
-tor (suc x) (suc y) eq = tor x y (Finₚ.suc-injective eq)
-
-ert : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ' Δ Θ Ψ : Ctx idxs} {t t'} {idx idx' idx'' idx'''} {m : Cs idx} {m' : Cs idx'}
-    → (x  : γ w Γ' ∋ C[ t' w m' ] w +∙ {idx''} ⊠ Θ)
-    → (x' : γ w Δ ∋ C[ t w m ] w -∙ {idx'''} ⊠ Ψ)
-    → (eq : toFin x ≡ toFin x')
-    → m ≡ subst Cs (tor x x' eq) m'
-ert zero zero refl = refl
-ert (suc x) (suc y) eq = ert x y (Finₚ.suc-injective eq)
-
-bar : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ' Γ Δ Θ Ψ : Ctx idxs} {t t'} {idx idx' idx'' idx'''} {m : Cs idx} {m' : Cs idx'}
+align : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ' Γ Δ Θ Ψ : Ctx idxs} {t t'} {idx idx' idx'' idx'''} {m : Cs idx} {m' : Cs idx'}
     → (x  : γ w Γ' ∋ C[ t' w m' ] w +∙ {idx''} ⊠ Θ)
     → γ -, t' w Θ -, m' ⊢ P ⊠ Δ -, 0∙
     → (x' : γ w Δ ∋ C[ t w m ] w -∙ {idx'''} ⊠ Ψ)
     → Γ' ≔ only (toFin x) 1∙ ⊎ Γ
     → toFin x ≡ toFin x'
     → γ -, t' w Γ -, m' ⊢ P ⊠ Ψ -, 0∙
-bar {Γ = Γ} {Ψ = Ψ} x ⊢P x' Γ'⇒Γ eq with ⊢-⊎ ⊢P
-bar {Γ = Γ} {Ψ = Ψ} x ⊢P x' Γ'⇒Γ eq | (Δ -, _) , (a , b) = ⊢-frame (a , b) (foo  , b) ⊢P
+align {Γ = Γ} {Ψ = Ψ} x ⊢P x' Γ'⇒Γ eq with ⊢-⊎ ⊢P
+align {Γ = Γ} {Ψ = Ψ} x ⊢P x' Γ'⇒Γ eq | (Δ -, _) , (a , b) = ⊢-frame (a , b) (foo  , b) ⊢P
     where
 
     ret : {idxs : Vec I n} {Γ : Ctx idxs} {i j : Fin n} {idxa idxb : I}
@@ -112,23 +96,8 @@ bar {Γ = Γ} {Ψ = Ψ} x ⊢P x' Γ'⇒Γ eq | (Δ -, _) , (a , b) = ⊢-frame 
               _ , e , f = ⊎-assoc (⊎-comm (∋-⊎ x)) (⊎-comm c)
            in subst (λ ● → ● ≔ _ ⊎ _) (⊎-uniqueˡ (subst (λ ● → _ ≔ _ ⊎ ●) (⊎-unique (ret eq (∋-I x) (∋-I x') (⊎-comm f)) (only-∙ (toFin x) (proj₂ ∙-join))) e) (⊎-comm Γ'⇒Γ)) (⊎-comm d)
 
-postulate
-  tar : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Cs idx} {m' : Cs idx'}
-      → γ -, t' w Γ -, m' ⊢ P ⊠ Ψ -, 0∙
-      → (y : γ w Ψ ∋ t w m ⊠ Ξ)
-      → γ -, t' w Γ -, m' ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m'
-
-  foo : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ' Γ Δ Ξ Θ Ψ : Ctx idxs} {t t'} {idx idx' idx'' idx'''} {m : Cs idx} {m' : Cs idx'}
-      → (x  : γ w Γ' ∋ C[ t' w m' ] w +∙ {idx''} ⊠ Θ)
-      → γ -, t' w Θ -, m' ⊢ P ⊠ Δ -, 0∙
-      → (x' : γ w Δ ∋ C[ t w m ] w -∙ {idx'''} ⊠ Ψ)
-      → (y : γ w Ψ ∋ t w m ⊠ Ξ)
-      → Γ' ≔ only (toFin x) 1∙ ⊎ Γ
-      → toFin x ≡ toFin x'
-      → γ w Γ ⊢ lower zero ([ suc (toFin y) / zero ] P) (subst-unused (λ ()) P) ⊠ Ξ
-
 subject-reduction : SubjectReduction
-subject-reduction Γ'⇒Γ (comm eq) (comp (recv {P = P} x ⊢P) (send x' y ⊢Q)) = comp (⊢-strengthen zero (subst-unused (λ ()) P) (tar (bar x ⊢P x' Γ'⇒Γ eq) y)) ⊢Q
+subject-reduction Γ'⇒Γ (comm eq) (comp (recv {P = P} x ⊢P) (send x' y ⊢Q)) = comp (⊢-strengthen zero (subst-unused (λ ()) P) (⊢-subst zero (align x ⊢P x' Γ'⇒Γ eq) y)) ⊢Q
 subject-reduction Γ'⇒Γ (par P→P') (comp ⊢P ⊢Q) = comp (subject-reduction Γ'⇒Γ P→P' ⊢P) ⊢Q
 subject-reduction Γ'⇒Γ (res_ {c = internal} P→Q) (chan t m μ ⊢P) = chan t m μ (subject-reduction (Γ'⇒Γ , ∙-idˡ _) P→Q ⊢P)
 subject-reduction Γ'⇒Γ (res_ {c = external zero} P→Q) (chan t m μ ⊢P) = chan t m _ (subject-reduction (Γ'⇒Γ , (proj₂ (comm-≥1∙ P→Q ⊢P refl))) P→Q ⊢P)

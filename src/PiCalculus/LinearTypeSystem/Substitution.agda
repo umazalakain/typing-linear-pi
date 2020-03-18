@@ -44,43 +44,37 @@ private
     idx : I
     idxs : Vec I n
     x : Cs idx
-    Γ Δ Δ' Θ : Ctx idxs
+    Γ Δ Δ' Θ Ψ : Ctx idxs
     P : Scoped n
 
-data _w_[_/_]≔_ : PreCtx n → Ctx idxs → Fin n → Fin n → Ctx idxs → Set where
+
+
+data _w_[_/_]⊠_ : PreCtx n → {idxs : Vec I n} → Ctx idxs → Fin n → Fin n → Ctx idxs → Set where
   zero : (i : γ w Γ ∋ t w x ⊠ Δ)
-       → γ -, t w Γ -, 0∙ [ suc (toFin i) / zero  ]≔ Δ -, x
-  suc  : γ w Γ [ i / j ]≔ Δ
-       → γ -, t w Γ -, x  [ suc i         / suc j ]≔ Δ -, x
+       → γ -, t w Γ -, 0∙ [ suc (toFin i) / zero  ]⊠ Δ -, x
+  suc  : γ w Γ [ i / j ]⊠ Δ
+       → γ -, t w Γ -, x  [ suc i         / suc j ]⊠ Δ -, x
 
-{-
-      Γ -, x ⊢ P                  ⊠ Δ  -, 0∙
-  ==> Γ -, x ⊢ [ suc i / zero ] P ⊠ Δ' -, x
-      where Δ ≔ Δ' ⊎ x at i
 
-  If P is 𝟘
-      Γ -, x ⊢ 𝟘 ⊠ Γ  -, 0∙  -- empty
-  ==> Γ -, x ⊢ 𝟘 ⊠ Γ' -, x
-      where Γ ≔ Γ' ⊎ x at i
+foo : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs}
+    → {i j : Fin n}
+    → γ w Γ ⊢ P ⊠ Ψ
+    → γ w Ψ [ j / i ]⊠ Ξ
+    → γ w Γ ⊢ [ j / i ] P ⊠ Ξ
+foo end xy = {!!}
+foo (chan t m μ ⊢P) xy = chan t m μ (foo ⊢P (suc xy))
+foo (recv x ⊢P) xy = {!x!}
+foo (send x y ⊢P) xy = {!!}
+foo (comp ⊢P ⊢Q) xy = {!!}
 
-  Relation between Δ -, 0∙ and Δ' -, x:
+⊢-subst' : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Cs idx}
+         → γ -, t w Γ -, m ⊢ P ⊠ Ψ -, 0∙
+         → (y : γ w Ψ ∋ t w m ⊠ Ξ)
+         → γ -, t w Γ -, m ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m
+⊢-subst' ⊢P y = foo ⊢P (zero y)
 
--}
-
-postulate
-  ∋-0∙ : {γ : PreCtx n} {idxs : Vec I n} {Γ : Ctx idxs} → γ w Γ ∋ t w x ⊠ Γ → x ≡ 0∙
-
-postulate
-  ⊢-subst : {γ : PreCtx n} {idxs : Vec I n} {Γ Δ Θ : Ctx idxs} {i j : Fin n}
-          → All.lookup j Γ ≢ All.lookup j Δ
-          → γ w Γ ⊢           P ⊠ Δ
-          → γ w Δ   [ i / j ]≔    Θ
-          → γ w Γ ⊢ [ i / j ] P ⊠ Θ
-          {-
-⊢-subst neq end Δ~Θ = ⊥-elim (neq refl)
-⊢-subst neq (chan t m μ ⊢P) Δ~Θ = chan t m μ (⊢-subst neq ⊢P (suc Δ~Θ))
-⊢-subst neq (recv x ⊢P) Δ~Θ = {!!}
-⊢-subst neq (send x y ⊢P) Δ~Θ = {!!}
-⊢-subst neq (comp ⊢P ⊢Q) Δ~Θ = comp (⊢-subst {!!} ⊢P {!!}) {!!}
-
--}
+{- TARGET -}
+⊢-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Cs idx} {m' : Cs idx'}
+        → γ -, t' w Γ -, m' ⊢ P ⊠ Ψ -, 0∙
+        → (y : γ w Ψ ∋ t w m ⊠ Ξ)
+        → γ -, t' w Γ -, m' ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m'
