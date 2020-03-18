@@ -70,14 +70,17 @@ data _w_[_/_]≔_ : PreCtx n → Ctx idxs → Fin n → Fin n → Ctx idxs → S
 postulate
   ∋-0∙ : {γ : PreCtx n} {idxs : Vec I n} {Γ : Ctx idxs} → γ w Γ ∋ t w x ⊠ Γ → x ≡ 0∙
 
-
-⊢-subst : {γ : PreCtx n} {idxs : Vec I n} {Γ Δ Θ : Ctx idxs} {i j : Fin n}
-        → All.lookup j Γ ≢ All.lookup j Δ
-        → γ w Γ ⊢           P ⊠ Δ
-        → γ w Δ   [ i / j ]≔    Θ
-        → γ w Γ ⊢ [ i / j ] P ⊠ Θ
+postulate
+  ⊢-subst : {γ : PreCtx n} {idxs : Vec I n} {Γ Δ Θ : Ctx idxs} {i j : Fin n}
+          → All.lookup j Γ ≢ All.lookup j Δ
+          → γ w Γ ⊢           P ⊠ Δ
+          → γ w Δ   [ i / j ]≔    Θ
+          → γ w Γ ⊢ [ i / j ] P ⊠ Θ
+          {-
 ⊢-subst neq end Δ~Θ = ⊥-elim (neq refl)
 ⊢-subst neq (chan t m μ ⊢P) Δ~Θ = chan t m μ (⊢-subst neq ⊢P (suc Δ~Θ))
 ⊢-subst neq (recv x ⊢P) Δ~Θ = {!!}
 ⊢-subst neq (send x y ⊢P) Δ~Θ = {!!}
 ⊢-subst neq (comp ⊢P ⊢Q) Δ~Θ = comp (⊢-subst {!!} ⊢P {!!}) {!!}
+
+-}

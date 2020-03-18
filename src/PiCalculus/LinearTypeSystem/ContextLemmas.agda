@@ -67,6 +67,14 @@ lookup-only : {idxs : Vec I n} (i : Fin n) {c : Cs (Vec.lookup idxs i)}
 lookup-only {idxs = _ -, _} zero = refl
 lookup-only {idxs = _ -, _} (suc i) = lookup-only i
 
+only-∙ : {idxs : Vec I n}
+       → (i : Fin n)
+       → {x y z : Cs (Vec.lookup idxs i)}
+       → x ≔ y ∙ z
+       → only {idxs = idxs} i x ≔ only i y ⊎ only i z
+only-∙ {idxs = _ -, _} zero s = ⊎-idˡ _ , s
+only-∙ {idxs = _ -, _} (suc i) s = only-∙ i s , ∙-idˡ _
+
 subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → Cs idx) → subst Cs eq δ ≡ δ
 subst-idx {eq = refl} δ = refl
 
