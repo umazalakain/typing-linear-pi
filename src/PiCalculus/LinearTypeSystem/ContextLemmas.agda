@@ -100,6 +100,10 @@ subst-idx {eq = refl} δ = refl
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
 
+∋-0∙ : {Γ Δ : Ctx idxs} → γ w Γ ∋ t w 0∙ {idx} ⊠ Δ → Γ ≡ Δ
+∋-0∙ (zero {check = check}) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
+∋-0∙ (suc x) = _-,_ & ∋-0∙ x ⊗ refl
+
 mult-insert : (i : Fin (suc n)) → Cs idx → Ctx idxs → Ctx (Vec.insert idxs i idx)
 mult-insert zero xs' Γ = Γ -, xs'
 mult-insert (suc i) xs' (Γ -, xs) = mult-insert i xs' Γ -, xs
