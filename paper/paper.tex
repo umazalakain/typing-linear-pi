@@ -8,6 +8,7 @@
 \usepackage{amssymb}
 \usepackage[fleqn]{amsmath}
 \usepackage{amsbsy}
+\usepackage{mathtools}
 \usepackage[many]{tcolorbox}
 \bibliographystyle{plainurl}
 
@@ -55,7 +56,7 @@
 \newcommand{\types}[4]{#1 \propto #2 \vdash #3 \boxtimes #4}
 \newcommand{\contains}[5]{#1 \propto #2 \ni #3 \propto #4 \boxtimes #5}
 \newcommand{\suc}{{\scriptscriptstyle 1+}}
-\newcommand{\op}[3]{#1 := #2 \cdot #3}
+\newcommand{\op}[3]{#1 \coloneqq #2 \cdot #3}
 
 % Types
 \newcommand{\Var}{\mathrm{VAR}}
@@ -73,6 +74,10 @@
 \newcommand{\Quantifier}{\mathrm{QUANTIFIER}}
 \newcommand{\Quantifiers}{\mathrm{QUANTIFIERS}}
 \newcommand{\constr}[1]{\mathtt{#1}}
+\newcommand{\zero}[0]{\constr{0}}
+\newcommand{\one}[0]{\constr{1}}
+\newcommand{\plus}[0]{\constr{+}}
+\newcommand{\minus}[0]{\constr{-}}
 
 
 \begin{document}
@@ -403,29 +408,25 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 
 \subsection{Multiplicities}
 
-A type system with both linear and shared resources has multiplicities $0$, $1$ and $\omega$.
 
 \begin{figure}[h]
 \begin{equation}
-\begin{split}
-  \constr{0\cdot}          &: C \\
-  \constr{+\cdot}          &: C \\
-  \constr{-\cdot}          &: C \\
-  \constr{\op{\_}{\_}{\_}} &: C \to C \to C \to Set \\
-  \constr{1\cdot}          &: C \\
-  \constr{\cdot-join}      &: \forall \{x y z\} \to \op{x}{y}{+\cdot} \to \op{x}{z}{-\cdot} \to \exists w . (\op{x}{w}{1\cdot}) \\
-  \constr{\cdot-compute}   &: \forall y z \to Dec (\exists x . (\op{x}{y}{z})) \\
-  \constr{\cdot-compute^l} &: \forall x z \to Dec (\exists y . (\op{x}{y}{z})) \\
-  \constr{\cdot-unique}    &: \forall \{x x' y z\} \to \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-  \constr{\cdot-unique^l}  &: \forall \{x y y' z\} \to \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  \constr{\cdot-id^l}      &: \forall x \to \op{x}{0\cdot}{x} \\
-  \constr{\cdot-comm}      &: \forall \{x y z\} \to \op{x}{y}{z} \to \op{x}{z}{y} \\
-  \constr{\cdot-assoc}     &: \forall \{x y z u v\} \to \op{x}{y}{z} \to \op{y}{u}{v} \to \exists w . (\op{x}{u}{w} \times \op{w}{v}{z})
-\end{split}
+\begin{aligned}
+  &\zero                    &:{} &                      &     & C \\
+  &\plus                    &:{} &                      &     & C \\
+  &\minus                   &:{} &                      &     & C \\
+  &\op{\_}{\_}{\_}          &:{} &                      &     & C \to C \to C \to Set \\
+  &\constr{\cdot-join}      &:{} &                      &     & \exists \one . \; \op{\one}{\plus}{\minus} \\
+  &\constr{\cdot-compute}   &:{} &\forall y z           & \to & Dec \; (\exists x . \; (\op{x}{y}{z})) \\
+  &\constr{\cdot-unique}    &:{} &\forall \{x x' y z\}  & \to & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+  &\constr{\cdot-unique^l}  &:{} &\forall \{x y y' z\}  & \to & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+  &\constr{\cdot-id^l}      &:{} &\forall x             & \to & \op{x}{\zero}{x} \\
+  &\constr{\cdot-comm}      &:{} &\forall \{x y z\}     & \to & \op{x}{y}{z} \to \op{x}{z}{y} \\
+  &\constr{\cdot-assoc}     &:{} &\forall \{x y z u v\} & \to & \op{x}{y}{z} \to \op{y}{u}{v} \to \exists w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
+\end{aligned}
 \end{equation}
 \caption{Partial commutative monoid}
 \end{figure}
-\todo{alignment, get rid of $1\cdot$, $\cdot-join$, $\cdot-compute^l$}
 
 \begin{figure}[h]
 \begin{equation}
