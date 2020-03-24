@@ -74,10 +74,6 @@
 \newcommand{\Quantifier}{\mathrm{QUANTIFIER}}
 \newcommand{\Quantifiers}{\mathrm{QUANTIFIERS}}
 \newcommand{\constr}[1]{\mathtt{#1}}
-\newcommand{\zero}[0]{\constr{0}}
-\newcommand{\one}[0]{\constr{1}}
-\newcommand{\plus}[0]{\constr{+}}
-\newcommand{\minus}[0]{\constr{-}}
 
 
 \begin{document}
@@ -406,27 +402,62 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resource-aware Typing System}
 
-\subsection{Multiplicities}
+A type system is in the business of further constraining a language, filtering out terms that (although well-formed) are meaningless.
+In the simply typed \lamcalc{}, a term has a meaning iff it has a type.
+This typing judgment is a proof of the form $\Gamma \vdash t : T$, where the term $t$ has type $T$ under the typing context $\Gamma$ -- the typing context associates variables (possibly occurring within $t$) to types.
+In the simply typed \picalc{} however, it is the channels that are typed, and a process has a meaning iff it \emph{uses} its channels according to their types.
+The typing judgment is therefore of the form $\Gamma \vdash p$, where the process $p$ (which has no type of its own) uses the channels in $\Gamma$ according to their types.
 
+A resource-aware type system uses both types and usage counting to constraint a language.
+It uses typing contexts to keep track of both types and usage counts.
+In the case of a linear type system, resources must be used exactly once, and usages transition from available to consumed as soon as they are used.
+In the linear \picalc{} however, every channel must be used exactly once to receive and exactly once to send.
+In \S \ref{multiplicities}, we generalize this usage counting algebra so that the same type system can be used for a combination of linear, shared, gradual and affine types.
+
+
+Syntax directed
+Continuations.
+\ref{leftover-typing}
+
+\subsection{Multiplicities}\label{multiplicities}
+
+In its usual representation, the linear \picalc{} distinguishes between \emph{capabilities} -- $\ell_{\o}$ for cannot send or receive, $\ell_i$ for input, $\ell_o$ for output, and $\ell_\#$ for both input and output -- and multiplicities -- $0$ or $1$.
+This introduces unnecessary semantic duplication: the semantic meaning of a multiplicity of $0$ on a capability $c$ is independent of $c$; a multiplicity of 1 $\ell_\#$ is equivalent to a multiplicity of 1 $\ell_i$ and 1 $\ell_o$.
+In this paper, we merge multiplicities and capabilities into a single set and provide an algebra that generalizes the rules of the linear \picalc{} into rules that are suitable for shared, linear, affine and gradual typing.
+
+The algebra $\Quantifier_C$ on the set of capabilities $C$ presented in Figure \ref{capabilities} is based on a \emph{partial commutative monoid} with a few special elements.
+The operation of the partial monoid is defined as a relation $\op{x}{y}{z}$ on a carrier $C$.
+This relation must be commutative, associative, and absorb the neutral element $\ell_{\o}$.
+To recover the computability of the relation, $\constr{\cdot-compute}$ requires that given two elements $y$ and $z$, it is decidable whether a third element $x$ exists such that $\op{x}{y}{z}$.
+To recover the functionality, $\constr{\cdot-unique}$ requires that given any two elements $y$ and $z$, if a third one exists, it is uniquely defined.
+A consequence of using leftover typing (\S \ref{leftover-typing}) is that this algebra needs to be injective, and thus $\constr{\cdot-unique^l}$ requires for an operand to be uniquely defined as well.
+In addition to these rules, we define the special elements $\ell_i$ and $\ell_o$, to be subtracted every time an input or output occurs, respectively.
+Finally, we require for $\ell_i$ and $\ell_o$ to be compatible, and refer to the result as $\ell_\#$.
 
 \begin{figure}[h]
 \begin{equation}
 \begin{aligned}
-  &\zero                    &:{} &                      &     & C \\
-  &\plus                    &:{} &                      &     & C \\
-  &\minus                   &:{} &                      &     & C \\
+  &\ell_{\o}                &:{} &                      &     & C \\
+  &\ell_i                   &:{} &                      &     & C \\
+  &\ell_o                   &:{} &                      &     & C \\
   &\op{\_}{\_}{\_}          &:{} &                      &     & C \to C \to C \to Set \\
-  &\constr{\cdot-join}      &:{} &                      &     & \exists \one . \; \op{\one}{\plus}{\minus} \\
+  &\constr{\cdot-join}      &:{} &                      &     & \exists \ell_\# . \; \op{\ell_\#}{\ell_i}{\ell_o} \\
   &\constr{\cdot-compute}   &:{} &\forall y z           & \to & Dec \; (\exists x . \; (\op{x}{y}{z})) \\
   &\constr{\cdot-unique}    &:{} &\forall \{x x' y z\}  & \to & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
   &\constr{\cdot-unique^l}  &:{} &\forall \{x y y' z\}  & \to & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  &\constr{\cdot-id^l}      &:{} &\forall x             & \to & \op{x}{\zero}{x} \\
+  &\constr{\cdot-id^l}      &:{} &\forall x             & \to & \op{x}{\ell_{\o}}{x} \\
   &\constr{\cdot-comm}      &:{} &\forall \{x y z\}     & \to & \op{x}{y}{z} \to \op{x}{z}{y} \\
   &\constr{\cdot-assoc}     &:{} &\forall \{x y z u v\} & \to & \op{x}{y}{z} \to \op{y}{u}{v} \to \exists w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
 \end{aligned}
 \end{equation}
-\caption{Partial commutative monoid}
+\caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid with special elements $\ell_i$, $\ell_o$ and $\ell_\#$.}
+\label{capabilities}
 \end{figure}
+
+To allow for several capability algebras to coexist on the same type system, in Figure \ref{indexed-capabilities} we index the algebra carriers by an index $\Idx$.
+Such an index is a type with one element for each algebra of our type system.
+To be able to prove subject congruence, we require for at least one such algebra to exist.
+Finally, the field $\constr{\Quantifiers}$ requires for each index $i$ to have an algebra defined on the carrier set $\constr{\Carrier_i}$.
 
 \begin{figure}[h]
 \begin{equation}
@@ -438,11 +469,34 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 \end{split}
 \end{equation}
 \caption{Indexed set of partial commutative monoids}
+\label{indexed-capabilities}
 \end{figure}
 
 \subsubsection{Example Type Systems}
 
-Shared. Gradual. Affine. Linear.
+\paragraph{Shared}
+
+The carrier $C$ is implemented as a type $\constr{One}$ with a single trivial constructor $\omega$.
+All of $\ell_{\o}$, $\ell_i$, $\ell_o$ and $\ell_\#$ are instantiated to $\omega$.
+The relation $\op{\omega}{\omega}{\omega}$ is inhabited.
+All other laws are trivially satisfied.
+
+\paragraph{Linear}
+
+The carrier $C$ is implemented as a type $\constr{Four}$ with the trivial elements $\ell_{\o}$, $\ell_i$, $\ell_o$ and $\ell_\#$.
+The partial monoid is defined with the element $\ell_{\o}$ being neutral on both sides, and the element $\ell_\#$ splitting into $\ell_i$ and $\ell_o$ or $\ell_o$ and $\ell_i$ -- and is uninhabited in every other case.
+All other rules follow trivially.
+
+\paragraph{Affine}
+
+The algebra of an affine system is exactly the one of a linear one, the only difference is the output context must satisfy a trivial predicate.
+
+\paragraph{Gradual}
+
+The carrier $C$ is implemented as a tuple $(\N , \N)$ of natural numbers.
+The element $\ell_{\o}$ corresponds to the tuple $(0 , 0)$, $\ell_i$ to $(1 , 0)$, $\ell_o$ to $(0 , 1)$, and $\ell_\#$ to $(1 , 1)$.
+The partial monoid is defined exactly when $\op{(x_l + y_l , x_r + y_r)}{(x_l , x_r)}{(y_l , y_r)}$.
+All other rules follow trivially from the algebraic rules for the addition of naturals.
 
 \subsection{Contexts}
 
@@ -500,7 +554,7 @@ Shared. Gradual. Affine. Linear.
 two-layered approach: types on one hand, capabilities on the other
 removing from context vs keeping in context but marking it used
 
-\subsection{Typing with Leftovers}
+\subsection{Typing with Leftovers}\label{leftover typing}
 
 Variable references as proofs of capability
 
@@ -530,6 +584,8 @@ Context splits at each variable reference
 \end{mathpar}
 \caption{This is...}
 \end{figure}
+
+\todo{comment on scope restriction rule and capabilities}
 
 \begin{figure}[h]
 \begin{mathpar}
