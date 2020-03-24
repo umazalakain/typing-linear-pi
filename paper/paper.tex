@@ -41,39 +41,51 @@
 \acknowledgements{We want to thank Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Processes
-\newcommand{\PO}{\mathbf{0}}
-\newcommand{\comp}[2]{#1 \parallel #2}
-\newcommand{\new}{\boldsymbol{\nu} \,}
-\newcommand{\send}[2]{#1 \, \langle#2\rangle \,}
-\newcommand{\recv}[1]{#1 \, \mathbb{()} \,}
-
-\newcommand{\subst}[3]{#1[#2/#3]}
 \newcommand{\lamcalc}{$\lambda$-calculus}
 \newcommand{\picalc}{$\pi$-calculus}
 \newcommand{\Picalc}{$\pi$-Calculus}
-\newcommand{\reduce}{\longrightarrow}
-\newcommand{\types}[4]{#1 \propto #2 \vdash #3 \boxtimes #4}
-\newcommand{\contains}[5]{#1 \propto #2 \ni #3 \propto #4 \boxtimes #5}
-\newcommand{\suc}{{\scriptscriptstyle 1+}}
-\newcommand{\op}[3]{#1 \coloneqq #2 \cdot #3}
+
+\newcommand{\type}[1]{\textcolor{blue}{\mathtt{\operatorname{#1}}}}
+\newcommand{\constr}[1]{\textcolor{olive}{\mathtt{\operatorname{#1}}}}
+\newcommand{\field}[1]{\textcolor{red}{\mathtt{\operatorname{#1}}}}
+
+% Constructors
+\newcommand{\PO}{\constr{\mathbf{0}}}
+\newcommand{\comp}[2]{#1 \; \constr{\parallel} \; #2}
+\newcommand{\new}{\constr{\boldsymbol{\nu}} \;}
+\newcommand{\send}[2]{#1 \; \constr{\langle}#2\constr{\rangle} \;}
+\newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
+\newcommand{\suc}{\constr{\scriptstyle 1+}}
+
+% Functions
+\newcommand{\subst}[3]{#1[#2/#3]}
+
+% Fields
+\newcommand{\op}[3]{#1 \; \field{\coloneqq} \; #2 \; \field{\cdot} \; #3}
+\newcommand{\li}{\field{\ell_i}}
+\newcommand{\lo}{\field{\ell_o}}
+\newcommand{\lz}{\field{\ell_{\o}}}
+\newcommand{\lio}{\field{\ell_{\#}}}
 
 % Types
-\newcommand{\Var}{\mathrm{VAR}}
-\newcommand{\Process}{\mathrm{PROCESS}}
-\newcommand{\Unused}{\mathrm{UNUSED}}
-\newcommand{\PreCtx}{\mathrm{PRECTX}}
-\newcommand{\Ctx}{\mathrm{CTX}}
-\newcommand{\Type}{\mathrm{TYPE}\;}
-\newcommand{\Idx}{\mathrm{IDX}\;}
-\newcommand{\Idxs}{\mathrm{IDXS}}
-\newcommand{\Carrier}{\mathrm{CARRIER}}
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\Channel}{\mathrm{CHANNEL}}
-\newcommand{\Rec}{\mathrm{REC}}
-\newcommand{\Quantifier}{\mathrm{QUANTIFIER}}
-\newcommand{\Quantifiers}{\mathrm{QUANTIFIERS}}
-\newcommand{\constr}[1]{\mathtt{#1}}
+\newcommand{\reduce}[1]{\; \type{\longrightarrow}_{#1} \;}
+\newcommand{\types}[4]{#1 \; \type{\propto} \; #2 \; \type{\vdash} \; #3 \; \type{\boxtimes} \; #4}
+\newcommand{\contains}[5]{#1 \; \type{\propto} \; #2 \; \type{\ni} \; #3 \; \type{\propto} \; #4 \; \type{\boxtimes} \; #5}
+\newcommand{\Var}{\type{VAR}}
+\newcommand{\Process}{\type{PROCESS}}
+\newcommand{\Unused}{\type{UNUSED}}
+\newcommand{\PreCtx}{\type{PRECTX}}
+\newcommand{\Ctx}{\type{CTX}}
+\newcommand{\Type}{\type{TYPE}\;}
+\newcommand{\Idx}{\type{IDX}\;}
+\newcommand{\Idxs}{\type{IDXS}}
+\newcommand{\Carrier}{\type{CARRIER}}
+\newcommand{\N}{\type{\mathbb{N}}}
+\newcommand{\Channel}{\type{CHANNEL}}
+\newcommand{\Rec}{\type{REC}}
+\newcommand{\Quantifier}{\type{QUANTIFIER}}
+\newcommand{\eq}[1]{\; \type{=}_{#1} \;}
+\newcommand{\eqeq}{\; \type{\equiv} \;}
 
 
 \begin{document}
@@ -84,7 +96,7 @@
 \begin{abstract}
   We present the syntax, operational semantics, and typing rules of a \picalc{} with linear and shared types.
   We use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
-  We generalize the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, affine, gradual and shared typing.
+  We generalize the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, gradual and shared typing.
   We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 
@@ -127,22 +139,22 @@ leftover typing
     {\mprset{fraction={===}}
       \inferrule
       { }
-      {\N : Set}}
+      {\type{\N} : \type{Set}}}
 
     \inferrule
     { }
-    {0 : \N}
+    {\constr{0} : \type{\N}}
 
     \inferrule
-    {n : \N}
-    {\suc n : \N}
+    {n : \type{\N}}
+    {\suc n : \type{\N}}
   \end{mathpar}
   \caption{Notation used in this paper}
 \end{figure}
 
 Double rule for type-level definitions.
 We omit universe levels for brevity.
-Constructors are $\constr{teletyped}$ unless they are symbols.
+$\type{TYPES}$ are in blue and uppercased (and their indices are subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red and variables and functions in black.
 Some constructors are shared across types. They can however always be disambiguated through the type of the goal.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,7 +191,7 @@ In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$
 
   \inferrule
   {n : \N}
-  {0 : \Var_{\suc n}}
+  {\constr{0} : \Var_{\suc n}}
 
   \inferrule
   {x : \Var_n}
@@ -244,31 +256,31 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
   {\mprset{fraction={===}}
     \inferrule
     { }
-    {P \equiv Q : Set}}
+    {P \eqeq Q : Set}}
 
   \inferrule
   { }
-  {\constr{comp-assoc} : \comp{P}{\comp{Q}{R}} \equiv \comp{\comp{P}{Q}}{R}}
+  {\constr{comp-assoc} : \comp{P}{\comp{Q}{R}} \eqeq \comp{\comp{P}{Q}}{R}}
 
   \inferrule
   { }
-  {\constr{comp-sym} : \comp{P}{Q} \equiv \comp{Q}{P}}
+  {\constr{comp-sym} : \comp{P}{Q} \eqeq \comp{Q}{P}}
   
   \inferrule
   { }
-  {\constr{comp-end} : \comp{P}{\PO_n} \equiv P}
+  {\constr{comp-end} : \comp{P}{\PO_n} \eqeq P}
   
   \inferrule
   { }
-  {\constr{scope-end} : \new \PO_{\suc n} \equiv \PO_n}
+  {\constr{scope-end} : \new \PO_{\suc n} \eqeq \PO_n}
   
   \inferrule
   {uQ : \Unused_0 \, Q}
-  {\constr{scope-ext} : \new (\comp{P}{Q}) \equiv \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
+  {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
 
   \inferrule
   { }
-  {\constr{scope-comm} : \new \new P \equiv \new \new swap \; 0 \; P}
+  {\constr{scope-comm} : \new \new P \eqeq \new \new swap \; 0 \; P}
 \end{mathpar}
 \caption{Structural rewriting rules. Premises $P$, $Q$ and $R$ are of type $\Process_n$ where $n$ can be inferred.}
 \label{struct-cong-base}
@@ -305,39 +317,39 @@ To show that the doubly recursive call terminates we index the equivalence relat
   {\mprset{fraction={===}}
     \inferrule
     {P \, Q : \Process_n \\ r : \Rec}
-    {P =_r Q : Set}}
+    {P \eq{r} Q : Set}}
 
   \inferrule
-  {eq : P \equiv Q}
-  {\constr{struct} \; eq : P =_{\constr{zero}} Q}
+  {eq : P \eqeq Q}
+  {\constr{struct} \; eq : P \eq{\constr{zero}} Q}
 
   \inferrule
-  {eq : P =_r P'}
-  {\constr{cong-scope} \; eq : \new P =_{\constr{one} \; r} \new P'}
+  {eq : P \eq{r} P'}
+  {\constr{cong-scope} \; eq : \new P \eq{\constr{one} \; r} \new P'}
 
   \inferrule
-  {eq : P =_r P'}
-  {\constr{cong-comp} \; eq : \comp{P}{Q} =_{\constr{one} \; r} \comp{P'}{Q}}
+  {eq : P \eq{r} P'}
+  {\constr{cong-comp} \; eq : \comp{P}{Q} \eq{\constr{one} \; r} \comp{P'}{Q}}
 
   \inferrule
-  {eq : P =_r P'}
-  {\constr{cong-recv} \; eq : \recv{x}P =_{\constr{one} \; r} \recv{x}P'}
+  {eq : P \eq{r} P'}
+  {\constr{cong-recv} \; eq : \recv{x}P \eq{\constr{one} \; r} \recv{x}P'}
 
   \inferrule
-  {eq : P =_r P'}
-  {\constr{cong-send} \; eq : \send{x}{y}P =_{\constr{one} \; r} \send{x}{y}P'}
+  {eq : P \eq{r} P'}
+  {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
 
   \inferrule
   { }
-  {\constr{refl} : P =_{\constr{zero}} P}
+  {\constr{refl} : P \eq{\constr{zero}} P}
 
   \inferrule
-  {eq : P =_r Q}
-  {\constr{sym} \; eq : Q =_{\constr{one} \; r} P}
+  {eq : P \eq{r} Q}
+  {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
 
   \inferrule
-  {eq_1 : P =_r Q \\ \; eq_2 : Q =_s R}
-  {\constr{trans} \; eq_1 \; eq_2 : P =_{\constr{two} \; r \; s} R}
+  {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
+  {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
 \end{mathpar}
 \caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.
   Premises $P$, $P'$, $Q$, and $R$ are of type $\Process_n$ where $n$ can be inferred.}
@@ -377,23 +389,23 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   {\mprset{fraction={===}}
     \inferrule
     {i : \Channel_n \\ P \; Q : \Process_n}
-    {P \reduce_i Q : Set}}
+    {P \reduce{i} Q : Set}}
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce_{external \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
 
   \inferrule
-  {red : P \reduce_i P'}
-  {\constr{par} \; red : \comp{P}{Q} \reduce_i \comp{P'}{Q}}
+  {red : P \reduce{i} P'}
+  {\constr{par} \; red : \comp{P}{Q} \reduce{i} \comp{P'}{Q}}
 
   \inferrule
-  {red : P \reduce_i Q}
-  {\constr{res} \; red : \new P \reduce_{dec\; i} \new Q}
+  {red : P \reduce{i} Q}
+  {\constr{res} \; red : \new P \reduce{dec\; i} \new Q}
 
   \inferrule
-  {eq : P = P' \\ red : P' \reduce_i Q}
-  {\constr{struct} \; eq \; red : P \reduce_i Q}
+  {eq : P = P' \\ red : P' \reduce{i} Q}
+  {\constr{struct} \; eq \; red : P \reduce{i} Q}
 \end{mathpar}
 \caption{Operational semantics indexed by the channel over which reduction occurs.}
 \label{reduction}
@@ -412,42 +424,61 @@ A resource-aware type system uses both types and usage counting to constraint a 
 It uses typing contexts to keep track of both types and usage counts.
 In the case of a linear type system, resources must be used exactly once, and usages transition from available to consumed as soon as they are used.
 In the linear \picalc{} however, every channel must be used exactly once to receive and exactly once to send.
-In \S \ref{multiplicities}, we generalize this usage counting algebra so that the same type system can be used for a combination of linear, shared, gradual and affine types.
+In \S \ref{multiplicities}, we generalize this usage counting algebra so that the same type system can be used for a combination of linear, shared, and gradual types.
 
 
 Syntax directed
 Continuations.
 \ref{leftover-typing}
 
-\subsection{Multiplicities}\label{multiplicities}
+\subsection{Multiplicities and Capabilities}\label{multiplicities}
 
-In its usual representation, the linear \picalc{} distinguishes between \emph{capabilities} -- $\ell_{\o}$ for cannot send or receive, $\ell_i$ for input, $\ell_o$ for output, and $\ell_\#$ for both input and output -- and multiplicities -- $0$ or $1$.
-This introduces unnecessary semantic duplication: the semantic meaning of a multiplicity of $0$ on a capability $c$ is independent of $c$; a multiplicity of 1 $\ell_\#$ is equivalent to a multiplicity of 1 $\ell_i$ and 1 $\ell_o$.
-In this paper, we merge multiplicities and capabilities into a single set and provide an algebra that generalizes the rules of the linear \picalc{} into rules that are suitable for shared, linear, affine and gradual typing.
+In its usual representation, the linear \picalc{} distinguishes between \emph{capabilities} -- $\ell_{\o}$ for cannot send nor receive, $\ell_i$ for input, $\ell_o$ for output, and $\ell_\#$ for both input and output -- and multiplicities -- $0$ or $1$.
+This introduces some unnecessary semantic duplication: a channel with multiplicity 1 and capability $\cdot \ell_{\o}$ is indistinguishable, in usage, from a channel with multiplicity 0.
+In this paper, we merge multiplicities and capabilities into a single type and define the algebraic rules for a generalized resource-aware type system on the \picalc{}.
+As such, it can be used to model shared, linear, or gradual types.
+  
+The algebra has a single binary operator $(\cdot)$ that crushes together capabilities, and must satisfy the following characteristics:
+\begin{description}
 
-The algebra $\Quantifier_C$ on the set of capabilities $C$ presented in Figure \ref{capabilities} is based on a \emph{partial commutative monoid} with a few special elements.
-The operation of the partial monoid is defined as a relation $\op{x}{y}{z}$ on a carrier $C$.
-This relation must be commutative, associative, and absorb the neutral element $\ell_{\o}$.
-To recover the computability of the relation, $\constr{\cdot-compute}$ requires that given two elements $y$ and $z$, it is decidable whether a third element $x$ exists such that $\op{x}{y}{z}$.
-To recover the functionality, $\constr{\cdot-unique}$ requires that given any two elements $y$ and $z$, if a third one exists, it is uniquely defined.
-A consequence of using leftover typing (\S \ref{leftover-typing}) is that this algebra needs to be injective, and thus $\constr{\cdot-unique^l}$ requires for an operand to be uniquely defined as well.
-In addition to these rules, we define the special elements $\ell_i$ and $\ell_o$, to be subtracted every time an input or output occurs, respectively.
-Finally, we require for $\ell_i$ and $\ell_o$ to be compatible, and refer to the result as $\ell_\#$.
+\item [Partiality]
+  Not all capabilities are necessarily compatible: in the linear \picalc{} the capability $\ell_i$ cannot be split into $\ell_i$ and $\ell_i$.
+\item [Functionality]
+  Given two capabilities $y$ and $z$, it must be computable whether a third capability $x$ exists such that $\op{x}{y}{z}$.
+  If such a $x$ exists, it must be unique.
+    
+\item [Injectivity]
+  To prove framing (\S \ref{framing}) we need to be able to compute the \emph{subtraction} of capabilities.
+  That is, $x - z \equiv y$ where $y$ is uniquely determined iff $\op{x}{y}{z}$ where $y$ is uniquely determined.
+
+\item [Associativity]
+  As a direct consequence of the structural congruence rule $\comp{P}{\comp{Q}{R}} \equiv \comp{\comp{P}{Q}}{R}$.
+
+\item [Commutativity]
+  As a direct consequence of the structural congruence rule $\comp{P}{Q} \equiv \comp{Q}{P}$.
+
+\item [Distinguished elements]
+  There must be a neutral element $\ell_{\o}$ absorbed on both sides.
+  There need to be two special elements $\ell_i$ and $\ell_o$ that will be subtracted every time input and output (respectively) happens.
+  These two elements need to be compatible, and we will refer to the result as $\ell_\#$.
+\end{description}
+  
+In Figure \ref{capabilities} we present an algebra $\Quantifier_C$ on the carrier set $C$ in the form of a terniary relation, satisfying all the properties mentioned above.
 
 \begin{figure}[h]
 \begin{equation}
 \begin{aligned}
-  &\ell_{\o}                &:{} &                      &     & C \\
-  &\ell_i                   &:{} &                      &     & C \\
-  &\ell_o                   &:{} &                      &     & C \\
-  &\op{\_}{\_}{\_}          &:{} &                      &     & C \to C \to C \to Set \\
-  &\constr{\cdot-join}      &:{} &                      &     & \exists \ell_\# . \; \op{\ell_\#}{\ell_i}{\ell_o} \\
-  &\constr{\cdot-compute}   &:{} &\forall y z           & \to & Dec \; (\exists x . \; (\op{x}{y}{z})) \\
-  &\constr{\cdot-unique}    &:{} &\forall \{x x' y z\}  & \to & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-  &\constr{\cdot-unique^l}  &:{} &\forall \{x y y' z\}  & \to & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  &\constr{\cdot-id^l}      &:{} &\forall x             & \to & \op{x}{\ell_{\o}}{x} \\
-  &\constr{\cdot-comm}      &:{} &\forall \{x y z\}     & \to & \op{x}{y}{z} \to \op{x}{z}{y} \\
-  &\constr{\cdot-assoc}     &:{} &\forall \{x y z u v\} & \to & \op{x}{y}{z} \to \op{y}{u}{v} \to \exists w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
+  &\lz                    &:{} &                      &     & C \\
+  &\li                    &:{} &                      &     & C \\
+  &\lo                    &:{} &                      &     & C \\
+  &\op{\_}{\_}{\_}        &:{} &                      &     & C \to C \to C \to Set \\
+  &\field{\cdot-join}     &:{} &                      &     & \type{\exists} \lio . \; \op{\lio}{\li}{\lo} \\
+  &\field{\cdot-compute}  &:{} &\forall y z           & \to & \type{Dec} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
+  &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+  &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+  &\field{\cdot-id^l}     &:{} &\forall x             & \to & \op{x}{\lz}{x} \\
+  &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to & \op{x}{y}{z} \to \op{x}{z}{y} \\
+  &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
 \end{aligned}
 \end{equation}
 \caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid with special elements $\ell_i$, $\ell_o$ and $\ell_\#$.}
@@ -457,15 +488,15 @@ Finally, we require for $\ell_i$ and $\ell_o$ to be compatible, and refer to the
 To allow for several capability algebras to coexist on the same type system, in Figure \ref{indexed-capabilities} we index the algebra carriers by an index $\Idx$.
 Such an index is a type with one element for each algebra of our type system.
 To be able to prove subject congruence, we require for at least one such algebra to exist.
-Finally, the field $\constr{\Quantifiers}$ requires for each index $i$ to have an algebra defined on the carrier set $\constr{\Carrier_i}$.
+Finally, the field $\field{QUANTIFIERS}$ requires for each index $i$ to have an algebra defined on the carrier set $\constr{\Carrier_i}$.
 
 \begin{figure}[h]
 \begin{equation}
 \begin{split}
-  \constr{\Idx}          &: Set \\
-  \constr{\exists \Idx}  &: Idx \\
-  \constr{\Carrier}      &: \Idx \to Set \\
-  \constr{\Quantifiers}  &: \forall i : \Idx \to \Quantifier_{\Carrier_i}
+  \field{IDX}          &: Set \\
+  \field{\exists IDX}  &: \field{IDX} \\
+  \field{CARRIER}      &: \field{IDX} \to Set \\
+  \field{QUANTIFIERS}  &: (i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
 \end{split}
 \end{equation}
 \caption{Indexed set of partial commutative monoids}
@@ -474,29 +505,29 @@ Finally, the field $\constr{\Quantifiers}$ requires for each index $i$ to have a
 
 \subsubsection{Example Type Systems}
 
-\paragraph{Shared}
+\begin{description}
 
-The carrier $C$ is implemented as a type $\constr{One}$ with a single trivial constructor $\omega$.
-All of $\ell_{\o}$, $\ell_i$, $\ell_o$ and $\ell_\#$ are instantiated to $\omega$.
-The relation $\op{\omega}{\omega}{\omega}$ is inhabited.
+\item [Shared]
+
+The carrier $C$ is implemented as a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
+All of $\lz$, $\li$, $\lo$ and $\lio$ are instantiated to $\constr{\omega}$.
+The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
 All other laws are trivially satisfied.
 
-\paragraph{Linear}
+\item [Linear]
 
-The carrier $C$ is implemented as a type $\constr{Four}$ with the trivial elements $\ell_{\o}$, $\ell_i$, $\ell_o$ and $\ell_\#$.
-The partial monoid is defined with the element $\ell_{\o}$ being neutral on both sides, and the element $\ell_\#$ splitting into $\ell_i$ and $\ell_o$ or $\ell_o$ and $\ell_i$ -- and is uninhabited in every other case.
+The carrier $C$ is implemented as a type $\type{Four}$ with the trivial elements $\constr{\ell_{\o}}$, $constr{\ell_i}$, $\constr{\ell_o}$ and $\constr{\ell_\#}$.
+The monoidal operation has the element $\constr{\ell_{\o}}$ as neutral on both sides, and the element $\constr{\ell_\#}$ splitting into $\constr{\ell_i}$ and $\constr{\ell_o}$ (or $\constr{\ell_o}$ and $\constr{\ell_i}$ -- and is uninhabited in every other case.
 All other rules follow trivially.
 
-\paragraph{Affine}
+\item [Gradual]
 
-The algebra of an affine system is exactly the one of a linear one, the only difference is the output context must satisfy a trivial predicate.
-
-\paragraph{Gradual}
-
-The carrier $C$ is implemented as a tuple $(\N , \N)$ of natural numbers.
-The element $\ell_{\o}$ corresponds to the tuple $(0 , 0)$, $\ell_i$ to $(1 , 0)$, $\ell_o$ to $(0 , 1)$, and $\ell_\#$ to $(1 , 1)$.
-The partial monoid is defined exactly when $\op{(x_l + y_l , x_r + y_r)}{(x_l , x_r)}{(y_l , y_r)}$.
+The carrier $C$ is implemented as a tuple $\N \type{\times} \N$ of natural numbers.
+The element $\lz$ corresponds to the tuple $(\constr{0} \constr{,} \constr{0})$, $\li$ to $(\constr{1} \constr{,} \constr{0})$, $\lo$ to $(\constr{0} \constr{,} \constr{1})$, and $\lio$ to $(\constr{1} \constr{,} \constr{1})$.
+The partial monoid is defined exactly when $\op{(x_l + y_l \constr{,} x_r + y_r)}{(x_l \constr{,} x_r)}{(y_l \constr{,} y_r)}$.
 All other rules follow trivially from the algebraic rules for the addition of naturals.
+
+\end{description}
 
 \subsection{Contexts}
 
