@@ -88,10 +88,11 @@ module _ {a} {A : Set a} where
 ∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) zero = zero
 ∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc zero) (suc zero) = suc (suc zero)
 ∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc (suc i)) (suc zero) = suc zero
-∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) with Fin.inject₁ i Finₚ.≟ suc j
-∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | yes p = suc (subst (λ ● → _ ∝ _ [ ● ]≔ _ ∝ _ ⊠ _) (trans (swapFin-inject i j p) (cong suc {!p!})) (∋-swap i sx))
+∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc i) (suc (suc x)) with Fin.inject₁ i Finₚ.≟ suc j
+∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc zero) (suc (suc x)) | yes ()
+∋-swap {j = suc (suc ._)} {γ = γ -, _} {Γ = Γ -, _} {Θ = Θ -, _} (suc (suc i)) (suc sx@(suc x)) | yes refl = suc ((subst (λ ● → swapᵥ (suc i) γ ∝ swapₐ (suc i) Γ [ ● ]≔ _ ∝ _ ⊠ swapₐ (suc i) Θ) (sym (trans (cong suc (sym (trans (swapFin-injectˡ i) (cong suc (sym (Finₚ.lower₁-inject₁′ i _)))))) (swapFin-suc i (Fin.inject₁ i)))) (∋-swap (suc i) sx)))
 ∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p with i Finₚ.≟ j
-∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p | yes refl = {!∋-swap i sx gs!}
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p | yes refl rewrite sym (swapFin-injectʳ i) = suc (∋-swap i sx)
 ∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p | no ¬q rewrite sym (swapFin-neq i j ¬q ¬p) = suc (∋-swap i sx)
 
 ⊢-swap : {γ : PreCtx (suc n)} {Γ Θ : Ctx idxs}

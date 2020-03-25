@@ -50,11 +50,13 @@ swapFin-suc i x | no ¬p with (suc i) Fin.≟ x
 swapFin-suc i x | no ¬p | yes q = refl
 swapFin-suc i x | no ¬p | no ¬q = refl
 
-swapFin-inject : (i j : Fin n) → Fin.inject₁ i ≡ suc j → swapFin i (suc j) ≡ suc i
-swapFin-inject (suc zero) zero refl = refl
-swapFin-inject (suc (suc i)) (suc j) eq
-  rewrite sym (swapFin-suc (suc i) (suc j))
-  = cong suc (swapFin-inject (suc i) j (Finₚ.suc-injective eq))
+swapFin-injectˡ : (i : Fin n) → swapFin i (Fin.inject₁ i) ≡ suc i
+swapFin-injectˡ zero = refl
+swapFin-injectˡ (suc i) rewrite sym (swapFin-suc i (Fin.inject₁ i)) = cong suc (swapFin-injectˡ i)
+
+swapFin-injectʳ : (i : Fin n) → swapFin i (suc i) ≡ Fin.inject₁ i
+swapFin-injectʳ zero = refl
+swapFin-injectʳ (suc i) rewrite sym (swapFin-suc i (suc i)) = cong suc (swapFin-injectʳ i)
 
 swapFin-neq : (i j : Fin n) → i ≢ j → Fin.inject₁ i ≢ suc j → swapFin i (suc j) ≡ suc j
 swapFin-neq zero zero i≢j ii≢sj = ⊥-elim (i≢j refl)
