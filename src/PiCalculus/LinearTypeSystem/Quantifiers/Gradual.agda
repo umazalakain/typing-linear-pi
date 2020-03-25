@@ -68,10 +68,10 @@ to-≡ split = refl
 ∙-join a b = _ , ∙-comm (proj₂ (∙-join' (∙-comm a) (∙-comm b)))
 
 Gradual : Quantifier RS
-Quantifier.0∙ Gradual = (0 , 0)
-Quantifier.+∙ Gradual = (1 , 0)
-Quantifier.-∙ Gradual = (0 , 1)
-Quantifier.1∙ Gradual = (1 , 1)
+Quantifier.ℓ∅ Gradual = (0 , 0)
+Quantifier.ℓᵢ Gradual = (1 , 0)
+Quantifier.ℓₒ Gradual = (0 , 1)
+Quantifier.ℓ# Gradual = (1 , 1)
 Quantifier._≔_∙_ Gradual = _≔_∙_
 Quantifier.∙-join Gradual = ∙-join
 Quantifier.∙-compute Gradual = ∙-compute

@@ -45,11 +45,11 @@ private
 
 only : {idxs : Vec I n} (i : Fin n) → Cs (Vec.lookup idxs i) → Ctx idxs
 only {idxs = _ -, _} zero x = ε -, x
-only {idxs = _ -, _} (suc i) x = only i x -, 0∙
+only {idxs = _ -, _} (suc i) x = only i x -, ℓ∅
 
-channel-1∙ : {idxs : Vec I n} (c : Channel n) → Ctx idxs
-channel-1∙ internal = ε
-channel-1∙ (external x) = only x 1∙
+channel-ℓ# : {idxs : Vec I n} (c : Channel n) → Ctx idxs
+channel-ℓ# internal = ε
+channel-ℓ# (external x) = only x ℓ#
 
 ∋-I : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
     → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
@@ -75,21 +75,21 @@ lookup-only : {idxs : Vec I n} (i : Fin n) {c : Cs (Vec.lookup idxs i)}
 lookup-only {idxs = _ -, _} zero = refl
 lookup-only {idxs = _ -, _} (suc i) = lookup-only i
 
-only-∙ : {idxs : Vec I n}
+onlyℓₒ : {idxs : Vec I n}
        → (i : Fin n)
        → {x y z : Cs (Vec.lookup idxs i)}
        → x ≔ y ∙ z
        → only {idxs = idxs} i x ≔ only i y ⊎ only i z
-only-∙ {idxs = _ -, _} zero s = ⊎-idˡ _ , s
-only-∙ {idxs = _ -, _} (suc i) s = only-∙ i s , ∙-idˡ _
+onlyℓₒ {idxs = _ -, _} zero s = ⊎-idˡ _ , s
+onlyℓₒ {idxs = _ -, _} (suc i) s = onlyℓₒ i s , ∙-idˡ _
 
 subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → Cs idx) → subst Cs eq δ ≡ δ
 subst-idx {eq = refl} δ = refl
 
-∋-∙ : {γ : PreCtx n} {idx : I} {idxs : Vec I n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → Cs idx)
+∋ℓₒ : {γ : PreCtx n} {idx : I} {idxs : Vec I n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → Cs idx)
     → (x : γ ∝ Γ [ i ]≔ t ∝ c {idx} ⊠ Ξ)
     → All.lookup i Γ ≔ c ∙ All.lookup i Ξ
-∋-∙ {i = i} {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup i Γ ≔ ● ∙ All.lookup i Ξ)
+∋ℓₒ {i = i} {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup i Γ ≔ ● ∙ All.lookup i Ξ)
                                         (trans (lookup-only i) (subst-idx c))
                                         (⊎-get i (∋-⊎ x))
 
@@ -108,9 +108,9 @@ subst-idx {eq = refl} δ = refl
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
 
-∋-0∙ : {Γ Δ : Ctx idxs} → γ ∝ Γ [ i ]≔ t ∝ 0∙ {idx} ⊠ Δ → Γ ≡ Δ
-∋-0∙ (zero {check = check}) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
-∋-0∙ (suc x) = _-,_ & ∋-0∙ x ⊗ refl
+∋-ℓ∅ : {Γ Δ : Ctx idxs} → γ ∝ Γ [ i ]≔ t ∝ ℓ∅ {idx} ⊠ Δ → Γ ≡ Δ
+∋-ℓ∅ (zero {check = check}) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
+∋-ℓ∅ (suc x) = _-,_ & ∋-ℓ∅ x ⊗ refl
 
 mult-insert : (i : Fin (suc n)) → Cs idx → Ctx idxs → Ctx (Vec.insert idxs i idx)
 mult-insert zero xs' Γ = Γ -, xs'

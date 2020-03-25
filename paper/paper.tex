@@ -53,7 +53,7 @@
 \newcommand{\PO}{\constr{\mathbf{0}}}
 \newcommand{\comp}[2]{#1 \; \constr{\parallel} \; #2}
 \newcommand{\new}{\constr{\boldsymbol{\nu}} \;}
-\newcommand{\send}[2]{#1 \; \constr{\langle}#2\constr{\rangle} \;}
+\newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
 \newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
@@ -73,7 +73,7 @@
 \newcommand{\Set}{\type{SET}}
 \newcommand{\reduce}[1]{\; \type{\longrightarrow}_{#1} \;}
 \newcommand{\types}[4]{#1 \; \type{\propto} \; #2 \; \type{\vdash} \; #3 \; \type{\boxtimes} \; #4}
-\newcommand{\contains}[5]{#1 \; \type{\propto} \; #2 \; \type{\ni} \; #3 \; \type{\propto} \; #4 \; \type{\boxtimes} \; #5}
+\newcommand{\contains}[6]{#1 \; \type{\propto} \; #2 \; \type{[} \; #3 \; \type{]\coloneqq} \; #4 \; \type{\propto} \; #5 \; \type{\boxtimes} \; #6}
 \newcommand{\Var}{\type{VAR}}
 \newcommand{\Process}{\type{PROCESS}}
 \newcommand{\Unused}{\type{UNUSED}}
@@ -623,21 +623,22 @@ Context splits at each variable reference
     \inferrule{
       \gamma : \PreCtx_n \\
       \inferrule*{}{
-        is : \Idxs_n \\\\
-        \Gamma : \Ctx_{is}} \\
+        idxs : \Idxs_n \\\\
+        \Gamma : \Ctx_{idxs}} \\
+      i : Fin n
       t : \Type \\
       x : \Carrier_i \\
       \Delta : \Ctx_{is}}
-    {\contains{\gamma}{\Gamma}{t}{x}{\Delta} : \Set}}
+    {\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta} : \Set}}
 
   \inferrule
-  {\Gamma : \Ctx_{is} \\ y \; z : \Carrier_i \\ True (\constr{\cdot-compute} \; y \; z)}
-  {\constr{zero} : \contains{\gamma , t}{\Gamma , x}{t}{y}{\Gamma , z}}
+  {\Gamma : \Ctx_{idxs} \\ y \; z : \Carrier_i \\ True (\constr{\cdot-compute} \; y \; z)}
+  {\constr{zero} : \contains{\gamma , t}{\Gamma , x}{zero}{t}{y}{\Gamma , z}}
   
   \inferrule
-  {\Gamma : \Ctx_{is} \\ x : \Carrier_i \\ x' : \Carrier_j \\ \Delta : \Ctx_{is} \\\\
-    loc_x : \contains{\gamma}{\Gamma}{t}{x}{\Delta}}
-  {\constr{suc} \; loc_x : \contains{\gamma , t}{\Gamma , x'}{t}{x}{\Delta , x'}}
+  {\Gamma : \Ctx_{idxs} \\ x : \Carrier_i \\ x' : \Carrier_j \\ \Delta : \Ctx_{idxs} \\\\
+    loc_x : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
+  {\constr{suc} \; loc_x : \contains{\gamma , t}{\Gamma , x'}{\suc i}{t}{x}{\Delta , x'}}
 \end{mathpar}
 \caption{This is...}
 \end{figure}
@@ -652,10 +653,10 @@ Context splits at each variable reference
     \inferrule{
       \gamma : \PreCtx_n \\
       \inferrule*{}{
-        is : \Idxs_n \\\\
-        \Gamma : \Ctx_{is}} \\
+        idxs : \Idxs_n \\\\
+        \Gamma : \Ctx_{idxs}} \\
       P : \Process_n \\
-      \Delta : \Ctx_{is}}
+      \Delta : \Ctx_{idxs}}
     {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}}
   
   \inferrule
@@ -668,15 +669,15 @@ Context splits at each variable reference
   {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
 
   \inferrule
-  {chan_x : \contains{\gamma}{\Gamma}{\channel{t}{x}}{\li}{\Xi} \\\\
+  {chan_x : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
    cont : \types{\gamma , t}{\Xi , x}{P}{\Theta , \lz}}
-  {\constr{recv} \; chan_x \; cont : \types{\gamma}{\Gamma}{\recv{toFin \; chan_x}{P}}{\Theta}}
+  {\constr{recv} \; chan_x \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
 
   \inferrule
-  {chan_x : \contains{\gamma}{\Gamma}{\channel{t}{x}}{\lo}{\Delta} \\\\
-   loc_y : \contains{\gamma}{\Delta}{t}{x}{\Xi} \\\\
+  {chan_x : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
+   loc_y : \contains{\gamma}{\Delta}{j}{t}{x}{\Xi} \\\\
    cont : \types{\gamma}{\Xi}{P}{\Theta}}
-  {\constr{send} \; chan_x \; loc_y \; cont : \types{\gamma}{\Gamma}{\send{toFin \; chan_x}{toFin \; loc_y}P}{\Theta}}
+  {\constr{send} \; chan_x \; loc_y \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
 
   \inferrule
   {l : \types{\gamma}{\Gamma}{P}{\Delta} \\\\

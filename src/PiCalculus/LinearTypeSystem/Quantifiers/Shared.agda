@@ -12,10 +12,10 @@ record Ω : Set where
   constructor ω∙
 
 Shared : Quantifier Ω
-Quantifier.0∙ Shared = ω∙
-Quantifier.+∙ Shared = ω∙
-Quantifier.-∙ Shared = ω∙
-Quantifier.1∙ Shared = ω∙
+Quantifier.ℓ∅ Shared = ω∙
+Quantifier.ℓᵢ Shared = ω∙
+Quantifier.ℓₒ Shared = ω∙
+Quantifier.ℓ# Shared = ω∙
 Quantifier._≔_∙_ Shared _ _ _ = ⊤
 Quantifier.∙-join Shared _ _ = ω∙ , tt
 Quantifier.∙-compute Shared _ _ = yes (ω∙ , tt)

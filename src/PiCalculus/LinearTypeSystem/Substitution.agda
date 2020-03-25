@@ -61,7 +61,7 @@ data _∝_[_/_]_ : PreCtx n → {idxs : Vec I n} → Ctx idxs → Fin n → Fin 
 
 {-
 subst-eq : γ ∝ Γ ⊠ Γ [ j / i ] Ξ → Γ ≡ Ξ
-subst-eq (zero x y j) rewrite ∙-uniqueˡ x (∙-idˡ _) | ∋-0∙ j = refl
+subst-eq (zero x y j) rewrite ∙-uniqueˡ x (∙-idˡ _) | ∋-ℓ∅ j = refl
 subst-eq (suc _ x) rewrite subst-eq x = refl
 
 split : Γ ≔ Δₗ ⊎ Δ
@@ -75,8 +75,8 @@ split {Δₗ = _ -, _} {Δ = _ -, _} {Δᵣ = _ -, _} {Θ = _ -, _} (a , b) (c ,
 
 ∋-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ψₗ Ψᵣ Δ Δₗ Δᵣ : Ctx idxs} {i j : Fin n} {idx}
         → (eq : idx ≡ Vec.lookup idxs j)
-        → Γ ≔ only j +∙ ⊎ Ψᵣ
-        → γ ∝ Γ [ j ]≔ t ∝ +∙ {idx} ⊠ Ψᵣ
+        → Γ ≔ only j ℓᵢ ⊎ Ψᵣ
+        → γ ∝ Γ [ j ]≔ t ∝ ℓᵢ {idx} ⊠ Ψᵣ
 ∋-subst {γ = _ -, _} {Γ = _ -, _} {Ψᵣ = _ -, _} {j = zero} refl (Γ≔ , r) = {!zero {check = fromWitness (_ , r)}!}
 ∋-subst {γ = _ -, _} {Γ = _ -, _} {Ψᵣ = _ -, _} {j = suc j} eq r = {!!}
 
@@ -98,7 +98,7 @@ foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (send x y ⊢P) = {!!}
 foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (comp ⊢P ⊢Q) = comp (foo eq x≤y {!!} {!!} (proj₂ (⊢-⊎ ⊢P)) {!!} ⊢P) (foo eq x≤y {!!} {!!} (proj₂ (⊢-⊎ ⊢Q)) {!!} ⊢Q)
 
 ⊢-subst' : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Cs idx}
-         → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, 0∙
+         → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
          → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
          → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
 ⊢-subst' ⊢P y with ⊢-⊎ ⊢P
@@ -108,6 +108,6 @@ foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (comp ⊢P ⊢Q) = comp (foo eq x≤y
 postulate
   {- TARGET -}
   ⊢-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Cs idx} {m' : Cs idx'}
-          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, 0∙
+          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, ℓ∅
           → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
           → γ -, t' ∝ Γ -, m' ⊢ [ suc j / zero ] P ⊠ Ξ -, m'

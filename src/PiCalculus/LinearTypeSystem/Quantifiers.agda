@@ -26,12 +26,12 @@ private
 
 record Quantifier (Q : Set) : Set₁ where
   field
-    0∙         : Q
-    +∙         : Q
-    -∙         : Q
+    ℓ∅         : Q
+    ℓᵢ         : Q
+    ℓₒ         : Q
     _≔_∙_      : Q → Q → Q → Set
 
-    ∙-join     : ∃[ 1∙ ] (1∙ ≔ +∙ ∙ -∙)
+    ∙-join     : ∃[ ℓ# ] (ℓ# ≔ ℓᵢ ∙ ℓₒ)
 
     -- Given two operands, we can decide whether a third one exists
     ∙-compute  : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
@@ -40,14 +40,14 @@ record Quantifier (Q : Set) : Set₁ where
     ∙-unique   : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
     ∙-uniqueˡ  : ∀ {x y y' z}  → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
 
-    ∙-idˡ      : ∀ x           → x ≔ 0∙ ∙ x
+    ∙-idˡ      : ∀ x           → x ≔ ℓ∅ ∙ x
     ∙-comm     : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
     ∙-assoc    : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ ∝ ] (x ≔ u ∙ ∝ × ∝ ≔ v ∙ z)
 
-  1∙ : Q
-  1∙ = proj₁ ∙-join
+  ℓ# : Q
+  ℓ# = proj₁ ∙-join
 
-  ∙-idʳ : ∀ x → x ≔ x ∙ 0∙
+  ∙-idʳ : ∀ x → x ≔ x ∙ ℓ∅
   ∙-idʳ x = ∙-comm (∙-idˡ x)
 
   ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ ∝ ] (x ≔ ∝ ∙ v × ∝ ≔ y ∙ u)
@@ -85,7 +85,7 @@ record Quantifiers : Set₁ where
 
   ε : {is : Vec I n} → Ctx is
   ε {is = []} = []
-  ε {is = _ -, _} = ε -, 0∙
+  ε {is = _ -, _} = ε -, ℓ∅
 
   ⊎-get : {is : Vec I n} {Γ Δ Ξ : Ctx is} (i : Fin n) → Γ ≔ Δ ⊎ Ξ → All.lookup i Γ ≔ All.lookup i Δ ∙ All.lookup i Ξ
   ⊎-get {Γ = _ -, _} {_ -, _} {_ -, _} zero (Γ≔ , x≔) = x≔

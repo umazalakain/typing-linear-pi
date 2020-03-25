@@ -132,23 +132,23 @@ raw⊢ P with raw→scoped P
 (raw⊢ P) | nothing = L.Lift _ ⊤
 
 _ : raw⊢ (⦅new "x" ⦆ (+[ "a" ] ("x" ⟨ "a" ⟩ 𝟘)) ∥ ("x" ⦅ "b" ⦆ 𝟘))
-_ = chan B[ 0 ] ω∙ 1∙
+_ = chan B[ 0 ] ω∙ ℓ#
     (comp
     (base (send (suc zero) zero end))
     (recv zero end))
 
 _ : raw⊢ channel-over-channel₀
-_ = chan (C[ B[ 0 ] ∝ ω∙ ]) +∙ 1∙ (comp
+_ = chan (C[ B[ 0 ] ∝ ω∙ ]) ℓᵢ ℓ# (comp
          (recv zero
                (recv zero end))
-         (chan B[ 0 ] ω∙ 1∙ (base
+         (chan B[ 0 ] ω∙ ℓ# (base
                (send (suc (suc zero)) (suc zero)
                      (send (suc zero) zero end)))))
 
 _ : raw⊢ channel-over-channel₀
-_ = chan C[ B[ 0 ] ∝ ω∙ ] +∙ ω∙ (comp
+_ = chan C[ B[ 0 ] ∝ ω∙ ] ℓᵢ ω∙ (comp
          (recv zero
                (recv zero end))
-         (chan B[ 0 ] ω∙ 1∙ (base
+         (chan B[ 0 ] ω∙ ℓ# (base
                (send (suc (suc zero)) (suc zero)
                      (send (suc zero) zero end)))))
