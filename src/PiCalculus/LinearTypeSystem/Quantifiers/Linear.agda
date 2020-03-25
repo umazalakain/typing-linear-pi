@@ -103,7 +103,7 @@ data _≔_∙_ : Mult → Mult → Mult → Set where
 ∙-comm splitˡ = splitʳ
 ∙-comm splitʳ = splitˡ
 
-∙-assoc : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃-syntax (λ ∝ → (x ≔ u ∙ w) × (w ≔ v ∙ z))
+∙-assoc : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃-syntax (λ w → (x ≔ u ∙ w) × (w ≔ v ∙ z))
 ∙-assoc 0≔ 0≔ = ℓ∅ , 0≔ , 0≔
 ∙-assoc 1≔ˡ 1≔ˡ = ℓ∅ , 1≔ˡ , 0≔
 ∙-assoc 1≔ˡ 1≔ʳ = ℓ# , 1≔ʳ , 1≔ˡ
@@ -121,18 +121,13 @@ data _≔_∙_ : Mult → Mult → Mult → Set where
 ∙-assoc splitʳ -≔ˡ = ℓᵢ , splitʳ , +≔ʳ
 ∙-assoc splitʳ -≔ʳ = ℓ# , 1≔ʳ , splitʳ
 
-∙-join : ∀ {x y z} → x ≔ y ∙ ℓᵢ → x ≔ z ∙ ℓₒ → ∃-syntax (λ ∝ → x ≔ ∝ ∙ ℓ#)
-∙-join splitʳ splitˡ = _ , 1≔ʳ
-
 Linear : Quantifier Mult
 Quantifier.ℓ∅ Linear = ℓ∅
 Quantifier.ℓᵢ Linear = ℓᵢ
 Quantifier.ℓₒ Linear = ℓₒ
-Quantifier.ℓ# Linear = ℓ#
 Quantifier._≔_∙_ Linear = _≔_∙_
-Quantifier.∙-join Linear = ∙-join
+Quantifier.∙-join Linear = ℓ# , splitˡ
 Quantifier.∙-compute Linear = ∙-compute
-Quantifier.∙-computeˡ Linear = ∙-computeˡ
 Quantifier.∙-unique Linear = ∙-unique
 Quantifier.∙-uniqueˡ Linear = ∙-uniqueˡ
 Quantifier.∙-idˡ Linear = ∙-idˡ

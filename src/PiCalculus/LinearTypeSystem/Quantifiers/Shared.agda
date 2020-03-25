@@ -15,11 +15,9 @@ Shared : Quantifier Ω
 Quantifier.ℓ∅ Shared = ω∙
 Quantifier.ℓᵢ Shared = ω∙
 Quantifier.ℓₒ Shared = ω∙
-Quantifier.ℓ# Shared = ω∙
 Quantifier._≔_∙_ Shared _ _ _ = ⊤
-Quantifier.∙-join Shared _ _ = ω∙ , tt
+Quantifier.∙-join Shared = ω∙ , tt
 Quantifier.∙-compute Shared _ _ = yes (ω∙ , tt)
-Quantifier.∙-computeˡ Shared _ _ = yes (ω∙ , tt)
 Quantifier.∙-unique Shared _ _ = refl
 Quantifier.∙-uniqueˡ Shared _ _ = refl
 Quantifier.∙-idˡ Shared _ = tt

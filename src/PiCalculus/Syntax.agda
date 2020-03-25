@@ -79,22 +79,18 @@ module Conversion where
   import Data.String.Properties as Stringₚ
   _∈?_ = DecPropositional._∈?_ Stringₚ._≟_
 
-  raw→scoped' : ∀ {n} → Vec String n → Raw tt → Maybe (Scoped n)
-  raw→scoped' ctx 𝟘                              = just 𝟘
-  raw→scoped' ctx (⦅new b ⦆ P)                   = do P' ← raw→scoped' (b ∷ ctx) P
-                                                      just (new P')
-  raw→scoped' ctx (P ∥ Q)                        = do P' ← raw→scoped' ctx P
-                                                      Q' ← raw→scoped' ctx Q
-                                                      just (P' ∥ Q')
-  raw→scoped' ctx (x ⦅ b ⦆ P)  with x ∈? ctx
-  raw→scoped' ctx (x ⦅ b ⦆ P)  | yes p           = do P' ← raw→scoped' (b ∷ ctx) P
-                                                      just (index p ⦅⦆ P')
-  raw→scoped' ctx (x ⦅ b ⦆ P)  | _               = nothing
-  raw→scoped' ctx (x ⟨ y ⟩ P)  with x ∈? ctx | y ∈? ctx
-  raw→scoped' ctx (x ⟨ y ⟩ P)  | yes xp | yes yp = do P' ← raw→scoped' ctx P
-                                                      just (index xp ⟨ index yp ⟩ P')
-  raw→scoped' ctx (x ⟨ y ⟩ P)  | _      | _      = nothing
-
-
-  raw→scoped : Raw tt → Maybe (Scoped 0)
-  raw→scoped = raw→scoped' []
+  raw→scoped : ∀ {n} → Vec String n → Raw tt → Maybe (Scoped n)
+  raw→scoped ctx 𝟘                              = just 𝟘
+  raw→scoped ctx (⦅new b ⦆ P)                   = do P' ← raw→scoped (b ∷ ctx) P
+                                                     just (new P')
+  raw→scoped ctx (P ∥ Q)                        = do P' ← raw→scoped ctx P
+                                                     Q' ← raw→scoped ctx Q
+                                                     just (P' ∥ Q')
+  raw→scoped ctx (x ⦅ b ⦆ P)  with x ∈? ctx
+  raw→scoped ctx (x ⦅ b ⦆ P)  | yes p           = do P' ← raw→scoped (b ∷ ctx) P
+                                                     just (index p ⦅⦆ P')
+  raw→scoped ctx (x ⦅ b ⦆ P)  | _               = nothing
+  raw→scoped ctx (x ⟨ y ⟩ P)  with x ∈? ctx | y ∈? ctx
+  raw→scoped ctx (x ⟨ y ⟩ P)  | yes xp | yes yp = do P' ← raw→scoped ctx P
+                                                     just (index xp ⟨ index yp ⟩ P')
+  raw→scoped ctx (x ⟨ y ⟩ P)  | _      | _      = nothing

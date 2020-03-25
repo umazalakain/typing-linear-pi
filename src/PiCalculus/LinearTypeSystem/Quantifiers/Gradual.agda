@@ -50,32 +50,18 @@ to-≡ split = refl
               sym (_,_ & ℕₚ.+-cancelʳ-≡ _ _ (cong proj₁ ab)
                        ⊗ ℕₚ.+-cancelʳ-≡ _ _ (cong proj₂ ab))
 
-∙-assoc : ∀ {x y z⁺ z⁻ u⁺ u⁻ v⁺ v⁻} → x ≔ y ∙ (z⁺ , z⁻) → y ≔ (u⁺ , u⁻) ∙ (v⁺ , v⁻) → ∃[ ∝ ] ((x ≔ (u⁺ , u⁻) ∙ w) × (w ≔ (v⁺ , v⁻) ∙ (z⁺ , z⁻)))
+∙-assoc : ∀ {x y z⁺ z⁻ u⁺ u⁻ v⁺ v⁻} → x ≔ y ∙ (z⁺ , z⁻) → y ≔ (u⁺ , u⁻) ∙ (v⁺ , v⁻) → ∃[ w ] ((x ≔ (u⁺ , u⁻) ∙ w) × (w ≔ (v⁺ , v⁻) ∙ (z⁺ , z⁻)))
 ∙-assoc {z⁺ = z⁺} {z⁻} {u⁺} {u⁻} {v⁺} {v⁻} split split
   rewrite ℕₚ.+-assoc u⁺ v⁺ z⁺ | ℕₚ.+-assoc u⁻ v⁻ z⁻
   = _ , (split , split)
-
-∙-join' : ∀ {x⁺ x⁻ y⁺ y⁻ z⁺ z⁻}
-        →         (x⁺ , x⁻) ≔ (1 , 0) ∙ (y⁺ , y⁻)
-        →         (x⁺ , x⁻) ≔ (0 , 1) ∙ (z⁺ , z⁻)
-        → ∃[ ∝ ] ((x⁺ , x⁻) ≔ (1 , 1) ∙ w)
-∙-join' split split = _ , split
-
-∙-join : ∀ {x⁺ x⁻ y⁺ y⁻ z⁺ z⁻}
-       → (x⁺ , x⁻) ≔ (y⁺ , y⁻) ∙ (1 , 0)
-       → (x⁺ , x⁻) ≔ (z⁺ , z⁻) ∙ (0 , 1)
-       → ∃[ ∝ ] ((x⁺ , x⁻) ≔ ∝ ∙ (1 , 1))
-∙-join a b = _ , ∙-comm (proj₂ (∙-join' (∙-comm a) (∙-comm b)))
 
 Gradual : Quantifier RS
 Quantifier.ℓ∅ Gradual = (0 , 0)
 Quantifier.ℓᵢ Gradual = (1 , 0)
 Quantifier.ℓₒ Gradual = (0 , 1)
-Quantifier.ℓ# Gradual = (1 , 1)
 Quantifier._≔_∙_ Gradual = _≔_∙_
-Quantifier.∙-join Gradual = ∙-join
+Quantifier.∙-join Gradual = (1 , 1) , split
 Quantifier.∙-compute Gradual = ∙-compute
-Quantifier.∙-computeˡ Gradual = ∙-computeˡ
 Quantifier.∙-unique Gradual = ∙-unique
 Quantifier.∙-uniqueˡ Gradual = ∙-uniqueˡ
 Quantifier.∙-idˡ Gradual (_ , _) = split
