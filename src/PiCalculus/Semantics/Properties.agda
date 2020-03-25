@@ -1,5 +1,6 @@
+open import Function using (_∘_)
 open import Data.Empty using (⊥-elim)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; cong; cong₂)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong; cong₂)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.Product using (Σ-syntax; _,_)
 open import Data.Unit using (tt)
@@ -48,6 +49,22 @@ swapFin-suc i .(Fin.inject₁ i) | yes refl = suc & (suc & Finₚ.lower₁-irrel
 swapFin-suc i x | no ¬p with (suc i) Fin.≟ x
 swapFin-suc i x | no ¬p | yes q = refl
 swapFin-suc i x | no ¬p | no ¬q = refl
+
+swapFin-inject : (i j : Fin n) → Fin.inject₁ i ≡ suc j → swapFin i (suc j) ≡ suc i
+swapFin-inject (suc zero) zero refl = refl
+swapFin-inject (suc (suc i)) (suc j) eq
+  rewrite sym (swapFin-suc (suc i) (suc j))
+  = cong suc (swapFin-inject (suc i) j (Finₚ.suc-injective eq))
+
+swapFin-neq : (i j : Fin n) → i ≢ j → Fin.inject₁ i ≢ suc j → swapFin i (suc j) ≡ suc j
+swapFin-neq zero zero i≢j ii≢sj = ⊥-elim (i≢j refl)
+swapFin-neq zero (suc zero) i≢j ii≢sj = refl
+swapFin-neq zero (suc (suc j)) i≢j ii≢sj = refl
+swapFin-neq (suc zero) zero i≢j ii≢sj = ⊥-elim (ii≢sj refl)
+swapFin-neq (suc (suc i)) zero i≢j ii≢sj = refl
+swapFin-neq (suc i) (suc j) i≢j ii≢sj
+  rewrite sym (swapFin-suc i (suc j))
+  = cong suc (swapFin-neq i j (i≢j ∘ cong suc) (ii≢sj ∘ cong suc))
 
 swapFin-swapFin : ∀ (i : Fin n) (x : Fin (suc n)) → swapFin i (swapFin i x) ≡ x
 swapFin-swapFin i x with Fin.inject₁ i Fin.≟ x

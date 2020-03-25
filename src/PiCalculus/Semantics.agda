@@ -142,10 +142,9 @@ module PiCalculus.Semantics where
 
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
-    comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i i' j : Fin n}
-         → i ≡ i'
+    comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
          → let uP = subst-unused (λ ()) P in
-           (i ⦅⦆ P) ∥ (i' ⟨ j ⟩ Q) =[ external i ]⇒ lower zero ([ suc j / zero ] P) uP ∥ Q
+           (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero ([ suc j / zero ] P) uP ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'

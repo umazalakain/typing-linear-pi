@@ -50,11 +50,11 @@ private
     P : Scoped n
 
 
-
-data _w_[_/_]_ : PreCtx n → {idxs : Vec I n} → Ctx idxs → Fin n → Fin n → Ctx idxs → Set where
+{-
+data _∝_[_/_]_ : PreCtx n → {idxs : Vec I n} → Ctx idxs → Fin n → Fin n → Ctx idxs → Set where
   zero : m ≔ δ ∙ l
-       → (j : γ ∝ Ψ ∋ t ∝ δ ⊠ Ξ)
-       → γ -, t ∝ Ψ -, l [ suc (toFin j) / zero ] Ξ -, m
+       → γ ∝ Ψ [ j ]≔ t ∝ δ ⊠ Ξ
+       → γ -, t ∝ Ψ -, l [ suc j / zero ] Ξ -, m
 
   suc : γ ∝ Ψ [ j / i ] Ξ
       → γ -, t ∝ Ψ -, l [ suc j / suc i ] Ξ -, l
@@ -76,9 +76,8 @@ split {Δₗ = _ -, _} {Δ = _ -, _} {Δᵣ = _ -, _} {Θ = _ -, _} (a , b) (c ,
 ∋-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ψₗ Ψᵣ Δ Δₗ Δᵣ : Ctx idxs} {i j : Fin n} {idx}
         → (eq : idx ≡ Vec.lookup idxs j)
         → Γ ≔ only j +∙ ⊎ Ψᵣ
-        → Σ[ y ∈ γ ∝ Γ ∋ t ∝ +∙ {idx} ⊠ Ψᵣ ]
-          j ≡ toFin y
-∋-subst {γ = _ -, _} {Γ = _ -, _} {Ψᵣ = _ -, _} {j = zero} refl (Γ≔ , r) = {!zero {check = fromWitness (_ , r)}!} , {!!}
+        → γ ∝ Γ [ j ]≔ t ∝ +∙ {idx} ⊠ Ψᵣ
+∋-subst {γ = _ -, _} {Γ = _ -, _} {Ψᵣ = _ -, _} {j = zero} refl (Γ≔ , r) = {!zero {check = fromWitness (_ , r)}!}
 ∋-subst {γ = _ -, _} {Γ = _ -, _} {Ψᵣ = _ -, _} {j = suc j} eq r = {!!}
 
 foo : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ψₗ Ψᵣ Δ Δₗ Δᵣ : Ctx idxs} {i j : Fin n} {m : Cs (Vec.lookup idxs i)}
@@ -92,21 +91,23 @@ foo : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ψₗ Ψᵣ Δ Δₗ Δᵣ : Ctx 
     → γ ∝ Γ ⊢ [ j / i ] P ⊠ Ψᵣ
 foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ end rewrite ⊎-uniqueˡ Γₗ≔ (⊎-idˡ _) = {!!}
 foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (chan t m μ ⊢P) = chan t m μ (foo eq (Nat.s≤s x≤y) (Δₗ , ∙-idˡ _) (Δᵣ , ∙-idˡ _) (Γₗ≔ , ∙-idʳ _) (Γᵣ≔ , ∙-idʳ _) ⊢P)
-foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) with ⊢-⊎ ⊢P | i Finₚ.≟ toFin x
-foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) | (_ -, _) , (P≔ , _) | yes p rewrite proj₂ (∋-subst {j = j} eq {!!}) = recv _ (foo {!!} {!!} {!!} {!!} {!!} {!!} ⊢P)
-foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) | (_ -, _) , (P≔ , _) | no ¬p = recv x (foo eq (Nat.s≤s x≤y) ({!!} , ∙-idˡ _) ({!!} , ∙-idˡ _) ({!x!} , ∙-idʳ _) ({!!} , ∙-idʳ _) ⊢P)
+foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) with ⊢-⊎ ⊢P | i Finₚ.≟ {!!}
+foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) | (_ -, _) , (P≔ , _) | yes p = recv {!!} {!!}
+foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) | (_ -, _) , (P≔ , _) | no ¬p = recv {!!} (foo eq (Nat.s≤s x≤y) ({!!} , ∙-idˡ _) ({!!} , ∙-idˡ _) ({!x!} , ∙-idʳ _) ({!!} , ∙-idʳ _) ⊢P)
 foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (send x y ⊢P) = {!!}
 foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (comp ⊢P ⊢Q) = comp (foo eq x≤y {!!} {!!} (proj₂ (⊢-⊎ ⊢P)) {!!} ⊢P) (foo eq x≤y {!!} {!!} (proj₂ (⊢-⊎ ⊢Q)) {!!} ⊢Q)
 
 ⊢-subst' : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Cs idx}
          → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, 0∙
-         → (y : γ ∝ Ψ ∋ t ∝ m ⊠ Ξ)
-         → γ -, t ∝ Γ -, m ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m
+         → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
+         → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
 ⊢-subst' ⊢P y with ⊢-⊎ ⊢P
 ⊢-subst' ⊢P y | (_ -, _) , (Γ≔ , x≔) = foo (∋-I y) Nat.z≤n (⊎-idˡ _ , ∙-idʳ _) ({!!} , (∙-idˡ _)) (Γ≔ , ∙-idʳ _) (⊎-trans Γ≔ (∋-⊎ y) , ∙-idˡ _) ⊢P
+-}
 
-{- ∋-SUBSTGET -}
-⊢-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Cs idx} {m' : Cs idx'}
-        → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, 0∙
-        → (y : γ ∝ Ψ ∋ t ∝ m ⊠ Ξ)
-        → γ -, t' ∝ Γ -, m' ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m'
+postulate
+  {- TARGET -}
+  ⊢-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Cs idx} {m' : Cs idx'}
+          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, 0∙
+          → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
+          → γ -, t' ∝ Γ -, m' ⊢ [ suc j / zero ] P ⊠ Ξ -, m'

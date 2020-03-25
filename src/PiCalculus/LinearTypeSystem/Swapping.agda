@@ -24,6 +24,7 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
+open import PiCalculus.Semantics.Properties
 open import PiCalculus.LinearTypeSystem.Quantifiers
 
 module PiCalculus.LinearTypeSystem.Swapping (Ω : Quantifiers) where
@@ -34,21 +35,22 @@ open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 private
   variable
     n : ℕ
-    j : I
-    is : Vec I n
+    i j : Fin n
+    idx : I
+    idxs : Vec I n
     P Q : Scoped n
 
-∋-unused : {γ : PreCtx n} {Γ Θ : Ctx is} {t : Type} {xs : Cs j}
+∋-unused : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Cs idx}
          → (i : Fin n)
-         → (x : γ ∝ Γ ∋ t ∝ xs ⊠ Θ)
-         → i ≢ toFin x
+         → γ ∝ Γ [ j ]≔ t ∝ xs ⊠ Θ
+         → i ≢ j
          → All.lookup i Γ ≡ All.lookup i Θ
 ∋-unused zero zero i≢x = ⊥-elim (i≢x refl)
 ∋-unused zero (suc x) i≢x = refl
 ∋-unused (suc i) zero i≢x = refl
 ∋-unused (suc i) (suc x) i≢x = ∋-unused i x (i≢x ∘ cong suc)
 
-⊢-unused : {γ : PreCtx n} {Γ Θ : Ctx is}
+⊢-unused : {γ : PreCtx n} {Γ Θ : Ctx idxs}
          → (i : Fin n)
          → Unused i P
          → γ ∝ Γ ⊢ P ⊠ Θ
@@ -76,31 +78,28 @@ module _ {a} {A : Set a} where
   swapₐ (suc i) (xs -, y -, x) = swapₐ i (xs -, y) -, x
 
 -- TODO: rewrite this crap
-∋-swap : {γ : PreCtx (suc n)} {is : Vec I (suc n)} {Γ Θ : Ctx is} {t : Type} {xs : Cs j}
+∋-swap : {γ : PreCtx (suc n)} {idxs : Vec I (suc n)} {Γ Θ : Ctx idxs} {t : Type} {x : Cs idx}
        → (i : Fin n)
-       → (x : γ ∝ Γ ∋ t ∝ xs ⊠ Θ)
-       → Σ[ y ∈ swapᵥ i γ ∝ swapₐ i Γ ∋ t ∝ xs ⊠ swapₐ i Θ ]
-         swapFin i (toFin x) ≡ toFin y
-∋-swap {γ = _ -, _ -, _} {is = _ -, _ -, _} {Γ = _ -, _ -, _} zero zero = suc zero , refl
-∋-swap {Γ = _ -, _ -, _} zero (suc zero) = zero , refl
-∋-swap {Γ = _ -, _ -, _} zero (suc (suc x)) = suc (suc x) , refl
-∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) zero = zero , refl
-∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc zero) (suc zero) = suc (suc zero) , refl
-∋-swap {γ = _ -, _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _ -, _} (suc (suc zero)) (suc zero) = suc zero , refl
-∋-swap {γ = _ -, _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _ -, _} (suc (suc (suc i))) (suc zero) = suc zero , refl
-∋-swap {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) with ∋-swap i sx
-∋-swap {Γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq with Fin.inject₁ i Finₚ.≟ suc (toFin x)
-∋-swap {Γ = _ -, _ -, _ -, _} {Θ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | yes p = suc x' , suc & trans (suc & (suc & Finₚ.lower₁-irrelevant _ _ _)) eq
-∋-swap {Γ = _ -, _ -, _ -, _} {Θ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | no ¬p with i Finₚ.≟ (toFin x)
-∋-swap {Γ = _ -, _ -, _ -, _} {Θ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | no ¬p | yes refl = suc x' , suc & eq
-∋-swap {Γ = _ -, _ -, _ -, _} {Θ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) | x' , eq | no ¬p | no ¬q = suc x' , suc & eq
+       → γ ∝ Γ [ j ]≔ t ∝ x ⊠ Θ
+       → swapᵥ i γ ∝ swapₐ i Γ [ swapFin i j ]≔ t ∝ x ⊠ swapₐ i Θ
+∋-swap {γ = _ -, _ -, _} {idxs = _ -, _ -, _} {Γ = _ -, _ -, _} zero zero = suc zero
+∋-swap {γ = _ -, _ -, _} zero (suc zero) = zero
+∋-swap {γ = _ -, _ -, _} zero (suc (suc x)) = suc (suc x)
+∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) zero = zero
+∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc zero) (suc zero) = suc (suc zero)
+∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc (suc i)) (suc zero) = suc zero
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc (suc x)) with Fin.inject₁ i Finₚ.≟ suc j
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | yes p = suc (subst (λ ● → _ ∝ _ [ ● ]≔ _ ∝ _ ⊠ _) (trans (swapFin-inject i j p) (cong suc {!p!})) (∋-swap i sx))
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p with i Finₚ.≟ j
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p | yes refl = {!∋-swap i sx gs!}
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p | no ¬q rewrite sym (swapFin-neq i j ¬q ¬p) = suc (∋-swap i sx)
 
-⊢-swap : {γ : PreCtx (suc n)} {Γ Θ : Ctx is}
+⊢-swap : {γ : PreCtx (suc n)} {Γ Θ : Ctx idxs}
        → (i : Fin n)
        → γ ∝ Γ ⊢ P ⊠ Θ
        → swapᵥ i γ ∝ swapₐ i Γ ⊢ swap i P ⊠ swapₐ i Θ
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i end = end
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (chan t m μ ⊢P) = chan t m μ (⊢-swap (suc i) ⊢P)
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (recv {Ξ = _ -, _ -, _} x ⊢P) rewrite proj₂ (∋-swap i x) = recv _ (⊢-swap (suc i) ⊢P)
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (send x y ⊢P) rewrite proj₂ (∋-swap i x) | proj₂ (∋-swap i y) = send _ _ (⊢-swap i ⊢P)
+⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (recv {Ξ = _ -, _ -, _} x ⊢P) = recv (∋-swap i x) (⊢-swap (suc i) ⊢P)
+⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (send x y ⊢P) = send (∋-swap i x) (∋-swap i y) (⊢-swap i ⊢P)
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (comp ⊢P ⊢Q) = comp (⊢-swap i ⊢P) (⊢-swap i ⊢Q)

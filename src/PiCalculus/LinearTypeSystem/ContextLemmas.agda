@@ -41,6 +41,7 @@ private
     idx idx' : I
     t : Type
     P Q : Scoped n
+    i j : Fin n
 
 only : {idxs : Vec I n} (i : Fin n) → Cs (Vec.lookup idxs i) → Ctx idxs
 only {idxs = _ -, _} zero x = ε -, x
@@ -51,8 +52,8 @@ channel-1∙ internal = ε
 channel-1∙ (external x) = only x 1∙
 
 ∋-I : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
-    → (x : γ ∝ Γ ∋ t ∝ c ⊠ Ξ)
-    → idx ≡ Vec.lookup idxs (toFin x)
+    → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
+    → idx ≡ Vec.lookup idxs i
 ∋-I zero = refl
 ∋-I (suc x) = ∋-I x
 
@@ -64,8 +65,8 @@ channel-1∙ (external x) = only x 1∙
 -}
 
 ∋-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
-    → (x : γ ∝ Γ ∋ t ∝ c ⊠ Ξ)
-    → Γ ≔ only (toFin x) (subst Cs (∋-I x) c) ⊎ Ξ
+    → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
+    → Γ ≔ only i (subst Cs (∋-I x) c) ⊎ Ξ
 ∋-⊎ (zero {check = check}) = ⊎-idˡ _ , proj₂ (toWitness check)
 ∋-⊎ (suc x) = ∋-⊎ x , ∙-idˡ _
 
@@ -86,11 +87,11 @@ subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → Cs idx) �
 subst-idx {eq = refl} δ = refl
 
 ∋-∙ : {γ : PreCtx n} {idx : I} {idxs : Vec I n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → Cs idx)
-    → (x : γ ∝ Γ ∋ t ∝ c {idx} ⊠ Ξ)
-    → All.lookup (toFin x) Γ ≔ c ∙ All.lookup (toFin x) Ξ
-∋-∙ {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup (toFin x) Γ ≔ ● ∙ All.lookup (toFin x) Ξ)
-                                (trans (lookup-only (toFin x)) (subst-idx c))
-                                (⊎-get (toFin x) (∋-⊎ x))
+    → (x : γ ∝ Γ [ i ]≔ t ∝ c {idx} ⊠ Ξ)
+    → All.lookup i Γ ≔ c ∙ All.lookup i Ξ
+∋-∙ {i = i} {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup i Γ ≔ ● ∙ All.lookup i Ξ)
+                                        (trans (lookup-only i) (subst-idx c))
+                                        (⊎-get i (∋-⊎ x))
 
 ⊢-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ _
@@ -107,7 +108,7 @@ subst-idx {eq = refl} δ = refl
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
 
-∋-0∙ : {Γ Δ : Ctx idxs} → γ ∝ Γ ∋ t ∝ 0∙ {idx} ⊠ Δ → Γ ≡ Δ
+∋-0∙ : {Γ Δ : Ctx idxs} → γ ∝ Γ [ i ]≔ t ∝ 0∙ {idx} ⊠ Δ → Γ ≡ Δ
 ∋-0∙ (zero {check = check}) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
 ∋-0∙ (suc x) = _-,_ & ∋-0∙ x ⊗ refl
 

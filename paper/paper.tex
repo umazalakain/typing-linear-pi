@@ -56,6 +56,8 @@
 \newcommand{\send}[2]{#1 \; \constr{\langle}#2\constr{\rangle} \;}
 \newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
+\newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
+\newcommand{\channel}[2]{\constr{C[} \; #1 \; \constr{\propto} \; #2 \; \constr{]}}
 
 % Functions
 \newcommand{\subst}[3]{#1[#2/#3]}
@@ -68,6 +70,7 @@
 \newcommand{\lio}{\field{\ell_{\#}}}
 
 % Types
+\newcommand{\Set}{\type{SET}}
 \newcommand{\reduce}[1]{\; \type{\longrightarrow}_{#1} \;}
 \newcommand{\types}[4]{#1 \; \type{\propto} \; #2 \; \type{\vdash} \; #3 \; \type{\boxtimes} \; #4}
 \newcommand{\contains}[5]{#1 \; \type{\propto} \; #2 \; \type{\ni} \; #3 \; \type{\propto} \; #4 \; \type{\boxtimes} \; #5}
@@ -139,7 +142,7 @@ leftover typing
     {\mprset{fraction={===}}
       \inferrule
       { }
-      {\type{\N} : \type{Set}}}
+      {\type{\N} : \Set}}
 
     \inferrule
     { }
@@ -187,7 +190,7 @@ In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$
   {\mprset{fraction={===}}
     \inferrule
     {n : \N}
-    {\Var_n : Set}}
+    {\Var_n : \Set}}
 
   \inferrule
   {n : \N}
@@ -210,7 +213,7 @@ As shown in Figure \ref{process}, we increase the \emph{depth} counter every tim
   {\mprset{fraction={===}}
     \inferrule
     {n : \N}
-    {\Process_n : Set}}
+    {\Process_n : \Set}}
 \end{mathpar}
   
 \begin{equation*} \label{pi-calc-syntax}
@@ -256,7 +259,7 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
   {\mprset{fraction={===}}
     \inferrule
     { }
-    {P \eqeq Q : Set}}
+    {P \eqeq Q : \Set}}
 
   \inferrule
   { }
@@ -300,7 +303,7 @@ To show that the doubly recursive call terminates we index the equivalence relat
   {\mprset{fraction={===}}
     \inferrule
     { }
-    {\Rec : Set}}
+    {\Rec : \Set}}
 
   \inferrule
   { }
@@ -317,7 +320,7 @@ To show that the doubly recursive call terminates we index the equivalence relat
   {\mprset{fraction={===}}
     \inferrule
     {P \, Q : \Process_n \\ r : \Rec}
-    {P \eq{r} Q : Set}}
+    {P \eq{r} Q : \Set}}
 
   \inferrule
   {eq : P \eqeq Q}
@@ -376,7 +379,7 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   {\mprset{fraction={===}}
     \inferrule
     {n : \N}
-    {\Channel_n : Set}}
+    {\Channel_n : \Set}}
 
   \inferrule
   { }
@@ -389,7 +392,7 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   {\mprset{fraction={===}}
     \inferrule
     {i : \Channel_n \\ P \; Q : \Process_n}
-    {P \reduce{i} Q : Set}}
+    {P \reduce{i} Q : \Set}}
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
@@ -468,17 +471,17 @@ In Figure \ref{capabilities} we present an algebra $\Quantifier_C$ on the carrie
 \begin{figure}[h]
 \begin{equation}
 \begin{aligned}
-  &\lz                    &:{} &                      &     & C \\
-  &\li                    &:{} &                      &     & C \\
-  &\lo                    &:{} &                      &     & C \\
-  &\op{\_}{\_}{\_}        &:{} &                      &     & C \to C \to C \to Set \\
-  &\field{\cdot-join}     &:{} &                      &     & \type{\exists} \lio . \; \op{\lio}{\li}{\lo} \\
-  &\field{\cdot-compute}  &:{} &\forall y z           & \to & \type{Dec} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
-  &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-  &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  &\field{\cdot-id^l}     &:{} &\forall x             & \to & \op{x}{\lz}{x} \\
-  &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to & \op{x}{y}{z} \to \op{x}{z}{y} \\
-  &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
+  &\lz                    &:{} &                      &        & C \\
+  &\li                    &:{} &                      &        & C \\
+  &\lo                    &:{} &                      &        & C \\
+  &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
+  &\field{\cdot-join}     &:{} &                      &        & \type{\exists} \lio . \; \op{\lio}{\li}{\lo} \\
+  &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
+  &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+  &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+  &\field{\cdot-id^l}     &:{} &\forall x             & \to \; & \op{x}{\lz}{x} \\
+  &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
+  &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
 \end{aligned}
 \end{equation}
 \caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid with special elements $\ell_i$, $\ell_o$ and $\ell_\#$.}
@@ -493,9 +496,9 @@ Finally, the field $\field{QUANTIFIERS}$ requires for each index $i$ to have an 
 \begin{figure}[h]
 \begin{equation}
 \begin{split}
-  \field{IDX}          &: Set \\
+  \field{IDX}          &: \Set \\
   \field{\exists IDX}  &: \field{IDX} \\
-  \field{CARRIER}      &: \field{IDX} \to Set \\
+  \field{CARRIER}      &: \field{IDX} \to \Set \\
   \field{QUANTIFIERS}  &: (i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
 \end{split}
 \end{equation}
@@ -529,14 +532,37 @@ All other rules follow trivially from the algebraic rules for the addition of na
 
 \end{description}
 
+\todo{mention types are independent from capabilities}
+\todo{add index to in-type}
+\todo{update examples}
+
 \subsection{Contexts}
 
 \begin{figure}[h]
 \begin{mathpar}
   {\mprset{fraction={===}}
     \inferrule
+    { }
+    {\Type : \Set}
+  }
+
+  \inferrule
+  {n : \N}
+  {\base{n} : \Type}
+
+  \inferrule
+  {t : \Type \\ \inferrule*{} {i : \Idx \\\\ x : \Carrier_i}}
+  {\channel{t}{x} : \Type}
+\end{mathpar}
+\caption{This is...}
+\end{figure}
+
+\begin{figure}[h]
+\begin{mathpar}
+  {\mprset{fraction={===}}
+    \inferrule
     {n : \N}
-    {\PreCtx_n : Set}
+    {\PreCtx_n : \Set}
   }
 
   \inferrule
@@ -555,7 +581,7 @@ All other rules follow trivially from the algebraic rules for the addition of na
   {\mprset{fraction={===}}
     \inferrule
     {n : \N}
-    {\Idxs_n : Set}}
+    {\Idxs_n : \Set}}
 
   \inferrule
   { }
@@ -570,7 +596,7 @@ All other rules follow trivially from the algebraic rules for the addition of na
   {\mprset{fraction={===}}
     \inferrule
     {is : \Idxs_n}
-    {\Ctx_{is} : Set}}
+    {\Ctx_{is} : \Set}}
   
   \inferrule
   { }
@@ -602,7 +628,7 @@ Context splits at each variable reference
       t : \Type \\
       x : \Carrier_i \\
       \Delta : \Ctx_{is}}
-    {\contains{\gamma}{\Gamma}{t}{x}{\Delta} : Set}}
+    {\contains{\gamma}{\Gamma}{t}{x}{\Delta} : \Set}}
 
   \inferrule
   {\Gamma : \Ctx_{is} \\ y \; z : \Carrier_i \\ True (\constr{\cdot-compute} \; y \; z)}
@@ -630,7 +656,7 @@ Context splits at each variable reference
         \Gamma : \Ctx_{is}} \\
       P : \Process_n \\
       \Delta : \Ctx_{is}}
-    {\types{\gamma}{\Gamma}{P}{\Delta} : Set}}
+    {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}}
   
   \inferrule
   { }
@@ -638,16 +664,16 @@ Context splits at each variable reference
 
   \inferrule
   {t : \Type \\ x : \Carrier_i \\ y : \Carrier_j \\\\
-   cont : \types{\gamma , C[ t \propto x ]}{\Gamma , y}{P}{\Delta , 0.}}
-  {\constr{chan} \; t \; x \; y : \types{\gamma}{\Gamma}{\new P}{\Delta}}
+   cont : \types{\gamma , \channel{t}{x}}{\Gamma , y}{P}{\Delta , \lz}}
+  {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
 
   \inferrule
-  {chan_x : \contains{\gamma}{\Gamma}{C[ t \propto x]}{+\cdot}{\Xi} \\\\
-   cont : \types{\gamma , t}{\Xi , x}{P}{\Theta , 0\cdot}}
+  {chan_x : \contains{\gamma}{\Gamma}{\channel{t}{x}}{\li}{\Xi} \\\\
+   cont : \types{\gamma , t}{\Xi , x}{P}{\Theta , \lz}}
   {\constr{recv} \; chan_x \; cont : \types{\gamma}{\Gamma}{\recv{toFin \; chan_x}{P}}{\Theta}}
 
   \inferrule
-  {chan_x : \contains{\gamma}{\Gamma}{C[t \propto x]}{-\cdot}{\Delta} \\\\
+  {chan_x : \contains{\gamma}{\Gamma}{\channel{t}{x}}{\lo}{\Delta} \\\\
    loc_y : \contains{\gamma}{\Delta}{t}{x}{\Xi} \\\\
    cont : \types{\gamma}{\Xi}{P}{\Theta}}
   {\constr{send} \; chan_x \; loc_y \; cont : \types{\gamma}{\Gamma}{\send{toFin \; chan_x}{toFin \; loc_y}P}{\Theta}}
