@@ -42,7 +42,7 @@ record Quantifier (Q : Set) : Set₁ where
 
     ∙-idˡ      : ∀ x           → x ≔ 0∙ ∙ x
     ∙-comm     : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
-    ∙-assoc    : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
+    ∙-assoc    : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ ∝ ] (x ≔ u ∙ ∝ × ∝ ≔ v ∙ z)
 
   1∙ : Q
   1∙ = proj₁ ∙-join
@@ -50,7 +50,7 @@ record Quantifier (Q : Set) : Set₁ where
   ∙-idʳ : ∀ x → x ≔ x ∙ 0∙
   ∙-idʳ x = ∙-comm (∙-idˡ x)
 
-  ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ w ] (x ≔ w ∙ v × w ≔ y ∙ u)
+  ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ ∝ ] (x ≔ ∝ ∙ v × ∝ ≔ y ∙ u)
   ∙-assoc⁻¹ a b = let _ , a' , b' = ∙-assoc (∙-comm a) (∙-comm b) in _ , ∙-comm a' , ∙-comm b'
 
   ∙-compute-unique : ∀ {x y z} (p : x ≔ y ∙ z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙-compute _ _} (_ , p)))

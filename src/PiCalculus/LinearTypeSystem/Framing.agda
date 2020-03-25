@@ -48,8 +48,8 @@ private
 
 ∋-frame : {γ : PreCtx n} {idxs : Vec I n} {Γ Θ Δ Ξ Ψ : Ctx idxs} {t : Type} {xs : Cs i}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
-        → (x : γ w Γ ∋ t w xs ⊠ Θ)
-        → Σ[ y ∈ γ w Ξ ∋ t w xs ⊠ Ψ ]
+        → (x : γ ∝ Γ ∋ t ∝ xs ⊠ Θ)
+        → Σ[ y ∈ γ ∝ Ξ ∋ t ∝ xs ⊠ Ψ ]
           toFin y ≡ toFin x
 
 ∋-frame {Γ = _ -, _} {_ -, ys} {_ -, _} {_ -, _} {Ψ -, _} {xs = xs} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero {check = check})
@@ -62,7 +62,7 @@ private
 
 ⊢-frame : {γ : PreCtx n} {idxs : Vec I n} {Γ Δ Θ Ξ Ψ : Ctx idxs}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
-        → γ w Γ ⊢ P ⊠ Θ → γ w Ξ ⊢ P ⊠ Ψ
+        → γ ∝ Γ ⊢ P ⊠ Θ → γ ∝ Ξ ⊢ P ⊠ Ψ
 
 ⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
@@ -72,7 +72,7 @@ private
   let xP≔           = ⊎-comp (∋-⊎ x) P≔ Γ≔
       _ , x'≔ , P'≔ = ⊎-assoc Ξ≔ xP≔
    in recv _ (⊢-frame {Δ = _ -, _} (P≔ , xs≔) (P'≔ , xs≔) ⊢P)
-      |> subst (λ ● → _ w _ ⊢ ● ⦅⦆ _ ⊠ _) (proj₂ (∋-frame (∋-⊎ x) x'≔ x))
+      |> subst (λ ● → _ ∝ _ ⊢ ● ⦅⦆ _ ⊠ _) (proj₂ (∋-frame (∋-⊎ x) x'≔ x))
 ⊢-frame Γ≔ Ξ≔ (send x y ⊢P) with ∋-⊎ x | ∋-⊎ y | ⊢-⊎ ⊢P
 ⊢-frame Γ≔ Ξ≔ (send x y ⊢P) | x≔ | y≔ | _ , P≔ =
   let [xy]P≔         = ⊎-comp (⊎-trans x≔ y≔) P≔ Γ≔
@@ -80,9 +80,9 @@ private
       xy≔            = ⊎-comp x≔ y≔ (⊎-trans x≔ y≔)
       _ , x'≔ , y'≔  = ⊎-assoc xy'≔ xy≔
    in send _ _ (⊢-frame P≔ P'≔ ⊢P)
-      |> subst (λ ● → _ w _ ⊢ ● ⟨ toFin (proj₁ (∋-frame y≔ y'≔ y)) ⟩ _ ⊠ _)
+      |> subst (λ ● → _ ∝ _ ⊢ ● ⟨ toFin (proj₁ (∋-frame y≔ y'≔ y)) ⟩ _ ⊠ _)
                (proj₂ (∋-frame x≔ x'≔ x))
-      |> subst (λ ● → _ w _ ⊢ _ ⟨ ● ⟩ _ ⊠ _)
+      |> subst (λ ● → _ ∝ _ ⊢ _ ⟨ ● ⟩ _ ⊠ _)
                (proj₂ (∋-frame y≔ y'≔ y))
 ⊢-frame Γ≔ Ξ≔ (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q
 ⊢-frame Γ≔ Ξ≔ (comp ⊢P ⊢Q) | _ , P≔ | _ , Q≔ =

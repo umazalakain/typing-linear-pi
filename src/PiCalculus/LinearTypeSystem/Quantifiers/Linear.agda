@@ -103,7 +103,7 @@ data _≔_∙_ : Mult → Mult → Mult → Set where
 ∙-comm splitˡ = splitʳ
 ∙-comm splitʳ = splitˡ
 
-∙-assoc : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃-syntax (λ w → (x ≔ u ∙ w) × (w ≔ v ∙ z))
+∙-assoc : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃-syntax (λ ∝ → (x ≔ u ∙ w) × (w ≔ v ∙ z))
 ∙-assoc 0≔ 0≔ = 0∙ , 0≔ , 0≔
 ∙-assoc 1≔ˡ 1≔ˡ = 0∙ , 1≔ˡ , 0≔
 ∙-assoc 1≔ˡ 1≔ʳ = 1∙ , 1≔ʳ , 1≔ˡ
@@ -121,7 +121,7 @@ data _≔_∙_ : Mult → Mult → Mult → Set where
 ∙-assoc splitʳ -≔ˡ = +∙ , splitʳ , +≔ʳ
 ∙-assoc splitʳ -≔ʳ = 1∙ , 1≔ʳ , splitʳ
 
-∙-join : ∀ {x y z} → x ≔ y ∙ +∙ → x ≔ z ∙ -∙ → ∃-syntax (λ w → x ≔ w ∙ 1∙)
+∙-join : ∀ {x y z} → x ≔ y ∙ +∙ → x ≔ z ∙ -∙ → ∃-syntax (λ ∝ → x ≔ ∝ ∙ 1∙)
 ∙-join splitʳ splitˡ = _ , 1≔ʳ
 
 Linear : Quantifier Mult

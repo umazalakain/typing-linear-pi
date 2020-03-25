@@ -24,8 +24,8 @@ open import PiCalculus.LinearTypeSystem.Quantifiers
 module PiCalculus.LinearTypeSystem (Ω : Quantifiers) where
 open Quantifiers Ω
 
-infixr 4 _w_⊢_⊠_
-infixr 4 _w_∋_w_⊠_
+infixr 4 _∝_⊢_⊠_
+infixr 4 _∝_∋_∝_⊠_
 infixr 10 chan recv send
 
 private
@@ -35,7 +35,7 @@ private
 
 data Type : Set where
   B[_]   : ℕ → Type
-  C[_w_] : Type → Cs i → Type
+  C[_∝_] : Type → Cs i → Type
   P[_&_] : Type → Type → Type
 
 PreCtx : ℕ → Set
@@ -54,50 +54,50 @@ private
     x y z : Cs i
     P Q : Scoped n
 
-data _w_∋_w_⊠_ : PreCtx n → Ctx is
+data _∝_∋_∝_⊠_ : PreCtx n → Ctx is
                → Type → Cs i
                → Ctx is → Set where
 
   zero : {Γ : Ctx is} {y z : Cs i}
        → {check : True (∙-compute y z)}
-       → γ -, t w Γ -, proj₁ (toWitness check) ∋ t w y ⊠ Γ -, z
+       → γ -, t ∝ Γ -, proj₁ (toWitness check) ∋ t ∝ y ⊠ Γ -, z
 
   suc : {Γ Δ : Ctx is} {x : Cs i} {x' : Cs i'}
-      → γ w Γ ∋ t w x ⊠ Δ
-      → γ -,  t' w Γ -, x' ∋ t w x ⊠ Δ -, x'
+      → γ ∝ Γ ∋ t ∝ x ⊠ Δ
+      → γ -,  t' ∝ Γ -, x' ∋ t ∝ x ⊠ Δ -, x'
 
 toFin : {γ : PreCtx n} {Γ Δ : Ctx is} {x : Cs i}
-      → γ w Γ ∋ t w x ⊠ Δ
+      → γ ∝ Γ ∋ t ∝ x ⊠ Δ
       → Fin n
 toFin zero = zero
 toFin (suc x) = suc (toFin x)
 
-data _w_⊢_⊠_ : PreCtx n → Ctx is → Scoped n → Ctx is → Set where
+data _∝_⊢_⊠_ : PreCtx n → Ctx is → Scoped n → Ctx is → Set where
 
-  end : γ w Γ ⊢ 𝟘 ⊠ Γ
+  end : γ ∝ Γ ⊢ 𝟘 ⊠ Γ
 
   chan : (t : Type) (m : Cs i') (μ : Cs i)
-       → γ -, C[ t w m ] w Γ -, μ ⊢ P     ⊠ Δ -, 0∙
+       → γ -, C[ t ∝ m ] ∝ Γ -, μ ⊢ P     ⊠ Δ -, 0∙
        --------------------------------------------
-       → γ               w Γ      ⊢ new P ⊠ Δ
+       → γ               ∝ Γ      ⊢ new P ⊠ Δ
 
   recv : {t : Type} {m : Cs i'}
-       → (x : γ      w Γ       ∋ C[ t w m ] w +∙ {i} ⊠ Ξ)
-       →      γ -, t w Ξ -, m  ⊢ P                   ⊠ Θ -, 0∙
+       → (x : γ      ∝ Γ       ∋ C[ t ∝ m ] ∝ +∙ {i} ⊠ Ξ)
+       →      γ -, t ∝ Ξ -, m  ⊢ P                   ⊠ Θ -, 0∙
        -------------------------------------------------------
-       →      γ      w Γ       ⊢ toFin x ⦅⦆ P        ⊠ Θ
+       →      γ      ∝ Γ       ⊢ toFin x ⦅⦆ P        ⊠ Θ
 
   send : {t : Type} {m : Cs i'}
-       → (x : γ w Γ ∋ C[ t w m ] w -∙ {i}   ⊠ Δ)
-       → (y : γ w Δ ∋ t          w m        ⊠ Ξ)
-       →      γ w Ξ ⊢ P                     ⊠ Θ
+       → (x : γ ∝ Γ ∋ C[ t ∝ m ] ∝ -∙ {i}   ⊠ Δ)
+       → (y : γ ∝ Δ ∋ t          ∝ m        ⊠ Ξ)
+       →      γ ∝ Ξ ⊢ P                     ⊠ Θ
        -----------------------------------------
-       →      γ w Γ ⊢ toFin x ⟨ toFin y ⟩ P ⊠ Θ
+       →      γ ∝ Γ ⊢ toFin x ⟨ toFin y ⟩ P ⊠ Θ
 
-  comp : γ w Γ ⊢ P     ⊠ Δ
-       → γ w Δ ⊢ Q     ⊠ Ξ
+  comp : γ ∝ Γ ⊢ P     ⊠ Δ
+       → γ ∝ Δ ⊢ Q     ⊠ Ξ
        -------------------
-       → γ w Γ ⊢ P ∥ Q ⊠ Ξ
+       → γ ∝ Γ ⊢ P ∥ Q ⊠ Ξ
 
-_w_⊢_ : PreCtx n → Ctx is → Scoped n → Set
-γ w Γ ⊢ P = γ w Γ ⊢ P ⊠ ε
+_∝_⊢_ : PreCtx n → Ctx is → Scoped n → Set
+γ ∝ Γ ⊢ P = γ ∝ Γ ⊢ P ⊠ ε

@@ -50,7 +50,7 @@ to-≡ split = refl
               sym (_,_ & ℕₚ.+-cancelʳ-≡ _ _ (cong proj₁ ab)
                        ⊗ ℕₚ.+-cancelʳ-≡ _ _ (cong proj₂ ab))
 
-∙-assoc : ∀ {x y z⁺ z⁻ u⁺ u⁻ v⁺ v⁻} → x ≔ y ∙ (z⁺ , z⁻) → y ≔ (u⁺ , u⁻) ∙ (v⁺ , v⁻) → ∃[ w ] ((x ≔ (u⁺ , u⁻) ∙ w) × (w ≔ (v⁺ , v⁻) ∙ (z⁺ , z⁻)))
+∙-assoc : ∀ {x y z⁺ z⁻ u⁺ u⁻ v⁺ v⁻} → x ≔ y ∙ (z⁺ , z⁻) → y ≔ (u⁺ , u⁻) ∙ (v⁺ , v⁻) → ∃[ ∝ ] ((x ≔ (u⁺ , u⁻) ∙ w) × (w ≔ (v⁺ , v⁻) ∙ (z⁺ , z⁻)))
 ∙-assoc {z⁺ = z⁺} {z⁻} {u⁺} {u⁻} {v⁺} {v⁻} split split
   rewrite ℕₚ.+-assoc u⁺ v⁺ z⁺ | ℕₚ.+-assoc u⁻ v⁻ z⁻
   = _ , (split , split)
@@ -58,13 +58,13 @@ to-≡ split = refl
 ∙-join' : ∀ {x⁺ x⁻ y⁺ y⁻ z⁺ z⁻}
         →         (x⁺ , x⁻) ≔ (1 , 0) ∙ (y⁺ , y⁻)
         →         (x⁺ , x⁻) ≔ (0 , 1) ∙ (z⁺ , z⁻)
-        → ∃[ w ] ((x⁺ , x⁻) ≔ (1 , 1) ∙ w)
+        → ∃[ ∝ ] ((x⁺ , x⁻) ≔ (1 , 1) ∙ w)
 ∙-join' split split = _ , split
 
 ∙-join : ∀ {x⁺ x⁻ y⁺ y⁻ z⁺ z⁻}
        → (x⁺ , x⁻) ≔ (y⁺ , y⁻) ∙ (1 , 0)
        → (x⁺ , x⁻) ≔ (z⁺ , z⁻) ∙ (0 , 1)
-       → ∃[ w ] ((x⁺ , x⁻) ≔ w ∙ (1 , 1))
+       → ∃[ ∝ ] ((x⁺ , x⁻) ≔ ∝ ∙ (1 , 1))
 ∙-join a b = _ , ∙-comm (proj₂ (∙-join' (∙-comm a) (∙-comm b)))
 
 Gradual : Quantifier RS

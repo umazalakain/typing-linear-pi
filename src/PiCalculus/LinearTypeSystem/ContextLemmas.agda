@@ -51,13 +51,20 @@ channel-1∙ internal = ε
 channel-1∙ (external x) = only x 1∙
 
 ∋-I : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
-    → (x : γ w Γ ∋ t w c ⊠ Ξ)
+    → (x : γ ∝ Γ ∋ t ∝ c ⊠ Ξ)
     → idx ≡ Vec.lookup idxs (toFin x)
 ∋-I zero = refl
 ∋-I (suc x) = ∋-I x
 
+{-
+∋-type : {idxs : Vec I n} {Γ Δ : Ctx idxs} {m : Cs idx}
+       → (x : γ ∝ Γ ∋ t ∝ m ⊠ Δ) → t ≡ Vec.lookup γ (toFin x) ≡ t
+∋-type zero = refl
+∋-type (suc x) = ∋-type x
+-}
+
 ∋-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
-    → (x : γ w Γ ∋ t w c ⊠ Ξ)
+    → (x : γ ∝ Γ ∋ t ∝ c ⊠ Ξ)
     → Γ ≔ only (toFin x) (subst Cs (∋-I x) c) ⊎ Ξ
 ∋-⊎ (zero {check = check}) = ⊎-idˡ _ , proj₂ (toWitness check)
 ∋-⊎ (suc x) = ∋-⊎ x , ∙-idˡ _
@@ -79,13 +86,13 @@ subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → Cs idx) �
 subst-idx {eq = refl} δ = refl
 
 ∋-∙ : {γ : PreCtx n} {idx : I} {idxs : Vec I n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → Cs idx)
-    → (x : γ w Γ ∋ t w c {idx} ⊠ Ξ)
+    → (x : γ ∝ Γ ∋ t ∝ c {idx} ⊠ Ξ)
     → All.lookup (toFin x) Γ ≔ c ∙ All.lookup (toFin x) Ξ
 ∋-∙ {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup (toFin x) Γ ≔ ● ∙ All.lookup (toFin x) Ξ)
                                 (trans (lookup-only (toFin x)) (subst-idx c))
                                 (⊎-get (toFin x) (∋-⊎ x))
 
-⊢-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} → γ w Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
+⊢-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ _
 ⊢-⊎ (chan t m μ ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
                        in _ , ⊎-tail Γ≔
@@ -100,7 +107,7 @@ subst-idx {eq = refl} δ = refl
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
 
-∋-0∙ : {Γ Δ : Ctx idxs} → γ w Γ ∋ t w 0∙ {idx} ⊠ Δ → Γ ≡ Δ
+∋-0∙ : {Γ Δ : Ctx idxs} → γ ∝ Γ ∋ t ∝ 0∙ {idx} ⊠ Δ → Γ ≡ Δ
 ∋-0∙ (zero {check = check}) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
 ∋-0∙ (suc x) = _-,_ & ∋-0∙ x ⊗ refl
 

@@ -41,9 +41,9 @@ private
 ∋-strengthen : {γ : PreCtx (suc n)} {is : Vec I (suc n)} {Γ Θ : Ctx is}
              → {i' : I} {t' : Type} {m' : Cs i'}
              → (i : Fin (suc n))
-             → (  x : γ               w Γ               ∋ t' w m' ⊠ Θ)
+             → (  x : γ               ∝ Γ               ∋ t' ∝ m' ⊠ Θ)
              → (i≢x : i ≢ toFin x)
-             → Σ[ y ∈ Vec.remove γ i w mult-remove Γ i ∋ t' w m' ⊠ mult-remove Θ i ]
+             → Σ[ y ∈ Vec.remove γ i ∝ mult-remove Γ i ∋ t' ∝ m' ⊠ mult-remove Θ i ]
                Fin.punchOut i≢x ≡ toFin y
 ∋-strengthen zero zero i≢x = ⊥-elim (i≢x refl)
 ∋-strengthen zero (suc x) i≢x = x , refl
@@ -55,8 +55,8 @@ private
              → {P : Scoped (suc n)}
              → (i : Fin (suc n))
              → (uP : Unused i P)
-             → γ w Γ ⊢ P ⊠ Θ
-             → Vec.remove γ i w mult-remove Γ i ⊢ lower i P uP ⊠ mult-remove Θ i
+             → γ ∝ Γ ⊢ P ⊠ Θ
+             → Vec.remove γ i ∝ mult-remove Γ i ⊢ lower i P uP ⊠ mult-remove Θ i
 ⊢-strengthen i uP end = end
 ⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (chan t m μ ⊢P)
   = chan t m μ (⊢-strengthen (suc i) uP ⊢P)

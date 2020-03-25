@@ -37,8 +37,8 @@ private
 
 ∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx is} {t t' : Type} {xs : Cs i} {xs' : Cs i'}
          → (f : Fin (suc n))
-         → (  x : γ                      w Γ                  ∋ t' w xs' ⊠ Θ)
-         → Σ[ y ∈ Vec.insert γ f t w mult-insert f xs Γ ∋ t' w xs' ⊠ mult-insert f xs Θ ]
+         → (  x : γ                      ∝ Γ                  ∋ t' ∝ xs' ⊠ Θ)
+         → Σ[ y ∈ Vec.insert γ f t ∝ mult-insert f xs Γ ∋ t' ∝ xs' ⊠ mult-insert f xs Θ ]
            Fin.punchIn f (toFin x) ≡ toFin y
 ∋-weaken zero x = suc x , refl
 ∋-weaken (suc i) zero = zero , refl
@@ -48,8 +48,8 @@ private
 ⊢-weaken : {γ : PreCtx n} {Γ Θ : Ctx is} {t : Type} {xs : Cs i}
          → (f : Fin (suc n))
          → {P : Scoped n}
-         → γ w Γ ⊢ P ⊠ Θ
-         → Vec.insert γ f t w mult-insert f xs Γ ⊢ lift f P ⊠ mult-insert f xs Θ
+         → γ ∝ Γ ⊢ P ⊠ Θ
+         → Vec.insert γ f t ∝ mult-insert f xs Γ ⊢ lift f P ⊠ mult-insert f xs Θ
 ⊢-weaken i end = end
 ⊢-weaken i (chan t m μ ⊢P) = chan t m μ (⊢-weaken (suc i) ⊢P)
 ⊢-weaken i (comp ⊢P ⊢Q) = comp (⊢-weaken i ⊢P) (⊢-weaken i ⊢Q)

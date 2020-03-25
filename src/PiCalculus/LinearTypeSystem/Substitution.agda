@@ -35,79 +35,78 @@ module PiCalculus.LinearTypeSystem.Substitution (Ω : Quantifiers) where
 open Quantifiers Ω
 open import PiCalculus.LinearTypeSystem Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
+open import PiCalculus.LinearTypeSystem.Framing Ω
 
 private
   variable
     n : ℕ
     i j : Fin n
-    t : Type
+    t t' : Type
     γ : PreCtx n
     idx : I
     idxs : Vec I n
-    m l δ : Cs idx
+    m m' l δ : Cs idx
     Γ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ : Ctx idxs
     P : Scoped n
 
 
 
-data _w_⊠_[_/_]_ : PreCtx n → {idxs : Vec I n} → Ctx idxs → Ctx idxs → Fin n → Fin n → Ctx idxs → Set where
+data _w_[_/_]_ : PreCtx n → {idxs : Vec I n} → Ctx idxs → Fin n → Fin n → Ctx idxs → Set where
   zero : m ≔ δ ∙ l
-       → Γ ≔ Δ ⊎ Ψ
-       → (j : γ w Ψ ∋ t w δ ⊠ Ξ)
-       → γ -, t w Γ -, m ⊠ Ψ -, l [ suc (toFin j) / zero ] Ξ -, m
+       → (j : γ ∝ Ψ ∋ t ∝ δ ⊠ Ξ)
+       → γ -, t ∝ Ψ -, l [ suc (toFin j) / zero ] Ξ -, m
 
-  suc : m ≔ δ ∙ l
-      → γ w Γ ⊠ Ψ [ j / i ] Ξ
-      → γ -, t w Γ -, m ⊠ Ψ -, l [ suc j / suc i ] Ξ -, l
+  suc : γ ∝ Ψ [ j / i ] Ξ
+      → γ -, t ∝ Ψ -, l [ suc j / suc i ] Ξ -, l
 
-subst-eq : γ w Γ ⊠ Γ [ j / i ] Ξ → Γ ≡ Ξ
+{-
+subst-eq : γ ∝ Γ ⊠ Γ [ j / i ] Ξ → Γ ≡ Ξ
 subst-eq (zero x y j) rewrite ∙-uniqueˡ x (∙-idˡ _) | ∋-0∙ j = refl
 subst-eq (suc _ x) rewrite subst-eq x = refl
 
 split : Γ ≔ Δₗ ⊎ Δ
       → Δ ≔ Δᵣ ⊎ Ψ
-      → γ w Γ ⊠ Ψ [ j / i ] Ξ
-      → γ w Γ ⊠ Δ [ j / i ] Θ × γ w Δ ⊠ Ψ [ j / i ] Ξ
+      → γ ∝ Γ ⊠ Ψ [ j / i ] Ξ
+      → γ ∝ Γ ⊠ Δ [ j / i ] Θ × γ ∝ Δ ⊠ Ψ [ j / i ] Ξ
 split {Δₗ = _ -, _} {Δ = _ -, _} {Δᵣ = _ -, _} {Θ = _ -, _} (a , b) (c , d) (zero x y j) = {!_w_⊠_[_/_]_.zero ? ? j!} , {!zero ? ? ?!}
 split {Δₗ = _ -, _} {Δ = _ -, _} {Δᵣ = _ -, _} {Θ = _ -, _} (a , b) (c , d) (suc x e) with split a c e
-split {Δₗ = _ -, _} {Δ = _ -, _} {Δᵣ = _ -, _} {Θ = _ -, _} (a , b) (c , d) (suc x e) | l , r = {!suc ? ?!} , (suc d r)
+split {Δₗ = _ -, _} {Δ = _ -, _} {Δᵣ = _ -, _} {Θ = _ -, _} (a , b) (c , d) (suc x e) | l , r = {!suc ? ?!} , {!!}
+-}
 
-∋-subst : (x : γ w Γ ∋ t w m ⊠ Ξ)
-    → γ w Γ ⊠ Ξ [ j / i ] Ψ
-    → Σ[ y ∈ γ w Γ ∋ t w m ⊠ Ψ ]
-      substFin j i (toFin x) ≡ toFin y
-∋-subst (zero {check = check}) (zero x y j) rewrite ⊎-uniqueˡ y (⊎-idˡ _) | ∙-uniqueˡ x (proj₂ (toWitness check)) = suc j , refl
-∋-subst (zero {check = check}) (suc _ s) rewrite subst-eq s = zero , refl
-∋-subst (suc x) (zero y _ j) rewrite ∙-uniqueˡ y (∙-idˡ _) | ∋-0∙ j  = (suc x) , refl
-∋-subst (suc x) (suc a s) with ∋-subst x s
-∋-subst {i = suc i} (suc x) (suc a s) | y , eq with i Finₚ.≟ toFin x
-∋-subst {i = suc i} (suc x) (suc a s) | y , eq | yes p = (suc y) , (cong suc eq)
-∋-subst {i = suc i} (suc x) (suc a s) | y , eq | no ¬p = (suc y) , (cong suc eq)
+∋-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ψₗ Ψᵣ Δ Δₗ Δᵣ : Ctx idxs} {i j : Fin n} {idx}
+        → (eq : idx ≡ Vec.lookup idxs j)
+        → Γ ≔ only j +∙ ⊎ Ψᵣ
+        → Σ[ y ∈ γ ∝ Γ ∋ t ∝ +∙ {idx} ⊠ Ψᵣ ]
+          j ≡ toFin y
+∋-subst {γ = _ -, _} {Γ = _ -, _} {Ψᵣ = _ -, _} {j = zero} refl (Γ≔ , r) = {!zero {check = fromWitness (_ , r)}!} , {!!}
+∋-subst {γ = _ -, _} {Γ = _ -, _} {Ψᵣ = _ -, _} {j = suc j} eq r = {!!}
 
-foo : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs}
-    → {i j : Fin n}
-    → γ w Γ ⊢ P ⊠ Ψ
-    → γ w Γ ⊠ Ψ [ j / i ] Ξ
-    → γ w Γ ⊢ [ j / i ] P ⊠ Ξ
-foo end xy rewrite subst-eq xy = end
-foo (chan t m μ ⊢P) xy with ⊢-⊎ ⊢P
-foo (chan t m μ ⊢P) xy | (_ -, _) , _ , b = chan t m μ (foo ⊢P (suc b xy) )
-foo (recv x ⊢P) xy with ⊢-⊎ ⊢P
-foo (recv x ⊢P) xy | (_ -, _) , a , b with split (∋-⊎ x) a xy
-foo (recv x ⊢P) xy | (_ -, _) , a , b | l , r rewrite proj₂ (∋-subst x l) = recv _ (foo ⊢P (suc (∙-idʳ _) r))
-foo (send x y ⊢P) xy = {!foo ⊢P !}
-foo (comp ⊢P ⊢Q) xy with split (proj₂ (⊢-⊎ ⊢P)) (proj₂ (⊢-⊎ ⊢Q)) xy
-foo (comp ⊢P ⊢Q) xy | l , r = comp (foo ⊢P l) (foo ⊢Q r)
+foo : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ψₗ Ψᵣ Δ Δₗ Δᵣ : Ctx idxs} {i j : Fin n} {m : Cs (Vec.lookup idxs i)}
+    → (eq : Vec.lookup idxs i ≡ Vec.lookup idxs j)
+    → i Fin.≤ j
+    → Δₗ ≔ only i m ⊎ Δ
+    → Δᵣ ≔ only j (subst Cs eq m) ⊎ Δ
+    → Γ ≔ Δₗ ⊎ Ψₗ
+    → Γ ≔ Δᵣ ⊎ Ψᵣ
+    → γ ∝ Γ ⊢ P ⊠ Ψₗ
+    → γ ∝ Γ ⊢ [ j / i ] P ⊠ Ψᵣ
+foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ end rewrite ⊎-uniqueˡ Γₗ≔ (⊎-idˡ _) = {!!}
+foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (chan t m μ ⊢P) = chan t m μ (foo eq (Nat.s≤s x≤y) (Δₗ , ∙-idˡ _) (Δᵣ , ∙-idˡ _) (Γₗ≔ , ∙-idʳ _) (Γᵣ≔ , ∙-idʳ _) ⊢P)
+foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) with ⊢-⊎ ⊢P | i Finₚ.≟ toFin x
+foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) | (_ -, _) , (P≔ , _) | yes p rewrite proj₂ (∋-subst {j = j} eq {!!}) = recv _ (foo {!!} {!!} {!!} {!!} {!!} {!!} ⊢P)
+foo {i = i} {j = j} eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (recv x ⊢P) | (_ -, _) , (P≔ , _) | no ¬p = recv x (foo eq (Nat.s≤s x≤y) ({!!} , ∙-idˡ _) ({!!} , ∙-idˡ _) ({!x!} , ∙-idʳ _) ({!!} , ∙-idʳ _) ⊢P)
+foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (send x y ⊢P) = {!!}
+foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (comp ⊢P ⊢Q) = comp (foo eq x≤y {!!} {!!} (proj₂ (⊢-⊎ ⊢P)) {!!} ⊢P) (foo eq x≤y {!!} {!!} (proj₂ (⊢-⊎ ⊢Q)) {!!} ⊢Q)
 
 ⊢-subst' : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Cs idx}
-         → γ -, t w Γ -, m ⊢ P ⊠ Ψ -, 0∙
-         → (y : γ w Ψ ∋ t w m ⊠ Ξ)
-         → γ -, t w Γ -, m ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m
+         → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, 0∙
+         → (y : γ ∝ Ψ ∋ t ∝ m ⊠ Ξ)
+         → γ -, t ∝ Γ -, m ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m
 ⊢-subst' ⊢P y with ⊢-⊎ ⊢P
-⊢-subst' ⊢P y | (_ -, _) , (Γ≔ , _) = foo ⊢P (zero (∙-idʳ _) Γ≔ y)
+⊢-subst' ⊢P y | (_ -, _) , (Γ≔ , x≔) = foo (∋-I y) Nat.z≤n (⊎-idˡ _ , ∙-idʳ _) ({!!} , (∙-idˡ _)) (Γ≔ , ∙-idʳ _) (⊎-trans Γ≔ (∋-⊎ y) , ∙-idˡ _) ⊢P
 
 {- ∋-SUBSTGET -}
 ⊢-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Cs idx} {m' : Cs idx'}
-        → γ -, t' w Γ -, m' ⊢ P ⊠ Ψ -, 0∙
-        → (y : γ w Ψ ∋ t w m ⊠ Ξ)
-        → γ -, t' w Γ -, m' ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m'
+        → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, 0∙
+        → (y : γ ∝ Ψ ∋ t ∝ m ⊠ Ξ)
+        → γ -, t' ∝ Γ -, m' ⊢ [ suc (toFin y) / zero ] P ⊠ Ξ -, m'

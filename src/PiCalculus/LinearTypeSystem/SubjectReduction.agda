@@ -42,8 +42,8 @@ SubjectReduction = {n : ℕ} {γ : PreCtx n} {idxs : Vec I n} {Γ Γ' Δ : Ctx i
                    {c : Channel n} {P Q : Scoped n}
                  → Γ' ≔ channel-1∙ c ⊎ Γ
                  → P =[ c ]⇒ Q
-                 → γ w Γ'  ⊢ P ⊠ Δ
-                 → γ w Γ   ⊢ Q ⊠ Δ
+                 → γ ∝ Γ'  ⊢ P ⊠ Δ
+                 → γ ∝ Γ   ⊢ Q ⊠ Δ
 
 private
   variable
@@ -53,15 +53,15 @@ private
     P Q : Scoped n
  
 send-≥-∙ : {γ : PreCtx n} {Γ Δ : Ctx idxs}
-         → γ w Γ ⊢ i ⟨ j ⟩ P ⊠ Δ → ∃[ y ] (All.lookup i Γ ≔ y ∙ -∙)
+         → γ ∝ Γ ⊢ i ⟨ j ⟩ P ⊠ Δ → ∃[ y ] (All.lookup i Γ ≔ y ∙ -∙)
 send-≥-∙ {Γ = Γ} (send {Δ = Δ} x _ _) = _ , ∙-comm (∋-∙ -∙ x)
 
 recv-≥+∙ : {γ : PreCtx n} {Γ Δ : Ctx idxs}
-         → γ w Γ ⊢ i ⦅⦆ P ⊠ Δ → ∃[ y ] (All.lookup i Γ ≔ y ∙ +∙)
+         → γ ∝ Γ ⊢ i ⦅⦆ P ⊠ Δ → ∃[ y ] (All.lookup i Γ ≔ y ∙ +∙)
 recv-≥+∙ (recv x _) = _ , ∙-comm (∋-∙ +∙ x)
 
 comm-≥1∙ : {γ : PreCtx n} {Γ Δ : Ctx idxs} {c : Channel n}
-      → P =[ c ]⇒ Q → γ w Γ ⊢ P ⊠ Δ → c ≡ external i → ∃[ y ] (All.lookup i Γ ≔ 1∙ ∙ y)
+      → P =[ c ]⇒ Q → γ ∝ Γ ⊢ P ⊠ Δ → c ≡ external i → ∃[ y ] (All.lookup i Γ ≔ 1∙ ∙ y)
 comm-≥1∙ {i = i} (comm refl) (comp (recv x ⊢P) ⊢Q) refl with ⊢-⊎ ⊢P | send-≥-∙ ⊢Q
 comm-≥1∙ {i = i} (comm refl) (comp (recv x ⊢P) ⊢Q) refl | (_ -, _) , (Ξ≔ , _) | _ , ≥-
   rewrite sym (∙-unique (∙-comm (proj₂ (proj₂ (∙-assoc (∙-comm (∋-∙ +∙ x)) (proj₁ (proj₂ (∙-assoc⁻¹ (⊎-get i Ξ≔) ≥-))))))) (proj₂ ∙-join))
@@ -73,12 +73,12 @@ comm-≥1∙ (res_ {c = external (suc i)} P→Q) (chan t m μ ⊢P) refl = comm-
 comm-≥1∙ (struct P≅P' P'→Q) ⊢P refl = comm-≥1∙ P'→Q (subject-cong P≅P' ⊢P) refl
 
 align : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ' Γ Δ Θ Ψ : Ctx idxs} {t t'} {idx idx' idx'' idx'''} {m : Cs idx} {m' : Cs idx'}
-    → (x  : γ w Γ' ∋ C[ t' w m' ] w +∙ {idx''} ⊠ Θ)
-    → γ -, t' w Θ -, m' ⊢ P ⊠ Δ -, 0∙
-    → (x' : γ w Δ ∋ C[ t w m ] w -∙ {idx'''} ⊠ Ψ)
+    → (x  : γ ∝ Γ' ∋ C[ t' ∝ m' ] ∝ +∙ {idx''} ⊠ Θ)
+    → γ -, t' ∝ Θ -, m' ⊢ P ⊠ Δ -, 0∙
+    → (x' : γ ∝ Δ ∋ C[ t ∝ m ] ∝ -∙ {idx'''} ⊠ Ψ)
     → Γ' ≔ only (toFin x) 1∙ ⊎ Γ
     → toFin x ≡ toFin x'
-    → γ -, t' w Γ -, m' ⊢ P ⊠ Ψ -, 0∙
+    → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, 0∙
 align {Γ = Γ} {Ψ = Ψ} x ⊢P x' Γ'⇒Γ eq with ⊢-⊎ ⊢P
 align {Γ = Γ} {Ψ = Ψ} x ⊢P x' Γ'⇒Γ eq | (Δ -, _) , (a , b) = ⊢-frame (a , b) (foo  , b) ⊢P
     where

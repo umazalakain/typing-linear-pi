@@ -40,7 +40,7 @@ private
 
 ∋-unused : {γ : PreCtx n} {Γ Θ : Ctx is} {t : Type} {xs : Cs j}
          → (i : Fin n)
-         → (x : γ w Γ ∋ t w xs ⊠ Θ)
+         → (x : γ ∝ Γ ∋ t ∝ xs ⊠ Θ)
          → i ≢ toFin x
          → All.lookup i Γ ≡ All.lookup i Θ
 ∋-unused zero zero i≢x = ⊥-elim (i≢x refl)
@@ -51,7 +51,7 @@ private
 ⊢-unused : {γ : PreCtx n} {Γ Θ : Ctx is}
          → (i : Fin n)
          → Unused i P
-         → γ w Γ ⊢ P ⊠ Θ
+         → γ ∝ Γ ⊢ P ⊠ Θ
          → All.lookup i Γ ≡ All.lookup i Θ
 ⊢-unused i uP end = refl
 ⊢-unused i uP (chan t m μ ⊢P) = ⊢-unused (suc i) uP ⊢P
@@ -78,8 +78,8 @@ module _ {a} {A : Set a} where
 -- TODO: rewrite this crap
 ∋-swap : {γ : PreCtx (suc n)} {is : Vec I (suc n)} {Γ Θ : Ctx is} {t : Type} {xs : Cs j}
        → (i : Fin n)
-       → (x : γ w Γ ∋ t w xs ⊠ Θ)
-       → Σ[ y ∈ swapᵥ i γ w swapₐ i Γ ∋ t w xs ⊠ swapₐ i Θ ]
+       → (x : γ ∝ Γ ∋ t ∝ xs ⊠ Θ)
+       → Σ[ y ∈ swapᵥ i γ ∝ swapₐ i Γ ∋ t ∝ xs ⊠ swapₐ i Θ ]
          swapFin i (toFin x) ≡ toFin y
 ∋-swap {γ = _ -, _ -, _} {is = _ -, _ -, _} {Γ = _ -, _ -, _} zero zero = suc zero , refl
 ∋-swap {Γ = _ -, _ -, _} zero (suc zero) = zero , refl
@@ -97,8 +97,8 @@ module _ {a} {A : Set a} where
 
 ⊢-swap : {γ : PreCtx (suc n)} {Γ Θ : Ctx is}
        → (i : Fin n)
-       → γ w Γ ⊢ P ⊠ Θ
-       → swapᵥ i γ w swapₐ i Γ ⊢ swap i P ⊠ swapₐ i Θ
+       → γ ∝ Γ ⊢ P ⊠ Θ
+       → swapᵥ i γ ∝ swapₐ i Γ ⊢ swap i P ⊠ swapₐ i Θ
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i end = end
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (chan t m μ ⊢P) = chan t m μ (⊢-swap (suc i) ⊢P)
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (recv {Ξ = _ -, _ -, _} x ⊢P) rewrite proj₂ (∋-swap i x) = recv _ (⊢-swap (suc i) ⊢P)
