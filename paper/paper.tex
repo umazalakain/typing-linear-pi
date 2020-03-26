@@ -12,6 +12,9 @@
 \usepackage[many]{tcolorbox}
 \bibliographystyle{plainurl}
 
+% Less margins around figures
+\usepackage{changepage}
+
 % Inference rules
 \usepackage{mathpartir}
 
@@ -40,6 +43,9 @@
 \supplement{\url{https://github/umazalakain/typing-linear-pi}}
 \acknowledgements{We want to thank Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\stacked}[1]{\mprset{flushleft} \inferrule*{}{#1}}
+\newcommand{\datatype}[2]{{\mprset{fraction={===}} \inferrule{#1}{#2}}}
 
 \newcommand{\lamcalc}{$\lambda$-calculus}
 \newcommand{\picalc}{$\pi$-calculus}
@@ -139,10 +145,9 @@ leftover typing
 
 \begin{figure}[h]
   \begin{mathpar}
-    {\mprset{fraction={===}}
-      \inferrule
-      { }
-      {\type{\N} : \Set}}
+    \datatype
+    { }
+    {\type{\N} : \Set}
 
     \inferrule
     { }
@@ -187,10 +192,9 @@ In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$
 
 \begin{figure}[h]
 \begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule
-    {n : \N}
-    {\Var_n : \Set}}
+  \datatype
+  {n : \N}
+  {\Var_n : \Set}
 
   \inferrule
   {n : \N}
@@ -210,10 +214,9 @@ As shown in Figure \ref{process}, we increase the \emph{depth} counter every tim
 
 \begin{figure}[h]
 \begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule
-    {n : \N}
-    {\Process_n : \Set}}
+  \datatype
+  {n : \N}
+  {\Process_n : \Set}
 \end{mathpar}
   
 \begin{equation*} \label{pi-calc-syntax}
@@ -256,10 +259,9 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
 
 \begin{figure}[h]
 \begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule
-    { }
-    {P \eqeq Q : \Set}}
+  \datatype
+  { }
+  {P \eqeq Q : \Set}
 
   \inferrule
   { }
@@ -298,12 +300,9 @@ To show that the doubly recursive call terminates we index the equivalence relat
 
 \begin{figure}[h]
 \begin{mathpar}
-  \mprset{flushleft}
-  
-  {\mprset{fraction={===}}
-    \inferrule
-    { }
-    {\Rec : \Set}}
+  \datatype
+  { }
+  {\Rec : \Set}
 
   \inferrule
   { }
@@ -317,10 +316,9 @@ To show that the doubly recursive call terminates we index the equivalence relat
   {r \; s : \Rec}
   {\constr{two} \; r \; s : \Rec}
   
-  {\mprset{fraction={===}}
-    \inferrule
-    {P \, Q : \Process_n \\ r : \Rec}
-    {P \eq{r} Q : \Set}}
+  \datatype
+  {P \, Q : \Process_n \\ r : \Rec}
+  {P \eq{r} Q : \Set}
 
   \inferrule
   {eq : P \eqeq Q}
@@ -376,10 +374,9 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 
 \begin{figure}[h]
 \begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule
-    {n : \N}
-    {\Channel_n : \Set}}
+  \datatype
+  {n : \N}
+  {\Channel_n : \Set}
 
   \inferrule
   { }
@@ -389,10 +386,9 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   {i : \Var_n}
   {\constr{external} \; i : \Channel_n}
 
-  {\mprset{fraction={===}}
-    \inferrule
-    {i : \Channel_n \\ P \; Q : \Process_n}
-    {P \reduce{i} Q : \Set}}
+  \datatype
+  {i : \Channel_n \\ P \; Q : \Process_n}
+  {P \reduce{i} Q : \Set}
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
@@ -496,10 +492,10 @@ Finally, the field $\field{QUANTIFIERS}$ requires for each index $i$ to have an 
 \begin{figure}[h]
 \begin{equation}
 \begin{split}
-  \field{IDX}          &: \Set \\
-  \field{\exists IDX}  &: \field{IDX} \\
-  \field{CARRIER}      &: \field{IDX} \to \Set \\
-  \field{QUANTIFIERS}  &: (i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
+  &\field{IDX}          &:{} &\Set \\
+  &\field{\exists IDX}  &:{} &\field{IDX} \\
+  &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
+  &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
 \end{split}
 \end{equation}
 \caption{Indexed set of partial commutative monoids}
@@ -532,82 +528,82 @@ All other rules follow trivially from the algebraic rules for the addition of na
 
 \end{description}
 
-\todo{mention types are independent from capabilities}
-
 \subsection{Contexts}
+
+In the linear \picalc{}, the capabilities of the variables in context need to be modified every time input or output occurs.
+However, the types of the variables in context need not.
+As neither capabilities nor their indices depend on types, we choose to keep these two kinds of information separate (Figure \ref{contexts}): a length-indexed context of types $\PreCtx_n$ on one side; a length-indexed context of indices $\Idxs_n$ on the other, with a context of capabilities $\Ctx_{idxs}$ on top.
+
+\begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+        {n : \N}
+        {\PreCtx_n : \Set}
+
+    \inferrule
+        { }
+        {[] : \PreCtx_0}
+
+        \inferrule
+            {\gamma : \PreCtx_n \\ t : \Type}
+            {\gamma , t : \PreCtx_{\suc n}}
+  \end{mathpar}
+
+  \begin{mathpar}
+    \datatype
+        {n : \N}
+        {\Idxs_n : \Set}
+
+    \inferrule
+        { }
+        {[] : \Idxs_0}
+
+        \inferrule
+            {idxs : \Idxs_n \\ idx : \Idx}
+            {idxs , idx : \Idxs_{\suc n}}
+
+            \\
+            
+            \datatype
+                {idxs : \Idxs_n}
+                {\Ctx_{idxs} : \Set}
+            
+            \inferrule
+                { }
+                {[] : Ctx_{[]}}
+                
+                \inferrule
+                    {\Gamma : \Ctx_{idxs} \\ x : \Carrier_{idx}}
+                    {\Gamma , x : \Ctx_{idxs , idx}}
+  \end{mathpar}
+  \caption{Length-indexed typing contexts; length-indexed index context; index-indexed capability contexts.}
+  \label{contexts}
+\end{figure}
+
+We represent base types $\base{n}$ using a natural number $n$ that can be reified into a type by the host language.
+Using natural numbers instead of type universes is convenient: there is no need to litter type types with universe polymorphism, and it provides an additional proof of inhabitance, needed for the $\new \PO_{\suc n} \eqeq \PO_n$ rule in subject congruence.
+
+Channel types $\channel{t}{x}$ use $t$ as the type of data sent over the channel and $x$ as the capability of the data sent over the channel.
+When data is received on a channel of type $\channel{t}{x}$, the type $t$ will be appended to the context of types $\PreCtx_n$ and the capability $x$ to the context of capabilities $\Ctx_{idxs}$.
 
 \begin{figure}[h]
 \begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule
-    { }
-    {\Type : \Set}
-  }
+  \datatype
+  { }
+  {\Type : \Set}
 
   \inferrule
   {n : \N}
   {\base{n} : \Type}
 
   \inferrule
-  {t : \Type \\ \inferrule*{} {i : \Idx \\\\ x : \Carrier_i}}
+  {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Carrier_{idx}}}
   {\channel{t}{x} : \Type}
 \end{mathpar}
-\caption{This is...}
+\caption{Types for a resource-aware \picalc{}.}
+\label{types}
 \end{figure}
 
-\begin{figure}[h]
-\begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule
-    {n : \N}
-    {\PreCtx_n : \Set}
-  }
-
-  \inferrule
-  { }
-  {[] : \PreCtx_0}
-
-  \inferrule
-  {\gamma : \PreCtx_n \\ t : \Type}
-  {\gamma , t : \PreCtx_{\suc n}}
-\end{mathpar}
-\caption{This is...}
-\end{figure}
-  
-\begin{figure}[h]
-\begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule
-    {n : \N}
-    {\Idxs_n : \Set}}
-
-  \inferrule
-  { }
-  {[] : \Idxs_0}
-
-  \inferrule
-  {is : \Idxs_n \\ i : \Idx}
-  {is , i : \Idxs_{\suc n}}
-
-  \\
-  
-  {\mprset{fraction={===}}
-    \inferrule
-    {is : \Idxs_n}
-    {\Ctx_{is} : \Set}}
-  
-  \inferrule
-  { }
-  {[] : Ctx_{[]}}
-  
-  \inferrule
-  {\Gamma : \Ctx_{is} \\ x : \Carrier_i}
-  {\Gamma , x : \Ctx_{is , i}}
-\end{mathpar}
-\caption{This is...}
-\end{figure}
-two-layered approach: types on one hand, capabilities on the other
-removing from context vs keeping in context but marking it used
 
 \subsection{Typing with Leftovers}\label{leftover typing}
 
@@ -615,29 +611,46 @@ Variable references as proofs of capability
 
 Context splits at each variable reference
 
+two-layered approach: types on one hand, capabilities on the other
+
 \begin{figure}[h]
+\begin{adjustwidth}{-1cm}{-1cm}
+\centering
 \begin{mathpar}
-  {\mprset{fraction={===}}
-    \inferrule{
-      \gamma : \PreCtx_n \\
-      \inferrule*{}{
-        idxs : \Idxs_n \\\\
-        \Gamma : \Ctx_{idxs}} \\
-      i : Fin n
-      t : \Type \\
-      x : \Carrier_i \\
-      \Delta : \Ctx_{is}}
-    {\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta} : \Set}}
+  \mprset{sep=0.5em}
+
+  \datatype{
+    \gamma : \PreCtx_n \\
+    \stacked{
+      idxs : \Idxs_n \\\\
+      \Gamma : \Ctx_{idxs}} \\
+    i : \Var_n \\
+    t : \Type \\
+    \stacked{
+      idx : \Idx \\\\
+      x : \Carrier_{idx}} \\
+    \Delta : \Ctx_{idxs}}
+  {\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta} : \Set}
 
   \inferrule
-  {\Gamma : \Ctx_{idxs} \\ y \; z : \Carrier_i \\ True (\constr{\cdot-compute} \; y \; z)}
+      {\gamma : \PreCtx_n \\
+        \stacked{idxs : \Idxs_n \\\\ \Gamma : \Ctx_{idxs}}\\
+        t : \Type \\
+        \stacked{idx : \Idx \\\\ x \; y \; z : \Carrier_{idx}}\\
+        \op{x}{y}{z}}
   {\constr{zero} : \contains{\gamma , t}{\Gamma , x}{zero}{t}{y}{\Gamma , z}}
   
   \inferrule
-  {\Gamma : \Ctx_{idxs} \\ x : \Carrier_i \\ x' : \Carrier_j \\ \Delta : \Ctx_{idxs} \\\\
+      {\gamma : \PreCtx_n \\
+        \stacked{idxs : \Idxs_n \\\\ \Gamma : \Ctx_{idxs}}\\
+        t \; t' \; : Type \\
+        \stacked{idx : \Idx \\\\ x : \Carrier_{idx}} \\
+        \stacked{idx' : \Idx \\\\ x' : \Carrier_{idx'}} \\
+        \Delta : \Ctx_{idxs} \\\\
     loc_x : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
-  {\constr{suc} \; loc_x : \contains{\gamma , t}{\Gamma , x'}{\suc i}{t}{x}{\Delta , x'}}
+  {\constr{suc} \; loc_x : \contains{\gamma , t'}{\Gamma , x'}{\suc i}{t}{x}{\Delta , x'}}
 \end{mathpar}
+\end{adjustwidth}
 \caption{This is...}
 \end{figure}
 
@@ -645,24 +658,21 @@ Context splits at each variable reference
 
 \begin{figure}[h]
 \begin{mathpar}
-  \mprset{flushleft}
-  
-  {\mprset{fraction={===}}
-    \inferrule{
-      \gamma : \PreCtx_n \\
-      \inferrule*{}{
-        idxs : \Idxs_n \\\\
-        \Gamma : \Ctx_{idxs}} \\
-      P : \Process_n \\
-      \Delta : \Ctx_{idxs}}
-    {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}}
+  \datatype{
+    \gamma : \PreCtx_n \\
+    \stacked{
+      idxs : \Idxs_n \\\\
+      \Gamma : \Ctx_{idxs}} \\
+    P : \Process_n \\
+    \Delta : \Ctx_{idxs}}
+  {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
   
   \inferrule
   { }
   {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
 
   \inferrule
-  {t : \Type \\ x : \Carrier_i \\ y : \Carrier_j \\\\
+  {t : \Type \\ x : \Carrier_{idx} \\ y : \Carrier_j \\\\
    cont : \types{\gamma , \channel{t}{x}}{\Gamma , y}{P}{\Delta , \lz}}
   {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
 
@@ -684,6 +694,7 @@ Context splits at each variable reference
 \end{mathpar}
 \caption{This is...}
 \end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Subject Reduction}\label{subject-reduction}
 
