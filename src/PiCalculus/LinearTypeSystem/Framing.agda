@@ -49,10 +49,10 @@ private
         → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Θ
         → γ ∝ Ξ [ i ]≔ t ∝ x ⊠ Ψ
 
-∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero {check = check})
+∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero ⦃ check ⦄)
   rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ)
   | ∙-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙-compute-unique x'≔
-  = zero {check = fromWitness (_ , x'≔)}
+  = zero ⦃ fromWitness (_ , x'≔) ⦄
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x)
   rewrite ∙-uniqueˡ x≔ (∙-idˡ _) | ∙-unique x'≔ (∙-idˡ _)
   = suc (∋-frame Γ≔ Ξ≔ x)

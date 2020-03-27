@@ -57,17 +57,10 @@ channel-ℓ# (external x) = only x ℓ#
 ∋-I zero = refl
 ∋-I (suc x) = ∋-I x
 
-{-
-∋-type : {idxs : Vec I n} {Γ Δ : Ctx idxs} {m : Cs idx}
-       → (x : γ ∝ Γ ∋ t ∝ m ⊠ Δ) → t ≡ Vec.lookup γ (toFin x) ≡ t
-∋-type zero = refl
-∋-type (suc x) = ∋-type x
--}
-
 ∋-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
     → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
     → Γ ≔ only i (subst Cs (∋-I x) c) ⊎ Ξ
-∋-⊎ (zero {check = check}) = ⊎-idˡ _ , proj₂ (toWitness check)
+∋-⊎ (zero ⦃ check ⦄) = ⊎-idˡ _ , proj₂ (toWitness check)
 ∋-⊎ (suc x) = ∋-⊎ x , ∙-idˡ _
 
 lookup-only : {idxs : Vec I n} (i : Fin n) {c : Cs (Vec.lookup idxs i)}
@@ -109,7 +102,7 @@ subst-idx {eq = refl} δ = refl
                     in _ , ⊎-trans P≔ Q≔
 
 ∋-ℓ∅ : {Γ Δ : Ctx idxs} → γ ∝ Γ [ i ]≔ t ∝ ℓ∅ {idx} ⊠ Δ → Γ ≡ Δ
-∋-ℓ∅ (zero {check = check}) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
+∋-ℓ∅ (zero ⦃ check ⦄) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
 ∋-ℓ∅ (suc x) = _-,_ & ∋-ℓ∅ x ⊗ refl
 
 mult-insert : (i : Fin (suc n)) → Cs idx → Ctx idxs → Ctx (Vec.insert idxs i idx)

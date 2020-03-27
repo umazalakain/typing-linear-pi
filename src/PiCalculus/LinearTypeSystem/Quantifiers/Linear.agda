@@ -1,11 +1,13 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
 open import Relation.Nullary using (Dec; yes; no)
 
+import Data.Empty as Empty
 import Data.Unit as Unit
 import Data.Product as Product
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕₚ
 
+open Empty using (⊥)
 open Unit using (⊤; tt)
 open Product using (∃-syntax; _×_; _,_)
 open ℕ using (ℕ)
@@ -125,11 +127,24 @@ Linear : Quantifier Mult
 Quantifier.ℓ∅ Linear = ℓ∅
 Quantifier.ℓᵢ Linear = ℓᵢ
 Quantifier.ℓₒ Linear = ℓₒ
+Quantifier.ℓ# Linear = ℓ#
 Quantifier._≔_∙_ Linear = _≔_∙_
-Quantifier.∙-join Linear = ℓ# , splitˡ
+Quantifier.∙-join Linear = splitˡ
 Quantifier.∙-compute Linear = ∙-compute
 Quantifier.∙-unique Linear = ∙-unique
 Quantifier.∙-uniqueˡ Linear = ∙-uniqueˡ
 Quantifier.∙-idˡ Linear = ∙-idˡ
 Quantifier.∙-comm Linear = ∙-comm
 Quantifier.∙-assoc Linear = ∙-assoc
+Quantifier.Balanced Linear ℓ∅ = ⊤
+Quantifier.Balanced Linear ℓ# = ⊤
+Quantifier.Balanced Linear _ = ⊥
+Quantifier.Balanced-ℓ∅ Linear = tt
+Quantifier.Balanced-ℓ# Linear = tt
+Quantifier.Balanced-∙ˡ Linear Bx Bz 0≔ = tt
+Quantifier.Balanced-∙ˡ Linear Bx Bz 1≔ˡ = tt
+Quantifier.Balanced-∙ˡ Linear Bx Bz 1≔ʳ = tt
+Quantifier.Balanced? Linear ℓ∅ = yes tt
+Quantifier.Balanced? Linear ℓᵢ = no λ ()
+Quantifier.Balanced? Linear ℓₒ = no λ ()
+Quantifier.Balanced? Linear ℓ# = yes tt

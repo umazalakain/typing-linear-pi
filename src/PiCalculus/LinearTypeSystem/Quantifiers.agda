@@ -26,26 +26,30 @@ private
 
 record Quantifier (Q : Set) : Set₁ where
   field
-    ℓ∅         : Q
-    ℓᵢ         : Q
-    ℓₒ         : Q
-    _≔_∙_      : Q → Q → Q → Set
+    ℓ∅          : Q
+    ℓᵢ          : Q
+    ℓₒ          : Q
+    ℓ#          : Q
 
-    ∙-join     : ∃[ ℓ# ] (ℓ# ≔ ℓᵢ ∙ ℓₒ)
+    _≔_∙_       : Q → Q → Q → Set
+    ∙-join      : ℓ# ≔ ℓᵢ ∙ ℓₒ
 
-    -- Given two operands, we can decide whether a third one exists
-    ∙-compute  : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
+    -- Given tw o operands, we can decide whether a third one exists
+    ∙-compute   : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
 
-    -- If a third operand exists, it must be unique
-    ∙-unique   : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
-    ∙-uniqueˡ  : ∀ {x y y' z}  → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
+    -- If a thi rd operand exists, it must be unique
+    ∙-unique    : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
+    ∙-uniqueˡ   : ∀ {x y y' z}  → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
 
-    ∙-idˡ      : ∀ x           → x ≔ ℓ∅ ∙ x
-    ∙-comm     : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
-    ∙-assoc    : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ ∝ ] (x ≔ u ∙ ∝ × ∝ ≔ v ∙ z)
+    ∙-idˡ       : ∀ x           → x ≔ ℓ∅ ∙ x
+    ∙-comm      : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
+    ∙-assoc     : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ ∝ ] (x ≔ u ∙ ∝ × ∝ ≔ v ∙ z)
 
-  ℓ# : Q
-  ℓ# = proj₁ ∙-join
+    Balanced    : Q → Set
+    Balanced-ℓ∅ : Balanced ℓ∅
+    Balanced-ℓ# : Balanced ℓ#
+    Balanced-∙ˡ : ∀ {x y z} → Balanced x → Balanced z → x ≔ y ∙ z → Balanced y
+    Balanced?   : ∀ x → Dec (Balanced x)
 
   ∙-idʳ : ∀ x → x ≔ x ∙ ℓ∅
   ∙-idʳ x = ∙-comm (∙-idˡ x)

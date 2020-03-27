@@ -74,6 +74,7 @@
 \newcommand{\lo}{\field{\ell_o}}
 \newcommand{\lz}{\field{\ell_{\o}}}
 \newcommand{\lio}{\field{\ell_{\#}}}
+\newcommand{\Balanced}{\field{Balanced}}
 
 % Types
 \newcommand{\Set}{\type{SET}}
@@ -473,8 +474,9 @@ We need to distinguish between \emph{capabilities} i, o or $\sharp$ and \emph{mu
   &\lz                    &:{} &                      &        & C \\
   &\li                    &:{} &                      &        & C \\
   &\lo                    &:{} &                      &        & C \\
+  &\lio                   &:{} &                      &        & C \\
   &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
-  &\field{\cdot-join}     &:{} &                      &        & \type{\exists} \lio . \; \op{\lio}{\li}{\lo} \\
+  &\field{\cdot-join}     &:{} &                      &        & \op{\lio}{\li}{\lo} \\
   &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
   &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
   &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
@@ -715,6 +717,25 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 \subsection{Subject Congruence}\label{subject-congruence}
 
 \subsection{Substitution}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Progress}\label{progress}
+
+\begin{figure}[h]
+\begin{equation}
+\begin{aligned}
+  &\Balanced                &:{} &                      &        & C \to \Set \\
+  &\field{Balanced-}\lz     &:{} &                      &        & \Balanced \; \lz \\
+  &\field{Balanced-}\lio    &:{} &                      &        & \Balanced \; \lio \\
+  &\field{Balanced-\cdot^l} &:{} &\forall \{x y z\}     & \to \; & \Balanced \; x \to \Balanced \; z \to \op{x}{y}{z} \to \Balanced \; y \\
+  &\field{Balanced?}        &:{} &\forall x             &        & \type{DEC} \; (\field{Balanced} \; x)
+\end{aligned}
+\end{equation}
+\caption{}
+\label{progress-capabilities}
+\end{figure}
+
+\todo{scope extension rule}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}

@@ -58,7 +58,7 @@ private
 data _∝_[_]≔_∝_⊠_ : PreCtx n → Ctx is → Fin n → Type → Cs idx → Ctx is → Set where
 
   zero : {Γ : Ctx is} {y z : Cs idx}
-       → {check : True (∙-compute y z)}
+       → ⦃ check : True (∙-compute y z) ⦄
        → γ -, t ∝ Γ -, proj₁ (toWitness check) [ zero ]≔ t ∝ y ⊠ Γ -, z
 
   suc : {Γ Δ : Ctx is} {x : Cs idx} {x' : Cs idx'}
@@ -70,6 +70,7 @@ data _∝_⊢_⊠_ : PreCtx n → Ctx is → Scoped n → Ctx is → Set where
   end : γ ∝ Γ ⊢ 𝟘 ⊠ Γ
 
   chan : (t : Type) (m : Cs idx') (μ : Cs idx)
+       → ⦃ check : True (Balanced? μ) ⦄
        → γ -, C[ t ∝ m ] ∝ Γ -, μ ⊢ P     ⊠ Δ -, ℓ∅
        --------------------------------------------
        → γ               ∝ Γ      ⊢ new P ⊠ Δ
