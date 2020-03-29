@@ -36,35 +36,35 @@ private
   variable
     n : ℕ
     i j : Fin n
-    idx : I
-    idxs : Vec I n
+    idx : Idx
+    idxs : Idxs n
     γ : PreCtx n
     t : Type
-    x y z : Cs idx
+    x y z : Carrier idx
     Γ Θ Δ Ξ : Ctx idxs
     P Q : Scoped n
 
-∋-frame : {γ : PreCtx n} {idxs : Vec I n} {Γ Θ Δ Ξ Ψ : Ctx idxs} {t : Type} {x : Cs idx}
+∋-frame : {γ : PreCtx n} {idxs : Idxs n} {Γ Θ Δ Ξ Ψ : Ctx idxs} {t : Type} {x : Carrier idx ²}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
         → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Θ
         → γ ∝ Ξ [ i ]≔ t ∝ x ⊠ Ψ
 
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero ⦃ check ⦄)
   rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ)
-  | ∙-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙-compute-unique x'≔
+  | ∙²-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙²-compute-unique x'≔
   = zero ⦃ fromWitness (_ , x'≔) ⦄
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x)
-  rewrite ∙-uniqueˡ x≔ (∙-idˡ _) | ∙-unique x'≔ (∙-idˡ _)
+  rewrite ∙²-uniqueˡ x≔ (∙²-idˡ _) | ∙²-unique x'≔ (∙²-idˡ _)
   = suc (∋-frame Γ≔ Ξ≔ x)
 
-⊢-frame : {γ : PreCtx n} {idxs : Vec I n} {Γ Δ Θ Ξ Ψ : Ctx idxs}
+⊢-frame : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Θ Ξ Ψ : Ctx idxs}
         → Γ ≔ Δ ⊎ Θ → Ξ ≔ Δ ⊎ Ψ
         → γ ∝ Γ ⊢ P ⊠ Θ
         → γ ∝ Ξ ⊢ P ⊠ Ψ
 
 ⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
-  = chan t m μ (⊢-frame {Δ = _ -, μ} (Γ≔ , ∙-idʳ _) (Ξ≔ , ∙-idʳ _) ⊢P)
+  = chan t m μ (⊢-frame {Δ = _ -, (μ , μ)} (Γ≔ , ∙²-idʳ _) (Ξ≔ , ∙²-idʳ _) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (recv x ⊢P) with ⊢-⊎ ⊢P
 ⊢-frame Γ≔ Ξ≔ (recv x ⊢P) | (_ -, _) , (P≔ , x≔) =
   let xP≔           = ⊎-comp (∋-⊎ x) P≔ Γ≔

@@ -36,13 +36,13 @@ private
   variable
     n : ℕ
     i j : Fin n
-    idx : I
-    idxs : Vec I n
+    idx : Idx
+    idxs : Idxs n
     P Q : Scoped n
 
-∋-unused : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Cs idx}
+∋-unused : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {x : Carrier idx ²}
          → (i : Fin n)
-         → γ ∝ Γ [ j ]≔ t ∝ xs ⊠ Θ
+         → γ ∝ Γ [ j ]≔ t ∝ x ⊠ Θ
          → i ≢ j
          → All.lookup i Γ ≡ All.lookup i Θ
 ∋-unused zero zero i≢x = ⊥-elim (i≢x refl)
@@ -78,7 +78,7 @@ module _ {a} {A : Set a} where
   swapₐ (suc i) (xs -, y -, x) = swapₐ i (xs -, y) -, x
 
 -- TODO: rewrite this crap
-∋-swap : {γ : PreCtx (suc n)} {idxs : Vec I (suc n)} {Γ Θ : Ctx idxs} {t : Type} {x : Cs idx}
+∋-swap : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {t : Type} {x : Carrier idx ²}
        → (i : Fin n)
        → γ ∝ Γ [ j ]≔ t ∝ x ⊠ Θ
        → swapᵥ i γ ∝ swapₐ i Γ [ swapFin i j ]≔ t ∝ x ⊠ swapₐ i Θ

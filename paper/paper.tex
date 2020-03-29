@@ -71,11 +71,12 @@
 
 % Fields
 \newcommand{\op}[3]{#1 \; \field{\coloneqq} \; #2 \; \field{\cdot} \; #3}
+\newcommand{\zero}{\field{0\cdot}}
+\newcommand{\one}{\field{1\cdot}}
 \newcommand{\li}{\field{\ell_i}}
 \newcommand{\lo}{\field{\ell_o}}
 \newcommand{\lz}{\field{\ell_{\o}}}
 \newcommand{\lio}{\field{\ell_{\#}}}
-\newcommand{\Balanced}{\field{Balanced}}
 
 % Types
 \newcommand{\Set}{\type{SET}}
@@ -434,23 +435,22 @@ Continuations.
 
 \subsection{Multiplicities and Capabilities}\label{multiplicities}
 
-In its usual representation, the linear \picalc{} distinguishes between \emph{capabilities} -- $\ell_{\o}$ for cannot send nor receive, $\ell_i$ for input, $\ell_o$ for output, and $\ell_\#$ for both input and output -- and multiplicities -- $0$ or $1$.
-This introduces some unnecessary semantic duplication: a channel with multiplicity 1 and capability $\cdot \ell_{\o}$ is indistinguishable, in usage, from a channel with multiplicity 0.
-In this paper, we merge multiplicities and capabilities into a single type and define the algebraic rules for a generalized resource-aware type system on the \picalc{}.
-As such, it can be used to model shared, linear, or gradual types.
-  
-The algebra has a single binary operator $(\cdot)$ that crushes together capabilities, and must satisfy the following characteristics:
+In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 or 1.
+In this paper we generalize over linearity and provide an algebra on multiplicities that is capable of encoding shared and gradual types as well.
+The algebra has a single binary operator $(\cdot)$ that crushes multiplicities together.
+It must satisfy the following constraints:
 \begin{description}
 
 \item [Partiality]
-  Not all capabilities are necessarily compatible: in the linear \picalc{} the capability $\ell_i$ cannot be split into $\ell_i$ and $\ell_i$.
+  Not all multiplicities are necessarily compatible: in the linear \picalc{} $1$ cannot be split into $1$ and $1$.
 \item [Functionality]
-  Given two capabilities $y$ and $z$, it must be computable whether a third capability $x$ exists such that $\op{x}{y}{z}$.
-  If such a $x$ exists, it must be unique.
+  Given two multiplicities $y$ and $z$, it must be computable whether a third multiplicity $x$ exists such that $\op{x}{y}{z}$.
+  If such an $x$ exists, it must be unique.
     
 \item [Injectivity]
-  To prove framing (\S \ref{framing}) we need to be able to compute the \emph{subtraction} of capabilities.
-  That is, $x - z \equiv y$ where $y$ is uniquely determined iff $\op{x}{y}{z}$ where $y$ is uniquely determined.
+  To prove framing (\S \ref{framing}) we need to be able to \emph{subtract} multiplicities.
+  For that end, we rely on $x - z \equiv y$ iff $\op{x}{y}{z}$.
+  As a consequence, we must constraint $y$ to be uniquely determined as well.
 
 \item [Associativity]
   As a direct consequence of the structural congruence rule $\comp{P}{\comp{Q}{R}} \equiv \comp{\comp{P}{Q}}{R}$.
@@ -459,41 +459,34 @@ The algebra has a single binary operator $(\cdot)$ that crushes together capabil
   As a direct consequence of the structural congruence rule $\comp{P}{Q} \equiv \comp{Q}{P}$.
 
 \item [Distinguished elements]
-  There must be a neutral element $\ell_{\o}$ absorbed on both sides.
-  There need to be two special elements $\ell_i$ and $\ell_o$ that will be subtracted every time input and output (respectively) happens.
-  These two elements need to be compatible, and we will refer to the result as $\ell_\#$.
+  There must be a neutral element $0$ absorbed on both sides.
+  There must be a special element $1$ to record usage.
 \end{description}
 
-In Figure \ref{capabilities} we present an algebra $\Quantifier_C$ on the carrier set $C$ in the form of a terniary relation, satisfying all the properties mentioned above.
-
-\todo{Ornela: in linear pi if you write $\li$ the $\ell$ already means that the multiplicity is 1, meaning linear. 
-We need to distinguish between \emph{capabilities} i, o or $\sharp$ and \emph{multiplicities} 0, 1 or $\omega$. So, the $\ell$ cannot be $\omega$, hence shared. You should use only i, o or $\sharp$ in Fig 7. and use $\ell$ as a syntactic sugar for i, o or $\sharp$ with multiplicity 1.}
+Together, these constraints give raise to a \emph{partial commutative monoid}.
+In Figure \ref{fig:multiplicities} we present an algebra $\Quantifier_C$ on the carrier set $C$ in the form of a terniary relation such that it forms a partially commutative monoid.
 
 \begin{figure}[h]
 \begin{equation}
 \begin{aligned}
-  &\lz                    &:{} &                      &        & C \\
-  &\li                    &:{} &                      &        & C \\
-  &\lo                    &:{} &                      &        & C \\
-  &\lio                   &:{} &                      &        & C \\
+  &\zero                  &:{} &                      &        & C \\
+  &\one                   &:{} &                      &        & C \\
   &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
-  &\field{\cdot-join}     &:{} &                      &        & \op{\lio}{\li}{\lo} \\
   &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
   &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
   &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  &\field{\cdot-id^l}     &:{} &\forall x             & \to \; & \op{x}{\lz}{x} \\
+  &\field{\cdot-id^l}     &:{} &\forall x             & \to \; & \op{x}{\zero}{x} \\
   &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
   &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
 \end{aligned}
 \end{equation}
-\caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid with special elements $\ell_i$, $\ell_o$ and $\ell_\#$.}
-\label{capabilities}
+\caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid.}
+\label{fig:multiplicities}
 \end{figure}
 
-To allow for several capability algebras to coexist on the same type system, in Figure \ref{indexed-capabilities} we index the algebra carriers by an index $\Idx$.
-Such an index is a type with one element for each algebra of our type system.
-To be able to prove subject congruence, we require for at least one such algebra to exist.
-Finally, the field $\field{QUANTIFIERS}$ requires for each index $i$ to have an algebra defined on the carrier set $\constr{\Carrier_i}$.
+To allow for several multiplicity algebras to coexist on the same type system, we index the carriers of the algebras by an index $\Idx$ (see Figure \ref{fig:indexed-multiplicities}).
+Each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
+We require the indexing type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
 
 \begin{figure}[h]
 \begin{equation}
@@ -504,93 +497,51 @@ Finally, the field $\field{QUANTIFIERS}$ requires for each index $i$ to have an 
   &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
 \end{split}
 \end{equation}
-\caption{Indexed set of partial commutative monoids}
-\label{indexed-capabilities}
+\caption{Indexed set of partial commutative monoids.}
+\label{fig:indexed-multiplicities}
 \end{figure}
 
 \subsubsection{Example Type Systems}
+
+\todo{Add typing derivations for example processes}
 
 \begin{description}
 
 \item [Shared]
 
 The carrier $C$ is implemented as a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
-All of $\lz$, $\li$, $\lo$ and $\lio$ are instantiated to $\constr{\omega}$.
+Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
 The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
 All other laws are trivially satisfied.
 
 \item [Linear]
 
-The carrier $C$ is implemented as a type $\type{Four}$ with the trivial elements $\constr{\ell_{\o}}$, $constr{\ell_i}$, $\constr{\ell_o}$ and $\constr{\ell_\#}$.
-The monoidal operation has the element $\constr{\ell_{\o}}$ as neutral on both sides, and the element $\constr{\ell_\#}$ splitting into $\constr{\ell_i}$ and $\constr{\ell_o}$ (or $\constr{\ell_o}$ and $\constr{\ell_i}$ -- and is uninhabited in every other case.
+The carrier $C$ is implemented as a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
+The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$ -- and is uninhabited in every other case.
 All other rules follow trivially.
 
 \item [Gradual]
 
-The carrier $C$ is implemented as a tuple $\N \type{\times} \N$ of natural numbers.
-The element $\lz$ corresponds to the tuple $(\constr{0} \constr{,} \constr{0})$, $\li$ to $(\constr{1} \constr{,} \constr{0})$, $\lo$ to $(\constr{0} \constr{,} \constr{1})$, and $\lio$ to $(\constr{1} \constr{,} \constr{1})$.
-The partial monoid is defined exactly when $\op{(x_l + y_l \constr{,} x_r + y_r)}{(x_l \constr{,} x_r)}{(y_l \constr{,} y_r)}$.
+The carrier $C$ is implemented as the type of natural numbers $\N$.
+The element $\zero$ corresponds 0, and $\one$ to 1.
+The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
 All other rules follow trivially from the algebraic rules for the addition of naturals.
 
 \end{description}
 
 \subsection{Contexts}
 
-In the linear \picalc{}, the capabilities of the variables in context need to be modified every time input or output occurs.
-However, the types of the variables in context need not.
-As neither capabilities nor their indices depend on types, we choose to keep these two kinds of information separate (Figure \ref{contexts}): a length-indexed context of types $\PreCtx_n$ on one side; a length-indexed context of indices $\Idxs_n$ on the other, with a context of capabilities $\Ctx_{idxs}$ on top.
+In a resource-aware \picalc{} type multiplicities change every time input and output occurs; however, the types themselves remain constant.
+If multiplicities need not to depend on types, keeping types and multiplicities in independent contexts allows for a more modular approach to the algebra on contexts of multiplicities.
+In this paper we choose that approach, which entails accepting that base non-channel types have dedicated input and output multiplicities too -- we will take care of impeding that any actual input or output can occur through them in the typing rules.
 
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-        {n : \N}
-        {\PreCtx_n : \Set}
-
-    \inferrule
-        { }
-        {[] : \PreCtx_0}
-
-        \inferrule
-            {\gamma : \PreCtx_n \\ t : \Type}
-            {\gamma \comma t : \PreCtx_{\suc n}}
-  \end{mathpar}
-
-  \begin{mathpar}
-    \datatype
-        {n : \N}
-        {\Idxs_n : \Set}
-
-    \inferrule
-        { }
-        {[] : \Idxs_0}
-
-        \inferrule
-            {idxs : \Idxs_n \\ idx : \Idx}
-            {idxs \comma idx : \Idxs_{\suc n}}
-
-            \\
-            
-            \datatype
-                {idxs : \Idxs_n}
-                {\Ctx_{idxs} : \Set}
-            
-            \inferrule
-                { }
-                {[] : Ctx_{[]}}
-                
-                \inferrule
-                    {\Gamma : \Ctx_{idxs} \\ x : \Carrier_{idx}}
-                    {\Gamma \comma x : \Ctx_{idxs \comma idx}}
-  \end{mathpar}
-  \caption{Length-indexed typing contexts; length-indexed index context; index-indexed capability contexts.}
-  \label{contexts}
-\end{figure}
-
-We represent base types $\base{n}$ using a natural number $n$ that can be reified into a type by the host language.
+Figure \ref{fig:prectx} represents base types $\base{n}$ using a natural number $n$ that can be reified into a type by the host language.
 Using natural numbers instead of type universes is convenient: there is no need to litter type types with universe polymorphism, and it provides an additional proof of inhabitance, needed for the $\new \PO_{\suc n} \eqeq \PO_n$ rule in subject congruence.
 
 Channel types $\channel{t}{x}$ use $t$ as the type of data sent over the channel and $x$ as the capability of the data sent over the channel.
 When data is received on a channel of type $\channel{t}{x}$, the type $t$ will be appended to the context of types $\PreCtx_n$ and the capability $x$ to the context of capabilities $\Ctx_{idxs}$.
+
+Types are then listed in a length-indexed \emph{pre-context} $\PreCtx_n$.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -606,8 +557,59 @@ When data is received on a channel of type $\channel{t}{x}$, the type $t$ will b
   {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Carrier_{idx}}}
   {\channel{t}{x} : \Type}
 \end{mathpar}
-\caption{Types for a resource-aware \picalc{}.}
-\label{types}
+
+\begin{mathpar}
+  \datatype
+      {n : \N}
+      {\PreCtx_n : \Set}
+
+  \inferrule
+      { }
+      {[] : \PreCtx_0}
+
+      \inferrule
+          {\gamma : \PreCtx_n \\ t : \Type}
+          {\gamma \comma t : \PreCtx_{\suc n}}
+\end{mathpar}
+\caption{Types and length-indexed typing contexts.}
+\label{fig:prectx}
+\end{figure}
+
+To allow different multiplicity algebras to coexist we first define a length-indexed context of carrier indices $\Idxs_n$ (see \ref{fig:ctx}).
+On top of it, we define a context of multiplicities $\Ctx_{idxs}$.
+We lift the algebra on multiplicities to multiplicity contexts by constraining the algebra on multiplicity contexts to act on  contexts defined on the same underlying context of carrier indices.
+We use two multiplicities over a common index to represent multiplicities for both the input and the output capabilities ($\Carrier_{idx}^2$).
+
+\begin{figure}[h]
+\begin{mathpar}
+  \datatype
+      {n : \N}
+      {\Idxs_n : \Set}
+
+  \inferrule
+      { }
+      {[] : \Idxs_0}
+
+  \inferrule
+      {idxs : \Idxs_n \\ idx : \Idx}
+      {idxs \comma idx : \Idxs_{\suc n}}
+
+      \\
+      
+  \datatype
+      {idxs : \Idxs_n}
+      {\Ctx_{idxs} : \Set}
+  
+  \inferrule
+      { }
+      {[] : Ctx_{[]}}
+      
+  \inferrule
+      {\Gamma : \Ctx_{idxs} \\ x : \Carrier_{idx} ^2}
+      {\Gamma \comma x : \Ctx_{idxs \comma idx}}
+\end{mathpar}
+\caption{Length-indexed context of carrier indices with a context of multiplicities on top.}
+\label{fig:ctx}
 \end{figure}
 
 
@@ -618,6 +620,8 @@ Variable references as proofs of capability
 Context splits at each variable reference
 
 two-layered approach: types on one hand, capabilities on the other
+
+\todo{lift op to $^2$}
 
 \begin{figure}[h]
 \begin{adjustwidth}{-1cm}{-1cm}
@@ -634,7 +638,7 @@ two-layered approach: types on one hand, capabilities on the other
     t : \Type \\
     \stacked{
       idx : \Idx \\\\
-      x : \Carrier_{idx}} \\
+      x : \Carrier_{idx}^2} \\
     \Delta : \Ctx_{idxs}}
   {\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta} : \Set}
 
@@ -642,7 +646,7 @@ two-layered approach: types on one hand, capabilities on the other
       {\gamma : \PreCtx_n \\
         \stacked{idxs : \Idxs_n \\\\ \Gamma : \Ctx_{idxs}}\\
         t : \Type \\
-        \stacked{idx : \Idx \\\\ x \; y \; z : \Carrier_{idx}}\\
+        \stacked{idx : \Idx \\\\ x \; y \; z : \Carrier_{idx}^2}\\
         \op{x}{y}{z}}
   {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{zero}{t}{y}{\Gamma \comma z}}
   
@@ -650,8 +654,8 @@ two-layered approach: types on one hand, capabilities on the other
       {\gamma : \PreCtx_n \\
         \stacked{idxs : \Idxs_n \\\\ \Gamma : \Ctx_{idxs}}\\
         t \; t' \; : Type \\
-        \stacked{idx : \Idx \\\\ x : \Carrier_{idx}} \\
-        \stacked{idx' : \Idx \\\\ x' : \Carrier_{idx'}} \\
+        \stacked{idx : \Idx \\\\ x : \Carrier_{idx}^2} \\
+        \stacked{idx' : \Idx \\\\ x' : \Carrier_{idx'}^2} \\
         \Delta : \Ctx_{idxs} \\\\
     loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
   {\constr{suc} \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
@@ -659,6 +663,8 @@ two-layered approach: types on one hand, capabilities on the other
 \end{adjustwidth}
 \caption{This is...}
 \end{figure}
+
+\todo{comment on balancing in chan rule}
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -676,8 +682,8 @@ two-layered approach: types on one hand, capabilities on the other
   {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
 
   \inferrule
-  {t : \Type \\ x : \Carrier_{idx} \\ y : \Carrier_{idx'} \\\\
-   cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma y}{P}{\Delta \comma \lz}}
+  {t : \Type \\ x : \Carrier_{idx}^2 \\ y : \Carrier_{idx'} \\\\
+   cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
   {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
 
   \inferrule
@@ -716,25 +722,6 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 \subsection{Subject Congruence}\label{subject-congruence}
 
 \subsection{Substitution}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Progress}\label{progress}
-
-\begin{figure}[h]
-\begin{equation}
-\begin{aligned}
-  &\Balanced                &:{} &                      &        & C \to \Set \\
-  &\field{Balanced-}\lz     &:{} &                      &        & \Balanced \; \lz \\
-  &\field{Balanced-}\lio    &:{} &                      &        & \Balanced \; \lio \\
-  &\field{Balanced-\cdot^l} &:{} &\forall \{x y z\}     & \to \; & \Balanced \; x \to \Balanced \; z \to \op{x}{y}{z} \to \Balanced \; y \\
-  &\field{Balanced?}        &:{} &\forall x             &        & \type{DEC} \; (\field{Balanced} \; x)
-\end{aligned}
-\end{equation}
-\caption{}
-\label{progress-capabilities}
-\end{figure}
-
-\todo{comment on scope restriction rule and capabilities}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}

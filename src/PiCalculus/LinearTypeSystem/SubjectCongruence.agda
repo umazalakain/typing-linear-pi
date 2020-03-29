@@ -37,7 +37,7 @@ open import PiCalculus.LinearTypeSystem.Strengthening Ω
 open import PiCalculus.LinearTypeSystem.Swapping Ω
 
 SubjectCongruence : Set
-SubjectCongruence = {n : ℕ} {γ : PreCtx n} {is : Vec I n} {Γ Δ : Ctx is}
+SubjectCongruence = {n : ℕ} {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs}
                   → {r : RecTree} {P Q : Scoped n}
                   → P ≅⟨ r ⟩ Q
                   → γ ∝ Γ ⊢ P ⊠ Δ
@@ -48,7 +48,7 @@ private
     n : ℕ
     P Q : Scoped n
 
-comp-comm : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs}
+comp-comm : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs}
           → γ ∝ Γ ⊢ P ∥ Q ⊠ Ξ
           → γ ∝ Γ ⊢ Q ∥ P ⊠ Ξ
 comp-comm (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q
@@ -66,7 +66,7 @@ subject-cong (stop scope-scope-comm) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) =
 subject-cong (cong-symm (stop comp-assoc)) (comp (comp ⊢P ⊢Q) ⊢R) = comp ⊢P (comp ⊢Q ⊢R)
 subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm (comp ⊢P ⊢Q)
 subject-cong (cong-symm (stop comp-end)) ⊢P = comp ⊢P end
-subject-cong (cong-symm (stop scope-end)) end = chan {idx' = ∃I} {idx = ∃I} B[ 0 ] ℓ∅ ℓ∅ ⦃ fromWitness Balanced-ℓ∅ ⦄ end
+subject-cong (cong-symm (stop scope-end)) end = chan {idx' = ∃Idx} {idx = ∃Idx} B[ 0 ] (0∙ , 0∙) 0∙ end
 subject-cong (cong-symm (stop (scope-ext u))) (comp ⊢P (chan t c μ ⊢Q)) = chan t c μ (comp (subst (λ ● → _ ∝ _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan _ _ _ (chan _ _ _ (subst (λ ● → _ ∝ _ ⊢ ● ⊠ _) (swap-swap zero _) (⊢-swap zero ⊢P)))
 

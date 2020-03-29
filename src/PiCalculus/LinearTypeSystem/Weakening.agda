@@ -28,11 +28,11 @@ private
   variable
     n : ℕ
     i j : Fin n
-    idx idx' : I
-    idxs : Vec I n
+    idx idx' : Idx
+    idxs : Idxs n
     P Q : Scoped n
 
-∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t t' : Type} {xs : Cs idx} {xs' : Cs idx'}
+∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t t' : Type} {xs : Carrier idx ²} {xs' : Carrier idx' ²}
          → (j : Fin (suc n))
          → γ                ∝ Γ                  [ i               ]≔ t' ∝ xs' ⊠ Θ
          → Vec.insert γ j t ∝ mult-insert j xs Γ [ Fin.punchIn j i ]≔ t' ∝ xs' ⊠ mult-insert j xs Θ
@@ -40,7 +40,7 @@ private
 ∋-weaken (suc i) zero = zero
 ∋-weaken (suc i) (suc x) = suc (∋-weaken i x)
 
-⊢-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Cs idx}
+⊢-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Carrier idx ²}
          → (j : Fin (suc n))
          → {P : Scoped n}
          → γ ∝ Γ ⊢ P ⊠ Θ

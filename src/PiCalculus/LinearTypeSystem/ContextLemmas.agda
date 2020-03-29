@@ -36,57 +36,57 @@ open import PiCalculus.LinearTypeSystem Ω
 private
   variable
     n : ℕ
-    idxs : Vec I n
+    idxs : Idxs n
     γ : PreCtx n
-    idx idx' : I
+    idx idx' : Idx
     t : Type
     P Q : Scoped n
     i j : Fin n
 
-only : {idxs : Vec I n} (i : Fin n) → Cs (Vec.lookup idxs i) → Ctx idxs
+only : {idxs : Idxs n} (i : Fin n) → Carrier (Vec.lookup idxs i) ² → Ctx idxs
 only {idxs = _ -, _} zero x = ε -, x
 only {idxs = _ -, _} (suc i) x = only i x -, ℓ∅
 
-channel-ℓ# : {idxs : Vec I n} (c : Channel n) → Ctx idxs
+channel-ℓ# : {idxs : Idxs n} (c : Channel n) → Ctx idxs
 channel-ℓ# internal = ε
 channel-ℓ# (external x) = only x ℓ#
 
-∋-I : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
+∋-I : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
     → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
     → idx ≡ Vec.lookup idxs i
 ∋-I zero = refl
 ∋-I (suc x) = ∋-I x
 
-∋-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} {c : Cs idx}
+∋-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : Carrier idx ²}
     → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
-    → Γ ≔ only i (subst Cs (∋-I x) c) ⊎ Ξ
+    → Γ ≔ only i (subst (λ i → Carrier i ²) (∋-I x) c) ⊎ Ξ
 ∋-⊎ (zero ⦃ check ⦄) = ⊎-idˡ _ , proj₂ (toWitness check)
-∋-⊎ (suc x) = ∋-⊎ x , ∙-idˡ _
+∋-⊎ (suc x) = ∋-⊎ x , ∙²-idˡ _
 
-lookup-only : {idxs : Vec I n} (i : Fin n) {c : Cs (Vec.lookup idxs i)}
+lookup-only : {idxs : Idxs n} (i : Fin n) {c : (Carrier (Vec.lookup idxs i)) ²}
             → All.lookup i (only {idxs = idxs} i c) ≡ c
 lookup-only {idxs = _ -, _} zero = refl
 lookup-only {idxs = _ -, _} (suc i) = lookup-only i
 
-onlyℓₒ : {idxs : Vec I n}
+only-∙ : {idxs : Idxs n}
        → (i : Fin n)
-       → {x y z : Cs (Vec.lookup idxs i)}
-       → x ≔ y ∙ z
+       → {x y z : (Carrier (Vec.lookup idxs i)) ²}
+       → x ≔ y ∙² z
        → only {idxs = idxs} i x ≔ only i y ⊎ only i z
-onlyℓₒ {idxs = _ -, _} zero s = ⊎-idˡ _ , s
-onlyℓₒ {idxs = _ -, _} (suc i) s = onlyℓₒ i s , ∙-idˡ _
+only-∙ {idxs = _ -, _} zero s = ⊎-idˡ _ , s
+only-∙ {idxs = _ -, _} (suc i) s = only-∙ i s , ∙²-idˡ _
 
-subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → Cs idx) → subst Cs eq δ ≡ δ
+subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → (Carrier idx) ²) → subst (λ i → Carrier i ²) eq δ ≡ δ
 subst-idx {eq = refl} δ = refl
 
-∋ℓₒ : {γ : PreCtx n} {idx : I} {idxs : Vec I n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → Cs idx)
+∋-∙ : {γ : PreCtx n} {idx : Idx} {idxs : Idxs n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → (Carrier idx) ²)
     → (x : γ ∝ Γ [ i ]≔ t ∝ c {idx} ⊠ Ξ)
-    → All.lookup i Γ ≔ c ∙ All.lookup i Ξ
-∋ℓₒ {i = i} {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup i Γ ≔ ● ∙ All.lookup i Ξ)
+    → All.lookup i Γ ≔ c ∙² All.lookup i Ξ
+∋-∙ {i = i} {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup i Γ ≔ ● ∙² All.lookup i Ξ)
                                         (trans (lookup-only i) (subst-idx c))
                                         (⊎-get i (∋-⊎ x))
 
-⊢-⊎ : {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
+⊢-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ _
 ⊢-⊎ (chan t m μ ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
                        in _ , ⊎-tail Γ≔
@@ -101,11 +101,11 @@ subst-idx {eq = refl} δ = refl
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
 
-∋-ℓ∅ : {Γ Δ : Ctx idxs} → γ ∝ Γ [ i ]≔ t ∝ ℓ∅ {idx} ⊠ Δ → Γ ≡ Δ
-∋-ℓ∅ (zero ⦃ check ⦄) = _-,_ & refl ⊗ ∙-unique (proj₂ (toWitness check)) (∙-idˡ _)
-∋-ℓ∅ (suc x) = _-,_ & ∋-ℓ∅ x ⊗ refl
+∋-0∙ : {Γ Δ : Ctx idxs} → γ ∝ Γ [ i ]≔ t ∝ (0∙ {idx} , 0∙) ⊠ Δ → Γ ≡ Δ
+∋-0∙ (zero ⦃ check ⦄) = _-,_ & refl ⊗ ∙²-unique (proj₂ (toWitness check)) (∙²-idˡ _)
+∋-0∙ (suc x) = _-,_ & ∋-0∙ x ⊗ refl
 
-mult-insert : (i : Fin (suc n)) → Cs idx → Ctx idxs → Ctx (Vec.insert idxs i idx)
+mult-insert : (i : Fin (suc n)) → (Carrier idx) ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
 mult-insert zero xs' Γ = Γ -, xs'
 mult-insert (suc i) xs' (Γ -, xs) = mult-insert i xs' Γ -, xs
 
@@ -113,6 +113,6 @@ mult-remove : Ctx idxs → (i : Fin (suc n)) → Ctx (Vec.remove idxs i)
 mult-remove (Γ -, _) zero = Γ
 mult-remove (Γ -, ys -, xs) (suc i) = mult-remove (Γ -, ys) i -, xs
 
-mult-update : (i : Fin n) → Cs (Vec.lookup idxs i) → Ctx idxs → Ctx idxs
+mult-update : (i : Fin n) → (Carrier (Vec.lookup idxs i)) ² → Ctx idxs → Ctx idxs
 mult-update zero m' (ms -, m) = ms -, m'
 mult-update (suc i) m' (ms -, m) = mult-update i m' ms -, m

@@ -34,14 +34,14 @@ open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 private
   variable
     n : ℕ
-    idxs : Vec I n
-    idx idx' : I
+    idxs : Idxs n
+    idx idx' : Idx
     t t' : Type
     i j : Fin n
     P Q : Scoped n
 
-∋-strengthen : {γ : PreCtx (suc n)} {idxs : Vec I (suc n)} {Γ Θ : Ctx idxs}
-             → {m' : Cs idx'}
+∋-strengthen : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs}
+             → {m' : Carrier idx' ²}
              → (i : Fin (suc n))
              → γ               ∝ Γ               [ j ]≔ t' ∝ m' ⊠ Θ
              → (i≢j : i ≢ j)
@@ -51,7 +51,7 @@ private
 ∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) zero i≢x = zero
 ∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) (suc x) i≢x = suc ( ∋-strengthen i x (i≢x ∘ cong suc))
 
-⊢-strengthen : {γ : PreCtx (suc n)} {idxs : Vec I (suc n)} {Γ Θ : Ctx idxs}
+⊢-strengthen : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs}
              → {P : Scoped (suc n)}
              → (i : Fin (suc n))
              → (uP : Unused i P)

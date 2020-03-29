@@ -43,9 +43,9 @@ private
     i j : Fin n
     t t' : Type
     γ : PreCtx n
-    idx : I
-    idxs : Vec I n
-    m m' l δ : Cs idx
+    idx : Idx
+    idxs : Idxs n
+    m m' l δ : Carrier idx
     Γ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ : Ctx idxs
     P : Scoped n
 
@@ -107,7 +107,7 @@ foo eq x≤y Δₗ Δᵣ Γₗ≔ Γᵣ≔ (comp ⊢P ⊢Q) = comp (foo eq x≤y
 
 postulate
   {- TARGET -}
-  ⊢-subst : ∀ {γ : PreCtx n} {idxs : Vec I n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Cs idx} {m' : Cs idx'}
-          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, ℓ∅
+  ⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Carrier idx ²} {m' : Carrier idx' ²}
+          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, (0∙ , 0∙)
           → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
           → γ -, t' ∝ Γ -, m' ⊢ [ suc j / zero ] P ⊠ Ξ -, m'
