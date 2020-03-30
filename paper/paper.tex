@@ -47,7 +47,7 @@
 \newcommand{\stacked}[1]{\mprset{flushleft} \inferrule*{}{#1}}
 \newcommand{\datatype}[2]{{\mprset{fraction={===}} \inferrule{#1}{#2}}}
 
-\newcommand{\lamcalc}{$\lambda$-calculus}
+\newcommand{\lamdacalc}{$\lambda$-calculus}
 \newcommand{\picalc}{$\pi$-calculus}
 \newcommand{\Picalc}{$\pi$-Calculus}
 
@@ -163,6 +163,7 @@ leftover typing
   \caption{Notation used in this paper}
 \end{figure}
 
+Type constructors as the names for the typing rules.
 Double rule for type-level definitions.
 We omit universe levels for brevity.
 $\type{TYPES}$ are in blue and uppercased (and their indices are subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red and variables and functions in black.
@@ -182,7 +183,7 @@ Machines prefer things they can algorithmically act upon. Like natural numbers!
 What does it mean to use a number as a variable reference?
 The idea de Bruijn had \cite{} was to use the index $n$ to refer to the variable introduced $n$ binders ago.
 The binders themselves introduce no names anymore.
-The expression $\lambda g . (\lambda f . f g) g$ in the \lamcalc{} would translate as $\lambda (\lambda 0 1) 0$.
+The expression $\lambda g . (\lambda f . f g) g$ in the \lamdacalc{} would translate as $\lambda (\lambda 0 1) 0$.
 That is, terms at different \emph{depths} must use different indices to refer to the same binding.
 Humans find this often confusing.
 There is however no reason not to keep the original names bestowed by the humans together with the indices.
@@ -245,7 +246,7 @@ To print things back to the user names can be substituted with an index together
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 
-In the \lamcalc{} $\beta$-reduction operates on syntactically adjacent terms.
+In the \lamdacalc{} $\beta$-reduction operates on syntactically adjacent terms.
 In the \picalc{} however, the syntax introduces unnecessary distinctions
 (e.g. semantically parallel composition is defined modulo associativity and commutativity).
 There are several ways around this, a structural congruence relation being one of the historical ones.
@@ -417,7 +418,7 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 \section{Resource-aware Typing System}
 
 A type system is in the business of further constraining a language, filtering out terms that (although well-formed) are meaningless.
-In the simply typed \lamcalc{}, a term has a meaning iff it has a type.
+In the simply typed \lamdacalc{}, a term has a meaning iff it has a type.
 This typing judgment is a proof of the form $\Gamma \vdash t : T$, where the term $t$ has type $T$ under the typing context $\Gamma$ -- the typing context associates variables (possibly occurring within $t$) to types.
 In the simply typed \picalc{} however, it is the channels that are typed, and a process has a meaning iff it \emph{uses} its channels according to their types.
 The typing judgment is therefore of the form $\Gamma \vdash p$, where the process $p$ (which has no type of its own) uses the channels in $\Gamma$ according to their types.
@@ -464,7 +465,9 @@ It must satisfy the following constraints:
 \end{description}
 
 Together, these constraints give raise to a \emph{partial commutative monoid}.
-In Figure \ref{fig:multiplicities} we present an algebra $\Quantifier_C$ on the carrier set $C$ in the form of a terniary relation such that it forms a partially commutative monoid.
+In Figure \ref{fig:multiplicities} we present an algebra $\Quantifier_C$ on the carrier set $C$ in the form of a terniary relation such that it forms a partial commutative monoid.
+
+\todo{SHOULD ALL THESE NOT BE DEFINITIONS?}
 
 \begin{figure}[h]
 \begin{equation}
@@ -487,6 +490,7 @@ In Figure \ref{fig:multiplicities} we present an algebra $\Quantifier_C$ on the 
 To allow for several multiplicity algebras to coexist on the same type system, we index the carriers of the algebras by an index $\Idx$ (see Figure \ref{fig:indexed-multiplicities}).
 Each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
 We require the indexing type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
+\todo{lift op to $^2$}
 
 \begin{figure}[h]
 \begin{equation}
@@ -517,7 +521,7 @@ All other laws are trivially satisfied.
 \item [Linear]
 
 The carrier $C$ is implemented as a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
-The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$ -- and is uninhabited in every other case.
+The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$), and is uninhabited in every other case.
 All other rules follow trivially.
 
 \item [Gradual]
@@ -615,11 +619,40 @@ We use two multiplicities over a common index to represent multiplicities for bo
 
 \subsection{Typing with Leftovers}\label{leftover typing}
 
-Variable references as proofs of capability
+\todo{syntax directed typing rules}
 
-Context splits at each variable reference
+In a resource-aware calculi, typing rules modify the context of multiplicities under which their premises are typed -- e.g. in $\send{x}{y}P$ the multiplicity context under which $P$ is typed needs to be modified at at $x$ and $y$.
+This context transformations can be modeled as functions on contexts, however threading these transformations through the proofs on typing rules is cumbersome, and these transformations necessitate of a myriad of additional lemmas.
+Additionally, if the typing rules do not record the result of their actions on contexts, managing parallel composition entails a context split for which the user is required to provide an existential proof at the cutting point \todo{rephrase}.
 
-two-layered approach: types on one hand, capabilities on the other
+An alternative is to keep track in the typing judgment of the way in which the context has been transformed.
+One way of doing so is by mentioning both the \emph{input contexts} and the \emph{output contexts} over which the processes are typed.
+Parallel composition then uses the output context of the left hand process as the input context of the right hand.
+As an additional benefit, the associativity of parallel composition becomes trivial to prove.
+\S \ref{typing-judgments} introduces the typing rules for such a typing judgment.
+
+In the \picalc{} both input and output contain variable references.
+Both these actions need to modify their context, and thus using variable references that mention both their input and output contexts seems relevant.
+\S \ref{variable-references} introduces the typing rules for such variable references.
+
+Both the typing judgment and the variable references are of an inductive form.
+As a consequence, all proofs on them will need to perform a double induction: once on the typing derivation, once for each variable reference.
+
+Both the typing rules and the rules for variable references mention both contexts of types and contexts of multiplicities.
+The contexts of types are threaded through the premises unchanged; the contexts of multiplicities are threaded through the premises using one premise's output as the next premise's input.
+Both the context of types and the context of multiplicities are of a common length.
+
+\subsection{Variable references} \label{variable-references}
+
+Akin to the typing rules for processes, the rules for variable references presented in Figure \ref{fig:variable-references} are indexed over the typing context, the input multiplicity context, and the output multiplicity context.
+The base case $\constr{zero}$ splits the last multiplicity in the input context into $x$ and the last multiplicity in the output context, while also ensuring that $t$ is the last type in the typing context.
+The inductive case $\constr{suc}$ appends the same multiplicity to both the input context and the output context, while also appending an extra type to the typing context.
+
+\lemma{The typing context $\gamma$ at index $i$ is type $t$.}
+\lemma{The input multiplicity context $\Gamma$ at index $i$ is the result of performing the monoidal operation on $x$ and the output multiplicity context $\Delta$ at index $i$.}
+\lemma{For every index $j$ other than $i$, the input multiplicity context $\Gamma$ at index $i$ is the output multiplicity $\Delta$ at index $i$.}
+\corollary{Given the witness $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$, $\Gamma \equiv \Delta$ iff $x \equiv \zero$.}
+\proof{By structural induction on the variable reference}
 
 \todo{lift op to $^2$}
 
@@ -644,25 +677,32 @@ two-layered approach: types on one hand, capabilities on the other
 
   \inferrule
       {\gamma : \PreCtx_n \\
-        \stacked{idxs : \Idxs_n \\\\ \Gamma : \Ctx_{idxs}}\\
+        \Gamma : \Ctx_{idxs}\\
         t : \Type \\
-        \stacked{idx : \Idx \\\\ x \; y \; z : \Carrier_{idx}^2}\\
+        x \; y \; z : \Carrier_{idx}^2\\
         \op{x}{y}{z}}
   {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{zero}{t}{y}{\Gamma \comma z}}
   
   \inferrule
       {\gamma : \PreCtx_n \\
-        \stacked{idxs : \Idxs_n \\\\ \Gamma : \Ctx_{idxs}}\\
-        t \; t' \; : Type \\
-        \stacked{idx : \Idx \\\\ x : \Carrier_{idx}^2} \\
-        \stacked{idx' : \Idx \\\\ x' : \Carrier_{idx'}^2} \\
+        \Gamma : \Ctx_{idxs}\\
+        t \; t' \; : \Type \\
+        x : \Carrier_{idx}^2 \\
+        x' : \Carrier_{idx'}^2 \\
         \Delta : \Ctx_{idxs} \\\\
     loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
   {\constr{suc} \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
 \end{mathpar}
 \end{adjustwidth}
-\caption{This is...}
+\caption{Variable references as proofs on the typing context and input and output multiplicity contexts.}
+\label{fig:variable-references}
 \end{figure}
+
+\todo{example}
+
+\subsection{Typing judgments}\label{typing-judgments}
+
+The indices in the variable reference rules are then used as the variable references of the underlying process.
 
 \todo{comment on balancing in chan rule}
 
