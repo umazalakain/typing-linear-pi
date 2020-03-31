@@ -59,9 +59,9 @@
 \newcommand{\picalc}{$\pi$-calculus}
 \newcommand{\Picalc}{$\pi$-Calculus}
 
-\newcommand{\type}[1]{\textcolor{blue}{\mathtt{\operatorname{#1}}}}
-\newcommand{\constr}[1]{\textcolor{olive}{\mathtt{\operatorname{#1}}}}
-\newcommand{\field}[1]{\textcolor{red}{\mathtt{\operatorname{#1}}}}
+\newcommand{\type}[1]{\textcolor{blue}{\operatorname{#1}}}
+\newcommand{\constr}[1]{\textcolor{olive}{\operatorname{#1}}}
+\newcommand{\field}[1]{\textcolor{red}{\operatorname{#1}}}
 
 % Constructors
 \newcommand{\PO}{\constr{\mathbf{0}}}
@@ -77,6 +77,8 @@
 
 % Functions
 \newcommand{\subst}[3]{#1[#2/#3]}
+\newcommand{\opsquared}[3]{#1 \, \coloneqq \, #2 \, \cdot^2 \, #3}
+\newcommand{\opctx}[3]{#1 \, \coloneqq \, #2 \, \otimes \, #3}
 
 % Fields
 \newcommand{\op}[3]{#1 \; \field{\coloneqq} \; #2 \; \field{\cdot} \; #3}
@@ -91,7 +93,7 @@
 \newcommand{\Set}{\type{SET}}
 \newcommand{\reduce}[1]{\; \type{\longrightarrow}_{#1} \;}
 \newcommand{\types}[4]{#1 \; \type{\propto} \; #2 \; \type{\vdash} \; #3 \; \type{\boxtimes} \; #4}
-\newcommand{\contains}[6]{#1 \; \type{\propto} \; #2 \; \type{_[} _{#3} \type{_]=} \; #4 \; \type{\propto} \; #5 \; \type{\boxtimes} \; #6}
+\newcommand{\contains}[6]{#1 \; \type{\propto} \; #2 \; \type{\ni}_{#3} \; #4 \; \type{\propto} \; #5 \; \type{\boxtimes} \; #6}
 \newcommand{\Var}{\type{VAR}}
 \newcommand{\Process}{\type{PROCESS}}
 \newcommand{\Unused}{\type{UNUSED}}
@@ -506,12 +508,15 @@ It must satisfy the following constraints:
   \end{figure}
 \end{nidefinition}
 
+\begin{note}
+  We will often work with input and output multiplicities pairs, and thus we use the notation $\Carrier^2$ to stand for the type $\Carrier \times \Carrier$, and $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where all of its properties are trivially lifted.
+\end{note}
+
 \begin{nidefinition}
   An indexed set of partial commutative monoids is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it.
   This allows for several algebras to coexist in the same type system.
   Figure \ref{fig:indexed-multiplicities} captures these requirements: each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
   We require the index type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
-  \todo{lift op to $^2$}
   
   \begin{figure}[h]
   \begin{equation}
@@ -654,6 +659,9 @@ In this paper we choose that approach, which entails accepting that base non-cha
   \end{figure}
 \end{nidefinition}
 
+\begin{note}
+  We lift the monoidal operation on pairs of multiplicities $\opsquared{x}{y}{z}$ to a monoidal operation on contexts with the same underlying vector of indices $\opctx{\Gamma}{\Delta}{\Xi}$, where all the properties of the partial monoid are trivially lifted to contexts.
+\end{note}
 
 \subsection{Typing with Leftovers}\label{leftover typing}
 
@@ -684,7 +692,6 @@ Both the context of types and the context of multiplicities are of a common leng
   The inductive case $\constr{suc}$ appends the same multiplicity to both the input context and the output context, while also appending an extra type to the typing context.
   
   \todo{example}
-  \todo{lift op to $^2$}
   
   \begin{figure}[h]
   \begin{mathpar}
@@ -707,7 +714,7 @@ Both the context of types and the context of multiplicities are of a common leng
     \inferrule
         {t : \Type \\
           x \; y \; z : \Carrier_{idx}^2\\
-          \op{x}{y}{z}}
+          \opsquared{x}{y}{z}}
     {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{zero}{t}{y}{\Gamma \comma z}}
     
     \inferrule
@@ -722,19 +729,49 @@ Both the context of types and the context of multiplicities are of a common leng
   \end{figure}
 \end{nidefinition}
 
-\lemma{The typing context $\gamma$ at index $i$ is type $t$.}
-\lemma{The input multiplicity context $\Gamma$ at index $i$ is the result of performing the monoidal operation on $x$ and the output multiplicity context $\Delta$ at index $i$.}
-\lemma{For every index $j$ other than $i$, the input multiplicity context $\Gamma$ at index $i$ is the output multiplicity $\Delta$ at index $i$.}
-\corollary{Given the witness $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$, $\Gamma \equiv \Delta$ iff $x \equiv \zero$.}
-\proof{By structural induction on the variable reference}
-
-\subsection{Typing judgments}\label{typing-judgments}
-
-The indices in the variable reference rules are then used as the variable references of the underlying process.
-
-\todo{comment on balancing in chan rule}
+\begin{lemma}
+  The typing context $\gamma$ at index $i$ is type $t$.
+\end{lemma}
+\begin{lemma}
+  The input multiplicity context $\Gamma$ at index $i$ is the result of performing the monoidal operation on $x$ and the output multiplicity context $\Delta$ at index $i$.
+\end{lemma}
+\begin{lemma}
+  For every index $j$ other than $i$, the input multiplicity context $\Gamma$ at index $i$ is the output multiplicity $\Delta$ at index $i$.
+\end{lemma}
+\begin{corollary}
+  Given the witness $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$, $\Gamma \equiv \Delta$ iff $x \equiv \zero$.
+\end{corollary}
+\proof{All proofs are by structural induction on \textsc{VarRef}.}
 
 \begin{nidefinition}
+  The typing relation \textsc{Types} presented in Figure \ref{fig:types} is indexed over a context of types $\gamma$, a context of input multiplicities $\Gamma$, the process $P$ that is being typed, and the context of output capabilities $\Delta$, and notated as $\types{\gamma}{\Gamma}{P}{\Delta}$.
+  \todo{empty output context}
+  The typing rules are in one-to-one correspondence with the underlying syntax for processes, and thus we say they are syntax-directed.
+
+  Process termination is typed under any typing context, and preserves the multiplicity context unchanged.
+
+  Scope restriction accepts three parameters: the type $t$ of data sent over the channel; the input and output multiplicities $x$ of the data sent over the channel; and the multiplicity $y$ of the channel itself, which is used both as input and as output.
+  The typing derivation of the continuation process $P$ has a channel of data type $t$ and data multiplicity $x$ added to the typing context, and the multiplicities $(y , y)$ added to the input multiplicity context.
+  The continuation must completely exhaust this channel, to that end we substitute $(y , y)$ by $(\zero , zero)$ in the output context.
+  \todo{comment on balancing in chan rule}
+
+  Input requires a proof $chan_i$ locating a channel with data type $t$, data multiplicities $x$ and multiplicity $\ell_i$ \todo{} at index $i$ in the typing and multiplicity contexts $\gamma$ and $\Gamma$.
+  The result of exhausting $\ell_i$ is the output multiplicity $\Xi$.
+  The data type $t$ is then used to expand the typing context of the continuation $cont$, while the data multiplicities $x$ are appended to the output context $\Xi$ to form the input context over which $P$ is typed.
+  These multiplicities $x$ must be exhausted by typing derivation of the continuation process.
+  Note that the index $i$ is then used as part of the syntax.
+
+  \todo{note that every new multiplicity introduced in an input context must be exhausted in the output context}
+
+  Similar to input, output requires a proof $chan_i$ locating a channel with data type $t$ and data multiplicities $x$ in $\gamma$ at index $i$, however this time the channel must have multiplicity $\ell_o$.
+  The result of exhausting $\ell_o$ is the output multiplicity $\Delta$.
+  That output context $\Delta$ must have a variable of type $t$ and multiplicities $x$ at position $j$.
+  This second proof represents the data that is sent over the channel.
+  The result of exhausting the multiplicities $x$ of that variable is the context $\Xi$.
+  The continuation process must be typed under this context $\Xi$.
+
+  Finally, parallel composition requires its two subprocesses to be typed such that the output context of the first is the input context of the second.
+
   \begin{figure}[h]
   \begin{mathpar}
     \datatype{
@@ -772,7 +809,8 @@ The indices in the variable reference rules are then used as the variable refere
      r : \types{\gamma}{\Delta}{Q}{\Xi}}
     {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
   \end{mathpar}
-  \caption{This is...}
+  \caption{Left-over typing for a resource-aware typing system.}
+  \label{fig:types}
   \end{figure}
 \end{nidefinition}
 
@@ -781,6 +819,11 @@ The indices in the variable reference rules are then used as the variable refere
 
 \subsection{Framing}
 
+\todo{op but for contexts}
+\begin{theorem}
+  Let $\opctx{\Gamma_l}{\Delta}{\Xi_l}$ and $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
+  If $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$ then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
+\end{theorem}
 
 \subsection{Weakening}
 
@@ -815,8 +858,6 @@ Work that will be done time permiting:
 
 \begin{description}
 
-\item [Affine types]
-  
 \item [Proof of progress]
 
 \item [Product types]
@@ -824,6 +865,8 @@ Work that will be done time permiting:
 \item [Sum types]
 
 \item [Decidable typechecking]
+
+  Bidirectional typing rules needed.
 
 \item [Soundness and completeness with respect to an alternative formalization.]
 
