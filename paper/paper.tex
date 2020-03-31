@@ -3,14 +3,15 @@
 \usepackage[utf8]{inputenc}
 \usepackage{url}
 \usepackage{todonotes}
-\usepackage{enumitem}
-\setlist{parsep=0pt,listparindent=\parindent}
 \usepackage{amssymb}
 \usepackage[fleqn]{amsmath}
 \usepackage{amsbsy}
 \usepackage{mathtools}
 \usepackage[many]{tcolorbox}
 \bibliographystyle{plainurl}
+
+% Mathbb doesn't support digits
+\usepackage{bbm}
 
 % Less margins around figures
 \usepackage{changepage}
@@ -20,6 +21,13 @@
 
 % TODO notes -- TODO: remove
 \usepackage{todonotes}
+
+% Do not use italics for definitions
+\theoremstyle{definition}
+\newtheorem{nidefinition}[theorem]{Definition}
+
+% No line numbers
+\nolinenumbers
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{Typing a linear \picalc}
@@ -62,6 +70,7 @@
 \newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
 \newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
+\newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
 \newcommand{\channel}[2]{\constr{C[} \; #1 \; \constr{\propto} \; #2 \; \constr{]}}
 \newcommand{\comma}{\; \constr{,} \;}
@@ -151,6 +160,7 @@ leftover typing
     \datatype
     { }
     {\type{\N} : \Set}
+    \; \textsc{Nat}
 
     \inferrule
     { }
@@ -164,6 +174,7 @@ leftover typing
 \end{figure}
 
 Type constructors as the names for the typing rules.
+Datatype constructor rules might have additional index-free synonyms for ease of reference.
 Double rule for type-level definitions.
 We omit universe levels for brevity.
 $\type{TYPES}$ are in blue and uppercased (and their indices are subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red and variables and functions in black.
@@ -199,6 +210,7 @@ In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$
   \datatype
   {n : \N}
   {\Var_n : \Set}
+  \; \textsc{Var}
 
   \inferrule
   {n : \N}
@@ -221,6 +233,7 @@ As shown in Figure \ref{process}, we increase the \emph{depth} counter every tim
   \datatype
   {n : \N}
   {\Process_n : \Set}
+  \; \textsc{Process}
 \end{mathpar}
   
 \begin{equation*} \label{pi-calc-syntax}
@@ -266,6 +279,7 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
   \datatype
   { }
   {P \eqeq Q : \Set}
+  \; \textsc{StructCong}
 
   \inferrule
   { }
@@ -307,6 +321,7 @@ To show that the doubly recursive call terminates we index the equivalence relat
   \datatype
   { }
   {\Rec : \Set}
+  \; \textsc{Rec}
 
   \inferrule
   { }
@@ -323,6 +338,7 @@ To show that the doubly recursive call terminates we index the equivalence relat
   \datatype
   {P \, Q : \Process_n \\ r : \Rec}
   {P \eq{r} Q : \Set}
+  \; \textsc{Equals}
 
   \inferrule
   {eq : P \eqeq Q}
@@ -381,6 +397,7 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   \datatype
   {n : \N}
   {\Channel_n : \Set}
+  \; \textsc{Channel}
 
   \inferrule
   { }
@@ -393,6 +410,7 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   \datatype
   {i : \Channel_n \\ P \; Q : \Process_n}
   {P \reduce{i} Q : \Set}
+  \; \textsc{Reduces}
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
@@ -464,46 +482,50 @@ It must satisfy the following constraints:
   There must be a special element $1$ to record usage.
 \end{description}
 
-Together, these constraints give raise to a \emph{partial commutative monoid}.
-In Figure \ref{fig:multiplicities} we present an algebra $\Quantifier_C$ on the carrier set $C$ in the form of a terniary relation such that it forms a partial commutative monoid.
+\begin{nidefinition}
+  Together, the aforementioned constraints give raise to a \emph{partial commutative monoid}.
+  We deal with partiality by modeling the monoidal operation as a terniary relation.
+  An algebra on the carrier set $C$ forms a $\Quantifier_C$ iff it satisfies the fields in Figure \ref{fig:multiplicities}.
+  
+  \begin{figure}[h]
+  \begin{equation}
+  \begin{aligned}
+    &\zero                  &:{} &                      &        & C \\
+    &\one                   &:{} &                      &        & C \\
+    &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
+    &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
+    &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+    &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+    &\field{\cdot-id^l}     &:{} &\forall x             & \to \; & \op{x}{\zero}{x} \\
+    &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
+    &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
+  \end{aligned}
+  \end{equation}
+  \caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid.}
+  \label{fig:multiplicities}
+  \end{figure}
+\end{nidefinition}
 
-\todo{SHOULD ALL THESE NOT BE DEFINITIONS?}
-
-\begin{figure}[h]
-\begin{equation}
-\begin{aligned}
-  &\zero                  &:{} &                      &        & C \\
-  &\one                   &:{} &                      &        & C \\
-  &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
-  &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
-  &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-  &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  &\field{\cdot-id^l}     &:{} &\forall x             & \to \; & \op{x}{\zero}{x} \\
-  &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-  &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
-\end{aligned}
-\end{equation}
-\caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid.}
-\label{fig:multiplicities}
-\end{figure}
-
-To allow for several multiplicity algebras to coexist on the same type system, we index the carriers of the algebras by an index $\Idx$ (see Figure \ref{fig:indexed-multiplicities}).
-Each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
-We require the indexing type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
-\todo{lift op to $^2$}
-
-\begin{figure}[h]
-\begin{equation}
-\begin{split}
-  &\field{IDX}          &:{} &\Set \\
-  &\field{\exists IDX}  &:{} &\field{IDX} \\
-  &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
-  &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
-\end{split}
-\end{equation}
-\caption{Indexed set of partial commutative monoids.}
-\label{fig:indexed-multiplicities}
-\end{figure}
+\begin{nidefinition}
+  An indexed set of partial commutative monoids is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it.
+  This allows for several algebras to coexist in the same type system.
+  Figure \ref{fig:indexed-multiplicities} captures these requirements: each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
+  We require the index type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
+  \todo{lift op to $^2$}
+  
+  \begin{figure}[h]
+  \begin{equation}
+  \begin{split}
+    &\field{IDX}          &:{} &\Set \\
+    &\field{\exists IDX}  &:{} &\field{IDX} \\
+    &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
+    &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
+  \end{split}
+  \end{equation}
+  \caption{Indexed set of partial commutative monoids.}
+  \label{fig:indexed-multiplicities}
+  \end{figure}
+\end{nidefinition}
 
 \subsubsection{Example Type Systems}
 
@@ -539,82 +561,98 @@ In a resource-aware \picalc{} type multiplicities change every time input and ou
 If multiplicities need not to depend on types, keeping types and multiplicities in independent contexts allows for a more modular approach to the algebra on contexts of multiplicities.
 In this paper we choose that approach, which entails accepting that base non-channel types have dedicated input and output multiplicities too -- we will take care of impeding that any actual input or output can occur through them in the typing rules.
 
-Figure \ref{fig:prectx} represents base types $\base{n}$ using a natural number $n$ that can be reified into a type by the host language.
-Using natural numbers instead of type universes is convenient: there is no need to litter type types with universe polymorphism, and it provides an additional proof of inhabitance, needed for the $\new \PO_{\suc n} \eqeq \PO_n$ rule in subject congruence.
+\begin{nidefinition}
+  Figure \ref{fig:prectx} defines types as either unit types, base types or channel types.
+  Unit types $\unit$ provide a proof of inhabitance for types, needed for the $\new \PO_{\suc n} \eqeq \PO_n$ rule in subject congruence.
 
-Channel types $\channel{t}{x}$ use $t$ as the type of data sent over the channel and $x$ as the capability of the data sent over the channel.
-When data is received on a channel of type $\channel{t}{x}$, the type $t$ will be appended to the context of types $\PreCtx_n$ and the capability $x$ to the context of capabilities $\Ctx_{idxs}$.
-
-Types are then listed in a length-indexed \emph{pre-context} $\PreCtx_n$.
-
-\begin{figure}[h]
-\begin{mathpar}
-  \datatype
-  { }
-  {\Type : \Set}
-
-  \inferrule
-  {n : \N}
-  {\base{n} : \Type}
-
-  \inferrule
-  {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Carrier_{idx}}}
-  {\channel{t}{x} : \Type}
-\end{mathpar}
-
-\begin{mathpar}
-  \datatype
-      {n : \N}
-      {\PreCtx_n : \Set}
-
-  \inferrule
-      { }
-      {[] : \PreCtx_0}
-
-      \inferrule
-          {\gamma : \PreCtx_n \\ t : \Type}
-          {\gamma \comma t : \PreCtx_{\suc n}}
-\end{mathpar}
-\caption{Types and length-indexed typing contexts.}
-\label{fig:prectx}
-\end{figure}
-
-To allow different multiplicity algebras to coexist we first define a length-indexed context of carrier indices $\Idxs_n$ (see \ref{fig:ctx}).
-On top of it, we define a context of multiplicities $\Ctx_{idxs}$.
-We lift the algebra on multiplicities to multiplicity contexts by constraining the algebra on multiplicity contexts to act on  contexts defined on the same underlying context of carrier indices.
-We use two multiplicities over a common index to represent multiplicities for both the input and the output capabilities ($\Carrier_{idx}^2$).
-
-\begin{figure}[h]
-\begin{mathpar}
-  \datatype
-      {n : \N}
-      {\Idxs_n : \Set}
-
-  \inferrule
-      { }
-      {[] : \Idxs_0}
-
-  \inferrule
-      {idxs : \Idxs_n \\ idx : \Idx}
-      {idxs \comma idx : \Idxs_{\suc n}}
-
-      \\
-      
-  \datatype
-      {idxs : \Idxs_n}
-      {\Ctx_{idxs} : \Set}
+  Base types $\base{n}$ use a natural number $n$ that can be reified into a type by the host language.
+  Using natural numbers instead of type universes is convenient: there is no need to litter type types with universe polymorphism.
   
-  \inferrule
-      { }
-      {[] : Ctx_{[]}}
-      
-  \inferrule
-      {\Gamma : \Ctx_{idxs} \\ x : \Carrier_{idx} ^2}
-      {\Gamma \comma x : \Ctx_{idxs \comma idx}}
-\end{mathpar}
-\caption{Length-indexed context of carrier indices with a context of multiplicities on top.}
-\label{fig:ctx}
-\end{figure}
+  Channel types $\channel{t}{x}$ use $t$ as the type of data sent over the channel and $x$ as the capability of the data sent over the channel.
+  When data is received on a channel of type $\channel{t}{x}$, the type $t$ will be appended to the context of types $\PreCtx_n$ and the capability $x$ to the context of capabilities $\Ctx_{idxs}$.
+  
+  Types form length-indexed \emph{pre-contexts} $\PreCtx_n$.
+  
+  \begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    { }
+    {\Type : \Set}
+    \; \textsc{Type}
+  
+    \inferrule
+    { }
+    {\unit : \Type}
+
+    \inferrule
+    {n : \N}
+    {\base{n} : \Type}
+  
+    \inferrule
+    {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Carrier_{idx}}}
+    {\channel{t}{x} : \Type}
+  \end{mathpar}
+  
+  \begin{mathpar}
+    \datatype
+    {n : \N}
+    {\PreCtx_n : \Set}
+    \; \textsc{PreCtx}
+  
+    \inferrule
+        { }
+        {[] : \PreCtx_0}
+  
+        \inferrule
+            {\gamma : \PreCtx_n \\ t : \Type}
+            {\gamma \comma t : \PreCtx_{\suc n}}
+  \end{mathpar}
+  \caption{Types and length-indexed typing contexts.}
+  \label{fig:prectx}
+  \end{figure}
+\end{nidefinition}
+
+\begin{nidefinition}
+  To allow different multiplicity algebras to coexist we first define a length-indexed context of carrier indices $\Idxs_n$ (see \ref{fig:ctx}).
+  On top of it, we define a context of multiplicities $\Ctx_{idxs}$.
+  We lift the algebra on multiplicities to multiplicity contexts by constraining the algebra on multiplicity contexts to act on  contexts defined on the same underlying context of carrier indices.
+  We use two multiplicities over a common index to represent multiplicities for both the input and the output capabilities ($\Carrier_{idx}^2$).
+  
+  \begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    {n : \N}
+    {\Idxs_n : \Set}
+    \; \textsc{Idxs}
+  
+    \inferrule
+        { }
+        {[] : \Idxs_0}
+  
+    \inferrule
+        {idxs : \Idxs_n \\ idx : \Idx}
+        {idxs \comma idx : \Idxs_{\suc n}}
+  
+        \\
+        
+    \datatype
+    {idxs : \Idxs_n}
+    {\Ctx_{idxs} : \Set}
+    \; \textsc{Ctx}
+  
+    
+    \inferrule
+        { }
+        {[] : Ctx_{[]}}
+        
+    \inferrule
+        {\Gamma : \Ctx_{idxs} \\ x : \Carrier_{idx} ^2}
+        {\Gamma \comma x : \Ctx_{idxs \comma idx}}
+  \end{mathpar}
+  \caption{Length-indexed context of carrier indices with a context of multiplicities on top.}
+  \label{fig:ctx}
+  \end{figure}
+\end{nidefinition}
 
 
 \subsection{Typing with Leftovers}\label{leftover typing}
@@ -629,11 +667,9 @@ An alternative is to keep track in the typing judgment of the way in which the c
 One way of doing so is by mentioning both the \emph{input contexts} and the \emph{output contexts} over which the processes are typed.
 Parallel composition then uses the output context of the left hand process as the input context of the right hand.
 As an additional benefit, the associativity of parallel composition becomes trivial to prove.
-\S \ref{typing-judgments} introduces the typing rules for such a typing judgment.
 
 In the \picalc{} both input and output contain variable references.
 Both these actions need to modify their context, and thus using variable references that mention both their input and output contexts seems relevant.
-\S \ref{variable-references} introduces the typing rules for such variable references.
 
 Both the typing judgment and the variable references are of an inductive form.
 As a consequence, all proofs on them will need to perform a double induction: once on the typing derivation, once for each variable reference.
@@ -642,11 +678,49 @@ Both the typing rules and the rules for variable references mention both context
 The contexts of types are threaded through the premises unchanged; the contexts of multiplicities are threaded through the premises using one premise's output as the next premise's input.
 Both the context of types and the context of multiplicities are of a common length.
 
-\subsection{Variable references} \label{variable-references}
-
-Akin to the typing rules for processes, the rules for variable references presented in Figure \ref{fig:variable-references} are indexed over the typing context, the input multiplicity context, and the output multiplicity context.
-The base case $\constr{zero}$ splits the last multiplicity in the input context into $x$ and the last multiplicity in the output context, while also ensuring that $t$ is the last type in the typing context.
-The inductive case $\constr{suc}$ appends the same multiplicity to both the input context and the output context, while also appending an extra type to the typing context.
+\begin{nidefinition}
+  Akin to the typing rules for processes, the rules for variable references presented in Figure \ref{fig:variable-references} are indexed over the typing context, the input multiplicity context, and the output multiplicity context.
+  The base case $\constr{zero}$ splits the last multiplicity in the input context into $x$ and the last multiplicity in the output context, while also ensuring that $t$ is the last type in the typing context.
+  The inductive case $\constr{suc}$ appends the same multiplicity to both the input context and the output context, while also appending an extra type to the typing context.
+  
+  \todo{example}
+  \todo{lift op to $^2$}
+  
+  \begin{figure}[h]
+  \begin{mathpar}
+    \mprset{sep=0.5em}
+  
+    \datatype{
+      \gamma : \PreCtx_n \\
+      \stacked{
+        idxs : \Idxs_n \\\\
+        \Gamma : \Ctx_{idxs}} \\
+      i : \Var_n \\
+      t : \Type \\
+      \stacked{
+        idx : \Idx \\\\
+        x : \Carrier_{idx}^2} \\
+      \Delta : \Ctx_{idxs}}
+    {\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta} : \Set}
+    \; \textsc{VarRef}
+  
+    \inferrule
+        {t : \Type \\
+          x \; y \; z : \Carrier_{idx}^2\\
+          \op{x}{y}{z}}
+    {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{zero}{t}{y}{\Gamma \comma z}}
+    
+    \inferrule
+        {t \; t' \; : \Type \\
+          x : \Carrier_{idx}^2 \\
+          x' : \Carrier_{idx'}^2 \\\\
+      loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
+    {\constr{suc} \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
+  \end{mathpar}
+  \caption{Variable references as proofs on the typing context and input and output multiplicity contexts.}
+  \label{fig:variable-references}
+  \end{figure}
+\end{nidefinition}
 
 \lemma{The typing context $\gamma$ at index $i$ is type $t$.}
 \lemma{The input multiplicity context $\Gamma$ at index $i$ is the result of performing the monoidal operation on $x$ and the output multiplicity context $\Delta$ at index $i$.}
@@ -654,96 +728,53 @@ The inductive case $\constr{suc}$ appends the same multiplicity to both the inpu
 \corollary{Given the witness $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$, $\Gamma \equiv \Delta$ iff $x \equiv \zero$.}
 \proof{By structural induction on the variable reference}
 
-\todo{lift op to $^2$}
-
-\begin{figure}[h]
-\begin{adjustwidth}{-1cm}{-1cm}
-\centering
-\begin{mathpar}
-  \mprset{sep=0.5em}
-
-  \datatype{
-    \gamma : \PreCtx_n \\
-    \stacked{
-      idxs : \Idxs_n \\\\
-      \Gamma : \Ctx_{idxs}} \\
-    i : \Var_n \\
-    t : \Type \\
-    \stacked{
-      idx : \Idx \\\\
-      x : \Carrier_{idx}^2} \\
-    \Delta : \Ctx_{idxs}}
-  {\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta} : \Set}
-
-  \inferrule
-      {\gamma : \PreCtx_n \\
-        \Gamma : \Ctx_{idxs}\\
-        t : \Type \\
-        x \; y \; z : \Carrier_{idx}^2\\
-        \op{x}{y}{z}}
-  {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{zero}{t}{y}{\Gamma \comma z}}
-  
-  \inferrule
-      {\gamma : \PreCtx_n \\
-        \Gamma : \Ctx_{idxs}\\
-        t \; t' \; : \Type \\
-        x : \Carrier_{idx}^2 \\
-        x' : \Carrier_{idx'}^2 \\
-        \Delta : \Ctx_{idxs} \\\\
-    loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
-  {\constr{suc} \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
-\end{mathpar}
-\end{adjustwidth}
-\caption{Variable references as proofs on the typing context and input and output multiplicity contexts.}
-\label{fig:variable-references}
-\end{figure}
-
-\todo{example}
-
 \subsection{Typing judgments}\label{typing-judgments}
 
 The indices in the variable reference rules are then used as the variable references of the underlying process.
 
 \todo{comment on balancing in chan rule}
 
-\begin{figure}[h]
-\begin{mathpar}
-  \datatype{
-    \gamma : \PreCtx_n \\
-    \stacked{
-      idxs : \Idxs_n \\\\
-      \Gamma : \Ctx_{idxs}} \\
-    P : \Process_n \\
-    \Delta : \Ctx_{idxs}}
-  {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
+\begin{nidefinition}
+  \begin{figure}[h]
+  \begin{mathpar}
+    \datatype{
+      \gamma : \PreCtx_n \\
+      \stacked{
+        idxs : \Idxs_n \\\\
+        \Gamma : \Ctx_{idxs}} \\
+      P : \Process_n \\
+      \Delta : \Ctx_{idxs}}
+    {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
+    \; \textsc{Types}
+    
+    \inferrule
+    { }
+    {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
   
-  \inferrule
-  { }
-  {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
-
-  \inferrule
-  {t : \Type \\ x : \Carrier_{idx}^2 \\ y : \Carrier_{idx'} \\\\
-   cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
-  {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
-
-  \inferrule
-  {chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
-   cont : \types{\gamma \comma t}{\Xi \comma x}{P}{\Theta \comma \lz}}
-  {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
-
-  \inferrule
-  {chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
-   loc_j : \contains{\gamma}{\Delta}{j}{t}{x}{\Xi} \\\\
-   cont : \types{\gamma}{\Xi}{P}{\Theta}}
-  {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
-
-  \inferrule
-  {l : \types{\gamma}{\Gamma}{P}{\Delta} \\\\
-   r : \types{\gamma}{\Delta}{Q}{\Xi}}
-  {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
-\end{mathpar}
-\caption{This is...}
-\end{figure}
+    \inferrule
+    {t : \Type \\ x : \Carrier_{idx}^2 \\ y : \Carrier_{idx'} \\\\
+     cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
+    {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
+  
+    \inferrule
+    {chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
+     cont : \types{\gamma \comma t}{\Xi \comma x}{P}{\Theta \comma \lz}}
+    {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
+  
+    \inferrule
+    {chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
+     loc_j : \contains{\gamma}{\Delta}{j}{t}{x}{\Xi} \\\\
+     cont : \types{\gamma}{\Xi}{P}{\Theta}}
+    {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
+  
+    \inferrule
+    {l : \types{\gamma}{\Gamma}{P}{\Delta} \\\\
+     r : \types{\gamma}{\Delta}{Q}{\Xi}}
+    {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
+  \end{mathpar}
+  \caption{This is...}
+  \end{figure}
+\end{nidefinition}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Subject Reduction}\label{subject-reduction}

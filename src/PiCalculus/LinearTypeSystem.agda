@@ -35,9 +35,10 @@ private
     i j : Fin n
 
 data Type : Set where
+  𝟙      : Type
   B[_]   : ℕ → Type
   C[_∝_] : Type → (Carrier idx) ² → Type
-  P[_&_] : Type → Type → Type
+  -- P[_&_] : Type → Type → Type
 
 PreCtx : ℕ → Set
 PreCtx = Vec Type
