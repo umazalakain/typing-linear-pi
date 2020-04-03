@@ -52,10 +52,16 @@ channel-ℓ# internal = ε
 channel-ℓ# (external x) = only x ℓ#
 
 ∋-I : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
-    → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
+    → γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ
     → idx ≡ Vec.lookup idxs i
 ∋-I zero = refl
 ∋-I (suc x) = ∋-I x
+
+∋-t : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
+    → γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ
+    → t ≡ Vec.lookup γ i
+∋-t zero = refl
+∋-t (suc a) = ∋-t a
 
 ∋-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : Carrier idx ²}
     → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
