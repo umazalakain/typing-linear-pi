@@ -111,6 +111,11 @@ subst-idx {eq = refl} δ = refl
 ∋-0∙ (zero ⦃ check ⦄) = _-,_ & refl ⊗ ∙²-unique (proj₂ (toWitness check)) (∙²-idˡ _)
 ∋-0∙ (suc x) = _-,_ & ∋-0∙ x ⊗ refl
 
+0∙-∋ : {Γ Δ : Ctx idxs} {m : Carrier idx ²} → γ ∝ Γ [ i ]≔ t ∝ m ⊠ Δ → Γ ≡ Δ → m ≡ (0∙ , 0∙)
+0∙-∋ (zero ⦃ check ⦄) eq with (toWitness check)
+0∙-∋ (zero ⦃ check = check ⦄) refl | x , x≔m∙z = ∙²-uniqueˡ x≔m∙z (∙²-idˡ _)
+0∙-∋ (suc x) eq = 0∙-∋ x (cong All.tail eq)
+
 mult-insert : (i : Fin (suc n)) → (Carrier idx) ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
 mult-insert zero xs' Γ = Γ -, xs'
 mult-insert (suc i) xs' (Γ -, xs) = mult-insert i xs' Γ -, xs

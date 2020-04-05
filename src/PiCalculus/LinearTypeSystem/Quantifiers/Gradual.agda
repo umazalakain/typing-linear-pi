@@ -1,11 +1,13 @@
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
 open import Relation.Nullary using (yes)
 
 import Data.Product as Product
+import Data.Sum as Sum
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕₚ
 
 open Product using (_,_)
+open Sum using (inj₁)
 open ℕ using (ℕ; _+_; zero; suc)
 
 open import PiCalculus.LinearTypeSystem.Quantifiers
@@ -21,6 +23,7 @@ Quantifier._≔_∙_ Gradual = _≔_∙_
 Quantifier.∙-compute Gradual y z = yes (y + z , refl)
 Quantifier.∙-unique Gradual refl refl = refl
 Quantifier.∙-uniqueˡ Gradual refl = ℕₚ.+-cancelʳ-≡ _ _
+Quantifier.0∙-unique Gradual x = inj₁ (ℕₚ.m+n≡0⇒m≡0 _ (sym x))
 Quantifier.∙-idˡ Gradual _ = refl
 Quantifier.∙-comm Gradual {y = y} refl = ℕₚ.+-comm y _
 Quantifier.∙-assoc Gradual {z = z} {v = v} refl refl = v + z , (ℕₚ.+-assoc _ v z , refl)

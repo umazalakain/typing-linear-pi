@@ -7,10 +7,12 @@ open import Data.Empty using (⊥-elim)
 import Data.Fin as Fin
 import Data.Unit as Unit
 import Data.Product as Product
+import Data.Sum as Sum
 import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
 import Data.Nat as ℕ
 
+open Sum using (_⊎_; inj₁; inj₂)
 open Fin using (Fin; zero; suc)
 open Unit using (⊤; tt)
 open ℕ using (ℕ)
@@ -36,12 +38,13 @@ record Quantifier (Q : Set) : Set₁ where
 
     _≔_∙_       : Q → Q → Q → Set
 
-    -- Given tw o operands, we can decide whether a third one exists
+    -- Given two operands, we can decide whether a third one exists
     ∙-compute   : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
 
-    -- If a thi rd operand exists, it must be unique
+    -- If a third operand exists, it must be unique
     ∙-unique    : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
     ∙-uniqueˡ   : ∀ {x y y' z}  → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
+    0∙-unique  : ∀ {y z}       → 0∙ ≔ y ∙ z → y ≡ 0∙ ⊎ z ≡ 0∙
 
     ∙-idˡ       : ∀ x           → x ≔ 0∙ ∙ x
     ∙-comm      : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
@@ -72,6 +75,12 @@ record Quantifier (Q : Set) : Set₁ where
   ∙-compute-unique {y = y} {z} p with ∙-compute y z
   ∙-compute-unique {y = y} {z} p | yes (x' , p') = ∙-unique p p'
   ∙-compute-unique {y = y} {z} p | no ¬q = ⊥-elim (¬q (_ , p))
+
+  ∙-mut-cancel : ∀ {x y y' z} → x ≔ y ∙ z → z ≔ y' ∙ x → x ≡ z
+  ∙-mut-cancel x≔y∙z z≔y'∙x with ∙-assoc⁻¹ x≔y∙z z≔y'∙x
+  ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' rewrite ∙-uniqueˡ x≔e∙x (∙-idˡ _) with 0∙-unique e≔y∙y'
+  ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' | inj₁ refl = ∙-unique x≔y∙z (∙-idˡ _)
+  ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' | inj₂ refl = sym (∙-unique z≔y'∙x (∙-idˡ _))
 
   ∙²-compute : ∀ y z → Dec (∃[ x ] (x ≔ y ∙² z))
   ∙²-compute (ly , ry) (lz , rz) with ∙-compute ly lz | ∙-compute ry rz
@@ -104,6 +113,9 @@ record Quantifier (Q : Set) : Set₁ where
   ∙²-compute-unique {y = y} {z} p with ∙²-compute y z
   ∙²-compute-unique {y = y} {z} p | yes (x' , p') = ∙²-unique p p'
   ∙²-compute-unique {y = y} {z} p | no ¬q = ⊥-elim (¬q (_ , p))
+
+  ∙²-mut-cancel : ∀ {x y y' z} → x ≔ y ∙² z → z ≔ y' ∙² x → x ≡ z
+  ∙²-mut-cancel {_ , _} (lx , rx) (ly , ry) rewrite ∙-mut-cancel lx ly | ∙-mut-cancel rx ry = refl
 
 record Quantifiers : Set₁ where
   field
@@ -189,3 +201,9 @@ record Quantifiers : Set₁ where
 
   ⊎-idʳ : (Γ : Ctx idxs) → Γ ≔ Γ ⊎ ε
   ⊎-idʳ Γ = ⊎-comm (⊎-idˡ Γ)
+
+  ⊎-mut-cancel : ∀ {x y y' z : Ctx idxs} → x ≔ y ⊎ z → z ≔ y' ⊎ x → x ≡ z
+  ⊎-mut-cancel {x = []} {[]} {[]} {[]} Γ Ξ = refl
+  ⊎-mut-cancel {x = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Γ≔ , x≔) (Ξ≔ , z≔)
+    rewrite ⊎-mut-cancel Γ≔ Ξ≔
+    | ∙²-mut-cancel x≔ z≔ = refl

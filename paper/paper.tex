@@ -29,35 +29,14 @@
 % No line numbers
 \nolinenumbers
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{Typing a linear \picalc}
-\author{Uma Zalakain}{University of Glasgow, Scotland}
-       {u.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
-\author{Ornela Dardha}{University of Glasgow, Scotland}
-       {ornela.dardha@glasgow.ac.uk}{https://orcid.org/0000-0001-9927-7875}{}
-\authorrunning{U. Zalakain and O. Dardha}
-\Copyright{Uma Zalakain and Ornela Dardha}
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10003752.10003753.10003761.10003764</concept_id>
-<concept_desc>Theory of computation~Process calculi</concept_desc>
-<concept_significance>300</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
-\ccsdesc[300]{Theory of computation~Process calculi}
-\keywords{pi calculus, linear, types, concurrency}
-\supplement{\url{https://github/umazalakain/typing-linear-pi}}
-\acknowledgements{We want to thank Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newcommand{\stacked}[1]{\mprset{flushleft} \inferrule*{}{#1}}
-\newcommand{\datatype}[2]{{\mprset{fraction={===}} \inferrule{#1}{#2}}}
-
+% Abbreviations
 \newcommand{\lamdacalc}{$\lambda$-calculus}
 \newcommand{\picalc}{$\pi$-calculus}
 \newcommand{\Picalc}{$\pi$-Calculus}
+
+% Typing rules
+\newcommand{\stacked}[1]{\mprset{flushleft} \inferrule*{}{#1}}
+\newcommand{\datatype}[2]{{\mprset{fraction={===}} \inferrule{#1}{#2}}}
 
 \newcommand{\type}[1]{\textcolor{blue}{\operatorname{#1}}}
 \newcommand{\constr}[1]{\textcolor{olive}{\operatorname{#1}}}
@@ -110,6 +89,28 @@
 \newcommand{\eq}[1]{\; \type{=}_{#1} \;}
 \newcommand{\eqeq}{\; \type{\equiv} \;}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Typing a linear \picalc}
+\author{Uma Zalakain}{University of Glasgow, Scotland}
+       {u.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
+\author{Ornela Dardha}{University of Glasgow, Scotland}
+       {ornela.dardha@glasgow.ac.uk}{https://orcid.org/0000-0001-9927-7875}{}
+\authorrunning{U. Zalakain and O. Dardha}
+\Copyright{Uma Zalakain and Ornela Dardha}
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10003752.10003753.10003761.10003764</concept_id>
+<concept_desc>Theory of computation~Process calculi</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[300]{Theory of computation~Process calculi}
+\keywords{pi calculus, linear, types, concurrency}
+\supplement{\url{https://github/umazalakain/typing-linear-pi}}
+\acknowledgements{We want to thank Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
@@ -483,6 +484,8 @@ It must satisfy the following constraints:
   There must be a neutral element $0$ absorbed on both sides.
   There must be a special element $1$ to record usage.
 \end{description}
+
+\todo{add on 0 = y * z -> 0 = y or 0 = z}
 
 \begin{nidefinition}
   Together, the aforementioned constraints give raise to a \emph{partial commutative monoid}.

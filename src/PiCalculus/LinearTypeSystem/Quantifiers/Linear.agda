@@ -4,6 +4,7 @@ open import Relation.Nullary using (Dec; yes; no)
 import Data.Bool as Bool
 import Data.Empty as Empty
 import Data.Unit as Unit
+import Data.Sum as Sum
 import Data.Product as Product
 import Data.Nat as ℕ
 import Data.Nat.Properties as ℕₚ
@@ -11,6 +12,7 @@ import Data.Nat.Properties as ℕₚ
 open Bool using (Bool; true; false)
 open Empty using (⊥)
 open Unit using (⊤; tt)
+open Sum using (inj₁; inj₂)
 open Product using (∃-syntax; _×_; _,_)
 open ℕ using (ℕ)
 
@@ -72,6 +74,7 @@ Quantifier._≔_∙_ Linear = _≔_∙_
 Quantifier.∙-compute Linear = ∙-compute
 Quantifier.∙-unique Linear = ∙-unique
 Quantifier.∙-uniqueˡ Linear = ∙-uniqueˡ
+Quantifier.0∙-unique Linear {zero} {zero} tt = inj₁ refl
 Quantifier.∙-idˡ Linear = ∙-idˡ
 Quantifier.∙-comm Linear = ∙-comm
 Quantifier.∙-assoc Linear = ∙-assoc

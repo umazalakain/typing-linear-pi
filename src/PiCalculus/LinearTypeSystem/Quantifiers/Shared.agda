@@ -3,6 +3,7 @@ open import Relation.Nullary using (yes)
 
 open import Data.Unit using (⊤; tt)
 open import Data.Product using (_,_)
+open import Data.Sum using (inj₁)
 
 open import PiCalculus.LinearTypeSystem.Quantifiers
 
@@ -17,6 +18,7 @@ Quantifier._≔_∙_ Shared _ _ _ = ⊤
 Quantifier.∙-compute Shared _ _ = yes (ω , tt)
 Quantifier.∙-unique Shared _ _ = refl
 Quantifier.∙-uniqueˡ Shared _ _ = refl
+Quantifier.0∙-unique Shared _ = inj₁ refl
 Quantifier.∙-idˡ Shared _ = tt
 Quantifier.∙-comm Shared _ = tt
 Quantifier.∙-assoc Shared _ _ = ω , tt , tt
