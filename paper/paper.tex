@@ -30,7 +30,7 @@
 \nolinenumbers
 
 % Abbreviations
-\newcommand{\lamdacalc}{$\lambda$-calculus}
+\newcommand{\lambdacalc}{$\lambda$-calculus}
 \newcommand{\picalc}{$\pi$-calculus}
 \newcommand{\Picalc}{$\pi$-Calculus}
 
@@ -130,13 +130,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-We live in a concurrent world where any given state is often decided by the interaction between a myriad of parties --- people, machines, processors, services, networks.
-As humans, we aim to model, predict, and even construct such interactive systems.
-As mathematicians, abstraction is our tool of choice to do so.
+We live in a concurrent world where any given state is often computed interactively by a myriad of parties --- people, machines, processors, services, networks.
+As humans, we aim to model, predict, and even construct such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
+The \picalc{} is a formal language that abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
+Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted too.
+We define the syntax for the \picalc{} in \S \ref{syntax}.
+We use dependent types to make this syntax well-scoped by construction: every unbound variable is accounted for in the type of the process using it.
+\todo{de Bruijn}
 
-The \picalc models communication.
+In the \lambdacalc{} all computations are local and happen on syntactically contiguous terms; in the \picalc{} however computations need not to happen on syntactically contiguous terms.
+One way to define a reduction relation modulo these syntactic minutiae is to define a structural congruence relation that acts as a quotient type.
+A term $A$ can then be freely rewritten into a term $B$ as long as $A$ is structurally congruent to $B$.
+We introduce this equivalence relation in \S \ref{structural-congruence}.
 
-The properties guaranteed by the picalc
+In the \lambdacalc{} function application is the main computational engine; in the \picalc{} it is inter-process communication what drives computation.
+Two subprocesses can communicate anywhere in a process but under input and output, which must be respected to ensure the sequentiality in behavior.
+We provide an operational semantics for the \picalc{} in \S \ref{operational-semantics}.
+Every computational step is the result of communication; we take care to keep information on what channel the communication is happening on so that we can later use it to state the theorem for subject reduction (aka type preservation).
+
+As with the \lambdacalc{}, the \picalc{} can be used to construct a wide variety of misbehaved processes.
+
+The properties guaranteed by the linear picalc
 
 why resource-aware typing
 
@@ -197,7 +211,7 @@ Machines prefer things they can algorithmically act upon. Like natural numbers!
 What does it mean to use a number as a variable reference?
 The idea de Bruijn had \cite{} was to use the index $n$ to refer to the variable introduced $n$ binders ago.
 The binders themselves introduce no names anymore.
-The expression $\lambda g . (\lambda f . f g) g$ in the \lamdacalc{} would translate as $\lambda (\lambda 0 1) 0$.
+The expression $\lambda g . (\lambda f . f g) g$ in the \lambdacalc{} would translate as $\lambda (\lambda 0 1) 0$.
 That is, terms at different \emph{depths} must use different indices to refer to the same binding.
 Humans find this often confusing.
 There is however no reason not to keep the original names bestowed by the humans together with the indices.
@@ -262,7 +276,7 @@ To print things back to the user names can be substituted with an index together
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 
-In the \lamdacalc{} $\beta$-reduction operates on syntactically adjacent terms.
+In the \lambdacalc{} $\beta$-reduction operates on syntactically adjacent terms.
 In the \picalc{} however, the syntax introduces unnecessary distinctions
 (e.g. semantically parallel composition is defined modulo associativity and commutativity).
 There are several ways around this, a structural congruence relation being one of the historical ones.
@@ -439,7 +453,7 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 \section{Resource-aware Typing System}
 
 A type system is in the business of further constraining a language, filtering out terms that (although well-formed) are meaningless.
-In the simply typed \lamdacalc{}, a term has a meaning iff it has a type.
+In the simply typed \lambdacalc{}, a term has a meaning iff it has a type.
 This typing judgment is a proof of the form $\Gamma \vdash t : T$, where the term $t$ has type $T$ under the typing context $\Gamma$ -- the typing context associates variables (possibly occurring within $t$) to types.
 In the simply typed \picalc{} however, it is the channels that are typed, and a process has a meaning iff it \emph{uses} its channels according to their types.
 The typing judgment is therefore of the form $\Gamma \vdash p$, where the process $p$ (which has no type of its own) uses the channels in $\Gamma$ according to their types.

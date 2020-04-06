@@ -68,15 +68,15 @@ feedback m (suc N) (suc Γ) = suc (feedback m N Γ)
 
 ∙-≤ : γ ∝ Γ [ i ]≔ t ∝ l ⊠ Ξ
     → γ ∝ Γ [ i ]≔ t ∝ m ⊠ Ψ
-    → All.lookup i Ξ ≡ (0∙ , 0∙)
+    → All.lookup i Ξ ≡ ℓ∅
     → ∃[ δ ] (m ≔ δ ∙² l)
 
-foo : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Ψₗ' Ψₗ Ψᵣ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
-    → γ ∝ Ψₗ' [ i ]≔ t ∝ m ⊠ Ψₗ
-    → γ ∝ Ψₗ' [ j ]≔ t ∝ m ⊠ Ψᵣ
+foo : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Ψₘ Ψₗ Ψᵣ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
+    → γ ∝ Ψₘ [ i ]≔ t ∝ m ⊠ Ψₗ
+    → γ ∝ Ψₘ [ j ]≔ t ∝ m ⊠ Ψᵣ
     → i Fin.≤ j
-    → All.lookup i Ψₗ ≡ (0∙ , 0∙)
-    → Γ ≔ Δ ⊎ Ψₗ'
+    → All.lookup i Ψₗ ≡ ℓ∅
+    → Γ ≔ Δ ⊎ Ψₘ
     → γ ∝ Γ ⊢ P ⊠ Ψₗ
     → γ ∝ Γ ⊢ [ j / i ] P ⊠ Ψᵣ
 foo ∋i ∋j i≤j eq Γ≔ end rewrite ⊎-mut-cancel Γ≔ (∋-⊎ ∋i) | 0∙-∋ ∋i (sym (⊎-mut-cancel Γ≔ (∋-⊎ ∋i))) | ∋-0∙ ∋j = end
@@ -92,11 +92,15 @@ foo ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = comp (foo {!∋i!} {!!} i≤j {!
          → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
          → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
 ⊢-subst' ⊢P y with ⊢-⊎ ⊢P
-⊢-subst' ⊢P y | (pctx -, rctx) , (p≔ , r≔) = foo {!zero!} (suc y) Nat.z≤n refl (p≔ , ∙²-idˡ _) ⊢P
+⊢-subst' ⊢P y | (pctx -, rctx) , (p≔ , r≔) = foo
+  (subst (λ ● → _ ∝ _ -, ● [ _ ]≔ _ ∝ _ ⊠ _)
+         (sym (∙²-compute-unique (∙²-idʳ _)))
+         (zero ⦃ fromWitness (_ , ∙²-idʳ _) ⦄))
+  (suc y) Nat.z≤n refl (p≔ , ∙²-idˡ _) ⊢P
 
 postulate
   {- TARGET -}
   ⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Carrier idx ²} {m' : Carrier idx' ²}
-          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, (0∙ , 0∙)
+          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, ℓ∅
           → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
           → γ -, t' ∝ Γ -, m' ⊢ [ suc j / zero ] P ⊠ Ξ -, m'
