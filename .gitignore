@@ -1,3 +1,5 @@
+*.autosave.xopp
+*.xopp~
 *.aux
 *.auxlock
 *.bcf

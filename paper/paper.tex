@@ -132,31 +132,46 @@
 
 We live in a concurrent world where any given state is often computed interactively by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and even construct such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
-The \picalc{} is a formal language that abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
+The \picalc{} \cite{} is a formal language that abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
 Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted too.
-We define the syntax for the \picalc{} in \S \ref{syntax}.
-We use dependent types to make this syntax well-scoped by construction: every unbound variable is accounted for in the type of the process using it.
-\todo{de Bruijn}
+We type the syntax for the \picalc{} in \S \ref{syntax}.
+We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every unbound variable is accounted for in the type of the process that uses it.
 
-In the \lambdacalc{} all computations are local and happen on syntactically contiguous terms; in the \picalc{} however computations need not to happen on syntactically contiguous terms.
-One way to define a reduction relation modulo these syntactic minutiae is to define a structural congruence relation that acts as a quotient type.
+In the \lambdacalc{} all computations are local and happen on syntactically contiguous terms; in the \picalc{} however communicating subprocesses can be non-contiguous and even have different parent processes.
+One way to define a reduction relation modulo these syntactic minutiae is to define a structural congruence \cite{} relation that acts as a quotient type.
 A term $A$ can then be freely rewritten into a term $B$ as long as $A$ is structurally congruent to $B$.
-We introduce this equivalence relation in \S \ref{structural-congruence}.
+We type this equivalence relation in \S \ref{structural-congruence}.
 
 In the \lambdacalc{} function application is the main computational engine; in the \picalc{} it is inter-process communication what drives computation.
-Two subprocesses can communicate anywhere in a process but under input and output, which must be respected to ensure the sequentiality in behavior.
-We provide an operational semantics for the \picalc{} in \S \ref{operational-semantics}.
-Every computational step is the result of communication; we take care to keep information on what channel the communication is happening on so that we can later use it to state the theorem for subject reduction (aka type preservation).
+Two subprocesses can communicate anywhere in a process but under input and output, which must be respected to ensure the sequential behavior.
+We type a reduction relation that acts as an operational semantics modulo subject congruence in \S \ref{operational-semantics}.
+The base case of every such reduction is communication over a channel; we take care to track this information at the type level so that we can then use it to state the theorem for subject reduction (aka type preservation).
 
-As with the \lambdacalc{}, the \picalc{} can be used to construct a wide variety of misbehaved processes.
+As with the untyped \lambdacalc{}, the untyped \picalc{} can be used to construct a wide variety of ill-behaved terms --- for some characterization of ill-behaved.
+One can use type systems to constructively obtain a subset of terms for which certain properties hold.
+As an example, the simply typed \lambdacalc{} ensures that the argument supplied to a function is of the expected type.
+Correspondingly, the simply typed \picalc{} \cite{} ensures that the data sent over a channel is of the expected type.
+This property is often referred to as \emph{communication safety}.
 
-The properties guaranteed by the linear picalc
+Another property of particular interest to concurrent systems is the avoidance of race conditions.
+A type system that excludes multiple usages of a resource excludes race conditions.
+In the linear \picalc{} \cite{} channels must be used exactly once.
+This not only avoids races, but ensures \emph{communication privacy}: if both endpoints of a channel are acquired no other process can eavesdrop.
+It also ensures that every declared communication channel must be used.
+The linear \picalc{} is also interesting because together with product types it is isomorphic to session types \cite{} -- which are used to encode communication protocols.
+We provide a typing system for the linear \picalc{} in \S \ref{type-system} as extensional rules on sitting on top of the unruly well-scoped syntax.
 
-why resource-aware typing
+Linear type systems need of context splits.
+These are tricky to handle constructively without explicitly asking for them to the user.
+Leftover typing \cite{} is a type theoretical technique that addresses this.
+It does so by carrying both an input and an output context (the leftovers).
+The output context can then be used as the input context of the continuations.
+We apply this technique to the \picalc{} in \S \ref{leftover-typing}.
+We generalize our algebra on usage multiplicities in \S \ref{multiplicities}.
+As a result, we are able to model a mix of shared, linear, and gradual types.
+\todo{reformulate paragraph}
 
-extensional typing rules for a given syntax and operational semantics
-
-leftover typing
+\todo{subject reduction}
 
 \subsection{Contribution}
 
@@ -190,15 +205,15 @@ leftover typing
   \caption{Notation used in this paper}
 \end{figure}
 
-Type constructors as the names for the typing rules.
-Datatype constructor rules might have additional index-free synonyms for ease of reference.
-Double rule for type-level definitions.
+Data type definitions have double lines and index-free synonyms as rule names, for ease of reference.
+Otherwise, we use the constructor name as the name of a typing rule.
 We omit universe levels for brevity.
-$\type{TYPES}$ are in blue and uppercased (and their indices are subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red and variables and functions in black.
-Some constructors are shared across types. They can however always be disambiguated through the type of the goal.
+$\type{TYPES}$ are in blue and uppercased (with indices as subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red, and variables and functions in black.
+Some constructors can be shared across types and disambiguated by context.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
+\label{syntax}
 
 Abstraction is one of the key reasoning tools in a language: it allows for features to be defined over a range of inputs.
 Such is the case of the \picalc{} too, where both scope restriction and input introduce abstractions.
@@ -238,12 +253,12 @@ In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$
   {\suc x : \Var_{\suc n}}
 \end{mathpar}
 \caption{Types of size $n$}
-\label{var}
+\label{fig:var}
 \end{figure}
 
 Every time we go under a binder, the number of binders a variable might refer to increments by one.
 To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-As shown in Figure \ref{process}, we increase the \emph{depth} counter every time we create a new channel or receive some input.
+As shown in Figure \ref{fig:process}, we increase the \emph{depth} counter every time we create a new channel or receive some input.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -253,7 +268,7 @@ As shown in Figure \ref{process}, we increase the \emph{depth} counter every tim
   \; \textsc{Process}
 \end{mathpar}
   
-\begin{equation*} \label{pi-calc-syntax}
+\begin{equation*}
 \begin{split}
   \Process_n ::=& \; \PO_n                    \\
               |& \; \new{} \Process_{\suc n}          \\
@@ -263,7 +278,7 @@ As shown in Figure \ref{process}, we increase the \emph{depth} counter every tim
 \end{split}
 \end{equation*}
 \caption{Well-scoped grammar using de Bruijn indices}
-\label{process}
+\label{fig:syntax}
 \end{figure}
 
 Unlike with names, using type-level de Bruijn indices makes our syntax well-scoped by construction.
@@ -275,6 +290,7 @@ To print things back to the user names can be substituted with an index together
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
+\label{semantics}
 
 In the \lambdacalc{} $\beta$-reduction operates on syntactically adjacent terms.
 In the \picalc{} however, the syntax introduces unnecessary distinctions
@@ -283,10 +299,11 @@ There are several ways around this, a structural congruence relation being one o
 (Others include labeled transition systems and higher inductive types.)
 
 \subsection{Structural Congruence}
+\label{structural-congruence}
 
 Structural congruence is a congruent equivalence relation on processes.
 Any two structurally congruent processes are strongly bisimilar: they are can follow each other's reduction steps \cite{}.
-Figure \ref{struct-cong-base} lists the base cases of structural congruence.
+Figure \ref{fig:struct-cong-base} lists the base cases of structural congruence.
 The type $\Unused_0 \; Q$ witnesses that index $0$ does not appear nor in the inputs nor in the outputs of process $Q$ --- it does so by traversing $Q$.
 The function $lower \; 0 \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $0$.
 Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps variable references $0$ and $\suc 0$.
@@ -323,11 +340,11 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
   {\constr{scope-comm} : \new \new P \eqeq \new \new swap \; 0 \; P}
 \end{mathpar}
 \caption{Structural rewriting rules. Premises $P$, $Q$ and $R$ are of type $\Process_n$ where $n$ can be inferred.}
-\label{struct-cong-base}
+\label{fig:struct-cong-base}
 \end{figure}
 
 Structural congruence is a congruent equivalence relation.
-As such, rewrites can happen at any point in a process' recursive definition, and they are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{struct-cong}.
+As such, rewrites can happen at any point in a process' recursive definition, and they are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{fig:struct-cong}.
 In \S \ref{subject-congruence} we will prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then $Q$ is well-typed.
 Specifically, in the case of transitivity we must prove that if $P$ is structurally congruent with $Q$ and $Q$ with $R$, and $P$ is well-typed, then so is $R$.
 To do so, we will have to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
@@ -391,12 +408,13 @@ To show that the doubly recursive call terminates we index the equivalence relat
 \end{mathpar}
 \caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.
   Premises $P$, $P'$, $Q$, and $R$ are of type $\Process_n$ where $n$ can be inferred.}
-\label{struct-cong}
+\label{fig:struct-cong}
 \end{figure}
   
 \subsection{Operational Semantics}
+\label{operational-semantics}
 
-Figure \ref{reduction} models the operational semantics of the \picalc{}.
+Figure \ref{fig:reduction} models the operational semantics of the \picalc{}.
 Processes put in parallel reduce when they communicate over a common variable.
 The receiving process substitutes references to its most immediate variable with references to the variable sent by the process doing the output, and is then \emph{lowered} --- all variable references are decreased by one.
 Reduction is closed under structural congruence and goes under parallel composition and scope restriction
@@ -446,11 +464,14 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   {\constr{struct} \; eq \; red : P \reduce{i} Q}
 \end{mathpar}
 \caption{Operational semantics indexed by the channel over which reduction occurs.}
-\label{reduction}
+\label{fig:reduction}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resource-aware Typing System}
+\label{type-system}
+
+\todo{why do we use a single relation for both type judgements and usage judgments}
 
 A type system is in the business of further constraining a language, filtering out terms that (although well-formed) are meaningless.
 In the simply typed \lambdacalc{}, a term has a meaning iff it has a type.
@@ -469,7 +490,8 @@ Syntax directed
 Continuations.
 \ref{leftover-typing}
 
-\subsection{Multiplicities and Capabilities}\label{multiplicities}
+\subsection{Multiplicities and Capabilities}
+\label{multiplicities}
 
 In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 or 1.
 In this paper we generalize over linearity and provide an algebra on multiplicities that is capable of encoding shared and gradual types as well.
@@ -680,7 +702,8 @@ In this paper we choose that approach, which entails accepting that base non-cha
   We lift the monoidal operation on pairs of multiplicities $\opsquared{x}{y}{z}$ to a monoidal operation on contexts with the same underlying vector of indices $\opctx{\Gamma}{\Delta}{\Xi}$, where all the properties of the partial monoid are trivially lifted to contexts.
 \end{note}
 
-\subsection{Typing with Leftovers}\label{leftover typing}
+\subsection{Typing with Leftovers}
+\label{leftover typing}
 
 \todo{stress what leftover typing is as a technique}
 \todo{syntax directed typing rules}
@@ -833,7 +856,8 @@ Both the context of types and the context of multiplicities are of a common leng
 \end{nidefinition}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Subject Reduction}\label{subject-reduction}
+\section{Subject Reduction}
+\label{subject-reduction}
 
 \subsection{Framing}
 
@@ -851,7 +875,8 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 
 \subsection{Swapping}
 
-\subsection{Subject Congruence}\label{subject-congruence}
+\subsection{Subject Congruence}
+\label{subject-congruence}
 
 \subsection{Substitution}
 
