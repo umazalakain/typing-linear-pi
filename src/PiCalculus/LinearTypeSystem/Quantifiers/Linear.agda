@@ -52,9 +52,9 @@ one  ≔ _    ∙ _    = ⊥
 ∙-uniqueˡ {one} {zero} {zero} {one} tt tt = refl
 ∙-uniqueˡ {one} {one} {one} {zero} tt tt = refl
 
-∙-idˡ : ∀ x → x ≔ zero ∙ x
-∙-idˡ zero = tt
-∙-idˡ one = tt
+∙-idˡ : ∀ {x} → x ≔ zero ∙ x
+∙-idˡ {zero} = tt
+∙-idˡ {one} = tt
 
 ∙-comm : ∀ {x y z} → x ≔ y ∙ z → x ≔ z ∙ y
 ∙-comm {zero} {zero} {zero} tt = tt
@@ -74,7 +74,7 @@ Quantifier._≔_∙_ Linear = _≔_∙_
 Quantifier.∙-compute Linear = ∙-compute
 Quantifier.∙-unique Linear = ∙-unique
 Quantifier.∙-uniqueˡ Linear = ∙-uniqueˡ
-Quantifier.0∙-unique Linear {zero} {zero} tt = inj₁ refl
+Quantifier.0∙-minˡ Linear {zero} {zero} tt = refl
 Quantifier.∙-idˡ Linear = ∙-idˡ
 Quantifier.∙-comm Linear = ∙-comm
 Quantifier.∙-assoc Linear = ∙-assoc

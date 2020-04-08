@@ -66,8 +66,8 @@ channel-ℓ# (external x) = only x ℓ#
 ∋-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : Carrier idx ²}
     → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
     → Γ ≔ only i (subst (λ i → Carrier i ²) (∋-I x) c) ⊎ Ξ
-∋-⊎ (zero ⦃ check ⦄) = ⊎-idˡ _ , proj₂ (toWitness check)
-∋-⊎ (suc x) = ∋-⊎ x , ∙²-idˡ _
+∋-⊎ (zero ⦃ check ⦄) = ⊎-idˡ , proj₂ (toWitness check)
+∋-⊎ (suc x) = ∋-⊎ x , ∙²-idˡ
 
 lookup-only : {idxs : Idxs n} (i : Fin n) {c : (Carrier (Vec.lookup idxs i)) ²}
             → All.lookup i (only {idxs = idxs} i c) ≡ c
@@ -79,8 +79,8 @@ only-∙ : {idxs : Idxs n}
        → {x y z : (Carrier (Vec.lookup idxs i)) ²}
        → x ≔ y ∙² z
        → only {idxs = idxs} i x ≔ only i y ⊎ only i z
-only-∙ {idxs = _ -, _} zero s = ⊎-idˡ _ , s
-only-∙ {idxs = _ -, _} (suc i) s = only-∙ i s , ∙²-idˡ _
+only-∙ {idxs = _ -, _} zero s = ⊎-idˡ , s
+only-∙ {idxs = _ -, _} (suc i) s = only-∙ i s , ∙²-idˡ
 
 subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → (Carrier idx) ²) → subst (λ i → Carrier i ²) eq δ ≡ δ
 subst-idx {eq = refl} δ = refl
@@ -93,7 +93,7 @@ subst-idx {eq = refl} δ = refl
                                         (⊎-get i (∋-⊎ x))
 
 ⊢-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
-⊢-⊎ end = ε , ⊎-idˡ _
+⊢-⊎ end = ε , ⊎-idˡ
 ⊢-⊎ (chan t m μ ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
                        in _ , ⊎-tail Γ≔
 ⊢-⊎ (recv x ⊢P) = let x≔ = ∋-⊎ x
@@ -108,12 +108,12 @@ subst-idx {eq = refl} δ = refl
                     in _ , ⊎-trans P≔ Q≔
 
 ∋-0∙ : {Γ Δ : Ctx idxs} → γ ∝ Γ [ i ]≔ t ∝ (0∙ {idx} , 0∙) ⊠ Δ → Γ ≡ Δ
-∋-0∙ (zero ⦃ check ⦄) = _-,_ & refl ⊗ ∙²-unique (proj₂ (toWitness check)) (∙²-idˡ _)
+∋-0∙ (zero ⦃ check ⦄) = _-,_ & refl ⊗ ∙²-unique (proj₂ (toWitness check)) ∙²-idˡ
 ∋-0∙ (suc x) = _-,_ & ∋-0∙ x ⊗ refl
 
 0∙-∋ : {Γ Δ : Ctx idxs} {m : Carrier idx ²} → γ ∝ Γ [ i ]≔ t ∝ m ⊠ Δ → Γ ≡ Δ → m ≡ (0∙ , 0∙)
 0∙-∋ (zero ⦃ check ⦄) eq with (toWitness check)
-0∙-∋ (zero ⦃ check = check ⦄) refl | x , x≔m∙z = ∙²-uniqueˡ x≔m∙z (∙²-idˡ _)
+0∙-∋ (zero ⦃ check = check ⦄) refl | x , x≔m∙z = ∙²-uniqueˡ x≔m∙z ∙²-idˡ
 0∙-∋ (suc x) eq = 0∙-∋ x (cong All.tail eq)
 
 mult-insert : (i : Fin (suc n)) → (Carrier idx) ² → Ctx idxs → Ctx (Vec.insert idxs i idx)

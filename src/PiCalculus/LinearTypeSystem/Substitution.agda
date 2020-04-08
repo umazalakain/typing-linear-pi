@@ -80,10 +80,10 @@ foo : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Ψₘ Ψₗ Ψᵣ : Ctx idxs} {
     → γ ∝ Γ ⊢ P ⊠ Ψₗ
     → γ ∝ Γ ⊢ [ j / i ] P ⊠ Ψᵣ
 foo ∋i ∋j i≤j eq Γ≔ end rewrite ⊎-mut-cancel Γ≔ (∋-⊎ ∋i) | 0∙-∋ ∋i (sym (⊎-mut-cancel Γ≔ (∋-⊎ ∋i))) | ∋-0∙ ∋j = end
-foo ∋i ∋j i≤j eq Γ≔ (chan t m μ ⊢P) = chan t m μ (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ _) ⊢P)
+foo ∋i ∋j i≤j eq Γ≔ (chan t m μ ⊢P) = chan t m μ (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ) ⊢P)
 foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = i'} x ⊢P) with i Finₚ.≟ i'
 foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} x ⊢P) | yes refl = recv {!!} {!!}
-foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = i'} x ⊢P) | no ¬p = recv x (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq ({!!} , ∙²-idʳ _) ⊢P)
+foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = i'} x ⊢P) | no ¬p = recv x (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq ({!!} , ∙²-idʳ) ⊢P)
 foo ∋i ∋j i≤j eq Γ≔ (send x y ⊢P) = {!!}
 foo ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = comp (foo {!∋i!} {!!} i≤j {!eq!} {!!} ⊢P) {!!}
 
@@ -94,9 +94,9 @@ foo ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = comp (foo {!∋i!} {!!} i≤j {!
 ⊢-subst' ⊢P y with ⊢-⊎ ⊢P
 ⊢-subst' ⊢P y | (pctx -, rctx) , (p≔ , r≔) = foo
   (subst (λ ● → _ ∝ _ -, ● [ _ ]≔ _ ∝ _ ⊠ _)
-         (sym (∙²-compute-unique (∙²-idʳ _)))
-         (zero ⦃ fromWitness (_ , ∙²-idʳ _) ⦄))
-  (suc y) Nat.z≤n refl (p≔ , ∙²-idˡ _) ⊢P
+         (sym (∙²-compute-unique ∙²-idʳ))
+         (zero ⦃ fromWitness (_ , ∙²-idʳ) ⦄))
+  (suc y) Nat.z≤n refl (p≔ , ∙²-idˡ) ⊢P
 
 postulate
   {- TARGET -}

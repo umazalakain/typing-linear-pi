@@ -50,11 +50,11 @@ private
         → γ ∝ Ξ [ i ]≔ t ∝ x ⊠ Ψ
 
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero ⦃ check ⦄)
-  rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ)
+  rewrite ⊎-uniqueˡ Γ≔ ⊎-idˡ | ⊎-unique Ξ≔ (⊎-idˡ {Γ = Ψ})
   | ∙²-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙²-compute-unique x'≔
   = zero ⦃ fromWitness (_ , x'≔) ⦄
 ∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x)
-  rewrite ∙²-uniqueˡ x≔ (∙²-idˡ _) | ∙²-unique x'≔ (∙²-idˡ _)
+  rewrite ∙²-uniqueˡ x≔ ∙²-idˡ | ∙²-unique x'≔ ∙²-idˡ
   = suc (∋-frame Γ≔ Ξ≔ x)
 
 ⊢-frame : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Θ Ξ Ψ : Ctx idxs}
@@ -62,9 +62,9 @@ private
         → γ ∝ Γ ⊢ P ⊠ Θ
         → γ ∝ Ξ ⊢ P ⊠ Ψ
 
-⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ (⊎-idˡ _) | ⊎-unique Ξ≔ (⊎-idˡ Ψ) = end
+⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ ⊎-idˡ | ⊎-unique Ξ≔ (⊎-idˡ {Γ = Ψ}) = end
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
-  = chan t m μ (⊢-frame {Δ = _ -, (μ , μ)} (Γ≔ , ∙²-idʳ _) (Ξ≔ , ∙²-idʳ _) ⊢P)
+  = chan t m μ (⊢-frame {Δ = _ -, (μ , μ)} (Γ≔ , ∙²-idʳ) (Ξ≔ , ∙²-idʳ) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (recv x ⊢P) with ⊢-⊎ ⊢P
 ⊢-frame Γ≔ Ξ≔ (recv x ⊢P) | (_ -, _) , (P≔ , x≔) =
   let xP≔           = ⊎-comp (∋-⊎ x) P≔ Γ≔

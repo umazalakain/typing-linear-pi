@@ -7,12 +7,10 @@ open import Data.Empty using (⊥-elim)
 import Data.Fin as Fin
 import Data.Unit as Unit
 import Data.Product as Product
-import Data.Sum as Sum
 import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
 import Data.Nat as ℕ
 
-open Sum using (_⊎_; inj₁; inj₂)
 open Fin using (Fin; zero; suc)
 open Unit using (⊤; tt)
 open ℕ using (ℕ)
@@ -44,9 +42,12 @@ record Quantifier (Q : Set) : Set₁ where
     -- If a third operand exists, it must be unique
     ∙-unique    : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
     ∙-uniqueˡ   : ∀ {x y y' z}  → x ≔ y' ∙ z → x ≔ y ∙ z → y' ≡ y
-    0∙-unique  : ∀ {y z}       → 0∙ ≔ y ∙ z → y ≡ 0∙ ⊎ z ≡ 0∙
 
-    ∙-idˡ       : ∀ x           → x ≔ 0∙ ∙ x
+    -- 0 is the minimum
+    0∙-minˡ     : ∀ {y z}       → 0∙ ≔ y ∙ z → y ≡ 0∙
+
+    -- Neutral element, commutativity, associativity
+    ∙-idˡ       : ∀ {x}         → x ≔ 0∙ ∙ x
     ∙-comm      : ∀ {x y z}     → x ≔ y ∙ z → x ≔ z ∙ y -- no need for right rules
     ∙-assoc     : ∀ {x y z u v} → x ≔ y ∙ z → y ≔ u ∙ v → ∃[ w ] (x ≔ u ∙ w × w ≔ v ∙ z)
 
@@ -65,8 +66,8 @@ record Quantifier (Q : Set) : Set₁ where
   _≔_∙²_ : Q ² → Q ² → Q ² → Set
   (lx , rx) ≔ (ly , ry) ∙² (lz , rz) = (lx ≔ ly ∙ lz) × (rx ≔ ry ∙ rz)
 
-  ∙-idʳ : ∀ x → x ≔ x ∙ 0∙
-  ∙-idʳ x = ∙-comm (∙-idˡ x)
+  ∙-idʳ : ∀ {x} → x ≔ x ∙ 0∙
+  ∙-idʳ = ∙-comm ∙-idˡ
 
   ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ ∝ ] (x ≔ ∝ ∙ v × ∝ ≔ y ∙ u)
   ∙-assoc⁻¹ a b = let _ , a' , b' = ∙-assoc (∙-comm a) (∙-comm b) in _ , ∙-comm a' , ∙-comm b'
@@ -78,9 +79,7 @@ record Quantifier (Q : Set) : Set₁ where
 
   ∙-mut-cancel : ∀ {x y y' z} → x ≔ y ∙ z → z ≔ y' ∙ x → x ≡ z
   ∙-mut-cancel x≔y∙z z≔y'∙x with ∙-assoc⁻¹ x≔y∙z z≔y'∙x
-  ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' rewrite ∙-uniqueˡ x≔e∙x (∙-idˡ _) with 0∙-unique e≔y∙y'
-  ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' | inj₁ refl = ∙-unique x≔y∙z (∙-idˡ _)
-  ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' | inj₂ refl = sym (∙-unique z≔y'∙x (∙-idˡ _))
+  ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' rewrite ∙-uniqueˡ x≔e∙x ∙-idˡ | 0∙-minˡ e≔y∙y' = ∙-unique x≔y∙z ∙-idˡ
 
   ∙²-compute : ∀ y z → Dec (∃[ x ] (x ≔ y ∙² z))
   ∙²-compute (ly , ry) (lz , rz) with ∙-compute ly lz | ∙-compute ry rz
@@ -96,14 +95,14 @@ record Quantifier (Q : Set) : Set₁ where
   ∙²-uniqueˡ {y = _ , _} {y' = _ , _} (ll , lr) (rl , rr)
     rewrite ∙-uniqueˡ ll rl | ∙-uniqueˡ lr rr = refl
 
-  ∙²-idˡ : ∀ x → x ≔ (0∙ , 0∙) ∙² x
-  ∙²-idˡ (lx , rx) = ∙-idˡ lx , ∙-idˡ rx
+  ∙²-idˡ : ∀ {x} → x ≔ (0∙ , 0∙) ∙² x
+  ∙²-idˡ = ∙-idˡ , ∙-idˡ
 
   ∙²-comm : ∀ {x y z} → x ≔ y ∙² z → x ≔ z ∙² y
   ∙²-comm (lx , rx) = ∙-comm lx , ∙-comm rx
 
-  ∙²-idʳ : ∀ x → x ≔ x ∙² (0∙ , 0∙)
-  ∙²-idʳ x = ∙²-comm (∙²-idˡ x)
+  ∙²-idʳ : ∀ {x} → x ≔ x ∙² (0∙ , 0∙)
+  ∙²-idʳ = ∙²-comm ∙²-idˡ
 
   ∙²-assoc : ∀ {x y z u v} → x ≔ y ∙² z → y ≔ u ∙² v → ∃[ w ] (x ≔ u ∙² w × w ≔ v ∙² z)
   ∙²-assoc (lx , rx) (ly , ry) with ∙-assoc lx ly | ∙-assoc rx ry
@@ -160,9 +159,9 @@ record Quantifiers : Set₁ where
   ... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
   ... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
-  ⊎-idˡ : {idxs : Idxs n} (Γ : Ctx idxs) → Γ ≔ ε ⊎ Γ
-  ⊎-idˡ [] = tt
-  ⊎-idˡ (Γ -, x) = ⊎-idˡ Γ , ∙²-idˡ x
+  ⊎-idˡ : {idxs : Idxs n} {Γ : Ctx idxs} → Γ ≔ ε ⊎ Γ
+  ⊎-idˡ {Γ = []} = tt
+  ⊎-idˡ {Γ = Γ -, x} = ⊎-idˡ , ∙²-idˡ
 
   ⊎-unique : {Γ Γ' Δ Ξ  : Ctx idxs} → Γ' ≔ Δ ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Γ' ≡ Γ
   ⊎-unique {Γ = []} {[]} {[]} {[]} tt tt = refl
@@ -200,7 +199,7 @@ record Quantifiers : Set₁ where
   ⊎-tail {x = _ -, _} {_ -, _} {_ -, _} (tail , _) = tail
 
   ⊎-idʳ : (Γ : Ctx idxs) → Γ ≔ Γ ⊎ ε
-  ⊎-idʳ Γ = ⊎-comm (⊎-idˡ Γ)
+  ⊎-idʳ Γ = ⊎-comm ⊎-idˡ
 
   ⊎-mut-cancel : ∀ {x y y' z : Ctx idxs} → x ≔ y ⊎ z → z ≔ y' ⊎ x → x ≡ z
   ⊎-mut-cancel {x = []} {[]} {[]} {[]} Γ Ξ = refl
