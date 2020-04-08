@@ -518,10 +518,9 @@ It must satisfy the following constraints:
 
 \item [Distinguished elements]
   There must be a neutral element $0$ absorbed on both sides.
+  The neutral element $0$ must also be the minimal element.
   There must be a special element $1$ to record usage.
 \end{description}
-
-\todo{add on 0 = y * z -> 0 = y or 0 = z}
 
 \begin{nidefinition}
   Together, the aforementioned constraints give raise to a \emph{partial commutative monoid}.
@@ -537,7 +536,8 @@ It must satisfy the following constraints:
     &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
     &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
     &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-    &\field{\cdot-id^l}     &:{} &\forall x             & \to \; & \op{x}{\zero}{x} \\
+    &\field{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
+    &\field{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
     &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
     &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
   \end{aligned}
