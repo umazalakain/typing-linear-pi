@@ -49,14 +49,16 @@ private
     Γ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ : Ctx idxs
     P : Scoped n
 
-
 feedback : {Γ M N : Ctx idxs}
          → m ≔ δ ∙² l
-         → γ ∝ N [ i ]≔ t ∝ δ ⊠ M
+         → γ ∝ N [ i ]≔ t ∝ l ⊠ M
          → γ ∝ Γ [ i ]≔ t ∝ m ⊠ M
-         → γ ∝ Γ [ i ]≔ t ∝ l ⊠ N
-feedback m (zero ⦃ a ⦄) (zero ⦃ b ⦄) = {!zero!}
-feedback m (suc N) (suc Γ) = suc (feedback m N Γ)
+         → γ ∝ Γ [ i ]≔ t ∝ δ ⊠ N
+feedback m≔δ∙l (zero ⦃ a ⦄) (zero ⦃ b ⦄) with toWitness a | toWitness b
+feedback m≔δ∙l (zero ⦃ a ⦄) (zero ⦃ b ⦄) | w , w≔l∙z | v , v≔m∙z with ∙²-assoc v≔m∙z m≔δ∙l
+feedback m≔δ∙l (zero ⦃ a ⦄) (zero ⦃ b ⦄) | w , w≔l∙z | v , v≔m∙z | w' , v≔δ∙w' , w'≔l∙z
+  rewrite ∙²-unique w≔l∙z w'≔l∙z | ∙²-compute-unique v≔δ∙w' = zero ⦃ fromWitness (_ , v≔δ∙w') ⦄
+feedback s (suc N) (suc Γ) = suc (feedback s N Γ)
 
 ∋-subst : {Γ Δ Ψₗ' Ψᵣ Ψₗ Ξ Ξ' : Ctx idxs}
         → Γ ≔ Δ ⊎ Ψₗ'
@@ -82,7 +84,7 @@ foo : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Ψₘ Ψₗ Ψᵣ : Ctx idxs} {
 foo ∋i ∋j i≤j eq Γ≔ end rewrite ⊎-mut-cancel Γ≔ (∋-⊎ ∋i) | 0∙-∋ ∋i (sym (⊎-mut-cancel Γ≔ (∋-⊎ ∋i))) | ∋-0∙ ∋j = end
 foo ∋i ∋j i≤j eq Γ≔ (chan t m μ ⊢P) = chan t m μ (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ) ⊢P)
 foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = i'} x ⊢P) with i Finₚ.≟ i'
-foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} x ⊢P) | yes refl = recv {!!} {!!}
+foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} x ⊢P) | yes refl = recv {!∋j !} {!!}
 foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = i'} x ⊢P) | no ¬p = recv x (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq ({!!} , ∙²-idʳ) ⊢P)
 foo ∋i ∋j i≤j eq Γ≔ (send x y ⊢P) = {!!}
 foo ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = comp (foo {!∋i!} {!!} i≤j {!eq!} {!!} ⊢P) {!!}
