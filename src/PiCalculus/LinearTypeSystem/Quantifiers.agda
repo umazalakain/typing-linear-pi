@@ -14,7 +14,7 @@ import Data.Nat as ℕ
 open Fin using (Fin; zero; suc)
 open Unit using (⊤; tt)
 open ℕ using (ℕ)
-open Product using (∃-syntax; _,_; _×_; proj₁; proj₂)
+open Product using (Σ-syntax; ∃-syntax; _,_; _×_; proj₁; proj₂)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 
@@ -108,6 +108,9 @@ record Quantifier (Q : Set) : Set₁ where
   ∙²-assoc (lx , rx) (ly , ry) with ∙-assoc lx ly | ∙-assoc rx ry
   ∙²-assoc (lx , rx) (ly , ry) | _ , ll , rl | _ , lr , rr = _ , ((ll , lr) , (rl , rr))
 
+  ∙²-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙² z → z ≔ u ∙² v → ∃[ ∝ ] (x ≔ ∝ ∙² v × ∝ ≔ y ∙² u)
+  ∙²-assoc⁻¹ a b = let _ , a' , b' = ∙²-assoc (∙²-comm a) (∙²-comm b) in _ , ∙²-comm a' , ∙²-comm b'
+
   ∙²-compute-unique : ∀ {x y z} (p : x ≔ y ∙² z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙²-compute _ _} (_ , p)))
   ∙²-compute-unique {y = y} {z} p with ∙²-compute y z
   ∙²-compute-unique {y = y} {z} p | yes (x' , p') = ∙²-unique p p'
@@ -138,49 +141,49 @@ record Quantifiers : Set₁ where
   private
     variable
       idx : Idx
-      idxs : Idxs n
+      idxs idxsₗ idxsᵣ : Idxs n
+      x y z : Carrier idx ²
+      Γ Δ Ξ : Ctx idxs
 
-  _≔_⊎_ : Ctx idxs → Ctx idxs → Ctx idxs → Set
-  _≔_⊎_ [] [] [] = ⊤
-  _≔_⊎_ (Γ -, x) (Δ -, y) (Ξ -, z) = Γ ≔ Δ ⊎ Ξ × x ≔ y ∙² z
+  data _≔_⊎_ : Ctx idxs → Ctx idxsₗ → Ctx idxsᵣ → Set where
+    []  : [] ≔ [] ⊎ []
+    _,_ : Γ ≔ Δ ⊎ Ξ → x ≔ y ∙² z → (Γ -, x) ≔ (Δ -, y) ⊎ (Ξ -, z)
 
   ε : ∀ {idxs : Idxs n} → Ctx idxs
   ε {idxs = []} = []
   ε {idxs = _ -, _} = ε -, (0∙ , 0∙)
 
   ⊎-get : {Γ Δ Ξ : Ctx idxs} (i : Fin n) → Γ ≔ Δ ⊎ Ξ → All.lookup i Γ ≔ All.lookup i Δ ∙² All.lookup i Ξ
-  ⊎-get {Γ = _ -, _} {_ -, _} {_ -, _} zero (Γ≔ , x≔) = x≔
-  ⊎-get {Γ = _ -, _} {_ -, _} {_ -, _} (suc i) (Γ≔ , x≔) = ⊎-get i Γ≔
+  ⊎-get zero (Γ≔ , x≔) = x≔
+  ⊎-get (suc i) (Γ≔ , x≔) = ⊎-get i Γ≔
 
-  ⊎-compute : (Δ Ξ : Ctx idxs) → Dec (∃[ Γ ] (Γ ≔ Δ ⊎ Ξ))
-  ⊎-compute [] [] = yes ([] , tt)
+  ⊎-compute : (Δ Ξ : Ctx idxs) → Dec (Σ[ Γ ∈ Ctx idxs ] (Γ ≔ Δ ⊎ Ξ))
+  ⊎-compute [] [] = yes ([] , [])
   ⊎-compute (Δ -, y) (Ξ -, z) with ⊎-compute Δ Ξ | ∙²-compute y z
   ... | yes (_ , ps)     | yes (_ , p) = yes ((_ -, _) , (ps , p))
   ... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
   ... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
 
-  ⊎-idˡ : {idxs : Idxs n} {Γ : Ctx idxs} → Γ ≔ ε ⊎ Γ
-  ⊎-idˡ {Γ = []} = tt
+  ⊎-idˡ : {idxs : Idxs n} {Γ : Ctx idxs} → Γ ≔ ε {idxs = idxs} ⊎ Γ
+  ⊎-idˡ {Γ = []} = []
   ⊎-idˡ {Γ = Γ -, x} = ⊎-idˡ , ∙²-idˡ
 
   ⊎-unique : {Γ Γ' Δ Ξ  : Ctx idxs} → Γ' ≔ Δ ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Γ' ≡ Γ
-  ⊎-unique {Γ = []} {[]} {[]} {[]} tt tt = refl
-  ⊎-unique {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Γ'≔ , x'≔) (Γ≔ , x≔)
-    rewrite ⊎-unique Γ'≔ Γ≔ | ∙²-unique x'≔ x≔ = refl
+  ⊎-unique [] [] = refl
+  ⊎-unique (Γ'≔ , x'≔) (Γ≔ , x≔) rewrite ⊎-unique Γ'≔ Γ≔ | ∙²-unique x'≔ x≔ = refl
 
   ⊎-uniqueˡ : {Γ Δ Δ' Ξ  : Ctx idxs} → Γ ≔ Δ' ⊎ Ξ → Γ ≔ Δ ⊎ Ξ → Δ' ≡ Δ
-  ⊎-uniqueˡ {Γ = []} {[]} {[]} {[]} tt tt = refl
-  ⊎-uniqueˡ {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Δ'≔ , y'≔) (Δ≔ , y≔)
-    rewrite ⊎-uniqueˡ Δ'≔ Δ≔ | ∙²-uniqueˡ y'≔ y≔ = refl
+  ⊎-uniqueˡ [] [] = refl
+  ⊎-uniqueˡ (Δ'≔ , y'≔) (Δ≔ , y≔) rewrite ⊎-uniqueˡ Δ'≔ Δ≔ | ∙²-uniqueˡ y'≔ y≔ = refl
 
   ⊎-comm : {Γ Δ Ξ : Ctx idxs} → Γ ≔ Δ ⊎ Ξ → Γ ≔ Ξ ⊎ Δ
-  ⊎-comm {Γ = []} {[]} {[]} tt = tt
-  ⊎-comm {Γ = _ -, _} {_ -, _} {_ -, _} (Γ≔ , x≔) = ⊎-comm Γ≔ , ∙²-comm x≔
+  ⊎-comm [] = []
+  ⊎-comm (Γ≔ , x≔) = ⊎-comm Γ≔ , ∙²-comm x≔
 
   ⊎-assoc : {Γₘ Γₗ Γᵣ Γₗₗ Γₗᵣ : Ctx idxs}
-          → Γₘ ≔ Γₗ ⊎ Γᵣ → Γₗ ≔ Γₗₗ ⊎ Γₗᵣ → ∃[ Γᵣ' ] (Γₘ ≔ Γₗₗ ⊎ Γᵣ' × Γᵣ' ≔ Γₗᵣ ⊎ Γᵣ)
-  ⊎-assoc {Γₘ = []} {[]} {[]} {[]} {[]}  tt tt = [] , tt , tt
-  ⊎-assoc {Γₘ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {_ -, _} (Γₘ≔ , xₘ≔) (Γₗ≔ , xₗ≔) with ⊎-assoc Γₘ≔ Γₗ≔ | ∙²-assoc xₘ≔ xₗ≔
+          → Γₘ ≔ Γₗ ⊎ Γᵣ → Γₗ ≔ Γₗₗ ⊎ Γₗᵣ → Σ[ Γᵣ' ∈ Ctx idxs ] (Γₘ ≔ Γₗₗ ⊎ Γᵣ' × Γᵣ' ≔ Γₗᵣ ⊎ Γᵣ)
+  ⊎-assoc [] [] = [] , [] , []
+  ⊎-assoc (Γₘ≔ , xₘ≔) (Γₗ≔ , xₗ≔) with ⊎-assoc Γₘ≔ Γₗ≔ | ∙²-assoc xₘ≔ xₗ≔
   ... | (_ , Γₘ'≔ , Γᵣ'≔)  | (_ , xₘ'≔ , xᵣ'≔) = _ , ((Γₘ'≔ , xₘ'≔) , (Γᵣ'≔ , xᵣ'≔))
 
   ⊎-trans : {m l r rl rr : Ctx idxs}
@@ -196,13 +199,11 @@ record Quantifiers : Set₁ where
 
   ⊎-tail : {x y z : Ctx (idxs -, idx)}
          → x ≔ y ⊎ z → All.tail x ≔ All.tail y ⊎ All.tail z
-  ⊎-tail {x = _ -, _} {_ -, _} {_ -, _} (tail , _) = tail
+  ⊎-tail (tail , _) = tail
 
   ⊎-idʳ : (Γ : Ctx idxs) → Γ ≔ Γ ⊎ ε
   ⊎-idʳ Γ = ⊎-comm ⊎-idˡ
 
   ⊎-mut-cancel : ∀ {x y y' z : Ctx idxs} → x ≔ y ⊎ z → z ≔ y' ⊎ x → x ≡ z
-  ⊎-mut-cancel {x = []} {[]} {[]} {[]} Γ Ξ = refl
-  ⊎-mut-cancel {x = _ -, _} {_ -, _} {_ -, _} {_ -, _} (Γ≔ , x≔) (Ξ≔ , z≔)
-    rewrite ⊎-mut-cancel Γ≔ Ξ≔
-    | ∙²-mut-cancel x≔ z≔ = refl
+  ⊎-mut-cancel [] [] = refl
+  ⊎-mut-cancel (Γ≔ , x≔) (Ξ≔ , z≔) rewrite ⊎-mut-cancel Γ≔ Ξ≔ | ∙²-mut-cancel x≔ z≔ = refl

@@ -140,6 +140,10 @@ module PiCalculus.Semantics where
   dec (external zero) = internal
   dec (external (suc i)) = external i
 
+  maybe : ∀ {a} {A : Set a} → A → (Fin n → A) → Channel n → A
+  maybe b f internal = b
+  maybe b f (external x) = f x
+
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
     comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}

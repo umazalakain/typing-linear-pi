@@ -1,4 +1,5 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
+open import Relation.Binary.HeterogeneousEquality using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Decidable using (toWitness)
 open import Function using (_∘_)
@@ -43,13 +44,13 @@ private
     P Q : Scoped n
     i j : Fin n
 
-only : {idxs : Idxs n} (i : Fin n) → Carrier (Vec.lookup idxs i) ² → Ctx idxs
-only {idxs = _ -, _} zero x = ε -, x
-only {idxs = _ -, _} (suc i) x = only i x -, ℓ∅
+only : {idxs : Idxs n} (i : Fin n) → idx ≡ Vec.lookup idxs i → Carrier idx ² → Ctx idxs
+only {idxs = _ -, _} zero refl x = ε -, x
+only {idxs = _ -, _} (suc i) eq x = only i eq x -, ℓ∅
 
 channel-ℓ# : {idxs : Idxs n} (c : Channel n) → Ctx idxs
 channel-ℓ# internal = ε
-channel-ℓ# (external x) = only x ℓ#
+channel-ℓ# (external x) = only x refl ℓ#
 
 ∋-I : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
     → γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ
@@ -65,32 +66,30 @@ channel-ℓ# (external x) = only x ℓ#
 
 ∋-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : Carrier idx ²}
     → (x : γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ)
-    → Γ ≔ only i (subst (λ i → Carrier i ²) (∋-I x) c) ⊎ Ξ
+    → Γ ≔ only {idxs = idxs} i (∋-I x) c ⊎ Ξ
 ∋-⊎ (zero ⦃ check ⦄) = ⊎-idˡ , proj₂ (toWitness check)
 ∋-⊎ (suc x) = ∋-⊎ x , ∙²-idˡ
 
-lookup-only : {idxs : Idxs n} (i : Fin n) {c : (Carrier (Vec.lookup idxs i)) ²}
-            → All.lookup i (only {idxs = idxs} i c) ≡ c
-lookup-only {idxs = _ -, _} zero = refl
-lookup-only {idxs = _ -, _} (suc i) = lookup-only i
+lookup-only : {idxs : Idxs n} (i : Fin n) {c : (Carrier idx) ²}
+            → (eq : idx ≡ Vec.lookup idxs i) → All.lookup i (only {idxs = idxs} i eq c) ≅ c
+lookup-only {idxs = _ -, _} zero refl = hrefl
+lookup-only {idxs = _ -, _} (suc i) eq = lookup-only i eq
 
 only-∙ : {idxs : Idxs n}
        → (i : Fin n)
-       → {x y z : (Carrier (Vec.lookup idxs i)) ²}
+       → {x y z : Carrier idx ²}
+       → (eq : idx ≡ Vec.lookup idxs i)
        → x ≔ y ∙² z
-       → only {idxs = idxs} i x ≔ only i y ⊎ only i z
-only-∙ {idxs = _ -, _} zero s = ⊎-idˡ , s
-only-∙ {idxs = _ -, _} (suc i) s = only-∙ i s , ∙²-idˡ
+       → only {idxs = idxs} i eq x ≔ only {idxs = idxs} i eq y ⊎ only {idxs = idxs} i eq z
+only-∙ {idxs = _ -, _} zero refl s = ⊎-idˡ , s
+only-∙ {idxs = _ -, _} (suc i) eq s = only-∙ i eq s , ∙²-idˡ
+
+only-irrel : {x : Carrier idx ²} (eqa eqb : idx ≡ Vec.lookup idxs i)
+           → only {idxs = idxs} i eqa x ≡ only i eqb x
+only-irrel refl refl = refl
 
 subst-idx : ∀ {idx idx'} {eq : idx ≡ idx'} → (δ : ∀ {idx} → (Carrier idx) ²) → subst (λ i → Carrier i ²) eq δ ≡ δ
 subst-idx {eq = refl} δ = refl
-
-∋-∙ : {γ : PreCtx n} {idx : Idx} {idxs : Idxs n} {Γ Ξ : Ctx idxs} (c : ∀ {idx} → (Carrier idx) ²)
-    → (x : γ ∝ Γ [ i ]≔ t ∝ c {idx} ⊠ Ξ)
-    → All.lookup i Γ ≔ c ∙² All.lookup i Ξ
-∋-∙ {i = i} {Γ = Γ} {Ξ = Ξ} c x = subst (λ ● → All.lookup i Γ ≔ ● ∙² All.lookup i Ξ)
-                                        (trans (lookup-only i) (subst-idx c))
-                                        (⊎-get i (∋-⊎ x))
 
 ⊢-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ

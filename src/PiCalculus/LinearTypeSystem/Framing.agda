@@ -49,11 +49,11 @@ private
         → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Θ
         → γ ∝ Ξ [ i ]≔ t ∝ x ⊠ Ψ
 
-∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (zero ⦃ check ⦄)
-  rewrite ⊎-uniqueˡ Γ≔ ⊎-idˡ | ⊎-unique Ξ≔ (⊎-idˡ {Γ = Ψ})
+∋-frame (Γ≔ , x≔) (Ξ≔ , x'≔) (zero ⦃ check ⦄)
+  rewrite ⊎-uniqueˡ Γ≔ ⊎-idˡ | ⊎-unique Ξ≔ ⊎-idˡ
   | ∙²-uniqueˡ x≔ (proj₂ (toWitness check)) | ∙²-compute-unique x'≔
   = zero ⦃ fromWitness (_ , x'≔) ⦄
-∋-frame {Γ = _ -, _} {_ -, _} {_ -, _} {_ -, _} {Ψ -, _} (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x)
+∋-frame (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x)
   rewrite ∙²-uniqueˡ x≔ ∙²-idˡ | ∙²-unique x'≔ ∙²-idˡ
   = suc (∋-frame Γ≔ Ξ≔ x)
 
@@ -62,21 +62,21 @@ private
         → γ ∝ Γ ⊢ P ⊠ Θ
         → γ ∝ Ξ ⊢ P ⊠ Ψ
 
-⊢-frame {Ψ = Ψ} Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ ⊎-idˡ | ⊎-unique Ξ≔ (⊎-idˡ {Γ = Ψ}) = end
+⊢-frame Γ≔ Ξ≔ end rewrite ⊎-uniqueˡ Γ≔ ⊎-idˡ | ⊎-unique Ξ≔ ⊎-idˡ = end
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
   = chan t m μ (⊢-frame {Δ = _ -, (μ , μ)} (Γ≔ , ∙²-idʳ) (Ξ≔ , ∙²-idʳ) ⊢P)
-⊢-frame Γ≔ Ξ≔ (recv x ⊢P) with ⊢-⊎ ⊢P
-⊢-frame Γ≔ Ξ≔ (recv x ⊢P) | (_ -, _) , (P≔ , x≔) =
-  let xP≔           = ⊎-comp (∋-⊎ x) P≔ Γ≔
-      _ , x'≔ , P'≔ = ⊎-assoc Ξ≔ xP≔
-   in recv (∋-frame (∋-⊎ x) x'≔ x) (⊢-frame (P≔ , x≔) (P'≔ , x≔) ⊢P)
-⊢-frame Γ≔ Ξ≔ (send x y ⊢P) with ∋-⊎ x | ∋-⊎ y | ⊢-⊎ ⊢P
-⊢-frame Γ≔ Ξ≔ (send x y ⊢P) | x≔ | y≔ | _ , P≔ =
-  let [xy]P≔         = ⊎-comp (⊎-trans x≔ y≔) P≔ Γ≔
-      _ , xy'≔ , P'≔ = ⊎-assoc Ξ≔ [xy]P≔
-      xy≔            = ⊎-comp x≔ y≔ (⊎-trans x≔ y≔)
-      _ , x'≔ , y'≔  = ⊎-assoc xy'≔ xy≔
-   in send (∋-frame x≔ x'≔ x) (∋-frame y≔ y'≔ y) (⊢-frame P≔ P'≔ ⊢P)
+⊢-frame Γ≔ Ξ≔ (recv ∋i ⊢P) with ∋-⊎ ∋i | ⊢-⊎ ⊢P
+⊢-frame Γ≔ Ξ≔ (recv ∋i ⊢P) | i≔ | (_ -, _) , (P≔ , x≔) =
+  let iP≔           = ⊎-comp i≔ P≔ Γ≔
+      _ , i'≔ , P'≔ = ⊎-assoc Ξ≔ iP≔
+   in recv (∋-frame i≔ i'≔ ∋i) (⊢-frame (P≔ , x≔) (P'≔ , x≔) ⊢P)
+⊢-frame Γ≔ Ξ≔ (send ∋i ∋j ⊢P) with ∋-⊎ ∋i | ∋-⊎ ∋j | ⊢-⊎ ⊢P
+⊢-frame Γ≔ Ξ≔ (send ∋i ∋j ⊢P) | i≔ | j≔ | _ , P≔ =
+  let [ij]P≔         = ⊎-comp (⊎-trans i≔ j≔) P≔ Γ≔
+      _ , ij'≔ , P'≔ = ⊎-assoc Ξ≔ [ij]P≔
+      ij≔            = ⊎-comp i≔ j≔ (⊎-trans i≔ j≔)
+      _ , i'≔ , j'≔  = ⊎-assoc ij'≔ ij≔
+   in send (∋-frame i≔ i'≔ ∋i) (∋-frame j≔ j'≔ ∋j) (⊢-frame P≔ P'≔ ⊢P)
 ⊢-frame Γ≔ Ξ≔ (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q
 ⊢-frame Γ≔ Ξ≔ (comp ⊢P ⊢Q) | _ , P≔ | _ , Q≔ =
   let PQ≔           = ⊎-comp P≔ Q≔ Γ≔

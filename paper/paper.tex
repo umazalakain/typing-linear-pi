@@ -703,7 +703,7 @@ In this paper we choose that approach, which entails accepting that base non-cha
 \end{note}
 
 \subsection{Typing with Leftovers}
-\label{leftover typing}
+\label{leftover-typing}
 
 \todo{stress what leftover typing is as a technique}
 \todo{syntax directed typing rules}
@@ -835,15 +835,17 @@ Both the context of types and the context of multiplicities are of a common leng
     {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
   
     \inferrule
-    {chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
-     cont : \types{\gamma \comma t}{\Xi \comma x}{P}{\Theta \comma \lz}}
-    {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
+        {\stacked{
+            chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
+            cont \hspace{0.6em} : \types{\gamma \comma t}{\Xi \comma x}{P}{\Theta \comma \lz}}}
+        {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
   
     \inferrule
-    {chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
-     loc_j : \contains{\gamma}{\Delta}{j}{t}{x}{\Xi} \\\\
-     cont : \types{\gamma}{\Xi}{P}{\Theta}}
-    {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
+        {\stacked{
+            chan_i : \contains{\gamma}{\Gamma}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
+            loc_j \hspace{0.8em} : \contains{\gamma}{\Delta}{j}{t}{x\hspace{4em}}{\Xi} \\\\
+            cont \hspace{0.6em} : \types{\gamma}{\Xi}{P\hspace{6em}}{\Theta}}}
+        {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
   
     \inferrule
     {l : \types{\gamma}{\Gamma}{P}{\Delta} \\\\
