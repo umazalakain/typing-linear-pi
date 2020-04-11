@@ -163,7 +163,7 @@ The linear \picalc{} is also interesting because together with product types it 
 We provide a typing system for the linear \picalc{} in \S \ref{type-system} as extensional rules on sitting on top of the unruly well-scoped syntax.
 
 Linear type systems need of context splits.
-These are tricky to handle constructively without explicitly asking for them to the user.
+These are tricky to handle constructively without explicitly asking the user to supply them.
 Leftover typing \cite{} is a type theoretical technique that addresses this.
 It does so by carrying both an input and an output context (the leftovers).
 The output context can then be used as the input context of the continuations.
@@ -716,31 +716,32 @@ We use leftover typing \cite{} to encode our typing rules.
 The insight of this approach is to use input and output contexts in the typing judgment.
 Our typing judgment on processes are of the form $\types{\gamma}{\Gamma}{P}{\Delta}$ (introduced in Figure \ref{fig:types}).
 This assertion is in fact both a typing judgment on $\gamma$ and a usage judgment on $\Gamma$ and $\Delta$.
+These two judgments could, in fact, happen separately: our typing rules are completely syntax directed.
+However, if we were to introduce branching, typing derivations would have to make choices, and the two separate judgments would need of a third relation to make sure that their choices agree.
+To avoid this, we merge both judgments into a single one.
 The typing context $\gamma$ needs to be explicit because the usage context $\Gamma$ and $\Delta$ do not in any way depend on it -- in fact, they are only related by their common length.
-Using both an input and an output usage context has several advantages.
-For one, the usage modifications effected by both input and output can be enclosed within a self-containing typing and usage judgment for variable references -- also with an output context.
-But more crucially, we avoid requesting an explicit constructive proof of context splitting for parallel composition:
-if $P$ is typed under $\Gamma_l$ and $Q$ under $\Gamma_r$, then to type $\comp{P}{Q}$ under $\Gamma_m$ we would need a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$.
+
+While the typing contexts are preserved through the typing derivation, the usage contexts change.
+We use input and output usage contexts to capture this transformation.
+This has two main advantages: for one, the usage modifications effected by both input and output can be enclosed in a self-containing typing and usage judgment for variable references (also with an output context); but more crucially, we avoid requesting an explicit constructive proof of context splitting for parallel composition -- if $P$ is typed under $\Gamma_l$ and $Q$ under $\Gamma_r$, then to type $\comp{P}{Q}$ under $\Gamma_m$ a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$ would be needed.
 The search for such a proof can be automated, but its existence is still required.
 Moreover, providing a typing derivation for $P$ gets the user no usage annotations to type $Q$.
 By using output usage contexts, we get the leftovers from the derivation on $P$ and use them to type $Q$.
+This is the recurring theme in leftover typing: usage contexts are threaded through the premises.
 
-Both the typing judgment and the variable references are of an inductive form.
-As a consequence, all proofs on them will need to perform a double induction: once on the typing derivation, once for each variable reference.
-
-\todo{syntax directed typing rules}
-
-In the \picalc{} both input and output contain variable references.
-Both these actions need to modify their context, and thus using variable references that mention both their input and output contexts seems relevant.
-
-Both the typing rules and the rules for variable references mention both contexts of types and contexts of multiplicities.
-The contexts of types are threaded through the premises unchanged; the contexts of multiplicities are threaded through the premises using one premise's output as the next premise's input.
-Both the context of types and the context of multiplicities are of a common length.
+The typing and usage judgments on both processes and variable references are of an inductive form.
+As a result, the proofs on typing derivations will perform a double induction: once on the derivation of the process, once on the derivation of the variable reference.
 
 \begin{nidefinition}
-  Akin to the typing rules for processes, the rules for variable references presented in Figure \ref{fig:variable-references} are indexed over the typing context, the input multiplicity context, and the output multiplicity context.
-  The base case $\constr{zero}$ splits the last multiplicity in the input context into $x$ and the last multiplicity in the output context, while also ensuring that $t$ is the last type in the typing context.
-  The inductive case $\constr{suc}$ appends the same multiplicity to both the input context and the output context, while also appending an extra type to the typing context.
+  Akin to the typing and usage judgment on processes, in Figure \ref{fig:variable-references} we present a typing and usage judgment on variable references -- also indexed over a typing context and an input an output usage context.
+  However, in addition to this, variable references also record the index, the type, and the usage annotation of the variable reference.
+  The base case $\constr{zero}$ ensures that $t$ is the most immediate type in typing context, and splits the most immediate annotation in the input context $x$ into the usage annotation for the variable $y$ and the annotation in the output context $z$.
+  The inductive case $\constr{suc}$ appends an extra type to the typing context, and an extra usage annotation to both the input and output usage context.
+
+  \begin{remark}
+    The constructor $\constr{zero}$ is the only place in the typing system that uses the algebra on multiplicities.
+  \end{remark}
+
   
   \todo{example}
   
@@ -757,9 +758,9 @@ Both the context of types and the context of multiplicities are of a common leng
       t : \Type \\
       \stacked{
         idx : \Idx \\\\
-        x : \Carrier_{idx}^2} \\
+        y : \Carrier_{idx}^2} \\
       \Delta : \Ctx_{idxs}}
-    {\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta} : \Set}
+    {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}
     \; \textsc{VarRef}
   
     \inferrule
@@ -784,13 +785,13 @@ Both the context of types and the context of multiplicities are of a common leng
   The typing context $\gamma$ at index $i$ is type $t$.
 \end{lemma}
 \begin{lemma}
-  The input multiplicity context $\Gamma$ at index $i$ is the result of performing the monoidal operation on $x$ and the output multiplicity context $\Delta$ at index $i$.
+  The input annotation in context $\Gamma$ at index $i$ is the result of aggregating (as per the algebra) $y$ and the output annotation in context $\Delta$ at index $i$.
 \end{lemma}
 \begin{lemma}
-  For every index $j$ other than $i$, the input multiplicity context $\Gamma$ at index $i$ is the output multiplicity $\Delta$ at index $i$.
+  For every index $j$ other than $i$, the input annotation in context $\Gamma$ at index $i$ is the output annotation in $\Delta$ at index $i$.
 \end{lemma}
 \begin{corollary}
-  Given the witness $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$, $\Gamma \equiv \Delta$ iff $x \equiv \zero$.
+  Given the witness $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$, $\Gamma \equiv \Delta$ iff $y \equiv \zero$.
 \end{corollary}
 \proof{All proofs are by structural induction on \textsc{VarRef}.}
 
