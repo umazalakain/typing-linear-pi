@@ -1,7 +1,7 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
 open import Relation.Binary.HeterogeneousEquality using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
 open import Relation.Nullary using (Dec; yes; no)
-open import Relation.Nullary.Decidable using (toWitness)
+open import Relation.Nullary.Decidable using (toWitness; fromWitness)
 open import Function using (_∘_)
 
 import Data.Maybe as Maybe
@@ -114,6 +114,33 @@ subst-idx {eq = refl} δ = refl
 0∙-∋ (zero ⦃ check ⦄) eq with (toWitness check)
 0∙-∋ (zero ⦃ check = check ⦄) refl | x , x≔m∙z = ∙²-uniqueˡ x≔m∙z ∙²-idˡ
 0∙-∋ (suc x) eq = 0∙-∋ x (cong All.tail eq)
+
+feedfront : {x y z a b c : Carrier idx}
+          → x ≔ y ∙ z
+          → a ≔ z ∙ b
+          → a ≔ x ∙ c
+          → b ≔ y ∙ c
+feedfront xyz azb axc with ∙-assoc axc (∙-comm xyz)
+feedfront xyz azb axc | [yc] , az[yc] , [yc]yc rewrite ∙-uniqueˡ (∙-comm azb) (∙-comm az[yc]) = [yc]yc
+
+feedback : {x y z a b c : Carrier idx}
+         → x ≔ y ∙ z
+         → b ≔ z ∙ c
+         → a ≔ x ∙ c
+         → a ≔ y ∙ b
+feedback xyz bzc axc with ∙-assoc axc xyz
+feedback xyz bzc axc | [zc] , ay[zc] , [zc]zc rewrite ∙-unique bzc [zc]zc = ay[zc]
+
+⊎-∋ : {idxs : Idxs n} {Γ Ξ : Ctx idxs} {x : Carrier idx ²}
+    → {i : Fin n}
+    → ⦃ eqt : t ≡ Vec.lookup γ i ⦄
+    → ⦃ eqi : idx ≡ Vec.lookup idxs i ⦄
+    → Γ ≔ only {idxs = idxs} i eqi x ⊎ Ξ
+    → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Ξ
+⊎-∋ {γ = _ -, _} {i = zero} ⦃ refl ⦄ ⦃ refl ⦄ (Γ≔ , x≔)
+  rewrite ⊎-unique Γ≔ ⊎-idˡ | ∙²-compute-unique x≔ = zero ⦃ fromWitness (_ , x≔) ⦄
+⊎-∋ {γ = _ -, _} {i = suc i} (Γ≔ , x≔)
+  rewrite ∙²-unique x≔ ∙²-idˡ = suc (⊎-∋ Γ≔)
 
 mult-insert : (i : Fin (suc n)) → (Carrier idx) ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
 mult-insert zero xs' Γ = Γ -, xs'

@@ -471,24 +471,29 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 \section{Resource-aware Typing System}
 \label{type-system}
 
-\todo{why do we use a single relation for both type judgements and usage judgments}
 
-A type system is in the business of further constraining a language, filtering out terms that (although well-formed) are meaningless.
-In the simply typed \lambdacalc{}, a term has a meaning iff it has a type.
-This typing judgment is a proof of the form $\Gamma \vdash t : T$, where the term $t$ has type $T$ under the typing context $\Gamma$ -- the typing context associates variables (possibly occurring within $t$) to types.
-In the simply typed \picalc{} however, it is the channels that are typed, and a process has a meaning iff it \emph{uses} its channels according to their types.
-The typing judgment is therefore of the form $\Gamma \vdash p$, where the process $p$ (which has no type of its own) uses the channels in $\Gamma$ according to their types.
+A \emph{resource-aware} typing system for the \emph{\picalc{}} is distinctive in several ways.
 
-A resource-aware type system uses both types and usage counting to constraint a language.
-It uses typing contexts to keep track of both types and usage counts.
-In the case of a linear type system, resources must be used exactly once, and usages transition from available to consumed as soon as they are used.
-In the linear \picalc{} however, every channel must be used exactly once to receive and exactly once to send.
-In \S \ref{multiplicities}, we generalize this usage counting algebra so that the same type system can be used for a combination of linear, shared, and gradual types.
+\begin{description}
+  \item [As a resource-aware typing system,] the language is constrained not just by types, but also by their usage annotations.
+    We must be able to add up and split usage contexts, to do so we introduce a generalized algebra in \S \ref{multiplicities}.
+    We provide an independent inductive definition of typing contexts and usage contexts in \S \ref{contexts}.
+    \todo{why independent}
 
+  \item [As a typing system for the \picalc{},] the terms (processes) in the typing judgment do not come accompanied by a type -- processes have no type.
+    It is the communication channels that are annotated with types and usages.
+    Typing judgments assert that the process correctly uses the channels in the context under which it is typed.
+\end{description}
 
-Syntax directed
-Continuations.
-\ref{leftover-typing}
+In this paper, we combine typing and annotation judgments into a single judgment.
+Although the typing rules are for now completely syntax-directed, adding support for branching would introduce choice in the typing derivations.
+If we were to keep typing judgments and annotation judgments separate, we would need a coherence relation making sure that the same choice is taken by both.
+We avoid doing so by combining them into a single judgment.
+
+We make use \emph{leftover typing}, a technique consisting of adding an \emph{output context of usages} to the usual \emph{input context of usages}.
+This output context contains the leftovers: the multiplicities unused by the processes.
+Crucially, this output context can then be used as the input context of the continuation process.
+The typing rules are introduced in \S \ref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
 \label{multiplicities}
@@ -600,6 +605,7 @@ All other rules follow trivially from the algebraic rules for the addition of na
 \end{description}
 
 \subsection{Contexts}
+\label{contexts}
 
 In a resource-aware \picalc{} type multiplicities change every time input and output occurs; however, the types themselves remain constant.
 If multiplicities need not to depend on types, keeping types and multiplicities in independent contexts allows for a more modular approach to the algebra on contexts of multiplicities.

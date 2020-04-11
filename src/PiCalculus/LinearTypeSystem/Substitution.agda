@@ -49,16 +49,26 @@ private
     Γ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ : Ctx idxs
     P : Scoped n
 
-feedback : {Γ M N : Ctx idxs}
+∋-feedfront : {γ : PreCtx n} {idxs : Idxs n} {Γ M₁ M₂ N : Ctx idxs}
+            → m ≔ δ ∙² l
+            → ⦃ eq : M₁ ≡ M₂ ⦄
+            → γ ∝ M₁ [ i ]≔ t ∝ l ⊠ N
+            → γ ∝ M₂ [ i ]≔ t ∝ m ⊠ Γ
+            → γ ∝ N [ i ]≔ t ∝ δ ⊠ Γ
+∋-feedfront (left , right) (zero ⦃ a ⦄) (zero ⦃ b ⦄) with toWitness a | toWitness b
+∋-feedfront (left , right) ⦃ refl ⦄ (zero ⦃ a ⦄) (zero ⦃ b ⦄) | _ , (la , ra) | _ , (lb , rb)
+  = ⊎-∋ (⊎-idˡ , (feedfront left la lb , feedfront right ra rb))
+∋-feedfront s ⦃ refl ⦄ (suc N) (suc Γ) = suc (∋-feedfront s N Γ)
+
+∋-feedback : {γ : PreCtx n} {idxs : Idxs n} {Γ M N : Ctx idxs}
          → m ≔ δ ∙² l
          → γ ∝ N [ i ]≔ t ∝ l ⊠ M
          → γ ∝ Γ [ i ]≔ t ∝ m ⊠ M
          → γ ∝ Γ [ i ]≔ t ∝ δ ⊠ N
-feedback m≔δ∙l (zero ⦃ a ⦄) (zero ⦃ b ⦄) with toWitness a | toWitness b
-feedback m≔δ∙l (zero ⦃ a ⦄) (zero ⦃ b ⦄) | w , w≔l∙z | v , v≔m∙z with ∙²-assoc v≔m∙z m≔δ∙l
-feedback m≔δ∙l (zero ⦃ a ⦄) (zero ⦃ b ⦄) | w , w≔l∙z | v , v≔m∙z | w' , v≔δ∙w' , w'≔l∙z
-  rewrite ∙²-unique w≔l∙z w'≔l∙z | ∙²-compute-unique v≔δ∙w' = zero ⦃ fromWitness (_ , v≔δ∙w') ⦄
-feedback s (suc N) (suc Γ) = suc (feedback s N Γ)
+∋-feedback (left , right) (zero ⦃ a ⦄) (zero ⦃ b ⦄) with toWitness a | toWitness b
+∋-feedback (left , right) (zero ⦃ a ⦄) (zero ⦃ b ⦄) | _ , (la , ra) | _ , (lb , rb)
+  = ⊎-∋ (⊎-idˡ , (feedback left la lb , feedback right ra rb))
+∋-feedback s (suc N) (suc Γ) = suc (∋-feedback s N Γ)
 
 foo : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Ψₘ Ψₗ Ψᵣ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
     → γ ∝ Ψₘ [ i ]≔ t ∝ m ⊠ Ψₗ
@@ -88,7 +98,7 @@ foo {idxs = idxs} {i = i} {m = m} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} x ⊢P
       ξ , Ψₘ≔ℓᵢ⊎ξ , ξ≔Ξₗᵢ⊎Ψₗ = ⊎-assoc (∋-⊎ ∋i) (only-∙ i (∋-I ∋i) m≔ℓᵢ∙δ)
       Ψₘ≔ℓᵢ⊎ξ' = subst (λ ● → _ ≔ ● ⊎ ξ) (only-irrel (∋-I ∋i) (∋-I x)) Ψₘ≔ℓᵢ⊎ξ
   in recv
-     (∋-frame Ψₘ≔ℓᵢ⊎ξ' (∋-⊎ x) (feedback m≔ℓᵢ∙δ {!!} ∋j))
+     (∋-frame Ψₘ≔ℓᵢ⊎ξ' (∋-⊎ x) (∋-feedback m≔ℓᵢ∙δ {!!} ∋j))
      {!!}
 
 
@@ -116,3 +126,4 @@ postulate
           → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, ℓ∅
           → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
           → γ -, t' ∝ Γ -, m' ⊢ [ suc j / zero ] P ⊠ Ξ -, m'
+ 
