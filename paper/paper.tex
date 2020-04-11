@@ -22,9 +22,10 @@
 % TODO notes -- TODO: remove
 \usepackage{todonotes}
 
-% Do not use italics for definitions
+% Do not use italics in definitions and theorems
 \theoremstyle{definition}
 \newtheorem{nidefinition}[theorem]{Definition}
+\newtheorem{nitheorem}[theorem]{Theorem}
 
 % No line numbers
 \nolinenumbers
@@ -711,23 +712,26 @@ In this paper we choose that approach, which entails accepting that base non-cha
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
 
-\todo{stress what leftover typing is as a technique}
-\todo{syntax directed typing rules}
-
-In a resource-aware calculi, typing rules modify the context of multiplicities under which their premises are typed -- e.g. in $\send{x}{y}P$ the multiplicity context under which $P$ is typed needs to be modified at at $x$ and $y$.
-This context transformations can be modeled as functions on contexts, however threading these transformations through the proofs on typing rules is cumbersome, and these transformations necessitate of a myriad of additional lemmas.
-Additionally, if the typing rules do not record the result of their actions on contexts, managing parallel composition entails a context split for which the user is required to provide an existential proof at the cutting point \todo{rephrase}.
-
-An alternative is to keep track in the typing judgment of the way in which the context has been transformed.
-One way of doing so is by mentioning both the \emph{input contexts} and the \emph{output contexts} over which the processes are typed.
-Parallel composition then uses the output context of the left hand process as the input context of the right hand.
-As an additional benefit, the associativity of parallel composition becomes trivial to prove.
-
-In the \picalc{} both input and output contain variable references.
-Both these actions need to modify their context, and thus using variable references that mention both their input and output contexts seems relevant.
+We use leftover typing \cite{} to encode our typing rules.
+The insight of this approach is to use input and output contexts in the typing judgment.
+Our typing judgment on processes are of the form $\types{\gamma}{\Gamma}{P}{\Delta}$ (introduced in Figure \ref{fig:types}).
+This assertion is in fact both a typing judgment on $\gamma$ and a usage judgment on $\Gamma$ and $\Delta$.
+The typing context $\gamma$ needs to be explicit because the usage context $\Gamma$ and $\Delta$ do not in any way depend on it -- in fact, they are only related by their common length.
+Using both an input and an output usage context has several advantages.
+For one, the usage modifications effected by both input and output can be enclosed within a self-containing typing and usage judgment for variable references -- also with an output context.
+But more crucially, we avoid requesting an explicit constructive proof of context splitting for parallel composition:
+if $P$ is typed under $\Gamma_l$ and $Q$ under $\Gamma_r$, then to type $\comp{P}{Q}$ under $\Gamma_m$ we would need a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$.
+The search for such a proof can be automated, but its existence is still required.
+Moreover, providing a typing derivation for $P$ gets the user no usage annotations to type $Q$.
+By using output usage contexts, we get the leftovers from the derivation on $P$ and use them to type $Q$.
 
 Both the typing judgment and the variable references are of an inductive form.
 As a consequence, all proofs on them will need to perform a double induction: once on the typing derivation, once for each variable reference.
+
+\todo{syntax directed typing rules}
+
+In the \picalc{} both input and output contain variable references.
+Both these actions need to modify their context, and thus using variable references that mention both their input and output contexts seems relevant.
 
 Both the typing rules and the rules for variable references mention both contexts of types and contexts of multiplicities.
 The contexts of types are threaded through the premises unchanged; the contexts of multiplicities are threaded through the premises using one premise's output as the next premise's input.
@@ -870,23 +874,50 @@ Both the context of types and the context of multiplicities are of a common leng
 \subsection{Framing}
 
 \todo{op but for contexts}
-\begin{theorem}
+\begin{nitheorem}
   Let $\opctx{\Gamma_l}{\Delta}{\Xi_l}$ and $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   If $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$ then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
-\end{theorem}
+\end{nitheorem}
 
 \subsection{Weakening}
 
 Order preserving embeddings model a series of insertions. We only ever need one insertion to prove subject congruence, but there is no loss of generality.
 
+\begin{nitheorem}
+  If $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
+\end{nitheorem}
+
 \subsection{Strengthening}
 
+\begin{nitheorem}
+  If $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\Unused \; i \; P$, then $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
+\end{nitheorem}
+
+\begin{remark}
+  The proof that index $i$ is unused in $P$ must be syntactical and cannot rely on the usage annotation of index $i$ being preserved between $\Gamma$ and $\Xi$: process $P$ can send variable reference $i$ with multiplicity $\zero$ over a channel.
+\end{remark}
+
 \subsection{Swapping}
+
+\begin{nitheorem}
+  If $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{swap_i \; \gamma}{swap_i \; \Gamma}{swap_i \; P}{swap_i \; \Xi}$.
+\end{nitheorem}
 
 \subsection{Subject Congruence}
 \label{subject-congruence}
 
+\begin{nitheorem}
+  If $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+\end{nitheorem}
+
 \subsection{Substitution}
+
+\subsection{Subject Reduction}
+
+\begin{nitheorem}
+  If $P \reduce{c} Q$ and $\types{\gamma}{\Gamma'}{P}{\Xi}$ where $\opctx{\Gamma'}{\ell_{\#} @ c}{\Gamma}$,
+  then $\types{\gamma}{\Gamma}{Q}{\Xi}$
+\end{nitheorem}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
