@@ -10,6 +10,9 @@
 \usepackage[many]{tcolorbox}
 \bibliographystyle{plainurl}
 
+% Diagrams
+\usepackage{tikz}
+
 % Mathbb doesn't support digits
 \usepackage{bbm}
 
@@ -209,6 +212,7 @@ As a result, we are able to model a mix of shared, linear, and gradual types.
 Data type definitions have double lines and index-free synonyms as rule names, for ease of reference.
 Otherwise, we use the constructor name as the name of a typing rule.
 We omit universe levels for brevity.
+Implicit arguments are mentioned by type definitions but omitted in constructors.
 $\type{TYPES}$ are in blue and uppercased (with indices as subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red, and variables and functions in black.
 Some constructors can be shared across types and disambiguated by context.
 
@@ -738,13 +742,6 @@ As a result, the proofs on typing derivations will perform a double induction: o
   The base case $\constr{zero}$ ensures that $t$ is the most immediate type in typing context, and splits the most immediate annotation in the input context $x$ into the usage annotation for the variable $y$ and the annotation in the output context $z$.
   The inductive case $\constr{suc}$ appends an extra type to the typing context, and an extra usage annotation to both the input and output usage context.
 
-  \begin{remark}
-    The constructor $\constr{zero}$ is the only place in the typing system that uses the algebra on multiplicities.
-  \end{remark}
-
-  
-  \todo{example}
-  
   \begin{figure}[h]
   \begin{mathpar}
     \mprset{sep=0.5em}
@@ -764,22 +761,26 @@ As a result, the proofs on typing derivations will perform a double induction: o
     \; \textsc{VarRef}
   
     \inferrule
-        {t : \Type \\
-          x \; y \; z : \Carrier_{idx}^2\\
-          \opsquared{x}{y}{z}}
+    {\opsquared{x}{y}{z}}
     {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{zero}{t}{y}{\Gamma \comma z}}
     
     \inferrule
-        {t \; t' \; : \Type \\
-          x : \Carrier_{idx}^2 \\
-          x' : \Carrier_{idx'}^2 \\\\
-      loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
+    {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
     {\constr{suc} \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
   \end{mathpar}
   \caption{Variable references as proofs on the typing context and input and output multiplicity contexts.}
   \label{fig:variable-references}
   \end{figure}
 \end{nidefinition}
+
+\begin{remark}
+  We use $\field{\cdot-unique}$ to relieve the user from the proof burden $\opsquared{x}{y}{z}$ in the base case $\constr{zero}$.
+  This is the only place in the typing system that uses the algebra on multiplicities.
+\end{remark}
+
+\begin{example}
+\todo{example}
+\end{example}
 
 \begin{lemma}
   The typing context $\gamma$ at index $i$ is type $t$.
@@ -789,6 +790,9 @@ As a result, the proofs on typing derivations will perform a double induction: o
 \end{lemma}
 \begin{lemma}
   For every index $j$ other than $i$, the input annotation in context $\Gamma$ at index $i$ is the output annotation in $\Delta$ at index $i$.
+\end{lemma}
+\begin{lemma}
+  \todo{Add feedback and feedfront}
 \end{lemma}
 \begin{corollary}
   Given the witness $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$, $\Gamma \equiv \Delta$ iff $y \equiv \zero$.
@@ -872,9 +876,26 @@ As a result, the proofs on typing derivations will perform a double induction: o
 \section{Subject Reduction}
 \label{subject-reduction}
 
+Subject reduction (aka type preservation) relates the operational semantics and the typing system of a language.
+In its usual form, it states that if $P$ reduces to $Q$ and $P$ is well-typed under context $\Gamma$, then $Q$ is well-typed under $\Gamma$ too.
+In the linear \picalc{} however, reduction \emph{is} meant to transform the context: each time communication occurs over a channel, that channel is exhausted.
+In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity on both its input and output capabilities.
+In \S \ref{semantics}, we made sure to lift the index of this channel to the type level.
+If the channel is internal to the process, the context must not be modified; if it is external on index $i$, the input usage context at index $i$ must have $\ell_\#$ subtracted.
+
+\begin{nitheorem}
+  Let $P \reduce{c} Q$.
+  If $c$ is $\constr{internal}$, then let $\Delta \equiv \epsilon$;
+  if $c$ is $\constr{external}\; i$, then let $\Delta \equiv \ell_\# @ i$.
+  Let $\Gamma'$ and $\Gamma$ be usage contexts only differing in $\Delta$, so that $\opctx{\Gamma'}{\Delta}{\Gamma}$.
+  If $\types{\gamma}{\Gamma'}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$
+\end{nitheorem}
+
+\begin{proof}
+\end{proof}
+
 \subsection{Framing}
 
-\todo{op but for contexts}
 \begin{nitheorem}
   Let $\opctx{\Gamma_l}{\Delta}{\Xi_l}$ and $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   If $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$ then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
@@ -913,12 +934,88 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 
 \subsection{Substitution}
 
-\subsection{Subject Reduction}
+When function abstraction and application come together in the \lambdacalc{} with de Bruijn indices, every reference to the innermost variable in the body of the abstraction gets replaced with the argument of the application.
+In the \picalc{} however substitution takes another form: every reference to the innermost variable in the receiving process gets replaced with the reference to the data that is being sent over the channel.
+In a resource-aware \picalc{}, that means that instead of exhausting all $m$ multiplicities of the innermost variable, we leave those unaltered and exhaust them from the element that is being sent.
 
 \begin{nitheorem}
-  If $P \reduce{c} Q$ and $\types{\gamma}{\Gamma'}{P}{\Xi}$ where $\opctx{\Gamma'}{\ell_{\#} @ c}{\Gamma}$,
-  then $\types{\gamma}{\Gamma}{Q}{\Xi}$
+  Let $P$ be a process where the innermost variable has all its $m$ multiplities exhausted, such that $\types{\gamma , t}{\Gamma , m}{P}{\Psi , \ell_{\o}}$.
+  Let $j$ be the index of the data that is being received.
+  This data has at least $m$ multiplicities, such that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
+  Then, we can substitute the innermost variable by $j$.
+  As a result, we will exhaust no multiplicities on the innermost variable and exhaust them in $j$ instead, such that $\types{\gamma , t}{\Gamma , m}{\subst{P}{j}{\constr{zero}}}{\Xi , m}$.
 \end{nitheorem}
+
+\begin{proof}
+  By induction on the typing derivation on $P$.
+  To be able to proceed under scope restriction, we need to generalize the theorem so that the variable that is being substituted need not be $\constr{zero}$, but any variable $i$.
+  We introduce such generalization in Theorem \ref{th:subst-generalization}.
+  \todo{explain arguments}
+\end{proof}
+
+\begin{nitheorem}
+  \label{th:subst-generalization}
+
+  We introduce an intermediate usage context $\Psi_m$.
+  This intermediate context is the result of exhausting some $\Delta$ from the input context $\Gamma$, such that $\opctx{\Gamma}{\Delta}{\Psi_m}$.
+  From $\Psi_m$, exhausting $m$ at index $i$ yields $\Psi_l$; exhausting it at index $j$ yields $\Psi_j$, such that $\contains{\gamma}{\Psi_m}{i}{t}{m}{\Psi_l}$ and $\contains{\gamma}{\Psi_m}{j}{t}{m}{\Psi_r}$.
+  The input derivation on $P$ takes context $\Gamma$ and yields context $\Psi_l$, such that $\types{\gamma}{\Gamma}{P}{\Psi_l}$.
+  The output derivation on $\subst{P}{j}{i}$ takes the same context $\Gamma$ but yields back $\Psi_r$, such that $\types{\gamma}{\Gamma}{\subst{P}{j}{i}}{\Psi_r}$.
+
+  \begin{remark}
+    \label{re:delta-zero}
+    It is of uttermost importance that the variable that is being substituted has \emph{all} of its multiplicities substituted.
+    To enforce this, we add an additional premise: that in going from $\Gamma$ to the intermediate context $\Psi_m$ we must exhaust no multiplicities at index $i$ -- so that $m$ indeed captures the totality of the multiplicities that are being exhausted between $\Gamma$ and $\Psi_l$.
+    We capture this requirement by enforcing $\Delta_i \equiv \ell_{\o}$.
+  \end{remark}
+\end{nitheorem}
+
+\begin{figure}[ht]
+  \begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}
+    \node (gamma) at (0,2) {$\Gamma$};
+    \node (psi-m) at (4,2) {$\Psi_m$};
+    \node (psi-l) at (4,4) {$\Psi_l$};
+    \node (psi-r) at (4,0) {$\Psi_r$};
+    \draw[->]                (gamma) -- node[above,sloped] {$\Delta$} node[below] {$\Delta_i = \ell_{\o}$} (psi-m);
+    \draw[->]                (gamma) -- node[above,sloped] {$\vdash P$}               (psi-l);
+    \draw[->,densely dotted] (gamma) -- node[below,sloped] {$\vdash \subst{P}{j}{i}$} (psi-r);
+    \draw[->]                (psi-m) -- node[right]        {$m@i$}                    (psi-l);
+    \draw[->]                (psi-m) -- node[right]        {$m@j$}                    (psi-r);
+  \end{tikzpicture}
+  \caption{Diagrammatic representation of the generalized substitution theorem.}
+  \label{fig:subst}
+  \end{subfigure}
+  % Do not leave empty line
+  \begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}
+    \node (gamma) at (0,2) {$\Gamma$};
+    \node (xi-l)  at (0,4) {$\Xi_l$};
+    \node (xi-r)  at (0,0) {$\Xi_r$};
+    \node (psi-m) at (4,2) {$\Psi_m$};
+    \node (psi-l) at (4,4) {$\Psi_l$};
+    \node (psi-r) at (4,0) {$\Psi_r$};
+    \draw[->]                (gamma) -- node[above,sloped] {$\Delta$} node[below] {$\Delta_i = \ell_{\o}$} (psi-m);
+    \draw[->]                (gamma) -- node[left]         {$\ell_i@i$}               (xi-l);
+    \draw[->,densely dotted] (gamma) -- node[left]         {$\ell_i@j$}               (xi-r);
+    \draw[->]                (xi-l)  -- node[above]        {$\vdash P$}               (psi-l);
+    \draw[->,densely dotted] (xi-r)  -- node[above]        {$\vdash \subst{P}{j}{i}$} (psi-r);
+    \draw[->]                (psi-m) -- node[right]        {$m@i$}                    (psi-l);
+    \draw[->]                (psi-m) -- node[right]        {$m@j$}                    (psi-r);
+  \end{tikzpicture}
+  \caption{
+    Diagrammatic representation of the generalized substitution for process input.
+    Thanks to the additional premise in Remark \ref{re:delta-zero}, we know that $m$ is at least capable of $\ell_i$, or $\opsquared{m}{\delta}{\ell_i}$.
+  }
+  \label{fig:subst-input}
+  \end{subfigure}
+\end{figure}
+
+\begin{proof}
+  \todo{BIG TODO}
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
