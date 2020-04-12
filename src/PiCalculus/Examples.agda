@@ -3,7 +3,7 @@ open import Data.String.Base using (String)
 open import Data.Bool using (Bool; true; false)
 open import Data.Unit using (⊤; tt)
 open import Data.Maybe using (Maybe; just; nothing)
-open import Data.Fin using (#_; zero; suc)
+open import Data.Fin using (#_)
 open import Data.Product using (_,_; Σ-syntax)
 open import Data.Vec using (Vec; []; _∷_)
 open import Data.Vec.Relation.Unary.All using (All; []; _∷_)
@@ -18,21 +18,23 @@ open Scoped
 open Conversion
 open import PiCalculus.Semantics
 open import PiCalculus.LinearTypeSystem.Quantifiers
-open import PiCalculus.LinearTypeSystem.Quantifiers.Linear
-open import PiCalculus.LinearTypeSystem.Quantifiers.Shared
+open import PiCalculus.LinearTypeSystem.Quantifiers.Linear using (Linear)
+open import PiCalculus.LinearTypeSystem.Quantifiers.Shared using (Shared)
 
 module PiCalculus.Examples where
 
 QUANTIFIERS : Quantifiers
-Quantifiers.I QUANTIFIERS = Bool
-Quantifiers.∃I QUANTIFIERS = false
-Quantifiers.Cs QUANTIFIERS false = Ω
-Quantifiers.Cs QUANTIFIERS true = Mult
-Quantifiers.Qs QUANTIFIERS false = Shared
-Quantifiers.Qs QUANTIFIERS true = Linear
+Quantifiers.Idx QUANTIFIERS = Bool
+Quantifiers.∃Idx QUANTIFIERS = false
+Quantifiers.Carrier QUANTIFIERS false = ⊤
+Quantifiers.Carrier QUANTIFIERS true = Bool
+Quantifiers.Algebra QUANTIFIERS false = Shared
+Quantifiers.Algebra QUANTIFIERS true = Linear
+
+pattern LINEAR = true
+pattern SHARED = false
 
 open Quantifiers QUANTIFIERS
-
 open import PiCalculus.LinearTypeSystem QUANTIFIERS
 
 variable
@@ -111,15 +113,18 @@ _ = _ , new-cong stop scope-end
 _ : channel-over-channel₆ raw-[ "y" ∷ [] ]≅ channel-over-channel₇
 _ = _ , stop scope-end
 
-raw-[_]_∝_⊢_ : ∀ {n} → Vec String n → Vec Type n → {idxs : Vec I n} → All Cs idxs → Raw tt → Set
+raw-[_]_∝_⊢_ : ∀ {n} → Vec String n → PreCtx n → {idxs : Idxs n} → Ctx idxs → Raw tt → Set
 raw-[ names ] γ ∝ Γ ⊢ P with raw→scoped names P
 raw-[ names ] γ ∝ Γ ⊢ P | just P' = γ ∝ Γ ⊢ P'
 raw-[ names ] γ ∝ Γ ⊢ P | nothing = L.Lift _ ⊤
 
-_ : raw-[ [] -, "a" ] [] -, B[ 0 ] ∝ _∷_ {x = false} ω∙ [] ⊢ (⦅new "x" ⦆ (("x" ⟨ "a" ⟩ 𝟘)) ∥ ("x" ⦅ "b" ⦆ 𝟘))
-_ = chan {idx = true} B[ 0 ] ω∙ Mult.ℓ# (comp (send zero (suc zero) end) (recv zero end))
+_ : raw-[ [] -, "a" ] [] -, B[ 0 ] ∝ _∷_ {x = false} (tt , tt) [] ⊢ (⦅new "x" ⦆ (("x" ⟨ "a" ⟩ 𝟘)) ∥ ("x" ⦅ "b" ⦆ 𝟘))
+_ = chan {idx = LINEAR} B[ 0 ] (ℓ# {SHARED}) (1∙ {LINEAR})
+    (comp (send zero (suc zero) end)
+    (recv  zero end))
 
-_ : raw-[ [] -, "y" ] [] -, B[ 0 ] ∝ _∷_ {x = false} ω∙ [] ⊢ channel-over-channel₀
-_ = chan {idx' = true} {idx = true} C[ B[ 0 ] ∝ ω∙ ] Mult.ℓᵢ Mult.ℓ# (comp
+_ : raw-[ [] -, "y" ] [] -, B[ 0 ] ∝ _∷_ {x = false} (tt , tt) [] ⊢ channel-over-channel₀
+_ = chan {idx' = LINEAR} {idx = LINEAR} C[ B[ 0 ] ∝ (ℓ# {SHARED}) ] (ℓᵢ {LINEAR}) (1∙ {LINEAR}) (comp
          (recv zero (recv zero end))
-         (chan B[ 0 ] ω∙ Mult.ℓ# (send (suc zero) zero (send zero (suc (suc zero)) end))))
+         (chan B[ 0 ] (ℓ# {SHARED}) (1∙ {LINEAR})
+               (send (suc zero) zero (send zero (suc (suc zero)) end))))
