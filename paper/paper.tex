@@ -301,7 +301,7 @@ To present things back to the user, we print indices as their named annotations.
 
 In the \lambdacalc{} $\beta$-reduction operates on syntactically adjacent terms.
 In the \picalc{} however, the syntax introduces unnecessary distinctions
-(e.g. semantically parallel composition is defined modulo associativity and commutativity).
+(e.g. semantically, parallel composition is defined modulo associativity and commutativity).
 There are several ways around this, a structural congruence relation being one of the historical ones.
 (Others include labeled transition systems and higher inductive types.)
 
@@ -312,9 +312,9 @@ There are several ways around this, a structural congruence relation being one o
 Structural congruence is a congruent equivalence relation on processes.
 Any two structurally congruent processes are strongly bisimilar: they are can follow each other's reduction steps \cite{}.
 Figure \ref{fig:struct-cong-base} lists the base cases of structural congruence.
-The type $\Unused_0 \; Q$ witnesses that index $0$ does not appear nor in the inputs nor in the outputs of process $Q$ --- it does so by traversing $Q$.
-The function $lower \; 0 \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $0$.
-Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps variable references $0$ and $\suc 0$.
+The type $\Unused_i \; Q$ is an inductive proof on $Q$ that witnesses that the index $i$ does not appear nor in the inputs nor in the outputs of the process.
+The function $lower \; i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
+Finally, $swap \; i \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps variable references $i$ and $\suc i$.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -351,12 +351,26 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
 \label{fig:struct-cong-base}
 \end{figure}
 
-\todo{lemma for lift-lower}
+\begin{nilemma}
+  \label{lm:lower-lift}
+  The function $lower \; i \; P \; uP$ has an inverse $lift \; i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $lift \; i \; (lower \; i \; P \; uP) \equiv P$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+  
+\begin{nilemma}
+  \label{lm:swap-swap}
+  The function $swap \; i \; P$ is its own inverse: $swap \; i \; (swap \; i \; P) \equiv P$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 Structural congruence is a congruent equivalence relation.
 As such, rewrites can happen at any point in a process' recursive definition, and they are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{fig:struct-cong}.
 In \S \ref{subject-congruence} we will prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then $Q$ is well-typed.
-Specifically, in the case of transitivity we must prove that if $P$ is structurally congruent with $Q$ and $Q$ with $R$, and $P$ is well-typed, then so is $R$.
+Specifically, in the case of transitivity, we must prove that if $P$ is structurally congruent with $Q$ and $Q$ with $R$, and $P$ is well-typed, then so is $R$.
 To do so, we will have to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
 To show that the doubly recursive call terminates we index the equivalence relation $=$ by the type $\Rec$, which models the structure of the recursion.
 
@@ -883,8 +897,20 @@ As a result, the proofs on typing derivations will perform a double induction: o
 \end{nidefinition}
 
 \begin{nilemma}
-\todo{introduce entails-unused}
+  \label{lm:types-unused}
+  If $P$ is well-typed under input context $\Gamma$ and output context $\Xi$, and variable $i$ is unused within $P$, then $\Gamma_i \equiv \Xi_i$.
 \end{nilemma}
+\begin{proof}
+  By induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+
+\begin{nilemma}
+  \label{lm:types-op}
+  For any well typed-process $P$ with input context $\Gamma$ and output context $\Xi$, there exists some $\Delta$ such that $\opctx{\Gamma}{\Delta}{\Xi}$.
+\end{nilemma}
+\begin{proof}
+  By induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Subject Reduction}
@@ -929,30 +955,53 @@ If the channel is internal to the process, the context must not be modified; if 
 \subsection{Framing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+Framing captures the idea that the well-typedness of a process does not depend on its unused resources.
+These unused resources are not introduced as new variables -- the typing context remains unaltered -- but rather as extra multiplicities that are carried from the input context to the output context.
+
 \begin{nitheorem}
-  Let $\opctx{\Gamma_l}{\Delta}{\Xi_l}$ and $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
-  If $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$ then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
+  Let $P$ be a well-typed process from context $\Gamma_l$ to $\Xi_l$.
+  Then, per Lemma \ref{lm:types-op}, there exists some $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
+  Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
+  Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
+\begin{proof}
+  By induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 \subsection{Weakening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Order preserving embeddings model a series of insertions. We only ever need one insertion to prove subject congruence, but there is no loss of generality.
+Weakening states that adding new variables to the typing and usage contexts preserves the well-typedness of a process.
+The multiplicities of these new variables will be carried from the input context to the output context.
+Usually, weakening is presented through order preserving embeddings.
+Order preserving embeddings model a series of insertions into a context.
+In this paper, we use weakening to prove subject congruence.
+To do so, we need of a single insertion into a context, and thus we will limit our theorem statement to that, but there is no loss of generality.
 
 \begin{nitheorem}
-  If $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
+  Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let us insert an arbitrary type $t$ at position $i$ in the typing context and an arbitrary multiplicity $x$ at position $i$ into both the input and output contexts.
+  Let us reflect this on the process $P$ by incrementing every index greater than or equal to $i$.
+  The resulting process will be well-typed so that $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
 \end{nitheorem}
+\begin{proof}
+  By induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 \subsection{Strengthening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{nitheorem}
-  If $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\Unused \; i \; P$, then $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
-\end{nitheorem}
+Strengthening states that removing unused variables from the typing and usage contexts preserves the well-typedness of a process.
+The proof that a variable is unused within a process must be syntactical and cannot rely on the preservation of its usage annotations between the input and output contexts: a process can refer to a variable and still make no use of it -- e.g. by sending none of its multiplicities over a channel.
 
-\begin{remark}
-  The proof that index $i$ is unused in $P$ must be syntactical and cannot rely on the usage annotation of index $i$ being preserved between $\Gamma$ and $\Xi$: process $P$ can send variable reference $i$ with multiplicity $\zero$ over a channel.
-\end{remark}
+\begin{nitheorem}
+  Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let $i$ be a variable index that is not mentioned by $P$, such that $\Unused \; i \; P$.
+  Then removing index $i$ from the typing context and both of the usage contexts and decrementing every variable in $P$ greater than $i$ preserves its well typedness, so that $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
+\end{nitheorem}
+\begin{proof}
+  By induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 \subsection{Swapping}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -984,15 +1033,19 @@ Structural congruence is an equivalence relation that aims to overcome the seman
   In the $\constr{scope-end}$ case, the typing rules $\constr{chan}$ and $\constr{end}$ work together to constraint the multiplicity of the newly create channel to $\ell_{\o}$, making the proof trivial.
   In the opposite direction, we will need to instantiate the newly created channel to a concrete type and multiplicities.
   For this, we will use type $\unit$ and multiplicities $\ell_{\o}$.
-  In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of Lemma $\ref{types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
+  In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of Lemma $\ref{lm:types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
   We will then use strengthening (\S \ref{strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
   In the reverse direction, we will weaken $P$ so that it can accept an additional variable.
-  We will then use Lemma \ref{lift-lower} to show that lifting a lowered $P$ leaves $P$ unchanged.
+  We will then use Lemma \ref{lm:lower-lift} to show that lifting a lowered $P$ leaves $P$ unchanged.
   Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in \S \ref{swapping}.
-  In the reverse direction, we will use swapping and then show that swapping indices $i$ and $\suc i$ in process $P$ two times leaves $P$ unchanged.
+  In the reverse direction, we will use swapping and then use Lemma \ref{lm:swap-swap} to show that swapping indices twice leaves $P$ unchanged.
 \end{proof}
 \todo{make sure constructor names in code coincide}
 
+\begin{remark}
+  We encode the recursive structure of \textsc{Equals} in its inductive definition -- by indexing its type with \textsc{Rec}.
+  This acts as a justification of the well-formedness of the recursion scheme, which Agda cannot immediately see as terminating due to the interaction between the transitive and symmetric cases.
+\end{remark}
 
 \subsection{Substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
