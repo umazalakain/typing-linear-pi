@@ -29,6 +29,7 @@
 \theoremstyle{definition}
 \newtheorem{nidefinition}[theorem]{Definition}
 \newtheorem{nitheorem}[theorem]{Theorem}
+\newtheorem{nilemma}[theorem]{Lemma}
 
 % No line numbers
 \nolinenumbers
@@ -178,6 +179,7 @@ As a result, we are able to model a mix of shared, linear, and gradual types.
 \todo{subject reduction}
 
 \subsection{Contribution}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{description}
   \item [Machine verified formalisation of the linear pi calculus]
@@ -190,6 +192,7 @@ As a result, we are able to model a mix of shared, linear, and gradual types.
 \end{description}
 
 \subsection{Notation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h]
   \begin{mathpar}
@@ -220,27 +223,27 @@ Some constructors can be shared across types and disambiguated by context.
 \section{Syntax}
 \label{syntax}
 
-Abstraction is one of the key reasoning tools in a language: it allows for features to be defined over a range of inputs.
-Such is the case of the \picalc{} too, where both scope restriction and input introduce abstractions.
-The bodies of these constructs must have a way of referring to their argument.
+In the \picalc{} both scope restriction and input introduce abstractions.
+The bodies of these constructs need a way of referring to their argument.
 Using names as variable references is a popular option amongst humans.
-However, names are cumbersome to mechanize: inserting a new variable into an environment means proving that the name of such variable is different to all other variable names in the environment.
-Moreover, to a machine names are of no significance whatsoever.
+However, names are cumbersome to mechanize: inserting a new variable into a context means proving that the name of such variable is different from all other variable names in context.
+Moreover, names are of no significance to machines.
 
-Machines prefer things they can algorithmically act upon. Like natural numbers!
-What does it mean to use a number as a variable reference?
-The idea de Bruijn had \cite{} was to use the index $n$ to refer to the variable introduced $n$ binders ago.
-The binders themselves introduce no names anymore.
-The expression $\lambda g . (\lambda f . f g) g$ in the \lambdacalc{} would translate as $\lambda (\lambda 0 1) 0$.
-That is, terms at different \emph{depths} must use different indices to refer to the same binding.
-Humans find this often confusing.
-There is however no reason not to keep the original names bestowed by the humans together with the indices.
-Machines can then manipulate references mechanically and still use names to present them to humans.
+Machines need constructs they can algorithmically act upon.
+The idea de Bruijn had \cite{} was to use a natural number $n$ (aka \emph{index}) to refer to the variable introduced $n$ binders ago.
+Binders no longer introduce any names.
+\begin{example}
+The expression $\lambda g . (\lambda f . f g) g$ in the \lambdacalc{} would translate to $\lambda (\lambda 0 1) 0$.
+\end{example}
+That is, terms at different \emph{depths} use different indices to refer to the same binding.
+Humans often find this confusing.
+There is however no reason not to annotate these indices with the original names bestowed by humans.
+Machines can then manipulate references mechanically while still using names to present terms to humans.
 
 A variable occurring under $n$ abstractions has $n$ things to refer to.
 References outside of that range have no associated meaning.
 It is useful to rule out these nonsensical terms syntactically.
-In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
+In Figure \ref{fig:var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -263,7 +266,7 @@ In Figure \ref{var} we do so by introducing the indexed family of types $\Var_n$
 
 Every time we go under a binder, the number of binders a variable might refer to increments by one.
 To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-As shown in Figure \ref{fig:process}, we increase the \emph{depth} counter every time we create a new channel or receive some input.
+As shown in Figure \ref{fig:syntax}, we increase the \emph{depth} counter every time we create a new channel or receive some input.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -286,12 +289,11 @@ As shown in Figure \ref{fig:process}, we increase the \emph{depth} counter every
 \label{fig:syntax}
 \end{figure}
 
-Unlike with names, using type-level de Bruijn indices makes our syntax well-scoped by construction.
-As a consequence, the semantics of our language can be defined on the totality of the syntax.
+Using type-level de Bruijn indices makes our syntax well-scoped by construction, and the semantics of our language can now be defined on the totality of the syntax.
 User-friendliness can still be recovered through a function that converts processes with names into (possibly) processes with indices.
-This function would keep track of what index is associated with what name, and would traverse the process recursively, taking note of new binders and substituting variable references.
-If the process is ill-scoped, the function would return nothing.
-To print things back to the user names can be substituted with an index together with the name.
+This function keeps track of what index is associated with what name, and traverses the process recursively, taking note of new binders and substituting variable references.
+If the process is ill-scoped, the function returns nothing.
+To present things back to the user, we print indices as their named annotations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
@@ -304,6 +306,7 @@ There are several ways around this, a structural congruence relation being one o
 (Others include labeled transition systems and higher inductive types.)
 
 \subsection{Structural Congruence}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{structural-congruence}
 
 Structural congruence is a congruent equivalence relation on processes.
@@ -419,6 +422,7 @@ To show that the doubly recursive call terminates we index the equivalence relat
 \end{figure}
   
 \subsection{Operational Semantics}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{operational-semantics}
 
 Figure \ref{fig:reduction} models the operational semantics of the \picalc{}.
@@ -503,6 +507,7 @@ Crucially, this output context can then be used as the input context of the cont
 The typing rules are introduced in \S \ref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{multiplicities}
 
 In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 or 1.
@@ -584,6 +589,7 @@ It must satisfy the following constraints:
 \end{nidefinition}
 
 \subsubsection{Example Type Systems}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \todo{Add typing derivations for example processes}
 
@@ -612,6 +618,7 @@ All other rules follow trivially from the algebraic rules for the addition of na
 \end{description}
 
 \subsection{Contexts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{contexts}
 
 In a resource-aware \picalc{} type multiplicities change every time input and output occurs; however, the types themselves remain constant.
@@ -716,6 +723,7 @@ In this paper we choose that approach, which entails accepting that base non-cha
 \end{note}
 
 \subsection{Typing with Leftovers}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{leftover-typing}
 
 We use leftover typing \cite{} to encode our typing rules.
@@ -784,18 +792,18 @@ As a result, the proofs on typing derivations will perform a double induction: o
 \todo{example}
 \end{example}
 
-\begin{lemma}
+\begin{nilemma}
   The typing context $\gamma$ at index $i$ is type $t$.
-\end{lemma}
-\begin{lemma}
+\end{nilemma}
+\begin{nilemma}
   The input annotation in context $\Gamma$ at index $i$ is the result of aggregating (as per the algebra) $y$ and the output annotation in context $\Delta$ at index $i$.
-\end{lemma}
-\begin{lemma}
+\end{nilemma}
+\begin{nilemma}
   For every index $j$ other than $i$, the input annotation in context $\Gamma$ at index $i$ is the output annotation in $\Delta$ at index $i$.
-\end{lemma}
-\begin{lemma}
+\end{nilemma}
+\begin{nilemma}
   \todo{Add feedback and feedfront}
-\end{lemma}
+\end{nilemma}
 \begin{corollary}
   Given the witness $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$, $\Gamma \equiv \Delta$ iff $y \equiv \zero$.
 \end{corollary}
@@ -874,9 +882,9 @@ As a result, the proofs on typing derivations will perform a double induction: o
   \end{figure}
 \end{nidefinition}
 
-\begin{lemma}
+\begin{nilemma}
 \todo{introduce entails-unused}
-\end{lemma}
+\end{nilemma}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Subject Reduction}
@@ -897,10 +905,29 @@ If the channel is internal to the process, the context must not be modified; if 
   If $\types{\gamma}{\Gamma'}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$
 \end{nitheorem}
 
+\begin{nilemma}
+  \label{lm:comm-capable}
+  \todo{reformulate}
+  A well-typed process on which reduction occurs externally, must have this external multiplicity be capable of $\ell_\#$.
+\end{nilemma}
+  
 \begin{proof}
+  For the base case $\constr{comm}$ \todo{}
+
+  Reduction under composition with $\constr{par}$ \todo{}
+
+  Reduction under scope restriction case splits on \textsc{Channel} $c$ on which communication occurs.
+  If this channel is internal to the process, or if it is external but on a channel other then the one introduced by the recent scope restriction, subject reduction proceeds inductively.
+  However, if reduction happens on the most recently introduced channel, we use the Lemma \ref{lm:comm-capable} to subtract $\ell_\#$ from the channel's multiplicity, then apply the induction hypothesis.
+
+  Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and then the induction hypothesis.
+  
+  
+
 \end{proof}
 
 \subsection{Framing}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{nitheorem}
   Let $\opctx{\Gamma_l}{\Delta}{\Xi_l}$ and $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
@@ -908,6 +935,7 @@ If the channel is internal to the process, the context must not be modified; if 
 \end{nitheorem}
 
 \subsection{Weakening}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Order preserving embeddings model a series of insertions. We only ever need one insertion to prove subject congruence, but there is no loss of generality.
 
@@ -916,6 +944,7 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 \end{nitheorem}
 
 \subsection{Strengthening}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{nitheorem}
   If $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\Unused \; i \; P$, then $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
@@ -926,17 +955,20 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 \end{remark}
 
 \subsection{Swapping}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{nitheorem}
   If $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{swap_i \; \gamma}{swap_i \; \Gamma}{swap_i \; P}{swap_i \; \Xi}$.
 \end{nitheorem}
 
 \subsection{Subject Congruence}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
 
 Structural congruence is an equivalence relation that aims to overcome the semantically meaningless difference introduced by the syntax of the \picalc{}.
 
 \begin{nitheorem}
+  \label{thm:subject-congruence}
   Applying structural congruence rules to a well-typed process should preserve its well-typedness under the same typing and usage contexts.
   If $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
@@ -963,6 +995,7 @@ Structural congruence is an equivalence relation that aims to overcome the seman
 
 
 \subsection{Substitution}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 When function abstraction and application come together in the \lambdacalc{} with de Bruijn indices, every reference to the innermost variable in the body of the abstraction gets replaced with the argument of the application.
 In the \picalc{} however substitution takes another form: every reference to the innermost variable in the receiving process gets replaced with the reference to the data that is being sent over the channel.
