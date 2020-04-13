@@ -348,6 +348,8 @@ Finally, $swap \; 0 \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
 \label{fig:struct-cong-base}
 \end{figure}
 
+\todo{lemma for lift-lower}
+
 Structural congruence is a congruent equivalence relation.
 As such, rewrites can happen at any point in a process' recursive definition, and they are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{fig:struct-cong}.
 In \S \ref{subject-congruence} we will prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then $Q$ is well-typed.
@@ -872,6 +874,10 @@ As a result, the proofs on typing derivations will perform a double induction: o
   \end{figure}
 \end{nidefinition}
 
+\begin{lemma}
+\todo{introduce entails-unused}
+\end{lemma}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Subject Reduction}
 \label{subject-reduction}
@@ -928,9 +934,33 @@ Order preserving embeddings model a series of insertions. We only ever need one 
 \subsection{Subject Congruence}
 \label{subject-congruence}
 
+Structural congruence is an equivalence relation that aims to overcome the semantically meaningless difference introduced by the syntax of the \picalc{}.
+
 \begin{nitheorem}
+  Applying structural congruence rules to a well-typed process should preserve its well-typedness under the same typing and usage contexts.
   If $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
+
+\begin{proof}
+  By induction on \textsc{EQUALS}.
+  The case $\constr{struct}$ and its symmetric one under $\constr{sym}$ are the nontrivial ones.
+  For those, we proceed by induction on \textsc{StructCong}.
+  The case $\constr{comp-assoc}$ is trivial because the encoding with leftover typing of the typing rules naturally preserves associativity.
+  The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (\S \ref{framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
+  The middle-point of the resulting derivation on $\comp{Q}{P}$ will no longer be the same.
+  The case $\constr{comp-end}$ is trivial because in the typing rule for process $\PO$ the input and output contexts are one and the same.
+  In the $\constr{scope-end}$ case, the typing rules $\constr{chan}$ and $\constr{end}$ work together to constraint the multiplicity of the newly create channel to $\ell_{\o}$, making the proof trivial.
+  In the opposite direction, we will need to instantiate the newly created channel to a concrete type and multiplicities.
+  For this, we will use type $\unit$ and multiplicities $\ell_{\o}$.
+  In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of Lemma $\ref{types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
+  We will then use strengthening (\S \ref{strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
+  In the reverse direction, we will weaken $P$ so that it can accept an additional variable.
+  We will then use Lemma \ref{lift-lower} to show that lifting a lowered $P$ leaves $P$ unchanged.
+  Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in \S \ref{swapping}.
+  In the reverse direction, we will use swapping and then show that swapping indices $i$ and $\suc i$ in process $P$ two times leaves $P$ unchanged.
+\end{proof}
+\todo{make sure constructor names in code coincide}
+
 
 \subsection{Substitution}
 
@@ -1007,7 +1037,7 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
   \end{tikzpicture}
   \caption{
     Diagrammatic representation of the generalized substitution for process input.
-    Thanks to the additional premise in Remark \ref{re:delta-zero}, we know that $m$ is at least capable of $\ell_i$, or $\opsquared{m}{\delta}{\ell_i}$.
+    Thanks to the additional premise in Remark \ref{re:delta-zero}, we know that $m$ is at least capable of $\ell_i$, i.e. $\opsquared{m}{\delta}{\ell_i}$ for some $\delta$.
   }
   \label{fig:subst-input}
   \end{subfigure}
