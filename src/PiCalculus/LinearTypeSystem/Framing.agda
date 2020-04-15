@@ -66,12 +66,12 @@ private
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)
   = chan t m μ (⊢-frame {Δ = _ -, (μ , μ)} (Γ≔ , ∙²-idʳ) (Ξ≔ , ∙²-idʳ) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (recv ∋i ⊢P) with ∋-⊎ ∋i | ⊢-⊎ ⊢P
-⊢-frame Γ≔ Ξ≔ (recv ∋i ⊢P) | i≔ | (_ -, _) , (P≔ , x≔) =
+⊢-frame Γ≔ Ξ≔ (recv ∋i ⊢P) | _ , i≔ | (_ -, _) , (P≔ , x≔) =
   let iP≔           = ⊎-comp i≔ P≔ Γ≔
       _ , i'≔ , P'≔ = ⊎-assoc Ξ≔ iP≔
    in recv (∋-frame i≔ i'≔ ∋i) (⊢-frame (P≔ , x≔) (P'≔ , x≔) ⊢P)
 ⊢-frame Γ≔ Ξ≔ (send ∋i ∋j ⊢P) with ∋-⊎ ∋i | ∋-⊎ ∋j | ⊢-⊎ ⊢P
-⊢-frame Γ≔ Ξ≔ (send ∋i ∋j ⊢P) | i≔ | j≔ | _ , P≔ =
+⊢-frame Γ≔ Ξ≔ (send ∋i ∋j ⊢P) | _ , i≔ | _ , j≔ | _ , P≔ =
   let [ij]P≔         = ⊎-comp (⊎-trans i≔ j≔) P≔ Γ≔
       _ , ij'≔ , P'≔ = ⊎-assoc Ξ≔ [ij]P≔
       ij≔            = ⊎-comp i≔ j≔ (⊎-trans i≔ j≔)

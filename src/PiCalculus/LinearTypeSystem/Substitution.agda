@@ -49,40 +49,33 @@ private
     Γ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ : Ctx idxs
     P : Scoped n
 
-∋-feedfront : {γ : PreCtx n} {idxs : Idxs n} {Γ M₁ M₂ N : Ctx idxs}
-            → m ≔ δ ∙² l
-            → ⦃ eq : M₁ ≡ M₂ ⦄
-            → γ ∝ M₁ [ i ]≔ t ∝ l ⊠ N
-            → γ ∝ M₂ [ i ]≔ t ∝ m ⊠ Γ
-            → γ ∝ N [ i ]≔ t ∝ δ ⊠ Γ
-∋-feedfront (left , right) (zero ⦃ a ⦄) (zero ⦃ b ⦄) with toWitness a | toWitness b
-∋-feedfront (left , right) ⦃ refl ⦄ (zero ⦃ a ⦄) (zero ⦃ b ⦄) | _ , (la , ra) | _ , (lb , rb)
-  = ⊎-∋ (⊎-idˡ , (feedfront left la lb , feedfront right ra rb))
-∋-feedfront s ⦃ refl ⦄ (suc N) (suc Γ) = suc (∋-feedfront s N Γ)
-
-∋-feedback : {γ : PreCtx n} {idxs : Idxs n} {Γ M N : Ctx idxs}
-         → m ≔ δ ∙² l
-         → γ ∝ N [ i ]≔ t ∝ l ⊠ M
-         → γ ∝ Γ [ i ]≔ t ∝ m ⊠ M
-         → γ ∝ Γ [ i ]≔ t ∝ δ ⊠ N
-∋-feedback (left , right) (zero ⦃ a ⦄) (zero ⦃ b ⦄) with toWitness a | toWitness b
-∋-feedback (left , right) (zero ⦃ a ⦄) (zero ⦃ b ⦄) | _ , (la , ra) | _ , (lb , rb)
-  = ⊎-∋ (⊎-idˡ , (feedback left la lb , feedback right ra rb))
-∋-feedback s (suc N) (suc Γ) = suc (∋-feedback s N Γ)
-
 foo : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Ψₘ Ψₗ Ψᵣ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
-    → γ ∝ Ψₘ [ i ]≔ t ∝ m ⊠ Ψₗ
-    → γ ∝ Ψₘ [ j ]≔ t ∝ m ⊠ Ψᵣ
+    → Ψₘ ≔ m at i ⊠ Ψₗ
+    → Ψₘ ≔ m at j ⊠ Ψᵣ
     → i Fin.≤ j
     → All.lookup i Δ ≡ ℓ∅
     → Γ ≔ Δ ⊎ Ψₘ
     → γ ∝ Γ ⊢ P ⊠ Ψₗ
     → γ ∝ Γ ⊢ [ j / i ] P ⊠ Ψᵣ
 
-foo ∋i ∋j i≤j eq Γ≔ end rewrite ⊎-mut-cancel Γ≔ (∋-⊎ ∋i) | 0∙-∋ ∋i (sym (⊎-mut-cancel Γ≔ (∋-⊎ ∋i))) | ∋-0∙ ∋j = end
+foo ∋i ∋j i≤j eq Γ≔ end with Only-⊎ ∋i | Only-⊎ ∋j
+foo ∋i ∋j i≤j eq Γ≔ end | _ , Ψₘ≔m∙Γ , _ | _ , Ψₘ≔m∙Ψᵣ , _
+  rewrite ⊎-mut-cancel Γ≔ Ψₘ≔m∙Γ | ε-Only ∋i | Only-ε ∋j = end
 
-foo ∋i ∋j i≤j eq Γ≔ (chan t m μ ⊢P) = chan t m μ (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ) ⊢P)
+foo ∋i ∋j i≤j eq Γ≔ (chan t m μ ⊢P)
+  = chan t m μ (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ) ⊢P)
 
+foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) with i Finₚ.≟ x | ∋-⊎ ∋x | Only-⊎ ∋i | Only-⊎ ∋j | ⊢-⊎ ⊢P
+foo {Ψₘ = Ψₘ} {i = i} {m = m} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) | yes refl | _ , Γ≔ℓᵢ∙Ξₗ | mati , Ψₘ≔m∙Ψₗ , _ | matj , Ψᵣ≔m∙Ψₗ , _ | (_ -, _) , (⊢P≔ , _)
+  = let m' , Γ≔m'∙Ψₗ , m'≔ℓᵢ∙⊢P = ∙²-assoc⁻¹ (⊎-get i Γ≔ℓᵢ∙Ξₗ) (⊎-get i ⊢P≔)
+        m'≔ℓᵢ∙⊢P = hsubst (λ ● → ● ≔ _ ∙² _) {!!} {!!} -- (lookup-only i {m} (∋-≡Idx ∋i))
+     in
+  recv (∋-frame {!∋i!} {!!} {!!}) {!!}
+
+foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) | no ¬p    | _ , Γ≔ℓᵢ∙Ξ | mati , Ψₘ≔m∙Ψₗ , _ | matj , Ψᵣ≔m∙Ψₗ , _ | (_ -, _) , (⊢P≔ , _)
+  rewrite ∙²-unique (⊎-get i Γ≔) (subst (λ ● → _ ≔ ● ∙² _) (sym eq) ∙²-idˡ)
+  = recv ∋x (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) {!eq!} (feedback {!!} Ψₘ≔m∙Ψₗ ⊢P≔ , ∙²-idʳ) ⊢P)
+{-
 foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = i'} x ⊢P) with ∋-I ∋i | ∋-I x | i Finₚ.≟ i' | ⊢-⊎ ⊢P
 foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} x ⊢P) | refl | refl | yes refl | (Ξₗ -, _) , (Ξₗ≔ , _) with ∙²-assoc⁻¹ (⊎-get i (∋-⊎ x)) (⊎-get i Ξₗ≔)
 foo {idxs = idxs} {i = i} {m = m} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} x ⊢P) | refl | refl | yes refl | (Ξₗ -, _) , (Ξₗ≔ , _) | δ , Γ≔δ∙Ψₗ , δ≔ℓᵢ∙⊢P
@@ -98,12 +91,13 @@ foo {idxs = idxs} {i = i} {m = m} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} x ⊢P
       ξ , Ψₘ≔ℓᵢ⊎ξ , ξ≔Ξₗᵢ⊎Ψₗ = ⊎-assoc (∋-⊎ ∋i) (only-∙ i (∋-I ∋i) m≔ℓᵢ∙δ)
       Ψₘ≔ℓᵢ⊎ξ' = subst (λ ● → _ ≔ ● ⊎ ξ) (only-irrel (∋-I ∋i) (∋-I x)) Ψₘ≔ℓᵢ⊎ξ
   in recv
-     (∋-frame Ψₘ≔ℓᵢ⊎ξ' (∋-⊎ x) (∋-feedback m≔ℓᵢ∙δ {!!} ∋j))
+     (∋-frame Ψₘ≔ℓᵢ⊎ξ' (∋-⊎ x) (∋-feedback m≔ℓᵢ∙δ {!Γ≔δ∙Ψₗ!} ∋j))
      {!!}
 
 
 
 foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = i'} x ⊢P) | refl | refl | no ¬p | (_ -, _) , (Ξₗ≔ , _) = recv x (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq ({!!} , ∙²-idʳ) ⊢P)
+     -}
 
 foo ∋i ∋j i≤j eq Γ≔ (send x y ⊢P) = {!!}
 
@@ -114,11 +108,7 @@ foo ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = comp (foo {!!} {!!} i≤j {!eq!}
          → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
          → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
 ⊢-subst' ⊢P y with ⊢-⊎ ⊢P
-⊢-subst' ⊢P y | (pctx -, rctx) , (p≔ , r≔) = foo
-  (subst (λ ● → _ ∝ _ -, ● [ _ ]≔ _ ∝ _ ⊠ _)
-         (sym (∙²-compute-unique ∙²-idʳ))
-         (zero ⦃ fromWitness (_ , ∙²-idʳ) ⦄))
-  (suc y) Nat.z≤n refl (p≔ , ∙²-idˡ) ⊢P
+⊢-subst' ⊢P y | (pctx -, rctx) , (p≔ , r≔) = foo (zero ∙²-idʳ) (suc (∋-Only y)) Nat.z≤n refl (p≔ , ∙²-idˡ) ⊢P
 
 postulate
   {- TARGET -}
