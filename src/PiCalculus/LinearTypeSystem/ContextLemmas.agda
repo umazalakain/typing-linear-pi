@@ -15,7 +15,7 @@ import Data.Vec.Relation.Unary.All as All
 import Data.Fin as Fin
 
 open Maybe using (nothing; just)
-open Empty using (⊥)
+open Empty using (⊥; ⊥-elim)
 open Unit using (⊤; tt)
 open ℕ using (ℕ; zero; suc)
 open Product using (Σ-syntax; ∃-syntax; _×_; _,_; proj₂; proj₁)
@@ -106,6 +106,16 @@ Only-ε (suc only) rewrite Only-ε only = refl
 ε-Only : Γ ≔ x at i ⊠ Γ → x ≡ ℓ∅
 ε-Only (zero x) rewrite ∙²-uniqueˡ x ∙²-idˡ = refl
 ε-Only (suc s) rewrite ε-Only s = refl
+
+Only-lookup-≢ : Γ ≔ x at i ⊠ Δ → ∀ j → i ≢ j → All.lookup j Γ ≡ All.lookup j Δ
+Only-lookup-≢ (zero x) zero i≢j = ⊥-elim (i≢j refl)
+Only-lookup-≢ (suc xati) zero i≢j = refl
+Only-lookup-≢ (zero x) (suc j) i≢j = refl
+Only-lookup-≢ (suc xati) (suc j) i≢j = Only-lookup-≢ xati j (i≢j ∘ cong suc)
+
+lookup-ε : ∀ i → All.lookup i (ε {idxs = idxs}) ≡ ℓ∅
+lookup-ε {idxs = _ -, _} zero = refl
+lookup-ε {idxs = _ -, _} (suc i) = lookup-ε i
 
 {-
 -- lookup ∘ only = id

@@ -201,8 +201,8 @@ record Quantifiers : Set₁ where
          → x ≔ y ⊎ z → All.tail x ≔ All.tail y ⊎ All.tail z
   ⊎-tail (tail , _) = tail
 
-  ⊎-idʳ : (Γ : Ctx idxs) → Γ ≔ Γ ⊎ ε
-  ⊎-idʳ Γ = ⊎-comm ⊎-idˡ
+  ⊎-idʳ : {Γ : Ctx idxs} → Γ ≔ Γ ⊎ ε
+  ⊎-idʳ = ⊎-comm ⊎-idˡ
 
   ⊎-mut-cancel : ∀ {x y y' z : Ctx idxs} → x ≔ y ⊎ z → z ≔ y' ⊎ x → x ≡ z
   ⊎-mut-cancel [] [] = refl
