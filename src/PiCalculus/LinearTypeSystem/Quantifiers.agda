@@ -186,6 +186,9 @@ record Quantifiers : Set₁ where
   ⊎-assoc (Γₘ≔ , xₘ≔) (Γₗ≔ , xₗ≔) with ⊎-assoc Γₘ≔ Γₗ≔ | ∙²-assoc xₘ≔ xₗ≔
   ... | (_ , Γₘ'≔ , Γᵣ'≔)  | (_ , xₘ'≔ , xᵣ'≔) = _ , ((Γₘ'≔ , xₘ'≔) , (Γᵣ'≔ , xᵣ'≔))
 
+  ⊎-assoc⁻¹ : ∀ {x y z u v : Ctx idxs} → x ≔ y ⊎ z → z ≔ u ⊎ v → ∃[ ∝ ] (x ≔ ∝ ⊎ v × ∝ ≔ y ⊎ u)
+  ⊎-assoc⁻¹ a b = let _ , a' , b' = ⊎-assoc (⊎-comm a) (⊎-comm b) in _ , ⊎-comm a' , ⊎-comm b'
+
   ⊎-trans : {m l r rl rr : Ctx idxs}
           → (t : m ≔ l ⊎ r) → (b : r ≔ rl ⊎ rr)
           → m ≔ proj₁ (⊎-assoc (⊎-comm t) (⊎-comm b)) ⊎ rr

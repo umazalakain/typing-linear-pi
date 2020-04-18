@@ -43,6 +43,11 @@ lift-lower i (x ⟨ y ⟩ P) (i≢x , i≢y , uP)
   | Finₚ.punchIn-punchOut i≢x
   | Finₚ.punchIn-punchOut i≢y = refl
 
+substFin-suc : (i j x : Fin n) → substFin (suc i) (suc j) (suc x) ≡ suc (substFin i j x)
+substFin-suc i j x with j Finₚ.≟ x
+substFin-suc i j x | yes p = refl
+substFin-suc i j x | no ¬p = refl
+
 swapFin-suc : (i : Fin n) (x : Fin (suc n)) → suc (swapFin i x) ≡ swapFin (suc i) (suc x)
 swapFin-suc i x with Fin.inject₁ i Finₚ.≟ x
 swapFin-suc i .(Fin.inject₁ i) | yes refl = suc & (suc & Finₚ.lower₁-irrelevant _ _ _)
