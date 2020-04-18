@@ -67,7 +67,7 @@ Only-≡Idx (suc s) rewrite Only-≡Idx s = refl
 -- Contains to type equality
 ∋-≡Type : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
         → γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ
-        → t ≡ Vec.lookup γ i
+        → Vec.lookup γ i ≡ t
 ∋-≡Type zero = refl
 ∋-≡Type (suc a) = ∋-≡Type a
 
@@ -111,6 +111,10 @@ Only-ℓ∅-≡ (suc only) rewrite Only-ℓ∅-≡ only = refl
 Only-≡ℓ∅ : Γ ≔ x at i ⊠ Γ → x ≡ ℓ∅
 Only-≡ℓ∅ (zero x) rewrite ∙²-uniqueˡ x ∙²-idˡ = refl
 Only-≡ℓ∅ (suc s) rewrite Only-≡ℓ∅ s = refl
+
+Only-uniqueʳ : Γ ≔ x at i ⊠ Δ → Γ ≔ x at i ⊠ Ξ → Δ ≡ Ξ
+Only-uniqueʳ (zero a) (zero b) rewrite ∙²-uniqueˡ (∙²-comm a) (∙²-comm b) = refl
+Only-uniqueʳ (suc a) (suc b) rewrite Only-uniqueʳ a b = refl
 
 Only-lookup-≡ : Γ ≔ x at i ⊠ Δ → All.lookup i Γ ≔ x ∙² All.lookup i Δ
 Only-lookup-≡ {i = zero} (zero x) = x

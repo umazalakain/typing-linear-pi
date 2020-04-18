@@ -47,10 +47,9 @@ private
     idx : Idx
     idxs : Idxs n
     x m m' l δ : Carrier idx ²
-    Γ Γₗ Γᵣ Ξₗ Ξᵣ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ : Ctx idxs
+    Γ Γₗ Γᵣ Ξₗ Ξᵣ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ Β : Ctx idxs
     P : Scoped n
 
-{-
 ≡-Only-⊎ : {idxs : Idxs n} {Γ xati : Ctx idxs}
           → (i : Fin n)
           → All.lookup i Γ ≡ All.lookup i xati
@@ -62,98 +61,86 @@ private
 ≡-Only-⊎ {Γ = _ -, _} (suc i) eq (suc xati) with ≡-Only-⊎ i eq xati
 ≡-Only-⊎ {Γ = _ -, _} (suc i) eq (suc xati) | _ , Γ≔ , eq' = _ , (Γ≔ , ∙²-idʳ) , eq'
 
-Only-frame : {Γₗ Γᵣ Ψₗ Ψᵣ Δ : Ctx idxs}
-           → Γₗ ≔ Δ ⊎ Γᵣ
-           → Ψₗ ≔ Δ ⊎ Ψᵣ
-           → Γᵣ ≔ m at i ⊠ Ψᵣ
-           → Γₗ ≔ m at i ⊠ Ψₗ
-Only-frame Γ Ψ ∋i = {!!}
+diff : {x y : Carrier idx ²}
+     → Γ ≔ x at i ⊠ Ξ
+     → Ξ ≔ Δ ⊎ Ψ
+     → All.lookup i Δ ≡ ℓ∅
+     → Γ ≔ y at i ⊠ Θ
+     → Θ ≔ Β ⊎ Ψ
+     → ∃[ z ] (x ≔ y ∙² z)
 
-bar : {i j x : Fin n} {Ψₘ Ψₗ Ψᵣ Γ Δ Ξ : Ctx idxs}
-    → Ψₘ ≔ m at i ⊠ Ψₗ
-    → Ψₘ ≔ m at j ⊠ Ψᵣ
+diff (zero x) (_ , Ξ≔) refl (zero y) (_ , Θ≔)
+  rewrite ∙²-unique Ξ≔ ∙²-idˡ =
+  let _ , a , b = ∙²-assoc⁻¹ y Θ≔
+  in _ , subst (λ ● → ● ≔ _ ∙² _) (∙²-uniqueˡ a x) b
+diff (suc x) (Ξ≔ , _) eq (suc y) (Θ≔ , _) = diff x Ξ≔ eq y Θ≔
+
+split : {x y z : Carrier idx ²}
+      → x ≔ y ∙² z
+      → Γ ≔ x at i ⊠ Ξ
+      → ∃[ Δ ] (Γ ≔ y at i ⊠ Δ × Δ ≔ z at i ⊠ Ξ)
+split s (zero x) = let _ , x' , s' = ∙²-assoc x s in _ , zero x' , zero s'
+split s (suc x) with split s x
+split s (suc x) | _ , y , z = _ , suc y , suc z
+
+bar : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Γᵢ Γⱼ Δ Ψ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
+    → γ ∝ Γᵢ [ i ]≔ t ∝ m ⊠ Γ
+    → γ ∝ Γⱼ [ j ]≔ t ∝ m ⊠ Γ
     → i Fin.≤ j
     → All.lookup i Δ ≡ ℓ∅
-    → Γ ≔ Δ ⊎ Ψₘ
-    → Γ ≔ m at x ⊠ Ξ
-    → Ξ ≔ Θ ⊎ Ψₗ
-    → Σ[ W ∈ Ctx idxs ] Γ ≔ m at substFin j i x ⊠ W
-bar {i = i} {j} {x} ∋i ∋j i≤j Δi Γ≔ ∋x Ξ≔ with i Finₚ.≟ x
-bar {i = i} {j} {.i} (zero ∋i) (zero ∋j) i≤j Δi Γ≔ (zero ∋x) Ξ≔ | yes refl = _ , zero ∋x
-bar {i = i} {suc j} {.i} (zero ∋i) (suc ∋j) i≤j refl (Γ≔ , _) (zero ∋x) (Ξ≔ , _) | yes refl = {!!} , suc (Only-frame Γ≔ {!∋x!} {!!})
-bar {i = suc i} {suc j} {suc .i} (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) Δi (Γ≔ , _) (suc ∋x) (Ξ≔ , _) | yes refl with bar ∋i ∋j i≤j Δi Γ≔ ∋x Ξ≔
-bar {i = suc i} {suc j} {suc .i} (suc ∋i) (suc ∋j) i≤j Δi Γ≔ (suc ∋x) Ξ≔ | yes refl | _ , ∋x' with i Finₚ.≟ i
-bar {i = suc i} {suc j} {suc .i} (suc ∋i) (suc ∋j) i≤j Δi Γ≔ (suc ∋x) Ξ≔ | yes refl | _ , ∋x' | yes refl = _ , suc ∋x'
-bar {i = suc i} {suc j} {suc .i} (suc ∋i) (suc ∋j) i≤j Δi Γ≔ (suc ∋x) Ξ≔ | yes refl | _ , ∋x' | no ¬p = ⊥-elim (¬p refl)
-bar {i = i} {j} {x} ∋i ∋j i≤j Δi Γ≔ ∋x Ξ≔ | no ¬p = _ , ∋x
+    → Γ ≔ Δ ⊎ Ψ
+    → γ ∝ Γᵢ ⊢ P ⊠ Ψ
+    → γ ∝ Γⱼ ⊢ [ j / i ] P ⊠ Ψ
+bar ∋i ∋j i≤j eq Γ≔ end with ∋-⊎ ∋i
+bar ∋i ∋j i≤j eq Γ≔ end | _ , Γᵢ≔m∙Γ
+  rewrite ⊎-mut-cancel Γ≔ Γᵢ≔m∙Γ | Only-≡ℓ∅ (∋-Only ∋i) | Only-ℓ∅-≡ (∋-Only ∋j) = end
+bar ∋i ∋j i≤j eq Γ≔ (chan t m μ ⊢P) = chan t m μ (bar (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ) ⊢P)
+bar {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) with ∋-≡Idx ∋i | ∋-≡Idx ∋x | ⊢-⊎ ⊢P | i Finₚ.≟ x
+bar {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = .i} ∋x ⊢P) | refl | refl | (_ -, _) , (⊢P≔ , _) | yes refl =
+  let
+    typecheck = trans (∋-≡Type ∋j) (trans (sym (∋-≡Type ∋i)) (∋-≡Type ∋x))
+    δ , m≔ℓᵢ∙δ = diff (∋-Only ∋i) Γ≔ eq (∋-Only ∋x) ⊢P≔
+    Ξⱼ , Γⱼ≔ℓᵢ∙Ξⱼ , Ξⱼ≔δ∙Γ = split m≔ℓᵢ∙δ (∋-Only ∋j)
+    Ξᵢ , Γᵢ≔ℓᵢ∙Ξᵢ , Ξᵢ≔δ∙Γ = split m≔ℓᵢ∙δ (∋-Only ∋i)
+    Γᵢ≔ℓᵢ∙Ξₓ = ∋-Only ∋x
+    Ξₓ≡Ξᵢ = Only-uniqueʳ Γᵢ≔ℓᵢ∙Ξᵢ Γᵢ≔ℓᵢ∙Ξₓ
+    Ξₓ≔δ∙Γ = subst (λ ● → ● ≔ δ at _ ⊠ _) Ξₓ≡Ξᵢ Ξᵢ≔δ∙Γ
+  in recv (Only-∋ Γⱼ≔ℓᵢ∙Ξⱼ typecheck)
+  (bar (suc (Only-∋ Ξₓ≔δ∙Γ (∋-≡Type ∋i)))
+       (suc (Only-∋ Ξⱼ≔δ∙Γ (∋-≡Type ∋j)))
+       (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ) ⊢P)
 
-foo : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Ψₘ Ψₗ Ψᵣ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
-    → γ ∝ Ψₘ [ i ]≔ t ∝ m ⊠ Ψₗ
-    → γ ∝ Ψₘ [ j ]≔ t ∝ m ⊠ Ψᵣ
-    → i Fin.≤ j
-    → All.lookup i Δ ≡ ℓ∅
-    → Γ ≔ Δ ⊎ Ψₘ
-    → γ ∝ Γ ⊢ P ⊠ Ψₗ
-    → γ ∝ Γ ⊢ [ j / i ] P ⊠ Ψᵣ
+bar {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) | refl | refl | (_ -, _) , (⊢P≔ , _) | no ¬p =
+  let
+    Δi , Γᵢ≔Δi∙Ξ , Δi≔ℓᵢ = Only-⊎ (∋-Only ∋x)
+  in
+  recv (∋-frame Γᵢ≔Δi∙Ξ {!∋x!} ∋x) {!!}
+bar ∋i ∋j i≤j eq Γ≔ (send ∋x ∋y ⊢P) = {!!}
+bar ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = {! !}
 
-foo ∋i ∋j i≤j eq Γ≔ end with ∋-⊎ ∋i
-foo ∋i ∋j i≤j eq Γ≔ end | _ , Ψₘ≔m∙Γ
-  rewrite ⊎-mut-cancel Γ≔ Ψₘ≔m∙Γ | Only-≡ℓ∅ (∋-Only ∋i) | Only-ℓ∅-≡ (∋-Only ∋j) = end
-
-foo ∋i ∋j i≤j eq Γ≔ (chan t m μ ⊢P)
-  = chan t m μ (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) eq (Γ≔ , ∙²-idʳ) ⊢P)
-
-foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) with ∋-Only ∋i | ∋-Only ∋j | ∋-Only ∋x | ⊢-⊎ ⊢P
-foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) | O∋i | O∋j | O∋x | (_ -, _) , (Ξ≔ , _) = {!!}
-{-
-foo {idxs = idxs} {Ψₘ = Ψₘ} {i = i} {m = m} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) | yes refl | ℓᵢati , Γ≔ℓᵢati∙Ξₗ , ℓᵢati≔ℓᵢati | mati , Ψₘ≔m∙Ψₗ , mati≔mati | matj , Ψᵣ≔m∙Ψₗ , matj≔matj | (_ -, _) , (⊢P≔ , _)
-  = let γⱼ≡C[] = trans (sym (∋-≡Type ∋j)) (trans (∋-≡Type ∋i) (sym (∋-≡Type ∋x)))
-
-        ℓᵢati∙⊢Pᵢ , Γᵢ≔[ℓᵢati∙⊢Pᵢ]∙Ψₗ , ℓᵢati∙⊢Pᵢ≔ℓᵢati∙⊢Pᵢ = ∙²-assoc⁻¹ (⊎-get i Γ≔ℓᵢati∙Ξₗ) (⊎-get i ⊢P≔)
-
-        Δᵢ∙m , Γᵢ≔[Δᵢ∙m]∙Ψₗ , Δᵢ∙m≔Δᵢ∙m = ∙²-assoc⁻¹ (⊎-get i Γ≔) (⊎-get i Ψₘ≔m∙Ψₗ)
-        Δᵢ∙m≡m = ∙²-unique (subst (λ ● → Δᵢ∙m ≔ ● ∙² _) eq Δᵢ∙m≔Δᵢ∙m) ∙²-idˡ
-        Γᵢ≔m∙Ψₗ = subst (λ ● → _ ≔ ● ∙² _) Δᵢ∙m≡m Γᵢ≔[Δᵢ∙m]∙Ψₗ
-
-        ℓᵢati∙⊢Pᵢ≡m = ∙²-uniqueˡ Γᵢ≔[ℓᵢati∙⊢Pᵢ]∙Ψₗ  Γᵢ≔m∙Ψₗ
-        m≔ℓᵢ∙⊢P = subst (λ ● → ● ≔ _ ∙² _) ℓᵢati∙⊢Pᵢ≡m ℓᵢati∙⊢Pᵢ≔ℓᵢati∙⊢Pᵢ
-     in
-  recv
-    (∋-frame
-    (proj₁ (proj₂ (Only-⊎ (proj₂ blabla)))) -- From where: Ψₘ ≔ ℓᵢ at j ⊠ ?1
-    {!!} -- To where: Γ ≔ ℓ₁ at j ⊠ ?2
-    (Only-∋ (proj₂ blabla) γⱼ≡C[]))
-    (⊢-frame {!∋x!} {!!} (foo (suc ∋i) (suc ∋j) {!!} {!!} {!!} ⊢P)) -- ?2 ≔ ⊢P [j/i] ⊎ ?1
-
-  where
-  blabla : Σ[ ⁇ ∈ Ctx idxs ] (Ψₘ ≔ ℓᵢ at j ⊠ ⁇)
-
-foo {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) | no i≢x    | _ , Γ≔ℓᵢatx∙Ξₗ , ℓᵢatx≔ℓᵢatx | mati , Ψₘ≔m∙Ψₗ , mati≔mati | matj , Ψᵣ≔m∙Ψₗ , _ | (_ -, _) , (⊢P≔ , _)
-  = let Δᵢ∙m , Γᵢ≔[Δᵢ∙m]∙Ψₗ , Δᵢ∙m≔Δᵢ∙m = ∙²-assoc⁻¹ (⊎-get i Γ≔) (⊎-get i Ψₘ≔m∙Ψₗ)
-        Δᵢ∙m≡m = ∙²-unique (subst (λ ● → Δᵢ∙m ≔ ● ∙² _) eq Δᵢ∙m≔Δᵢ∙m) ∙²-idˡ
-        Γᵢ≔m∙Ψₗ = subst (λ ● → _ ≔ ● ∙² _) Δᵢ∙m≡m Γᵢ≔[Δᵢ∙m]∙Ψₗ
-
-        ℓᵢatx∙⊢Pᵢ , Γᵢ≔[ℓᵢatx∙⊢Pᵢ]∙Ψₗ , ℓᵢatx∙⊢Pᵢ≔ℓᵢatx∙⊢Pᵢ = ∙²-assoc⁻¹ (⊎-get i Γ≔ℓᵢatx∙Ξₗ) (⊎-get i ⊢P≔)
-        ℓᵢatxati≡ℓ∅ = trans (Only-lookup-≢ ℓᵢatx≔ℓᵢatx i (i≢x ∘ sym)) (lookup-ε i)
-        ℓᵢatx∙⊢Pᵢ≡⊢Pᵢ = ∙²-unique (subst (λ ● → ℓᵢatx∙⊢Pᵢ ≔ ● ∙² _) ℓᵢatxati≡ℓ∅ ℓᵢatx∙⊢Pᵢ≔ℓᵢatx∙⊢Pᵢ) ∙²-idˡ
-        Γᵢ≔⊢Pᵢ∙Ψₗ = subst (λ ● → _ ≔ ● ∙² _) ℓᵢatx∙⊢Pᵢ≡⊢Pᵢ Γᵢ≔[ℓᵢatx∙⊢Pᵢ]∙Ψₗ
-
-        ⊢Pᵢ≡m = ∙²-uniqueˡ Γᵢ≔⊢Pᵢ∙Ψₗ Γᵢ≔m∙Ψₗ
-        ⁇ , ⊢P≔⁇⊎mati , ⁇ᵢ≡ℓ∅ = ≡-Only-⊎ i ⊢Pᵢ≡m mati≔mati
-  in recv ∋x (foo (suc ∋i) (suc ∋j) (Nat.s≤s i≤j) ⁇ᵢ≡ℓ∅ (feedback ⊢P≔⁇⊎mati Ψₘ≔m∙Ψₗ ⊢P≔ , ∙²-idʳ) ⊢P)
-  -}
-
-foo ∋i ∋j i≤j eq Γ≔ (send x y ⊢P) = {!!}
-
-foo ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = comp (foo {!!} {!!} i≤j {!eq!} {!!} ⊢P) 
+switch : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
+       → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
+       → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
+       → ∃[ Θ ] (γ      ∝ Γ      [ j ]≔ t ∝ m ⊠ Θ
+               × γ -, t ∝ Θ -, m ⊢ P          ⊠ Ξ -, ℓ∅)
+switch ⊢P ∋j with ⊢-⊎ ⊢P | ∋-⊎ ∋j
+switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | Δj , Ψ≔ =
+  let W , Γ≔Δj∙W , W≔Δ⊢P∙Ξ = ⊎-assoc (⊎-comm Γ≔) Ψ≔ in
+  _ , ∋-frame Ψ≔ Γ≔Δj∙W  ∋j , ⊢-frame (Γ≔ , ∙²-idʳ) (⊎-comm W≔Δ⊢P∙Ξ , ∙²-idʳ) ⊢P
 
 ⊢-subst' : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
          → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
          → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
          → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
-⊢-subst' ⊢P y with ⊢-⊎ ⊢P
-⊢-subst' ⊢P y | (pctx -, rctx) , (p≔ , r≔) = foo (Only-∋ (zero ∙²-idʳ) refl) (suc y) Nat.z≤n refl (p≔ , ∙²-idˡ) ⊢P
--}
+⊢-subst' {Γ = Γ} {Ξ} ⊢P y with switch ⊢P y
+⊢-subst' {Γ = Γ} {Ξ} ⊢P y | Θ , y' , ⊢P' with ⊢-⊎ ⊢P'
+⊢-subst' {Γ = Γ} {Ξ} ⊢P y | Θ , y' , ⊢P' | (_ -, _) , (⊢P'≔ , _) =
+  ⊢-frame (proj₂ Γ≔ , ∙²-idˡ) (proj₂ Γ≔ , ∙²-idˡ) ⊢P''
+  where
+  ⊢P'' = bar (Only-∋ (zero ∙²-idʳ) refl) (suc y') Nat.z≤n refl (⊢P'≔ , ∙²-idʳ) ⊢P'
+  Γ≔ : ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
+  Γ≔ with ⊢-⊎ ⊢P''
+  Γ≔ | (_ -, _) , (x , _) = _ , x
 
 postulate
   {- TARGET -}
