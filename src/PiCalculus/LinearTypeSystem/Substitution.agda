@@ -83,14 +83,17 @@ split s (zero x) = let _ , x' , s' = ∙²-assoc x s in _ , zero x' , zero s'
 split s (suc x) with split s x
 split s (suc x) | _ , y , z = _ , suc y , suc z
 
-bar : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Γᵢ Γⱼ Δ Ψ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
-    → γ ∝ Γᵢ [ i ]≔ t ∝ m ⊠ Γ
-    → γ ∝ Γⱼ [ j ]≔ t ∝ m ⊠ Γ
-    → i Fin.≤ j
-    → All.lookup i Δ ≡ ℓ∅
-    → Γ ≔ Δ ⊎ Ψ
-    → γ ∝ Γᵢ ⊢ P ⊠ Ψ
-    → γ ∝ Γⱼ ⊢ [ j / i ] P ⊠ Ψ
+postulate
+  bar : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Γᵢ Γⱼ Δ Ψ : Ctx idxs} {i j : Fin n} {m : Carrier idx ²}
+      → γ ∝ Γᵢ [ i ]≔ t ∝ m ⊠ Γ
+      → γ ∝ Γⱼ [ j ]≔ t ∝ m ⊠ Γ
+      → i Fin.≤ j
+      → All.lookup i Δ ≡ ℓ∅
+      → Γ ≔ Δ ⊎ Ψ
+      → γ ∝ Γᵢ ⊢ P ⊠ Ψ
+      → γ ∝ Γⱼ ⊢ [ j / i ] P ⊠ Ψ
+
+    {-
 bar ∋i ∋j i≤j eq Γ≔ end with ∋-⊎ ∋i
 bar ∋i ∋j i≤j eq Γ≔ end | _ , Γᵢ≔m∙Γ
   rewrite ⊎-mut-cancel Γ≔ Γᵢ≔m∙Γ | Only-≡ℓ∅ (∋-Only ∋i) | Only-ℓ∅-≡ (∋-Only ∋j) = end
@@ -114,9 +117,10 @@ bar {i = i} ∋i ∋j i≤j eq Γ≔ (recv {i = x} ∋x ⊢P) | refl | refl | (_
   let
     Δi , Γᵢ≔Δi∙Ξ , Δi≔ℓᵢ = Only-⊎ (∋-Only ∋x)
   in
-  recv (∋-frame Γᵢ≔Δi∙Ξ {!∋x!} ∋x) {!!}
+  recv (∋-frame Γᵢ≔Δi∙Ξ {!!} ∋x) {!!}
 bar ∋i ∋j i≤j eq Γ≔ (send ∋x ∋y ⊢P) = {!!}
 bar ∋i ∋j i≤j eq Γ≔ (comp ⊢P ⊢Q) = {! !}
+-}
 
 switch : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
        → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
@@ -128,24 +132,16 @@ switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | Δj , Ψ≔ =
   let W , Γ≔Δj∙W , W≔Δ⊢P∙Ξ = ⊎-assoc (⊎-comm Γ≔) Ψ≔ in
   _ , ∋-frame Ψ≔ Γ≔Δj∙W  ∋j , ⊢-frame (Γ≔ , ∙²-idʳ) (⊎-comm W≔Δ⊢P∙Ξ , ∙²-idʳ) ⊢P
 
-⊢-subst' : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
-         → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
-         → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
-         → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
-⊢-subst' {Γ = Γ} {Ξ} ⊢P y with switch ⊢P y
-⊢-subst' {Γ = Γ} {Ξ} ⊢P y | Θ , y' , ⊢P' with ⊢-⊎ ⊢P'
-⊢-subst' {Γ = Γ} {Ξ} ⊢P y | Θ , y' , ⊢P' | (_ -, _) , (⊢P'≔ , _) =
+⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
+        → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
+        → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
+        → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
+⊢-subst {Γ = Γ} {Ξ} y ⊢P with switch ⊢P y
+⊢-subst {Γ = Γ} {Ξ} y ⊢P | Θ , y' , ⊢P' with ⊢-⊎ ⊢P'
+⊢-subst {Γ = Γ} {Ξ} y ⊢P | Θ , y' , ⊢P' | (_ -, _) , (⊢P'≔ , _) =
   ⊢-frame (proj₂ Γ≔ , ∙²-idˡ) (proj₂ Γ≔ , ∙²-idˡ) ⊢P''
   where
   ⊢P'' = bar (Only-∋ (zero ∙²-idʳ) refl) (suc y') Nat.z≤n refl (⊢P'≔ , ∙²-idʳ) ⊢P'
   Γ≔ : ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
   Γ≔ with ⊢-⊎ ⊢P''
   Γ≔ | (_ -, _) , (x , _) = _ , x
-
-postulate
-  {- TARGET -}
-  ⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t t'} {idx idx'}  {m : Carrier idx ²} {m' : Carrier idx' ²}
-          → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
-          → γ -, t' ∝ Γ -, m' ⊢ P ⊠ Ψ -, ℓ∅
-          → γ -, t' ∝ Γ -, m' ⊢ [ suc j / zero ] P ⊠ Ξ -, m'
- 

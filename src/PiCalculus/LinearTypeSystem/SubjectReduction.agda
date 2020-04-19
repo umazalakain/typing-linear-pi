@@ -102,7 +102,8 @@ comm-≥ℓ# (res_ {c = external (suc i)} P→Q) (chan t m μ ⊢P) refl = comm-
 comm-≥ℓ# (struct P≅P' P'→Q) ⊢P refl = comm-≥ℓ# P'→Q (subject-cong P≅P' ⊢P) refl
 
 subject-reduction : SubjectReduction
-subject-reduction Γ'⇒Γ comm (comp (recv {P = P} x ⊢P) (send x' y ⊢Q)) = comp ⊢P' ⊢Q
+subject-reduction Γ'⇒Γ comm (comp (recv {P = P} x ⊢P) (send x' y ⊢Q)) with trans (sym (∋-≡Type x)) (∋-≡Type x')
+subject-reduction Γ'⇒Γ comm (comp (recv {P = P} x ⊢P) (send x' y ⊢Q)) | refl = comp ⊢P' ⊢Q
   where ⊢P' = ⊢P
             |> align (suc (∋-Only x)) (suc (∋-Only x')) (suc Γ'⇒Γ)
             |> ⊢-subst y
