@@ -30,3 +30,4 @@
 *.toc
 *.vtc
 auto/
+*.gz(busy)
