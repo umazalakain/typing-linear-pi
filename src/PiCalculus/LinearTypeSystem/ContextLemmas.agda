@@ -142,14 +142,6 @@ Only-join s (zero y) (zero z) | a , b , c rewrite ∙²-unique s c = zero b
 Only-join s (suc y) (suc z) = suc (Only-join s y z)
 -}
 
-{-
--- lookup ∘ only = id
-lookup-only : {idxs : Idxs n} (i : Fin n) {c : (Carrier idx) ²}
-            → (eq : idx ≡ Vec.lookup idxs i) → All.lookup i (only {idxs = idxs} i eq c) ≅ c
-lookup-only {idxs = _ -, _} zero refl = hrefl
-lookup-only {idxs = _ -, _} (suc i) eq = lookup-only i eq
--}
-
 -- TODO: CHANGE NAME
 -- Split of multiplicities to split of contexts
 only-∙ : {Γ Δ Ξ : Ctx idxs}
@@ -175,22 +167,6 @@ only-∙ (suc Γ≔) (suc Δ≔) (suc Ξ≔) sp = only-∙ Γ≔ Δ≔ Ξ≔ sp 
 ⊢-⊎ (comp ⊢P ⊢Q) = let _ , P≔ = ⊢-⊎ ⊢P
                        _ , Q≔ = ⊢-⊎ ⊢Q
                     in _ , ⊎-trans P≔ Q≔
-
-feedfront : {x y z a b c : Ctx idxs}
-        → x ≔ y ⊎ z
-        → a ≔ z ⊎ b
-        → a ≔ x ⊎ c
-        → b ≔ y ⊎ c
-feedfront xyz azb axc with ⊎-assoc axc (⊎-comm xyz)
-feedfront xyz azb axc | [yc] , az[yc] , [yc]yc rewrite ⊎-uniqueˡ (⊎-comm azb) (⊎-comm az[yc]) = [yc]yc
-
-feedback : {x y z a b c : Ctx idxs}
-       → x ≔ y ⊎ z
-       → b ≔ z ⊎ c
-       → a ≔ x ⊎ c
-       → a ≔ y ⊎ b
-feedback xyz bzc axc with ⊎-assoc axc xyz
-feedback xyz bzc axc | [zc] , ay[zc] , [zc]zc rewrite ⊎-unique bzc [zc]zc = ay[zc]
 
 mult-insert : (i : Fin (suc n)) → (Carrier idx) ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
 mult-insert zero xs' Γ = Γ -, xs'
