@@ -120,9 +120,9 @@
 \begin{document}
 
 \maketitle
-\todo{remove todo notes}
 
 \begin{abstract}
+  \todo{OD: the abstract requires an opening. Before diving into what we present, it is useful to give context of what the problem is and why it is important.}
   We present the syntax, operational semantics, and typing rules of a \picalc{} with linear and shared types.
   We use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
   We generalize the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, gradual and shared typing.
@@ -130,18 +130,22 @@
   We show that the type system is stable under substitution and prove subject reduction.
 
   This formalization has been fully mechanized with Agda and is available at \url{https://github.com/umazalakain/typing-linear-pi}.
+  \todo{OD: remove links and put them as reference under @misc}
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-
+\todo{OD:
+It is important to emphasise that this is the first fully formalised pi-calculus from syntax to OS to typing rules, spanning from linear to shared types, "gradually".}
 We live in a concurrent world where any given state is often computed interactively by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and even construct such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
 The \picalc{} \cite{} is a formal language that abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
+\todo{OD: The key point here is that the pi-calculus, especically the linear one, is a sufficcient core calculus where all research on concurrent and ditrubuted systems can be achieved. That is why we are inspecting it. The goal is to bring all distributed systems features (in the future) into the formalised world.}
 Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted too.
 We type the syntax for the \picalc{} in \S \ref{syntax}.
 We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every unbound variable is accounted for in the type of the process that uses it.
-
+\todo{OD: don't put references to section just yet. This first part should describe the what and why of the problem.
+In the contributions section below, we can use references to sections to show where those contributions can be found.}
 In the \lambdacalc{} all computations are local and happen on syntactically contiguous terms; in the \picalc{} however communicating subprocesses can be non-contiguous and even have different parent processes.
 One way to define a reduction relation modulo these syntactic minutiae is to define a structural congruence \cite{} relation that acts as a quotient type.
 A term $A$ can then be freely rewritten into a term $B$ as long as $A$ is structurally congruent to $B$.
@@ -218,7 +222,7 @@ We omit universe levels for brevity.
 Implicit arguments are mentioned by type definitions but omitted in constructors.
 $\type{TYPES}$ are in blue and uppercased (with indices as subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red, and variables and functions in black.
 Some constructors can be shared across types and disambiguated by context.
-
+\todo{OD: the next part to be filled should be the notation, so that when I go through the paper, I can use this as a manual.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 \label{syntax}
@@ -232,6 +236,8 @@ Moreover, names are of no significance to machines.
 Machines need constructs they can algorithmically act upon.
 The idea de Bruijn had \cite{} was to use a natural number $n$ (aka \emph{index}) to refer to the variable introduced $n$ binders ago.
 Binders no longer introduce any names.
+\todo{OD: IMPORTATNT!
+There is too much on lambda-calculus; I suggest you give examples and illustrate your points on the pi-calculus only from now on. It can get too broad and lack focus otherwise... It is fine in the Introduction as you are giving an overview.}
 \begin{example}
 The expression $\lambda g . (\lambda f . f g) g$ in the \lambdacalc{} would translate to $\lambda (\lambda 0 1) 0$.
 \end{example}
@@ -628,7 +634,7 @@ The carrier $C$ is implemented as the type of natural numbers $\N$.
 The element $\zero$ corresponds 0, and $\one$ to 1.
 The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
 All other rules follow trivially from the algebraic rules for the addition of naturals.
-
+\todo{OD: in addition to the above, could we have examples of typing a process in each of the above type systems? It can be the same process everywhere and we can show how the typing changes...}
 \end{description}
 
 \subsection{Contexts}
