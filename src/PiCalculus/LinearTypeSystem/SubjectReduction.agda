@@ -1,6 +1,4 @@
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; trans; subst)
-open import Relation.Nullary using (yes; no)
-open import Relation.Nullary.Decidable using (toWitness; fromWitness)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst)
 open import Function.Reasoning
 
 import Data.Empty as Empty
@@ -18,7 +16,6 @@ open Nat using (ℕ; zero; suc)
 open Fin using (Fin ; zero ; suc)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
-open Maybe using (nothing; just)
 open Product using (_×_; Σ-syntax; ∃-syntax; _,_; proj₁; proj₂)
 
 open import PiCalculus.Syntax

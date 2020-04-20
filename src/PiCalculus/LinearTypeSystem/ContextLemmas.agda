@@ -1,5 +1,4 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
-open import Relation.Binary.HeterogeneousEquality using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Decidable using (toWitness; fromWitness)
 open import Function using (_∘_)
@@ -24,7 +23,6 @@ open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
-open import PiCalculus.Function
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics

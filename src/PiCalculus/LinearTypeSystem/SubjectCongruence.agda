@@ -18,7 +18,6 @@ open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
 open Product using (Σ-syntax; _×_; _,_; proj₁; proj₂)
 
-open import PiCalculus.Function
 open import PiCalculus.Syntax
 open Scoped
 open Syntax

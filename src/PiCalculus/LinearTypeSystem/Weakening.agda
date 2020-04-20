@@ -12,7 +12,6 @@ open All using (All; []; _∷_)
 open Fin using (Fin ; zero ; suc)
 open Product using (_,_)
 
-open import PiCalculus.Function
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped

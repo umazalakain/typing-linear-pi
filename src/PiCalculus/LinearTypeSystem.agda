@@ -5,7 +5,6 @@ import Data.Product as Product
 import Data.Unit as Unit
 import Data.Fin as Fin
 import Data.Nat as Nat
-import Data.Bool as Bool
 import Data.Vec as Vec
 import Data.Vec.Relation.Unary.All as All
 
