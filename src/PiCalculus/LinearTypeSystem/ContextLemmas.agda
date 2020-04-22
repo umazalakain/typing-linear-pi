@@ -58,7 +58,7 @@ Only-≡Idx (suc s) rewrite Only-≡Idx s = refl
 -- Contains to index equality
 ∋-≡Idx : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
        → γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ
-       → idx ≡ Vec.lookup idxs i
+       → Vec.lookup idxs i ≡ idx
 ∋-≡Idx zero = refl
 ∋-≡Idx (suc x) = ∋-≡Idx x
 
@@ -110,6 +110,10 @@ Only-≡ℓ∅ : Γ ≔ x at i ⊠ Γ → x ≡ ℓ∅
 Only-≡ℓ∅ (zero x) rewrite ∙²-uniqueˡ x ∙²-idˡ = refl
 Only-≡ℓ∅ (suc s) rewrite Only-≡ℓ∅ s = refl
 
+Only-ℓ∅ : {idxs : Idxs n} {Γ : Ctx idxs} {i : Fin n} {idx : Idx}→ Vec.lookup idxs i ≡ idx → Γ ≔ ℓ∅ {idx} at i ⊠ Γ
+Only-ℓ∅ {Γ = _ -, _} {i = zero} refl = zero ∙²-idˡ
+Only-ℓ∅ {Γ = _ -, _} {i = suc i} eq = suc (Only-ℓ∅ eq)
+
 Only-uniqueʳ : Γ ≔ x at i ⊠ Δ → Γ ≔ x at i ⊠ Ξ → Δ ≡ Ξ
 Only-uniqueʳ (zero a) (zero b) rewrite ∙²-uniqueˡ (∙²-comm a) (∙²-comm b) = refl
 Only-uniqueʳ (suc a) (suc b) rewrite Only-uniqueʳ a b = refl
@@ -118,10 +122,10 @@ Only-lookup-≡ : Γ ≔ x at i ⊠ Δ → All.lookup i Γ ≔ x ∙² All.looku
 Only-lookup-≡ {i = zero} (zero x) = x
 Only-lookup-≡ {i = suc i} (suc s) = Only-lookup-≡ s
 
-Only-idʳ : {x : Carrier (Vec.lookup idxs i) ²} → Σ[ Γ ∈ Ctx idxs ] (Γ ≔ x at i ⊠ ε {idxs = idxs})
-Only-idʳ {idxs = idxs -, _} {i = zero} = (_ -, _) , zero ∙²-idʳ
-Only-idʳ {idxs = idxs -, _} {i = suc i} with Only-idʳ {idxs = idxs} {i = i}
-Only-idʳ {idxs = idxs -, _} {i = suc i} | _ , Γ≔ = _ , suc Γ≔
+Only-idʳ : {x : Carrier idx ²} → Vec.lookup idxs i ≡ idx → Σ[ Γ ∈ Ctx idxs ] (Γ ≔ x at i ⊠ ε {idxs = idxs})
+Only-idʳ {idxs = idxs -, _} {i = zero} refl = (_ -, _) , zero ∙²-idʳ
+Only-idʳ {idxs = idxs -, _} {i = suc i} eq with Only-idʳ {idxs = idxs} {i = i} eq
+Only-idʳ {idxs = idxs -, _} {i = suc i} eq | _ , Γ≔ = _ , suc Γ≔
 
 Only-lookup-≢ : Γ ≔ x at i ⊠ Δ → ∀ j → i ≢ j → All.lookup j Γ ≡ All.lookup j Δ
 Only-lookup-≢ (zero x) zero i≢j = ⊥-elim (i≢j refl)
@@ -132,13 +136,6 @@ Only-lookup-≢ (suc xati) (suc j) i≢j = Only-lookup-≢ xati j (i≢j ∘ con
 lookup-ε : ∀ i → All.lookup i (ε {idxs = idxs}) ≡ ℓ∅
 lookup-ε {idxs = _ -, _} zero = refl
 lookup-ε {idxs = _ -, _} (suc i) = lookup-ε i
-
-{-
-Only-join : x ≔ y ∙² z → Γ ≔ y at i ⊠ ε → Δ ≔ z at i ⊠ ε → Γ ≔ x at i ⊠ Ξ
-Only-join s (zero y) (zero z) with ∙²-assoc⁻¹ y z
-Only-join s (zero y) (zero z) | a , b , c rewrite ∙²-unique s c = zero b
-Only-join s (suc y) (suc z) = suc (Only-join s y z)
--}
 
 -- TODO: CHANGE NAME
 -- Split of multiplicities to split of contexts
