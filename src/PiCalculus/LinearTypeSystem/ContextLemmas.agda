@@ -114,9 +114,15 @@ Only-ℓ∅ : {idxs : Idxs n} {Γ : Ctx idxs} {i : Fin n} {idx : Idx}→ Vec.loo
 Only-ℓ∅ {Γ = _ -, _} {i = zero} refl = zero ∙²-idˡ
 Only-ℓ∅ {Γ = _ -, _} {i = suc i} eq = suc (Only-ℓ∅ eq)
 
+-- TODO: deprecate, convert to context first
 Only-uniqueʳ : Γ ≔ x at i ⊠ Δ → Γ ≔ x at i ⊠ Ξ → Δ ≡ Ξ
 Only-uniqueʳ (zero a) (zero b) rewrite ∙²-uniqueˡ (∙²-comm a) (∙²-comm b) = refl
 Only-uniqueʳ (suc a) (suc b) rewrite Only-uniqueʳ a b = refl
+
+-- TODO: deprecate, convert to context first
+Only-uniqueˡ : Γ ≔ x at i ⊠ Δ → Ξ ≔ x at i ⊠ Δ → Γ ≡ Ξ
+Only-uniqueˡ (zero a) (zero b) rewrite ∙²-unique a b = refl
+Only-uniqueˡ (suc a) (suc b) rewrite Only-uniqueˡ a b = refl
 
 Only-lookup-≡ : Γ ≔ x at i ⊠ Δ → All.lookup i Γ ≔ x ∙² All.lookup i Δ
 Only-lookup-≡ {i = zero} (zero x) = x
@@ -147,6 +153,75 @@ only-∙ : {Γ Δ Ξ : Ctx idxs}
        → Γ ≔ Δ ⊎ Ξ
 only-∙ (zero x) (zero y) (zero z) sp rewrite ∙²-unique x ∙²-idʳ | ∙²-unique y ∙²-idʳ | ∙²-unique z ∙²-idʳ = ⊎-idˡ , sp
 only-∙ (suc Γ≔) (suc Δ≔) (suc Ξ≔) sp = only-∙ Γ≔ Δ≔ Ξ≔ sp , ∙²-idˡ
+
+
+diamond : {Γ Ξ Ψ : Ctx idxs}
+        → i ≢ j
+        → Γ ≔ x at j ⊠ Ξ
+        → Γ ≔ y at i ⊠ Ψ
+        → Σ[ Θ ∈ Ctx idxs ]
+        ( Ξ ≔ y at i ⊠ Θ
+        × Ψ ≔ x at j ⊠ Θ
+        )
+diamond i≢j (zero _) (zero _) = ⊥-elim (i≢j refl)
+diamond i≢j (zero x) (suc ∋i) = _ , suc ∋i , zero x
+diamond i≢j (suc ∋j) (zero x) = _ , zero x , suc ∋j
+diamond i≢j (suc ∋j) (suc ∋i) with diamond (i≢j ∘ cong suc) ∋j ∋i
+diamond i≢j (suc ∋j) (suc ∋i) | _ , ∋i' , ∋j' = _ , suc ∋i' , suc ∋j'
+
+outer-diamond : {Γ Ξ Ψ Θ ΞΔ Δ ΨΔ : Ctx idxs}
+              → i ≢ j
+              → Γ ≔ x at i ⊠ Ξ
+              → Γ ≔ y at j ⊠ Ψ
+              → Ξ ≔ y at j ⊠ Θ
+              → Ψ ≔ x at i ⊠ Θ
+              → Ξ ≔ ΞΔ ⊎ Δ
+              → Ψ ≔ ΨΔ ⊎ Δ
+              → Σ[ ΘΔ ∈ Ctx idxs ] (Θ ≔ ΘΔ ⊎ Δ)
+outer-diamond i≢j (zero _) (zero _) (zero _) (zero _) a b = ⊥-elim (i≢j refl)
+outer-diamond i≢j (zero x₁) (suc ∋j) (suc ∈j) (zero x) (as , a) (bs , b) = _ , (bs , a)
+outer-diamond i≢j (suc ∋i) (zero ∋j) (zero ∈j) (suc ∈i) (as , a) (bs , b) = _ , (as , b)
+outer-diamond i≢j (suc ∋i) (suc ∋j) (suc ∈j) (suc ∈i) (as , a) (bs , b) with outer-diamond (i≢j ∘ cong suc) ∋i ∋j ∈j ∈i as bs
+outer-diamond i≢j (suc ∋i) (suc ∋j) (suc ∈j) (suc ∈i) (as , a) (bs , b) | _ , s = _ , (s , a)
+
+
+-- TODO: generalize to contexts
+reverse : {Γ Ξ Ψ : Ctx idxs}
+        → Γ ≔ x at i ⊠ Ξ
+        → Ξ ≔ y at j ⊠ Ψ
+        → Σ[ Θ ∈ Ctx idxs ]
+        ( Γ ≔ y at j ⊠ Θ
+        × Θ ≔ x at i ⊠ Ψ
+        )
+reverse (zero x) (zero y) =
+  let _ , a , b = ∙²-assoc⁻¹ x (∙²-comm y) in
+  _ , zero (∙²-comm a) , zero b
+reverse (zero x) (suc ∋j) = _ , suc ∋j , zero x
+reverse (suc ∋i) (zero x) = _ , zero x , suc ∋i
+reverse (suc ∋i) (suc ∋j) with reverse ∋i ∋j
+reverse (suc ∋i) (suc ∋j) | _ , ∋i' , ∋j' = _ , suc ∋i' , suc ∋j'
+
+boil : {Γ Ξ Θ Ψ ΘΨ : Ctx idxs}
+     → Γ ≔ x at i ⊠ Θ
+     → Γ ≔ y at i ⊠ Ξ
+     → Ξ ≔ z at i ⊠ Ψ
+     → Θ ≔ ΘΨ ⊎ Ψ
+     → All.lookup i ΘΨ ≡ ℓ∅
+     → x ≔ y ∙² z
+boil {i = zero} (zero a) (zero b) (zero c) (_ , d) refl rewrite ∙²-unique d ∙²-idˡ with ∙²-assoc⁻¹ b c
+boil {i = zero} (zero a) (zero b) (zero c) (_ , d) refl | _ , e , f rewrite ∙²-uniqueˡ e a = f
+boil {i = suc i} (suc a) (suc b) (suc c) (d , _) eq = boil a b c d eq
+
+tail-ℓ∅ : {Γ ΓΨ Ψ ΓΘ Θ ΘΨ : Ctx idxs}
+        → Γ ≔ ΓΨ ⊎ Ψ
+        → Γ ≔ ΓΘ ⊎ Θ
+        → Θ ≔ ΘΨ ⊎ Ψ
+        → All.lookup i ΓΨ ≡ ℓ∅
+        → All.lookup i ΘΨ ≡ ℓ∅
+tail-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl rewrite ∙²-unique x ∙²-idˡ with ∙²-mut-cancel y z
+tail-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl | refl = ∙²-uniqueˡ z ∙²-idˡ
+tail-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = tail-ℓ∅ a b c eq
+
 
 ⊢-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
 ⊢-⊎ end = ε , ⊎-idˡ
