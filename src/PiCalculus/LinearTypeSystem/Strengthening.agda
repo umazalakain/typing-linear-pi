@@ -39,29 +39,27 @@ private
     i j : Fin n
     P Q : Scoped n
 
-∋-strengthen : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs}
-             → {m' : Carrier idx' ²}
+∋-strengthen : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {m' : Carrier idx' ²}
              → (i : Fin (suc n))
-             → γ               ∝ Γ               [ j ]≔ t' ∝ m' ⊠ Θ
              → (i≢j : i ≢ j)
-             → Vec.remove γ i ∝ mult-remove Γ i [ Fin.punchOut i≢j ]≔ t' ∝ m' ⊠ mult-remove Θ i
-∋-strengthen zero zero i≢x = ⊥-elim (i≢x refl)
-∋-strengthen zero (suc x) i≢x = x
-∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) zero i≢x = zero
-∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) (suc x) i≢x = suc ( ∋-strengthen i x (i≢x ∘ cong suc))
+             → γ              ∝ Γ              ∋[ j ] t' ∝ m' ⊠ Θ
+             → Vec.remove γ i ∝ ctx-remove Γ i ∋[ Fin.punchOut i≢j ] t' ∝ m' ⊠ ctx-remove Θ i
+∋-strengthen zero i≢x (zero , zero _) = ⊥-elim (i≢x refl)
+∋-strengthen zero i≢x (suc t , suc x) = t , x
+∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) i≢x (zero , zero xyz) = zero , zero xyz
+∋-strengthen {γ = _ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} {_ -, _ -, _} (suc i) i≢x (suc t , suc x) = there (∋-strengthen i (i≢x ∘ cong suc) (t , x))
 
-⊢-strengthen : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs}
-             → {P : Scoped (suc n)}
+⊢-strengthen : {P : Scoped (suc n)} {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs}
              → (i : Fin (suc n))
              → (uP : Unused i P)
              → γ ∝ Γ ⊢ P ⊠ Θ
-             → Vec.remove γ i ∝ mult-remove Γ i ⊢ lower i P uP ⊠ mult-remove Θ i
+             → Vec.remove γ i ∝ ctx-remove Γ i ⊢ lower i P uP ⊠ ctx-remove Θ i
 ⊢-strengthen i uP end = end
 ⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (chan t m μ ⊢P)
   = chan t m μ (⊢-strengthen (suc i) uP ⊢P)
 ⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i (i≢x , uP) (recv {Ξ = _ -, _} x ⊢P)
-  = recv (∋-strengthen i x i≢x) (⊢-strengthen (suc i) uP ⊢P)
+  = recv (∋-strengthen i i≢x x) (⊢-strengthen (suc i) uP ⊢P)
 ⊢-strengthen {γ = _ -, _} i (i≢x , i≢y , uP) (send x y ⊢P)
-  = send (∋-strengthen i x i≢x) (∋-strengthen i y i≢y) (⊢-strengthen i uP ⊢P)
+  = send (∋-strengthen i i≢x x) (∋-strengthen i i≢y y) (⊢-strengthen i uP ⊢P)
 ⊢-strengthen {γ = _ -, _} i (uP , uQ) (comp ⊢P ⊢Q)
   = comp (⊢-strengthen i uP ⊢P) (⊢-strengthen i uQ ⊢Q)

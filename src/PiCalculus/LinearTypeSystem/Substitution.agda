@@ -49,33 +49,21 @@ private
     Γ Γₗ Γᵣ Ξₗ Ξᵣ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ Β : Ctx idxs
     P : Scoped n
 
-split : x ≔ y ∙² z
-      → Γ ≔ x at i ⊠ Ξ
-      → ∃[ Δ ] (Γ ≔ y at i ⊠ Δ × Δ ≔ z at i ⊠ Ξ)
-split s (zero x) = let _ , x' , s' = ∙²-assoc x s in _ , zero x' , zero s'
-split s (suc x) with split s x
-split s (suc x) | _ , y , z = _ , suc y , suc z
-
-diff : {Γₗ Δ⊢P Ξₗ Θ Γ Δ : Ctx idxs}
-     → Γₗ ≔ Δ⊢P ⊎ Ξₗ
-     → Ξₗ ≔ δ at i ⊠ Θ
-     → Γₗ ≔ m at i ⊠ Γ
-     → Γ ≔ Δ ⊎ Θ
-     → All.lookup i Δ ≡ ℓ∅
-     → ∃[ δ⊢p ] (m ≔ δ⊢p ∙² δ × δ⊢p ≅ All.lookup i Δ⊢P)
-diff (_ , γₗ≔δ⊢P∙ξₗ) (zero ξₗ≔δ∙θ) (zero γₗ≔m∙γ) (_ , γ≔δ∙θ) refl rewrite ∙²-unique γ≔δ∙θ ∙²-idˡ =
-  let
-    _ , γₗ≔δ⊢Pδ∙θ , δ⊢Pδ≔δ⊢P∙δ = ∙²-assoc⁻¹ γₗ≔δ⊢P∙ξₗ ξₗ≔δ∙θ
-    δ⊢Pδ≡m = ∙²-uniqueˡ γₗ≔δ⊢Pδ∙θ γₗ≔m∙γ
-    m≔δ⊢P∙δ = subst (λ ● → ● ≔ _ ∙² _) δ⊢Pδ≡m δ⊢Pδ≔δ⊢P∙δ
-  in _ , m≔δ⊢P∙δ , hrefl
-diff (Γₗ≔Δ⊢P∙Ξₗ , _) (suc Ξₗ≔δ∙Θ) (suc Γₗ≔m∙Γ) (Γ≔Δ∙Θ , _) Δ[i]≡0 = diff Γₗ≔Δ⊢P∙Ξₗ Ξₗ≔δ∙Θ Γₗ≔m∙Γ Γ≔Δ∙Θ Δ[i]≡0
+midpoint : {Γ ΓΞ Ξ ΞΨ Ψ Β Ι Δ : Ctx idxs}
+         → Γ ≔ ΓΞ ⊠ Ξ
+         → Ξ ≔ ΞΨ ⊠ Ψ
+         → Γ ∋[ i ] x ⊠ Β
+         → Ψ ∋[ i ] y ⊠ Ι
+         → x ≔ y ∙² z
+         → Β ≔ Δ ⊠ Ι
+         → Σ[ δ ∈ Carrier idx ² ] Σ[ Θ ∈ Ctx idxs ] Σ[ Δ₁ ∈ Ctx idxs ] Σ[ Δ₂ ∈ Ctx idxs ]
+           (Ξ ∋[ i ] δ ⊠ Θ × Β ≔ Δ₁ ⊠ Θ × Θ ≔ Δ₂ ⊠ Ι)
 
 cutpoint : {Γ Δ Θ Γⱼ : Ctx idxs} {m n l : Carrier idx ²}
-       → Γ ≔ Δ ⊎ Θ
-       → Γⱼ ≔ m at j ⊠ Γ
+       → Γ ≔ Δ ⊠ Θ
+       → Γⱼ ∋[ j ] m ⊠ Γ
        → m ≔ n ∙² l
-       → Σ[ Θⱼ ∈ Ctx idxs ] (Θⱼ ≔ l at j ⊠ Θ)
+       → Σ[ Θⱼ ∈ Ctx idxs ] (Θⱼ ∋[ j ] l ⊠ Θ)
 cutpoint (_ , γ≔) (zero x) m≔ =
   let
     _ , _ , a = ∙²-assoc x m≔
@@ -84,132 +72,113 @@ cutpoint (_ , γ≔) (zero x) m≔ =
 cutpoint (Γ≔ , _) (suc ∋j) m≔ with cutpoint Γ≔ ∋j m≔
 cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
 
-midpoint : {Γᵢ Γ Δ Ψ ΔP Ξᵢ ΔQ Ψᵢ : Ctx idxs} {m n : Carrier idx ²}
-         → Γᵢ ≔ m at i ⊠ Γ
-         → Γ ≔ Δ ⊎ Ψ
-         → All.lookup i Δ ≡ ℓ∅
-         → Γᵢ ≔ ΔP ⊎ Ξᵢ
-         → Ξᵢ ≔ ΔQ ⊎ Ψᵢ
-         → Ψᵢ ≔ n at i ⊠ Ψ
-         → Σ[ δ ∈ Carrier idx ² ]
-           Σ[ Θ ∈ Ctx idxs ]
-           Σ[ Δ₁ ∈ Ctx idxs ]
-           Σ[ Δ₂ ∈ Ctx idxs ] (
-           Ξᵢ ≔ δ at i ⊠ Θ
-         × Γ ≔ Δ₁ ⊎ Θ
-         × Θ ≔ Δ₂ ⊎ Ψ
-         × All.lookup i Δ₁ ≡ ℓ∅
-         × All.lookup i Δ₂ ≡ ℓ∅)
-
-midpoint {i = zero} (zero γᵢ≔m∙γ) (Γ≔Δ∙Ψ , γ≔δ∙ψ) refl (Γᵢ≔ΔP∙Ξᵢ , γᵢ≔δp∙ξᵢ) (Ξᵢ≔ΔQ∙Ψᵢ , ξᵢ≔δq∙ψᵢ) (zero ψᵢ≔n∙ψ) rewrite ∙²-unique γ≔δ∙ψ ∙²-idˡ =
-  let _ , ξᵢ≔δ∙θ , _ = ∙²-assoc⁻¹ ξᵢ≔δq∙ψᵢ ψᵢ≔n∙ψ in
-  _ , _ , (_ -, _) , _ , zero ξᵢ≔δ∙θ , (Γᵢ≔ΔP∙Ξᵢ , ∙²-idˡ) , (Ξᵢ≔ΔQ∙Ψᵢ , ∙²-idˡ) , refl , refl
-midpoint {i = suc i} (suc Γᵢ≔m∙Γ) (Γ≔Δ∙Ψ , _) Δ[i]≡ℓ∅ (Γᵢ≔ΔP∙Ξᵢ , γᵢ≔δp∙ξᵢ) (Ξᵢ≔ΔQ∙Ψᵢ , ξᵢ≔δq∙ψᵢ) (suc ψᵢ≔n∙ψ) with midpoint Γᵢ≔m∙Γ Γ≔Δ∙Ψ Δ[i]≡ℓ∅ Γᵢ≔ΔP∙Ξᵢ Ξᵢ≔ΔQ∙Ψᵢ ψᵢ≔n∙ψ
-midpoint {i = suc i} (suc Γᵢ≔m∙Γ) (Γ≔Δ∙Ψ , _) Δ[i]≡ℓ∅ (Γᵢ≔ΔP∙Ξᵢ , γᵢ≔δp∙ξᵢ) (Ξᵢ≔ΔQ∙Ψᵢ , ξᵢ≔δq∙ψᵢ) (suc ψᵢ≔n∙ψ) | _ , _ , _ , _ , Ξᵢ≔δ∙Θ , Γ≔Δ₁∙Θ , Θ≔Δ₂∙Ψ , Δ₁[i]≡ℓ∅ , Δ₂[i]≡ℓ∅ =
-  _ , _ , (_ -, _) , _ , suc Ξᵢ≔δ∙Θ , (Γ≔Δ₁∙Θ , γᵢ≔δp∙ξᵢ) , (Θ≔Δ₂∙Ψ , ξᵢ≔δq∙ψᵢ) , Δ₁[i]≡ℓ∅ , Δ₂[i]≡ℓ∅
-
 ∋-subst : {Γ Γᵢ Γⱼ Δ Ψ Ψᵢ Ψⱼ Ξᵢ CONT : Ctx idxs} {i j x : Fin n} {mx : Carrier idx' ²} {m n : Carrier idx ²}
         → Vec.lookup γ i ≡ Vec.lookup γ j
-        → Γᵢ ≔ m at i ⊠ Γ
-        → Γⱼ ≔ m at j ⊠ Γ
-        → Ψᵢ ≔ n at i ⊠ Ψ
-        → Ψⱼ ≔ n at j ⊠ Ψ
-        → Γ ≔ Δ ⊎ Ψ
+        → Γᵢ ∋[ i ] m ⊠ Γ
+        → Γⱼ ∋[ j ] m ⊠ Γ
+        → Ψᵢ ∋[ i ] n ⊠ Ψ
+        → Ψⱼ ∋[ j ] n ⊠ Ψ
+        → Γ ≔ Δ ⊠ Ψ
         → All.lookup i Δ ≡ ℓ∅
-        → γ ∝ Γᵢ [ x ]≔ t ∝ mx ⊠ Ξᵢ
-        → Ξᵢ ≔ CONT ⊎ Ψᵢ
+        → γ ∝ Γᵢ ∋[ x ] t ∝ mx ⊠ Ξᵢ
+        → Ξᵢ ≔ CONT ⊠ Ψᵢ
         → Σ[ Ξⱼ ∈ Ctx idxs ]
           Σ[ Θ ∈ Ctx idxs ]
           Σ[ Δ' ∈ Ctx idxs ]
           Σ[ m' ∈ Carrier idx ² ]
-         (γ ∝ Γⱼ [ substFin j i x ]≔ t ∝ mx ⊠ Ξⱼ
-        × Ξᵢ ≔ m' at i ⊠ Θ
-        × Ξⱼ ≔ m' at j ⊠ Θ
-        × Θ ≔ Δ' ⊎ Ψ
+         (γ ∝ Γⱼ ∋[ substFin j i x ] t ∝ mx ⊠ Ξⱼ
+        × Ξᵢ ∋[ i ] m' ⊠ Θ
+        × Ξⱼ ∋[ j ] m' ⊠ Θ
+        × Θ ≔ Δ' ⊠ Ψ
         × All.lookup i Δ' ≡ ℓ∅)
-∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ ∋x Ξᵢ≔CONT∙Ψᵢ with i Finₚ.≟ x
-∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ ∋x Ξᵢ≔CONT∙Ψᵢ | yes refl with Only-≡Idx ∋i | ∋-≡Idx ∋x
-∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ ∋x Ξᵢ≔CONT∙Ψᵢ | yes refl | refl | refl =
+∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (∋t , ∋x) Ξᵢ≔CONT∙Ψᵢ with i Finₚ.≟ x
+∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (∋t , ∋x) Ξᵢ≔CONT∙Ψᵢ | yes refl with ∋-≡Idx ∋i | ∋-≡Idx ∋x
+∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (∋t , ∋x) Ξᵢ≔CONT∙Ψᵢ | yes refl | refl | refl =
   let
-    _ , Γᵢ≔ℓ∙Ξᵢ , ℓ≔ℓ = Only-⊎ (∋-Only ∋x)
-    δ , _ , _ , _ , Ξᵢ≔δ∙Θ , Γ≔Δ₁∙Θ , Θ≔Δ₂∙Ψ , Δ₁[i]≡0 , Δ₂[i]≡0 = midpoint ∋i Γ≔Δ∙Ψ Δ∋iℓ∅ Γᵢ≔ℓ∙Ξᵢ Ξᵢ≔CONT∙Ψᵢ ∈i
-    m≔ℓ∙δ = boil ∋i (∋-Only ∋x) Ξᵢ≔δ∙Θ Γ≔Δ₁∙Θ Δ₁[i]≡0
-    Γᵢ' , Γᵢ≔ℓ∙Γᵢ' , Γᵢ'≔δ∙Γ = split m≔ℓ∙δ ∋i
-    Γⱼ' , Γⱼ≔ℓ∙Γⱼ' , Γⱼ'≔δ∙Γ = split m≔ℓ∙δ ∋j
-    Γᵢ'≡Ξᵢ = Only-uniqueʳ Γᵢ≔ℓ∙Γᵢ' (∋-Only ∋x)
-    Ξᵢ≔δ∙Γ = subst (λ ● → ● ≔ δ at _ ⊠ _) Γᵢ'≡Ξᵢ Γᵢ'≔δ∙Γ
-    Γ≡Θ = Only-uniqueʳ Ξᵢ≔δ∙Γ Ξᵢ≔δ∙Θ
-    Ξⱼ≔δ∙Θ = subst (λ ● → Γⱼ' ≔ δ at _ ⊠ ●) Γ≡Θ Γⱼ'≔δ∙Γ
-  in _ , _ , _ , _ , Only-∋ Γⱼ≔ℓ∙Γⱼ' (trans (sym eq) (∋-≡Type ∋x)) , Ξᵢ≔δ∙Θ , Ξⱼ≔δ∙Θ , Θ≔Δ₂∙Ψ , Δ₂[i]≡0
+    _ , Ξᵢ≔CONTn∙Ψ , _ = ⊠-assoc⁻¹ Ξᵢ≔CONT∙Ψᵢ (proj₁ (proj₂ (∋-⊠ ∈i)))
+    δ , m≔ℓ∙δ = boil ∋i ∋x Ξᵢ≔CONTn∙Ψ Γ≔Δ∙Ψ Δ∋iℓ∅
+    _ , Γᵢ≔ℓ∙⁇ᵢ , ⁇ᵢ≔δ∙Γ = split m≔ℓ∙δ ∋i
+    _ , Γⱼ≔ℓ∙⁇ⱼ , ⁇ⱼ≔δ∙Γ = split m≔ℓ∙δ ∋j
+    ⁇ᵢ≡Ξᵢ = ∋-uniqueʳ Γᵢ≔ℓ∙⁇ᵢ ∋x
+    Ξᵢ≔δ∙Γ = subst (λ ● → ● ∋[ _ ] δ ⊠ _) ⁇ᵢ≡Ξᵢ ⁇ᵢ≔δ∙Γ
+  in _ , _ , _ , _ , (≡Type-∋ (trans (sym eq) (∋-≡Type ∋t)) , Γⱼ≔ℓ∙⁇ⱼ) , Ξᵢ≔δ∙Γ , ⁇ⱼ≔δ∙Γ , Γ≔Δ∙Ψ , Δ∋iℓ∅
 
-∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ ∋x Ξᵢ≔CONT∙Ψᵢ | no i≢x =
+∋-subst {i = i} {x = x} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (∋t , ∋x) Ξᵢ≔CONT∙Ψᵢ | no i≢x =
   let
-    _ , Ξᵢ≔m∙Θ , Γ≔ℓ∙Θ = diamond i≢x (∋-Only ∋x) ∋i
-    _ , Γⱼ≔ℓ∙Ξⱼ , Ξⱼ≔m∙Θ = reverse ∋j Γ≔ℓ∙Θ
-    _ , Γᵢ≔ℓCONT∙Ψᵢ , _ = ⊎-assoc⁻¹ (proj₁ (proj₂ (Only-⊎ (∋-Only ∋x)))) Ξᵢ≔CONT∙Ψᵢ
-    _ , Ξᵢ≔CONTn∙Ψ , _ = ⊎-assoc⁻¹ Ξᵢ≔CONT∙Ψᵢ (proj₁ (proj₂ (Only-⊎ ∈i)))
-    _ , Θ≔Δ'∙Ψ = outer-diamond i≢x ∋i (∋-Only ∋x) Γ≔ℓ∙Θ Ξᵢ≔m∙Θ Γ≔Δ∙Ψ Ξᵢ≔CONTn∙Ψ
-  in _ , _ , _ , _ , Only-∋ Γⱼ≔ℓ∙Ξⱼ (∋-≡Type ∋x) , Ξᵢ≔m∙Θ , Ξⱼ≔m∙Θ , Θ≔Δ'∙Ψ , tail-ℓ∅ Γ≔Δ∙Ψ (proj₁ (proj₂ (Only-⊎ Γ≔ℓ∙Θ))) Θ≔Δ'∙Ψ Δ∋iℓ∅
+    _ , Ξᵢ≔m∙Θ , Γ≔ℓ∙Θ = diamond i≢x ∋x ∋i
+    _ , Γⱼ≔m'∙Γ , m'≔m∙ε = ∋-⊠ ∋j
+    _ , Γ≔ℓ'∙Θ ,  ℓ'≔ℓ∙ε = ∋-⊠ Γ≔ℓ∙Θ
+    _ , Γⱼ≔ℓ'∙Ξⱼ , Ξⱼ≔m'∙Θ = reverse Γⱼ≔m'∙Γ Γ≔ℓ'∙Θ
+    _ , Γᵢ≔ℓCONT∙Ψᵢ , _ = ⊠-assoc⁻¹ (proj₁ (proj₂ (∋-⊠ ∋x))) Ξᵢ≔CONT∙Ψᵢ
+    _ , Ξᵢ≔CONTn∙Ψ , _ = ⊠-assoc⁻¹ Ξᵢ≔CONT∙Ψᵢ (proj₁ (proj₂ (∋-⊠ ∈i)))
+    _ , Θ≔Δ'∙Ψ = outer-diamond i≢x ∋i ∋x Γ≔ℓ∙Θ Ξᵢ≔m∙Θ Γ≔Δ∙Ψ Ξᵢ≔CONTn∙Ψ
+    _ , Δ'∋iℓ∅ = split-ℓ∅ Γ≔Δ∙Ψ (proj₁ (proj₂ (∋-⊠ Γ≔ℓ∙Θ))) Θ≔Δ'∙Ψ Δ∋iℓ∅
+  in _ , _ , _ , _ , (∋t , ⊠-∋ Γⱼ≔ℓ'∙Ξⱼ ℓ'≔ℓ∙ε) , Ξᵢ≔m∙Θ , ⊠-∋ Ξⱼ≔m'∙Θ m'≔m∙ε , Θ≔Δ'∙Ψ , Δ'∋iℓ∅
 
 ⊢-subst-ih : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Γᵢ Γⱼ Δ Ψ Ψᵢ Ψⱼ : Ctx idxs} {i j : Fin n} {m n : Carrier idx ²}
            → Vec.lookup γ i ≡ Vec.lookup γ j
-           → Γᵢ ≔ m at i ⊠ Γ
-           → Γⱼ ≔ m at j ⊠ Γ
-           → Ψᵢ ≔ n at i ⊠ Ψ
-           → Ψⱼ ≔ n at j ⊠ Ψ
-           → Γ ≔ Δ ⊎ Ψ
+           → Γᵢ ∋[ i ] m ⊠ Γ
+           → Γⱼ ∋[ j ] m ⊠ Γ
+           → Ψᵢ ∋[ i ] n ⊠ Ψ
+           → Ψⱼ ∋[ j ] n ⊠ Ψ
+           → Γ ≔ Δ ⊠ Ψ
            → All.lookup i Δ ≡ ℓ∅
            → γ ∝ Γᵢ ⊢ P ⊠ Ψᵢ
            → γ ∝ Γⱼ ⊢ [ j / i ] P ⊠ Ψⱼ
 
-⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end with ⊎-get i Γ≔Δ∙Ψ | Only-≡Idx ∈i | Only-≡Idx ∋i
-⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end | Γi≔Δi∙Ψi | refl | refl with Only-lookup-≡ ∈i | Only-lookup-≡ ∋i
+⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end with ⊠-get i Γ≔Δ∙Ψ | ∋-≡Idx ∈i | ∋-≡Idx ∋i
+⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end | Γi≔Δi∙Ψi | refl | refl with ∋-lookup-≡ ∈i | ∋-lookup-≡ ∋i
 ⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end | Γi≔Δi∙Ψi | refl | refl | qeq | qe
-  rewrite Δ∋iℓ∅ | ∙²-unique Γi≔Δi∙Ψi ∙²-idˡ | ∙²-uniqueˡ qe qeq | Only-uniqueʳ ∋i ∈i | Only-uniqueˡ ∋j ∈j = end
+  rewrite Δ∋iℓ∅ | ∙²-unique Γi≔Δi∙Ψi ∙²-idˡ | ∙²-uniqueˡ qe qeq | ∋-uniqueʳ ∋i ∈i | ∋-uniqueˡ ∋j ∈j = end
 ⊢-subst-ih eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (chan t m μ ⊢P) =
   chan t m μ (⊢-subst-ih eq (suc ∋i) (suc ∋j) (suc ∈i) (suc ∈j) (Γ≔Δ∙Ψ , ∙²-idʳ) Δ∋iℓ∅ ⊢P)
-⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (recv {i = x} ∋x ⊢P) with ⊢-⊎ ⊢P
+⊢-subst-ih eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (recv ∋x ⊢P) with ⊢-⊠ ⊢P
 ⊢-subst-ih eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (recv ∋x ⊢P) | (_ -, _) , (Ξᵢ≔δ⊢P∙Ψᵢ , _) =
   let _ , _ , _ , _ , ∋x' , ∋i' , ∋j' , Θ≔Δ'∙Ψ , Δ'∋iℓ∅ = ∋-subst eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ ∋x Ξᵢ≔δ⊢P∙Ψᵢ in
   recv ∋x' (⊢-subst-ih eq (suc ∋i') (suc ∋j') (suc ∈i) (suc ∈j) (Θ≔Δ'∙Ψ , ∙²-idʳ) Δ'∋iℓ∅ ⊢P)
-⊢-subst-ih eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (send ∋x ∋y ⊢P) =
+⊢-subst-ih eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (send (∋tx , ∋x) (∋ty , ∋y) ⊢P) =
   let
-    _ , _ , _ , _ , ∋x' , ∋i' , ∋j' , Θ≔Δ'∙Ψ , Δ'∋iℓ∅ = ∋-subst eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ ∋x (proj₁ (proj₂ (⊎-assoc⁻¹ (proj₂ (∋-⊎ ∋y)) (proj₂ (⊢-⊎ ⊢P)))))
-    _ , _ , _ , _ , ∋y' , ∋i'' , ∋j'' , Θ≔Δ''∙Ψ , Δ''∋iℓ∅ = ∋-subst eq ∋i' ∋j' ∈i ∈j Θ≔Δ'∙Ψ Δ'∋iℓ∅ ∋y (proj₂ (⊢-⊎ ⊢P))
+    _ , δ⊢P = ⊢-⊠ ⊢P
+    _ , δy , _ = ∋-⊠ ∋y
+    _ , δy⊢P , _ = ⊠-assoc⁻¹ δy δ⊢P
+    _ , _ , _ , _ , ∋x' , ∋i' , ∋j' , Θ≔Δ'∙Ψ , Δ'∋iℓ∅ = ∋-subst eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (∋tx , ∋x) δy⊢P
+    _ , _ , _ , _ , ∋y' , ∋i'' , ∋j'' , Θ≔Δ''∙Ψ , Δ''∋iℓ∅ = ∋-subst eq ∋i' ∋j' ∈i ∈j Θ≔Δ'∙Ψ Δ'∋iℓ∅ (∋ty , ∋y) δ⊢P
   in send ∋x' ∋y' (⊢-subst-ih eq ∋i'' ∋j'' ∈i ∈j Θ≔Δ''∙Ψ Δ''∋iℓ∅ ⊢P)
 ⊢-subst-ih eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ (comp {Δ = Ξᵢ} ⊢P ⊢Q) =
   let
-    _ , Γᵢ≔δ⊢P∙Ξᵢ = ⊢-⊎ ⊢P
-    _ , Ξᵢ≔δ⊢Q∙Ψᵢ = ⊢-⊎ ⊢Q
-    _ , _ , _ , _ , Ξᵢ≔δ∙Θ , Γ≔Δ₁∙Θ , Θ≔Δ₂∙Ψ , Δ₁[i]≡0 , Δ₂[i]≡0 = midpoint ∋i Γ≔Δ∙Ψ Δ∋iℓ∅ Γᵢ≔δ⊢P∙Ξᵢ Ξᵢ≔δ⊢Q∙Ψᵢ ∈i
-    _ , m≔δ⊢p∙δ , _ = diff Γᵢ≔δ⊢P∙Ξᵢ Ξᵢ≔δ∙Θ ∋i Γ≔Δ₁∙Θ Δ₁[i]≡0
-    _ , Ξⱼ≔δ∙Θ = cutpoint Γ≔Δ₁∙Θ ∋j m≔δ⊢p∙δ
-    ∋i' = Ξᵢ≔δ∙Θ
-    ∋j' = Ξⱼ≔δ∙Θ
-  in comp (⊢-subst-ih eq ∋i ∋j ∋i' ∋j' Γ≔Δ₁∙Θ Δ₁[i]≡0 ⊢P) (⊢-subst-ih eq ∋i' ∋j' ∈i ∈j Θ≔Δ₂∙Ψ Δ₂[i]≡0 ⊢Q)
+    _ , Γᵢ≔δ⊢P∙Ξᵢ = ⊢-⊠ ⊢P
+    _ , Ξᵢ≔δ⊢Q∙Ψᵢ = ⊢-⊠ ⊢Q
+    _ , Γᵢ≔δ⊢Pδ⊢Q∙Ψᵢ , Ψᵢ≔n∙Ψ = ⊠-assoc⁻¹ Γᵢ≔δ⊢P∙Ξᵢ Ξᵢ≔δ⊢Q∙Ψᵢ
+    _ , Ψᵢ≔n'∙Ψ , n'≔n∙ε = ∋-⊠ ∈i
+    _ , Γᵢ≔n'∙⁇ᵢ , ⁇ᵢ≔δ⊢Pδ⊢Q∙Ψ = reverse Γᵢ≔δ⊢Pδ⊢Q∙Ψᵢ Ψᵢ≔n'∙Ψ
+    _ , m≔n∙δ = boil ∋i (⊠-∋ Γᵢ≔n'∙⁇ᵢ n'≔n∙ε) ⁇ᵢ≔δ⊢Pδ⊢Q∙Ψ Γ≔Δ∙Ψ Δ∋iℓ∅
+    _ , _ , _ , _ , Ξᵢ≔δ∙Θ , Γ≔Δ₁∙Θ , Θ≔Δ₂∙Ψ = midpoint Γᵢ≔δ⊢P∙Ξᵢ Ξᵢ≔δ⊢Q∙Ψᵢ ∋i ∈i m≔n∙δ Γ≔Δ∙Ψ
+    _ , Ξⱼ≔δ∙Θ = cutpoint Γ≔Δ₁∙Θ ∋j {! m≔n∙δ!}
+    Δ₁∋iℓ∅ , Δ₂∋iℓ∅ = split-ℓ∅ Γ≔Δ∙Ψ Γ≔Δ₁∙Θ Θ≔Δ₂∙Ψ Δ∋iℓ∅
+  in comp (⊢-subst-ih eq ∋i ∋j Ξᵢ≔δ∙Θ Ξⱼ≔δ∙Θ Γ≔Δ₁∙Θ Δ₁∋iℓ∅ ⊢P) (⊢-subst-ih eq Ξᵢ≔δ∙Θ Ξⱼ≔δ∙Θ ∈i ∈j Θ≔Δ₂∙Ψ Δ₂∋iℓ∅ ⊢Q)
 
 
 switch : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
        → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
-       → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
-       → ∃[ Θ ] (γ      ∝ Γ      [ j ]≔ t ∝ m ⊠ Θ
-               × γ -, t ∝ Θ -, m ⊢ P          ⊠ Ξ -, ℓ∅)
-switch ⊢P ∋j with ⊢-⊎ ⊢P | ∋-⊎ ∋j
-switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | Δj , Ψ≔ =
-  let W , Γ≔Δj∙W , W≔Δ⊢P∙Ξ = ⊎-assoc (⊎-comm Γ≔) Ψ≔ in
-  _ , ∋-frame Ψ≔ Γ≔Δj∙W  ∋j , ⊢-frame (Γ≔ , ∙²-idʳ) (⊎-comm W≔Δ⊢P∙Ξ , ∙²-idʳ) ⊢P
+       → Ψ ∋[ j ] m ⊠ Ξ
+       → ∃[ Θ ] (Γ      ∋[ j ] m ⊠ Θ
+      × γ -, t ∝ Θ -, m ⊢ P      ⊠ Ξ -, ℓ∅)
+switch ⊢P ∋j with ⊢-⊠ ⊢P | ∋-⊠ ∋j
+switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | _ , Ψ≔ , _ =
+  let W , Γ≔Δj∙W , W≔Δ⊢P∙Ξ = ⊠-assoc (⊠-comm Γ≔) Ψ≔ in
+  _ , ∋-frame Ψ≔ Γ≔Δj∙W  ∋j , ⊢-frame (Γ≔ , ∙²-idʳ) (⊠-comm W≔Δ⊢P∙Ξ , ∙²-idʳ) ⊢P
 
 
 ⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
-        → γ ∝ Ψ [ j ]≔ t ∝ m ⊠ Ξ
+        → γ ∝ Ψ ∋[ j ] t ∝ m ⊠ Ξ
         → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
         → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
-⊢-subst {Γ = Γ} {Ξ} y ⊢P with switch ⊢P y
-⊢-subst {Γ = Γ} {Ξ} y ⊢P | Θ , y' , ⊢P' with ⊢-⊎ ⊢P'
-⊢-subst {Γ = Γ} {Ξ} y ⊢P | Θ , y' , ⊢P' | (_ -, _) , (⊢P'≔ , _) =
+⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P with switch ⊢P y
+⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P | Θ , y' , ⊢P' with ⊢-⊠ ⊢P'
+⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P | Θ , y' , ⊢P' | (_ -, _) , (⊢P'≔ , _) =
   ⊢-frame (proj₂ Γ≔ , ∙²-idˡ) (proj₂ Γ≔ , ∙²-idˡ) ⊢P''
   where
-  ⊢P'' = ⊢-subst-ih (sym (∋-≡Type y')) (zero ∙²-idʳ) (suc (∋-Only y')) (zero ∙²-idʳ) (suc (Only-ℓ∅ (∋-≡Idx y))) (⊢P'≔ , ∙²-idʳ) refl ⊢P'
-  Γ≔ : ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
-  Γ≔ with ⊢-⊎ ⊢P''
+  ⊢P'' = ⊢-subst-ih (sym (∋-≡Type t)) (zero ∙²-idʳ) (suc y') (zero ∙²-idʳ) (suc (∋-ℓ∅ (∋-≡Idx y))) (⊢P'≔ , ∙²-idʳ) refl ⊢P'
+  Γ≔ : ∃[ Δ ] (Γ ≔ Δ ⊠ Ξ)
+  Γ≔ with ⊢-⊠ ⊢P''
   Γ≔ | (_ -, _) , (x , _) = _ , x

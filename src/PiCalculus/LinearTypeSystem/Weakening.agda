@@ -33,17 +33,16 @@ private
 
 ∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t t' : Type} {xs : Carrier idx ²} {xs' : Carrier idx' ²}
          → (j : Fin (suc n))
-         → γ                ∝ Γ                  [ i               ]≔ t' ∝ xs' ⊠ Θ
-         → Vec.insert γ j t ∝ mult-insert j xs Γ [ Fin.punchIn j i ]≔ t' ∝ xs' ⊠ mult-insert j xs Θ
-∋-weaken zero x = suc x
-∋-weaken (suc i) zero = zero
-∋-weaken (suc i) (suc x) = suc (∋-weaken i x)
+         → γ                ∝ Γ                 ∋[ i               ] t' ∝ xs' ⊠ Θ
+         → Vec.insert γ j t ∝ ctx-insert j xs Γ ∋[ Fin.punchIn j i ] t' ∝ xs' ⊠ ctx-insert j xs Θ
+∋-weaken zero x = there x
+∋-weaken (suc i) (zero , zero xyz) = zero , zero xyz
+∋-weaken (suc i) (suc t , suc x) = there (∋-weaken i (t , x))
 
-⊢-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Carrier idx ²}
+⊢-weaken : {P : Scoped n} {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Carrier idx ²}
          → (j : Fin (suc n))
-         → {P : Scoped n}
          → γ ∝ Γ ⊢ P ⊠ Θ
-         → Vec.insert γ j t ∝ mult-insert j xs Γ ⊢ lift j P ⊠ mult-insert j xs Θ
+         → Vec.insert γ j t ∝ ctx-insert j xs Γ ⊢ lift j P ⊠ ctx-insert j xs Θ
 ⊢-weaken j end = end
 ⊢-weaken j (chan t m μ ⊢P) = chan t m μ (⊢-weaken (suc j) ⊢P)
 ⊢-weaken j (comp ⊢P ⊢Q) = comp (⊢-weaken j ⊢P) (⊢-weaken j ⊢Q)

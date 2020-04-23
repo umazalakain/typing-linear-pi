@@ -50,10 +50,10 @@ private
 comp-comm : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs}
           → γ ∝ Γ ⊢ P ∥ Q ⊠ Ξ
           → γ ∝ Γ ⊢ Q ∥ P ⊠ Ξ
-comp-comm (comp ⊢P ⊢Q) with ⊢-⊎ ⊢P | ⊢-⊎ ⊢Q
+comp-comm (comp ⊢P ⊢Q) with ⊢-⊠ ⊢P | ⊢-⊠ ⊢Q
 comp-comm (comp ⊢P ⊢Q) | _ , P≔ | _ , Q≔ =
-  let _ , (Q'≔ , P'≔) = ⊎-assoc (⊎-comm P≔) Q≔ in
-  comp (⊢-frame Q≔ Q'≔ ⊢Q) (⊢-frame P≔ (⊎-comm P'≔) ⊢P)
+  let _ , (Q'≔ , P'≔) = ⊠-assoc (⊠-comm P≔) Q≔ in
+  comp (⊢-frame Q≔ Q'≔ ⊢Q) (⊢-frame P≔ (⊠-comm P'≔) ⊢P)
 
 subject-cong : SubjectCongruence
 subject-cong (stop comp-assoc) (comp ⊢P (comp ⊢Q ⊢R)) = comp (comp ⊢P ⊢Q) ⊢R

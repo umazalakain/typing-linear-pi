@@ -44,124 +44,72 @@ private
     Γ Δ Ξ Θ : Ctx idxs
     x x' y z : Carrier idx ²
 
-data _≔_at_⊠_ : {idxs : Idxs n} → Ctx idxs → Carrier idx ² → Fin n → Ctx idxs → Set where
-  zero : x ≔ y ∙² z
-       → Γ -, x ≔ y at zero ⊠ Γ -, z
-  suc : Γ ≔ x at i ⊠ Δ
-      → Γ -, x' ≔ x at (suc i) ⊠ Δ -, x'
+∋-≡Idx : {Γ : Ctx idxs} {x : Carrier idx ²} → Γ ∋[ i ] x ⊠ Δ → Vec.lookup idxs i ≡ idx
+∋-≡Idx (zero x) = refl
+∋-≡Idx (suc s) rewrite ∋-≡Idx s = refl
 
-Only-≡Idx : {Γ : Ctx idxs} {x : Carrier idx ²} → Γ ≔ x at i ⊠ Δ → Vec.lookup idxs i ≡ idx
-Only-≡Idx (zero x) = refl
-Only-≡Idx (suc s) rewrite Only-≡Idx s = refl
-
--- TODO: DEPRECATED
--- Contains to index equality
-∋-≡Idx : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
-       → γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ
-       → Vec.lookup idxs i ≡ idx
-∋-≡Idx zero = refl
-∋-≡Idx (suc x) = ∋-≡Idx x
-
--- Contains to type equality
-∋-≡Type : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {c : (Carrier idx) ²}
-        → γ ∝ Γ [ i ]≔ t ∝ c ⊠ Ξ
-        → Vec.lookup γ i ≡ t
+∋-≡Type : γ ∋[ i ] t → Vec.lookup γ i ≡ t
 ∋-≡Type zero = refl
-∋-≡Type (suc a) = ∋-≡Type a
+∋-≡Type (suc t) rewrite ∋-≡Type t = refl
 
--- Contains to context split
-∋-Only : {Γ Ξ : Ctx idxs} {x : Carrier idx ²}
-       → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Ξ
-       → Γ ≔ x at i ⊠ Ξ
-∋-Only (zero ⦃ check ⦄) = zero (proj₂ (toWitness check))
-∋-Only (suc x) = suc (∋-Only x)
+≡Type-∋ : Vec.lookup γ i ≡ t → γ ∋[ i ] t
+≡Type-∋ {γ = _ -, _} {i = zero} refl = zero
+≡Type-∋ {γ = _ -, _} {i = suc i} eq = suc (≡Type-∋ eq)
 
-Only-∋ : Γ ≔ x at i ⊠ Ξ
-       → Vec.lookup γ i ≡ t
-       → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Ξ
-Only-∋ {γ = _ -, _} (zero x) refl rewrite ∙²-compute-unique x = zero ⦃ fromWitness (_ , x) ⦄
-Only-∋ {γ = _ -, _} (suc only) eq = suc (Only-∋ only eq)
+∋-⊠ : {Γ Ξ : Ctx idxs}
+    → Γ ∋[ i ] x ⊠ Ξ
+    → Σ[ Δ ∈ Ctx idxs ]
+      (Γ ≔ Δ ⊠ Ξ × Δ ∋[ i ] x ⊠ ε {idxs = idxs})
+∋-⊠ (zero x) = _ , (⊠-idˡ , x) , zero ∙²-idʳ
+∋-⊠ (suc s) with ∋-⊠ s
+∋-⊠ (suc s) | _ , Γ≔ , Δ≔ = _ , (Γ≔ , ∙²-idˡ) , suc Δ≔
 
-Only-⊎ : {Γ Ξ : Ctx idxs}
-       → Γ ≔ x at i ⊠ Ξ
-       → Σ[ Δ ∈ Ctx idxs ]
-         (Γ ≔ Δ ⊎ Ξ × Δ ≔ x at i ⊠ ε {idxs = idxs})
-Only-⊎ (zero x) = _ , (⊎-idˡ , x) , zero ∙²-idʳ
-Only-⊎ (suc s) with Only-⊎ s
-Only-⊎ (suc s) | _ , Γ≔ , Δ≔ = _ , (Γ≔ , ∙²-idˡ) , suc Δ≔
+⊠-∋ : {Γ Δ Ξ : Ctx idxs}
+    → Γ ≔ Δ ⊠ Ξ
+    → Δ ∋[ i ] x ⊠ ε {idxs = idxs}
+    → Γ ∋[ i ] x ⊠ Ξ
+⊠-∋ (sp , s) (zero x) rewrite ⊠-unique sp ⊠-idˡ | ∙²-unique x ∙²-idʳ = zero s
+⊠-∋ (sp , s) (suc only) rewrite ∙²-unique s ∙²-idˡ = suc (⊠-∋ sp only)
 
-∋-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} {x : Carrier idx ²}
-    → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Ξ
-    → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
-∋-⊎ s = let _ , (Γ≔ , _) = Only-⊎ (∋-Only s ) in _ , Γ≔
-
-⊎-Only : {Γ Δ Ξ : Ctx idxs}
-       → Γ ≔ Δ ⊎ Ξ
-       → Δ ≔ x at i ⊠ ε {idxs = idxs}
-       → Γ ≔ x at i ⊠ Ξ
-⊎-Only (sp , s) (zero x) rewrite ⊎-unique sp ⊎-idˡ | ∙²-unique x ∙²-idʳ = zero s
-⊎-Only (sp , s) (suc only) rewrite ∙²-unique s ∙²-idˡ = suc (⊎-Only sp only)
-
-Only-ℓ∅-≡ : Γ ≔ ℓ∅ {idx} at i ⊠ Ξ → Γ ≡ Ξ
-Only-ℓ∅-≡ (zero x) rewrite ∙²-uniqueˡ (∙²-comm x) ∙²-idʳ = refl
-Only-ℓ∅-≡ (suc only) rewrite Only-ℓ∅-≡ only = refl
-
-Only-≡ℓ∅ : Γ ≔ x at i ⊠ Γ → x ≡ ℓ∅
-Only-≡ℓ∅ (zero x) rewrite ∙²-uniqueˡ x ∙²-idˡ = refl
-Only-≡ℓ∅ (suc s) rewrite Only-≡ℓ∅ s = refl
-
-Only-ℓ∅ : {idxs : Idxs n} {Γ : Ctx idxs} {i : Fin n} {idx : Idx}→ Vec.lookup idxs i ≡ idx → Γ ≔ ℓ∅ {idx} at i ⊠ Γ
-Only-ℓ∅ {Γ = _ -, _} {i = zero} refl = zero ∙²-idˡ
-Only-ℓ∅ {Γ = _ -, _} {i = suc i} eq = suc (Only-ℓ∅ eq)
+∋-ℓ∅ : {idxs : Idxs n} {Γ : Ctx idxs} {i : Fin n} {idx : Idx}→ Vec.lookup idxs i ≡ idx → Γ ∋[ i ] ℓ∅ {idx} ⊠ Γ
+∋-ℓ∅ {Γ = _ -, _} {i = zero} refl = zero ∙²-idˡ
+∋-ℓ∅ {Γ = _ -, _} {i = suc i} eq = suc (∋-ℓ∅ eq)
 
 -- TODO: deprecate, convert to context first
-Only-uniqueʳ : Γ ≔ x at i ⊠ Δ → Γ ≔ x at i ⊠ Ξ → Δ ≡ Ξ
-Only-uniqueʳ (zero a) (zero b) rewrite ∙²-uniqueˡ (∙²-comm a) (∙²-comm b) = refl
-Only-uniqueʳ (suc a) (suc b) rewrite Only-uniqueʳ a b = refl
+∋-uniqueʳ : Γ ∋[ i ] x ⊠ Δ → Γ ∋[ i ] x ⊠ Ξ → Δ ≡ Ξ
+∋-uniqueʳ (zero a) (zero b) rewrite ∙²-uniqueˡ (∙²-comm a) (∙²-comm b) = refl
+∋-uniqueʳ (suc a) (suc b) rewrite ∋-uniqueʳ a b = refl
 
 -- TODO: deprecate, convert to context first
-Only-uniqueˡ : Γ ≔ x at i ⊠ Δ → Ξ ≔ x at i ⊠ Δ → Γ ≡ Ξ
-Only-uniqueˡ (zero a) (zero b) rewrite ∙²-unique a b = refl
-Only-uniqueˡ (suc a) (suc b) rewrite Only-uniqueˡ a b = refl
+∋-uniqueˡ : Γ ∋[ i ] x ⊠ Δ → Ξ ∋[ i ] x ⊠ Δ → Γ ≡ Ξ
+∋-uniqueˡ (zero a) (zero b) rewrite ∙²-unique a b = refl
+∋-uniqueˡ (suc a) (suc b) rewrite ∋-uniqueˡ a b = refl
 
-Only-lookup-≡ : Γ ≔ x at i ⊠ Δ → All.lookup i Γ ≔ x ∙² All.lookup i Δ
-Only-lookup-≡ {i = zero} (zero x) = x
-Only-lookup-≡ {i = suc i} (suc s) = Only-lookup-≡ s
+∋-lookup-≡ : Γ ∋[ i ] x ⊠ Δ → All.lookup i Γ ≔ x ∙² All.lookup i Δ
+∋-lookup-≡ {Δ = _ -, _} (zero x) = x
+∋-lookup-≡ {Δ = _ -, _} (suc s) = ∋-lookup-≡ s
 
-Only-idʳ : {x : Carrier idx ²} → Vec.lookup idxs i ≡ idx → Σ[ Γ ∈ Ctx idxs ] (Γ ≔ x at i ⊠ ε {idxs = idxs})
-Only-idʳ {idxs = idxs -, _} {i = zero} refl = (_ -, _) , zero ∙²-idʳ
-Only-idʳ {idxs = idxs -, _} {i = suc i} eq with Only-idʳ {idxs = idxs} {i = i} eq
-Only-idʳ {idxs = idxs -, _} {i = suc i} eq | _ , Γ≔ = _ , suc Γ≔
+∋-lookup-≢ : Γ ∋[ i ] x ⊠ Δ → ∀ j → j ≢ i → All.lookup j Γ ≡ All.lookup j Δ
+∋-lookup-≢ (zero x) zero j≢i = ⊥-elim (j≢i refl)
+∋-lookup-≢ (suc xati) zero j≢i = refl
+∋-lookup-≢ (zero x) (suc j) j≢i = refl
+∋-lookup-≢ (suc xati) (suc j) j≢i = ∋-lookup-≢ xati j (j≢i ∘ cong suc)
 
-Only-lookup-≢ : Γ ≔ x at i ⊠ Δ → ∀ j → i ≢ j → All.lookup j Γ ≡ All.lookup j Δ
-Only-lookup-≢ (zero x) zero i≢j = ⊥-elim (i≢j refl)
-Only-lookup-≢ (suc xati) zero i≢j = refl
-Only-lookup-≢ (zero x) (suc j) i≢j = refl
-Only-lookup-≢ (suc xati) (suc j) i≢j = Only-lookup-≢ xati j (i≢j ∘ cong suc)
-
-lookup-ε : ∀ i → All.lookup i (ε {idxs = idxs}) ≡ ℓ∅
-lookup-ε {idxs = _ -, _} zero = refl
-lookup-ε {idxs = _ -, _} (suc i) = lookup-ε i
-
--- TODO: CHANGE NAME
--- Split of multiplicities to split of contexts
-only-∙ : {Γ Δ Ξ : Ctx idxs}
-       → Γ ≔ x at i ⊠ ε
-       → Δ ≔ y at i ⊠ ε
-       → Ξ ≔ z at i ⊠ ε
-       → x ≔ y ∙² z
-       → Γ ≔ Δ ⊎ Ξ
-only-∙ (zero x) (zero y) (zero z) sp rewrite ∙²-unique x ∙²-idʳ | ∙²-unique y ∙²-idʳ | ∙²-unique z ∙²-idʳ = ⊎-idˡ , sp
-only-∙ (suc Γ≔) (suc Δ≔) (suc Ξ≔) sp = only-∙ Γ≔ Δ≔ Ξ≔ sp , ∙²-idˡ
+∙²-⊠ : {Γ Δ Ξ : Ctx idxs}
+     → Γ ∋[ i ] x ⊠ ε → Δ ∋[ i ] y ⊠ ε → Ξ ∋[ i ] z ⊠ ε
+     → x ≔ y ∙² z → Γ ≔ Δ ⊠ Ξ
+∙²-⊠ (zero x) (zero y) (zero z) sp
+  rewrite ∙²-unique x ∙²-idʳ | ∙²-unique y ∙²-idʳ | ∙²-unique z ∙²-idʳ = ⊠-idˡ , sp
+∙²-⊠ (suc Γ≔) (suc Δ≔) (suc Ξ≔) sp = ∙²-⊠ Γ≔ Δ≔ Ξ≔ sp , ∙²-idˡ
 
 
 diamond : {Γ Ξ Ψ : Ctx idxs}
         → i ≢ j
-        → Γ ≔ x at j ⊠ Ξ
-        → Γ ≔ y at i ⊠ Ψ
+        → Γ ∋[ j ] x ⊠ Ξ
+        → Γ ∋[ i ] y ⊠ Ψ
         → Σ[ Θ ∈ Ctx idxs ]
-        ( Ξ ≔ y at i ⊠ Θ
-        × Ψ ≔ x at j ⊠ Θ
+        ( Ξ ∋[ i ] y ⊠ Θ
+        × Ψ ∋[ j ] x ⊠ Θ
         )
 diamond i≢j (zero _) (zero _) = ⊥-elim (i≢j refl)
 diamond i≢j (zero x) (suc ∋i) = _ , suc ∋i , zero x
@@ -171,81 +119,85 @@ diamond i≢j (suc ∋j) (suc ∋i) | _ , ∋i' , ∋j' = _ , suc ∋i' , suc �
 
 outer-diamond : {Γ Ξ Ψ Θ ΞΔ Δ ΨΔ : Ctx idxs}
               → i ≢ j
-              → Γ ≔ x at i ⊠ Ξ
-              → Γ ≔ y at j ⊠ Ψ
-              → Ξ ≔ y at j ⊠ Θ
-              → Ψ ≔ x at i ⊠ Θ
-              → Ξ ≔ ΞΔ ⊎ Δ
-              → Ψ ≔ ΨΔ ⊎ Δ
-              → Σ[ ΘΔ ∈ Ctx idxs ] (Θ ≔ ΘΔ ⊎ Δ)
+              → Γ ∋[ i ] x ⊠ Ξ → Γ ∋[ j ] y ⊠ Ψ
+              → Ξ ∋[ j ] y ⊠ Θ → Ψ ∋[ i ] x ⊠ Θ
+              → Ξ ≔ ΞΔ ⊠ Δ → Ψ ≔ ΨΔ ⊠ Δ
+              → Σ[ ΘΔ ∈ Ctx idxs ] (Θ ≔ ΘΔ ⊠ Δ)
 outer-diamond i≢j (zero _) (zero _) (zero _) (zero _) a b = ⊥-elim (i≢j refl)
 outer-diamond i≢j (zero x₁) (suc ∋j) (suc ∈j) (zero x) (as , a) (bs , b) = _ , (bs , a)
 outer-diamond i≢j (suc ∋i) (zero ∋j) (zero ∈j) (suc ∈i) (as , a) (bs , b) = _ , (as , b)
 outer-diamond i≢j (suc ∋i) (suc ∋j) (suc ∈j) (suc ∈i) (as , a) (bs , b) with outer-diamond (i≢j ∘ cong suc) ∋i ∋j ∈j ∈i as bs
 outer-diamond i≢j (suc ∋i) (suc ∋j) (suc ∈j) (suc ∈i) (as , a) (bs , b) | _ , s = _ , (s , a)
 
-
--- TODO: generalize to contexts
-reverse : {Γ Ξ Ψ : Ctx idxs}
-        → Γ ≔ x at i ⊠ Ξ
-        → Ξ ≔ y at j ⊠ Ψ
+reverse : {Γ ΓΞ Ξ ΞΨ Ψ : Ctx idxs}
+        → Γ ≔ ΓΞ ⊠ Ξ
+        → Ξ ≔ ΞΨ ⊠ Ψ
         → Σ[ Θ ∈ Ctx idxs ]
-        ( Γ ≔ y at j ⊠ Θ
-        × Θ ≔ x at i ⊠ Ψ
+        ( Γ ≔ ΞΨ ⊠ Θ
+        × Θ ≔ ΓΞ ⊠ Ψ
         )
-reverse (zero x) (zero y) =
-  let _ , a , b = ∙²-assoc⁻¹ x (∙²-comm y) in
-  _ , zero (∙²-comm a) , zero b
-reverse (zero x) (suc ∋j) = _ , suc ∋j , zero x
-reverse (suc ∋i) (zero x) = _ , zero x , suc ∋i
-reverse (suc ∋i) (suc ∋j) with reverse ∋i ∋j
-reverse (suc ∋i) (suc ∋j) | _ , ∋i' , ∋j' = _ , suc ∋i' , suc ∋j'
+reverse Γ≔ΓΞ∙Ξ Ξ≔ΞΨ∙Ψ =
+  let _ , Γ≔ΞΨ∙Θ , Θ≔Ψ∙ΓΞ = ⊠-assoc (⊠-comm Γ≔ΓΞ∙Ξ) Ξ≔ΞΨ∙Ψ in
+  _ , Γ≔ΞΨ∙Θ , ⊠-comm Θ≔Ψ∙ΓΞ
 
-boil : {Γ Ξ Θ Ψ ΘΨ : Ctx idxs}
-     → Γ ≔ x at i ⊠ Θ
-     → Γ ≔ y at i ⊠ Ξ
-     → Ξ ≔ z at i ⊠ Ψ
-     → Θ ≔ ΘΨ ⊎ Ψ
+boil : {Γ Ξ ΞΨ Θ Ψ ΘΨ : Ctx idxs}
+     → Γ ∋[ i ] x ⊠ Θ
+     → Γ ∋[ i ] y ⊠ Ξ
+     → Ξ ≔ ΞΨ ⊠ Ψ
+     → Θ ≔ ΘΨ ⊠ Ψ
      → All.lookup i ΘΨ ≡ ℓ∅
-     → x ≔ y ∙² z
-boil {i = zero} (zero a) (zero b) (zero c) (_ , d) refl rewrite ∙²-unique d ∙²-idˡ with ∙²-assoc⁻¹ b c
-boil {i = zero} (zero a) (zero b) (zero c) (_ , d) refl | _ , e , f rewrite ∙²-uniqueˡ e a = f
-boil {i = suc i} (suc a) (suc b) (suc c) (d , _) eq = boil a b c d eq
+     → ∃[ z ] (x ≔ y ∙² z)
+boil {i = zero} (zero a) (zero b) (_ , c) (_ , d) refl rewrite ∙²-unique d ∙²-idˡ with ∙²-assoc⁻¹ b c
+boil {i = zero} (zero a) (zero b) (_ , c) (_ , d) refl | _ , e , f rewrite ∙²-uniqueˡ e a = _ , f
+boil {i = suc i} (suc a) (suc b) (c , _) (d , _) eq = boil a b c d eq
 
-tail-ℓ∅ : {Γ ΓΨ Ψ ΓΘ Θ ΘΨ : Ctx idxs}
-        → Γ ≔ ΓΨ ⊎ Ψ
-        → Γ ≔ ΓΘ ⊎ Θ
-        → Θ ≔ ΘΨ ⊎ Ψ
+split : x ≔ y ∙² z
+      → Γ ∋[ i ] x ⊠ Ξ
+      → ∃[ Δ ] (Γ ∋[ i ] y ⊠ Δ × Δ ∋[ i ] z ⊠ Ξ)
+split s (zero x) = let _ , x' , s' = ∙²-assoc x s in _ , zero x' , zero s'
+split s (suc x) with split s x
+split s (suc x) | _ , y , z = _ , suc y , suc z
+
+split-ℓ∅ : {Γ ΓΨ Ψ ΓΘ Θ ΘΨ : Ctx idxs}
+        → Γ ≔ ΓΨ ⊠ Ψ
+        → Γ ≔ ΓΘ ⊠ Θ
+        → Θ ≔ ΘΨ ⊠ Ψ
         → All.lookup i ΓΨ ≡ ℓ∅
-        → All.lookup i ΘΨ ≡ ℓ∅
-tail-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl rewrite ∙²-unique x ∙²-idˡ with ∙²-mut-cancel y z
-tail-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl | refl = ∙²-uniqueˡ z ∙²-idˡ
-tail-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = tail-ℓ∅ a b c eq
+        → All.lookup i ΓΘ ≡ ℓ∅ × All.lookup i ΘΨ ≡ ℓ∅
+split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl rewrite ∙²-unique x ∙²-idˡ with ∙²-mut-cancel y z
+split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl | refl = ∙²-uniqueˡ y ∙²-idˡ , ∙²-uniqueˡ z ∙²-idˡ
+split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
 
+⊢-⊠ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → Σ[ Δ ∈ Ctx idxs ] (Γ ≔ Δ ⊠ Ξ)
+⊢-⊠ end = ε , ⊠-idˡ
+⊢-⊠ (chan t m μ ⊢P) with ⊢-⊠ ⊢P
+⊢-⊠ (chan t m μ ⊢P) | (_ -, _) , (P≔ , _) = _ , P≔
+⊢-⊠ (recv (_ , x) ⊢P) with ⊢-⊠ ⊢P
+⊢-⊠ (recv (_ , x) ⊢P) | (_ -, _) , (P≔ , _) =
+  let _ , x≔ , _ = ∋-⊠ x
+      _ , xP≔ , _ = ⊠-assoc⁻¹ x≔ P≔
+   in _ , xP≔
+⊢-⊠ (send (_ , x) (_ , y) ⊢P) =
+  let _ , x≔ , _ = ∋-⊠ x
+      _ , y≔ , _ = ∋-⊠ y
+      _ , P≔ = ⊢-⊠ ⊢P
+      _ , xy≔ , _ = ⊠-assoc⁻¹ x≔ y≔
+      _ , Pxy≔ , _ = ⊠-assoc⁻¹ xy≔ P≔
+   in _ , Pxy≔
+⊢-⊠ (comp ⊢P ⊢Q) =
+  let _ , P≔ = ⊢-⊠ ⊢P
+      _ , Q≔ = ⊢-⊠ ⊢Q
+      _ , PQ≔ , _ = ⊠-assoc⁻¹ P≔ Q≔
+   in _ , PQ≔
 
-⊢-⊎ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → ∃[ Δ ] (Γ ≔ Δ ⊎ Ξ)
-⊢-⊎ end = ε , ⊎-idˡ
-⊢-⊎ (chan t m μ ⊢P) = let _ , Γ≔ = ⊢-⊎ ⊢P
-                       in _ , ⊎-tail Γ≔
-⊢-⊎ (recv x ⊢P) = let _ , x≔ = ∋-⊎ x
-                      _ , P≔ = ⊢-⊎ ⊢P
-                   in _ , ⊎-trans x≔ (⊎-tail P≔)
-⊢-⊎ (send x y ⊢P) = let _ , x≔ = ∋-⊎ x
-                        _ , y≔ = ∋-⊎ y
-                        _ , P≔ = ⊢-⊎ ⊢P
-                     in _ , ⊎-trans (⊎-trans x≔ y≔) P≔
-⊢-⊎ (comp ⊢P ⊢Q) = let _ , P≔ = ⊢-⊎ ⊢P
-                       _ , Q≔ = ⊢-⊎ ⊢Q
-                    in _ , ⊎-trans P≔ Q≔
+ctx-insert : (i : Fin (suc n)) → Carrier idx ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
+ctx-insert zero xs' Γ = Γ -, xs'
+ctx-insert (suc i) xs' (Γ -, xs) = ctx-insert i xs' Γ -, xs
 
-mult-insert : (i : Fin (suc n)) → (Carrier idx) ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
-mult-insert zero xs' Γ = Γ -, xs'
-mult-insert (suc i) xs' (Γ -, xs) = mult-insert i xs' Γ -, xs
+ctx-remove : Ctx idxs → (i : Fin (suc n)) → Ctx (Vec.remove idxs i)
+ctx-remove (Γ -, _) zero = Γ
+ctx-remove (Γ -, ys -, xs) (suc i) = ctx-remove (Γ -, ys) i -, xs
 
-mult-remove : Ctx idxs → (i : Fin (suc n)) → Ctx (Vec.remove idxs i)
-mult-remove (Γ -, _) zero = Γ
-mult-remove (Γ -, ys -, xs) (suc i) = mult-remove (Γ -, ys) i -, xs
-
-mult-update : (i : Fin n) → (Carrier (Vec.lookup idxs i)) ² → Ctx idxs → Ctx idxs
-mult-update zero m' (ms -, m) = ms -, m'
-mult-update (suc i) m' (ms -, m) = mult-update i m' ms -, m
+ctx-update : (i : Fin n) → Carrier (Vec.lookup idxs i) ² → Ctx idxs → Ctx idxs
+ctx-update zero m' (ms -, m) = ms -, m'
+ctx-update (suc i) m' (ms -, m) = ctx-update i m' ms -, m

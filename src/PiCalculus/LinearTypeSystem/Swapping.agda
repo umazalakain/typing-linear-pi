@@ -39,16 +39,6 @@ private
     idxs : Idxs n
     P Q : Scoped n
 
-∋-unused : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {x : Carrier idx ²}
-         → (i : Fin n)
-         → γ ∝ Γ [ j ]≔ t ∝ x ⊠ Θ
-         → i ≢ j
-         → All.lookup i Γ ≡ All.lookup i Θ
-∋-unused zero zero i≢x = ⊥-elim (i≢x refl)
-∋-unused zero (suc x) i≢x = refl
-∋-unused (suc i) zero i≢x = refl
-∋-unused (suc i) (suc x) i≢x = ∋-unused i x (i≢x ∘ cong suc)
-
 ⊢-unused : {γ : PreCtx n} {Γ Θ : Ctx idxs}
          → (i : Fin n)
          → Unused i P
@@ -56,12 +46,12 @@ private
          → All.lookup i Γ ≡ All.lookup i Θ
 ⊢-unused i uP end = refl
 ⊢-unused i uP (chan t m μ ⊢P) = ⊢-unused (suc i) uP ⊢P
-⊢-unused i (i≢x , uP) (recv x ⊢P) = trans
-  (∋-unused i x i≢x)
+⊢-unused i (i≢x , uP) (recv (_ , x) ⊢P) = trans
+  (∋-lookup-≢ x i i≢x)
   (⊢-unused (suc i) uP ⊢P)
-⊢-unused i (i≢x , i≢y , uP) (send x y ⊢P) = trans (trans
-  (∋-unused i x i≢x)
-  (∋-unused i y i≢y))
+⊢-unused i (i≢x , i≢y , uP) (send (_ , x) (_ , y) ⊢P) = trans (trans
+  (∋-lookup-≢ x i i≢x)
+  (∋-lookup-≢ y i i≢y))
   (⊢-unused i uP ⊢P)
 ⊢-unused i (uP , uQ) (comp ⊢P ⊢Q) = trans
   (⊢-unused i uP ⊢P)
@@ -79,20 +69,24 @@ module _ {a} {A : Set a} where
 -- TODO: rewrite this crap
 ∋-swap : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {t : Type} {x : Carrier idx ²}
        → (i : Fin n)
-       → γ ∝ Γ [ j ]≔ t ∝ x ⊠ Θ
-       → swapᵥ i γ ∝ swapₐ i Γ [ swapFin i j ]≔ t ∝ x ⊠ swapₐ i Θ
-∋-swap {γ = _ -, _ -, _} {idxs = _ -, _ -, _} {Γ = _ -, _ -, _} zero zero = suc zero
-∋-swap {γ = _ -, _ -, _} zero (suc zero) = zero
-∋-swap {γ = _ -, _ -, _} zero (suc (suc x)) = suc (suc x)
-∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) zero = zero
-∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc zero) (suc zero) = suc (suc zero)
-∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc (suc i)) (suc zero) = suc zero
-∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc i) (suc (suc x)) with Fin.inject₁ i Finₚ.≟ suc j
-∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc zero) (suc (suc x)) | yes ()
-∋-swap {j = suc (suc ._)} {γ = γ -, _} {Γ = Γ -, _} {Θ = Θ -, _} (suc (suc i)) (suc sx@(suc x)) | yes refl = suc ((subst (λ ● → swapᵥ (suc i) γ ∝ swapₐ (suc i) Γ [ ● ]≔ _ ∝ _ ⊠ swapₐ (suc i) Θ) (sym (trans (cong suc (sym (trans (swapFin-injectˡ i) (cong suc (sym (Finₚ.lower₁-inject₁′ i _)))))) (swapFin-suc i (Fin.inject₁ i)))) (∋-swap (suc i) sx)))
-∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p with i Finₚ.≟ j
-∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p | yes refl rewrite sym (swapFin-injectʳ i) = suc (∋-swap i sx)
-∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc sx@(suc x)) | no ¬p | no ¬q rewrite sym (swapFin-neq i j ¬q ¬p) = suc (∋-swap i sx)
+       → γ ∝ Γ ∋[ j ] t ∝ x ⊠ Θ
+       → swapᵥ i γ ∝ swapₐ i Γ ∋[ swapFin i j ] t ∝ x ⊠ swapₐ i Θ
+∋-swap {γ = _ -, _ -, _} {idxs = _ -, _ -, _} {Γ = _ -, _ -, _} zero (zero , zero xyz) = (suc zero , suc (zero xyz))
+∋-swap {γ = _ -, _ -, _} zero (suc zero , suc (zero xyz)) = zero , zero xyz
+∋-swap {γ = _ -, _ -, _} zero (suc (suc t) , suc (suc x)) = suc (suc t) , suc (suc x)
+∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (zero , zero xyz) = zero , zero xyz
+∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc zero) (suc zero , suc (zero xyz)) = suc (suc zero) , suc (suc (zero xyz))
+∋-swap {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc (suc i)) (suc zero , suc (zero xyz)) = suc zero , suc (zero xyz)
+∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc i) (suc (suc t) , suc (suc x)) with Fin.inject₁ i Finₚ.≟ suc j
+∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc zero) (suc (suc t) , suc (suc x)) | yes ()
+∋-swap {j = suc (suc ._)} {γ = γ -, _} {Γ = Γ -, _} {Θ = Θ -, _} (suc (suc i)) (suc st@(suc t) , suc sx@(suc x)) | yes refl =
+  let s' = subst (λ ● → swapᵥ (suc i) γ ∝ swapₐ (suc i) Γ ∋[ ● ] _ ∝ _ ⊠ swapₐ (suc i) Θ)
+                 (sym (trans (cong suc (sym (trans (swapFin-injectˡ i) (cong suc (sym (Finₚ.lower₁-inject₁′ i _))))))
+                 (swapFin-suc i (Fin.inject₁ i)))) (∋-swap (suc i) (st , sx))
+  in there s'
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc st@(suc t) , suc sx@(suc x)) | no ¬p with i Finₚ.≟ j
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc st@(suc t) , suc sx@(suc x)) | no ¬p | yes refl rewrite sym (swapFin-injectʳ i) = there (∋-swap i (st , sx))
+∋-swap {j = suc (suc j)} {γ = _ -, _ -, _ -, _} {Γ = _ -, _ -, _ -, _} (suc i) (suc st@(suc t) , suc sx@(suc x)) | no ¬p | no ¬q rewrite sym (swapFin-neq i j ¬q ¬p) = there (∋-swap i (st , sx))
 
 ⊢-swap : {γ : PreCtx (suc n)} {Γ Θ : Ctx idxs}
        → (i : Fin n)

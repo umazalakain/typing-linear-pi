@@ -24,7 +24,7 @@ module PiCalculus.LinearTypeSystem (Ω : Quantifiers) where
 open Quantifiers Ω
 
 infixr 4 _∝_⊢_⊠_
-infixr 4 _∝_[_]≔_∝_⊠_
+infixr 4 _∝_∋[_]_∝_⊠_ _∋[_]_⊠_ _∋[_]_
 infixr 10 chan recv send
 
 private
@@ -52,35 +52,50 @@ private
     x y z : Carrier idx
     P Q : Scoped n
 
-data _∝_[_]≔_∝_⊠_ : PreCtx n → Ctx idxs → Fin n → Type → (Carrier idx) ² → Ctx idxs → Set where
+data _∋[_]_⊠_ : Ctx idxs → Fin n → (Carrier idx) ² → Ctx idxs → Set where
 
-  zero : {Γ : Ctx idxs} {y z : (Carrier idx) ²}
-       → ⦃ check : True (∙²-compute y z) ⦄
-       → γ -, t ∝ Γ -, proj₁ (toWitness check) [ zero ]≔ t ∝ y ⊠ Γ -, z
+  zero : {idxs : Idxs n} {Γ : Ctx idxs} {x y z : Carrier idx ²}
+       → x ≔ y ∙² z
+       → Γ -, x ∋[ zero {n} ] y ⊠ Γ -, z
 
   suc : {Γ Δ : Ctx idxs} {x : (Carrier idx) ² } {x' : (Carrier idx') ²}
-      → γ ∝ Γ [ i ]≔ t ∝ x ⊠ Δ
-      → γ -,  t' ∝ Γ -, x' [ suc i ]≔ t ∝ x ⊠ Δ -, x'
+      → Γ ∋[ i ] x ⊠ Δ
+      → Γ -, x' ∋[ suc i ] x ⊠ Δ -, x'
 
+data _∋[_]_ : PreCtx n → Fin n → Type → Set where
+  zero : γ -, t ∋[ zero ] t
+  suc : γ ∋[ i ] t → γ -,  t' ∋[ suc i ] t
+
+_∝_∋[_]_∝_⊠_ : PreCtx n → Ctx idxs → Fin n → Type → (Carrier idx) ² → Ctx idxs → Set
+γ ∝ Γ ∋[ i ] t ∝ x ⊠ Δ = (γ ∋[ i ] t) × (Γ ∋[ i ] x ⊠ Δ)
+
+here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {y z : Carrier idx ²} ⦃ check : True (∙²-compute y z) ⦄
+     → γ -, t ∝ Γ -, proj₁ (toWitness check) ∋[ zero ] t ∝ y ⊠ Γ -, z
+here ⦃ check ⦄ = let _ , x≔y∙²z = toWitness check in zero , zero x≔y∙²z
+
+there : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs} {x : Carrier idx ²} {x' : Carrier idx' ²}
+      → γ       ∝ Γ       ∋[     i ] t ∝ x ⊠ Δ
+      → γ -, t' ∝ Γ -, x' ∋[ suc i ] t ∝ x ⊠ Δ -, x'
+there (i , j) = suc i , suc j
 
 data _∝_⊢_⊠_ : PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set where
 
   end : γ ∝ Γ ⊢ 𝟘 ⊠ Γ
 
-  chan : (t : Type) (m : (Carrier idx') ²) (μ : Carrier idx)
+  chan : (t : Type) (m : Carrier idx' ²) (μ : Carrier idx)
        → γ -, C[ t ∝ m ] ∝ Γ -, (μ , μ) ⊢ P     ⊠ Δ -, ℓ∅
        -----------------------------------------------------
        → γ               ∝ Γ            ⊢ new P ⊠ Δ
 
   recv : {t : Type} {m : (Carrier idx') ²}
-       → (x : γ      ∝ Γ       [ i ]≔ C[ t ∝ m ] ∝ ℓᵢ {idx} ⊠ Ξ)
+       → (x : γ      ∝ Γ       ∋[ i ] C[ t ∝ m ] ∝ ℓᵢ {idx} ⊠ Ξ)
        →      γ -, t ∝ Ξ -, m  ⊢      P                     ⊠ Θ -, ℓ∅
        --------------------------------------------------------------
        →      γ      ∝ Γ       ⊢ i ⦅⦆ P        ⊠ Θ
 
   send : {t : Type} {m : (Carrier idx') ²}
-       → (x : γ ∝ Γ [ i ]≔ C[ t ∝ m ] ∝ ℓₒ {idx} ⊠ Δ)
-       → (y : γ ∝ Δ [ j ]≔ t          ∝ m        ⊠ Ξ)
+       → (x : γ ∝ Γ ∋[ i ] C[ t ∝ m ] ∝ ℓₒ {idx} ⊠ Δ)
+       → (y : γ ∝ Δ ∋[ j ] t          ∝ m        ⊠ Ξ)
        →      γ ∝ Ξ ⊢      P                     ⊠ Θ
        -------------------------------------------
        →      γ ∝ Γ ⊢ i ⟨ j ⟩ P ⊠ Θ
@@ -89,6 +104,3 @@ data _∝_⊢_⊠_ : PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set whe
        → γ ∝ Δ ⊢ Q     ⊠ Ξ
        -------------------
        → γ ∝ Γ ⊢ P ∥ Q ⊠ Ξ
-
-_∝_⊢_ : PreCtx n → Ctx idxs → Scoped n → Set
-γ ∝ Γ ⊢ P = γ ∝ Γ ⊢ P ⊠ ε

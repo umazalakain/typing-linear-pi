@@ -120,11 +120,11 @@ raw-[ names ] γ ∝ Γ ⊢ P | nothing = L.Lift _ ⊤
 
 _ : raw-[ [] -, "a" ] [] -, B[ 0 ] ∝ _∷_ {x = false} (tt , tt) [] ⊢ (⦅new "x" ⦆ (("x" ⟨ "a" ⟩ 𝟘)) ∥ ("x" ⦅ "b" ⦆ 𝟘))
 _ = chan {idx = LINEAR} B[ 0 ] (ℓ# {SHARED}) (1∙ {LINEAR})
-    (comp (send zero (suc zero) end)
-    (recv  zero end))
+    (comp (send here (there here) end)
+    (recv  here end))
 
 _ : raw-[ [] -, "y" ] [] -, B[ 0 ] ∝ _∷_ {x = false} (tt , tt) [] ⊢ channel-over-channel₀
 _ = chan {idx' = LINEAR} {idx = LINEAR} C[ B[ 0 ] ∝ (ℓ# {SHARED}) ] (ℓᵢ {LINEAR}) (1∙ {LINEAR}) (comp
-         (recv zero (recv zero end))
+         (recv here (recv here end))
          (chan B[ 0 ] (ℓ# {SHARED}) (1∙ {LINEAR})
-               (send (suc zero) zero (send zero (suc (suc zero)) end))))
+               (send (there here) here (send here (there (there here)) end))))
