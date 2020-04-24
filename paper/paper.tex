@@ -1092,46 +1092,74 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
   \end{remark}
 \end{nitheorem}
 
-\begin{figure}[ht]
+\begin{figure}[h]
   \begin{subfigure}{.5\textwidth}
-  \centering
-  \begin{tikzpicture}
-    \node (gamma) at (0,2) {$\Gamma$};
-    \node (psi-m) at (4,2) {$\Psi_m$};
-    \node (psi-l) at (4,4) {$\Psi_l$};
-    \node (psi-r) at (4,0) {$\Psi_r$};
-    \draw[->]                (gamma) -- node[above,sloped] {$\Delta$} node[below] {$\Delta_i = \ell_{\o}$} (psi-m);
-    \draw[->]                (gamma) -- node[above,sloped] {$\vdash P$}               (psi-l);
-    \draw[->,densely dotted] (gamma) -- node[below,sloped] {$\vdash \subst{P}{j}{i}$} (psi-r);
-    \draw[->]                (psi-m) -- node[right]        {$m@i$}                    (psi-l);
-    \draw[->]                (psi-m) -- node[right]        {$m@j$}                    (psi-r);
-  \end{tikzpicture}
-  \caption{Diagrammatic representation of the generalized substitution theorem.}
-  \label{fig:subst}
+    \centering
+    \begin{tikzpicture}
+      \node (gamma-l) at (0,6)   {$\Gamma_l$};
+      \node (gamma-m)   at (0,3)   {$\Gamma$};
+      \node (gamma-r) at (0,0)   {$\Gamma_r$};
+      \node (xi-l)    at (3,5.5) {$\Xi_l$};
+      \node (theta)   at (3,3.3) {$\Theta$};
+      \node (delta-m) at (3,2.7) {};
+      \node (xi-r)    at (3,0.5) {$\Xi_r$};
+      \node (psi-l)   at (6,5)   {$\Psi_l$};
+      \node (psi-m)   at (6,3)   {$\Psi$};
+      \node (psi-r)   at (6,1)   {$\Psi_r$};
+
+      \draw[-]  (gamma-m) -- (delta-m.center);
+      \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \ell_{\o}$}(psi-m);
+
+      \draw[->,densely dotted] (gamma-m) -- (theta);
+      \draw[->,densely dotted] (theta) -- (psi-m);
+      
+      \draw[->] (gamma-l) -- node[left] {$\ni_i m$} (gamma-m);
+      \draw[->] (gamma-r) -- node[left] {$\ni_j m$} (gamma-m);
+      \draw[->] (psi-l) -- node[right] {$\ni_i n$} (psi-m);
+      \draw[->] (psi-r) -- node[right] {$\ni_j n$} (psi-m);
+
+      \draw[->] (gamma-l) -- node[above] {$\vdash P$} (xi-l);
+      \draw[->] (xi-l) -- node[above] {$\vdash Q$} (psi-l);
+      \draw[->,densely dotted] (gamma-r) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-r);
+      \draw[->,densely dotted] (xi-r) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-r);
+      \draw[->,densely dotted] (xi-l) -- node[left] {$\ni_i l$} (theta);
+      \draw[->,densely dotted] (xi-r) -- node[left] {$\ni_j l$} (theta);
+    \end{tikzpicture}
+    \caption{
+      Diagrammatic representation of the generalized substitution for process input.
+      Thanks to the additional premise in Remark \ref{re:delta-zero}, we know that $m$ is at least capable of $n$, i.e. $\opsquared{m}{\delta}{n}$ for some $\delta$.
+    }
+    \label{fig:subst}
   \end{subfigure}
-  % Do not leave empty line
-  \begin{subfigure}{.5\textwidth}
-  \centering
-  \begin{tikzpicture}
-    \node (gamma) at (0,2) {$\Gamma$};
-    \node (xi-l)  at (0,4) {$\Xi_l$};
-    \node (xi-r)  at (0,0) {$\Xi_r$};
-    \node (psi-m) at (4,2) {$\Psi_m$};
-    \node (psi-l) at (4,4) {$\Psi_l$};
-    \node (psi-r) at (4,0) {$\Psi_r$};
-    \draw[->]                (gamma) -- node[above,sloped] {$\Delta$} node[below] {$\Delta_i = \ell_{\o}$} (psi-m);
-    \draw[->]                (gamma) -- node[left]         {$\ell_i@i$}               (xi-l);
-    \draw[->,densely dotted] (gamma) -- node[left]         {$\ell_i@j$}               (xi-r);
-    \draw[->]                (xi-l)  -- node[above]        {$\vdash P$}               (psi-l);
-    \draw[->,densely dotted] (xi-r)  -- node[above]        {$\vdash \subst{P}{j}{i}$} (psi-r);
-    \draw[->]                (psi-m) -- node[right]        {$m@i$}                    (psi-l);
-    \draw[->]                (psi-m) -- node[right]        {$m@j$}                    (psi-r);
-  \end{tikzpicture}
-  \caption{
-    Diagrammatic representation of the generalized substitution for process input.
-    Thanks to the additional premise in Remark \ref{re:delta-zero}, we know that $m$ is at least capable of $\ell_i$, i.e. $\opsquared{m}{\delta}{\ell_i}$ for some $\delta$.
-  }
-  \label{fig:subst-input}
+  \hspace{\fill} % DO NOT LEAVE EMPTY LINE
+  \begin{subfigure}{.4\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \node (gamma-l) at (0,4)   {};
+      \node (gamma-m) at (0,2)   {};
+      \node (gamma-r) at (0,0)   {};
+      \node (xi-l)    at (2,5)   {};
+      \node (xi-m)    at (2,3.5) {};
+      \node (xi-r)    at (2,2)   {};
+      \node (psi-m)   at (4,3.5) {};
+
+      \draw[->] (gamma-l) -- (xi-r);
+      \draw[->] (gamma-m) -- (xi-r);
+      \draw[->] (gamma-r) -- (xi-r);
+      \draw[->] (gamma-l) -- (gamma-m);
+      \draw[->] (gamma-r) -- (gamma-m);
+      \draw[->] (xi-l)    -- (xi-m);
+      \draw[->] (xi-r)    -- (xi-m);
+      \draw[->] (xi-l)    -- (psi-m);
+      \draw[->] (xi-m)    -- (psi-m);
+      \draw[->] (xi-r)    -- (psi-m);
+    \end{tikzpicture}
+    \caption{
+      Alternative approach without the $\ni_i n$ and $\ni_j n$ arrows.
+      These are not strictly necessary, but they make the inductive hypotheses compositional.
+      Without them, framing lemmas would have to be used extensively.
+    }
+    \label{fig:subst-compositionality}
   \end{subfigure}
 \end{figure}
 
