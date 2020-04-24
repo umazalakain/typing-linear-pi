@@ -39,8 +39,17 @@ data Type : Set where
   C[_∝_] : Type → (Carrier idx) ² → Type
   -- P[_&_] : Type → Type → Type
 
+-- Context of types
 PreCtx : ℕ → Set
 PreCtx = Vec Type
+
+-- Context of usage indices
+Idxs : ℕ → Set
+Idxs = Vec Idx
+
+-- Indexed context of usages
+Ctx : ∀ {n} → Idxs n → Set
+Ctx = All λ idx → (Carrier idx) ²
 
 private
   variable
@@ -52,6 +61,12 @@ private
     x y z : Carrier idx
     P Q : Scoped n
 
+-- γ ∋[ i ] t is a proof that variable i in Γ has type t
+data _∋[_]_ : PreCtx n → Fin n → Type → Set where
+  zero : γ -, t ∋[ zero ] t
+  suc : γ ∋[ i ] t → γ -,  t' ∋[ suc i ] t
+
+-- Γ ∋[ i ] x ⊠ Δ is a proof that subtracting x from variable in in Γ results in Δ
 data _∋[_]_⊠_ : Ctx idxs → Fin n → (Carrier idx) ² → Ctx idxs → Set where
 
   zero : {idxs : Idxs n} {Γ : Ctx idxs} {x y z : Carrier idx ²}
@@ -62,13 +77,11 @@ data _∋[_]_⊠_ : Ctx idxs → Fin n → (Carrier idx) ² → Ctx idxs → Set
       → Γ ∋[ i ] x ⊠ Δ
       → Γ -, x' ∋[ suc i ] x ⊠ Δ -, x'
 
-data _∋[_]_ : PreCtx n → Fin n → Type → Set where
-  zero : γ -, t ∋[ zero ] t
-  suc : γ ∋[ i ] t → γ -,  t' ∋[ suc i ] t
-
+-- For convenience, merge together γ ∋[ i ] t and Γ ∋[ i ] x ⊠ Δ
 _∝_∋[_]_∝_⊠_ : PreCtx n → Ctx idxs → Fin n → Type → (Carrier idx) ² → Ctx idxs → Set
 γ ∝ Γ ∋[ i ] t ∝ x ⊠ Δ = (γ ∋[ i ] t) × (Γ ∋[ i ] x ⊠ Δ)
 
+-- Constructor for (zero , zero xyz) that computes x from y and z
 here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {y z : Carrier idx ²} ⦃ check : True (∙²-compute y z) ⦄
      → γ -, t ∝ Γ -, proj₁ (toWitness check) ∋[ zero ] t ∝ y ⊠ Γ -, z
 here ⦃ check ⦄ = let _ , x≔y∙²z = toWitness check in zero , zero x≔y∙²z
@@ -78,10 +91,13 @@ there : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs} {x : Carrier idx ²} 
       → γ -, t' ∝ Γ -, x' ∋[ suc i ] t ∝ x ⊠ Δ -, x'
 there (i , j) = suc i , suc j
 
+-- Typing judgment γ ∝ Γ ⊢ P ⊠ Δ where P is a well-typed process
+-- under typing context γ and input and output usage contexts Γ and Δ
 data _∝_⊢_⊠_ : PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set where
 
   end : γ ∝ Γ ⊢ 𝟘 ⊠ Γ
 
+  -- Note (μ , μ): the created channel is balanced
   chan : (t : Type) (m : Carrier idx' ²) (μ : Carrier idx)
        → γ -, C[ t ∝ m ] ∝ Γ -, (μ , μ) ⊢ P     ⊠ Δ -, ℓ∅
        -----------------------------------------------------
