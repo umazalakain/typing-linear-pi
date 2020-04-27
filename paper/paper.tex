@@ -60,7 +60,7 @@
 \newcommand{\comma}{\; \constr{,} \;}
 
 % Functions
-\newcommand{\subst}[3]{#1[#2/#3]}
+\newcommand{\subst}[3]{#1 \; [ \; #2 \; / \;#3 \;]}
 \newcommand{\opsquared}[3]{#1 \, \coloneqq \, #2 \, \cdot^2 \, #3}
 \newcommand{\opctx}[3]{#1 \, \coloneqq \, #2 \, \otimes \, #3}
 
@@ -78,6 +78,7 @@
 \newcommand{\reduce}[1]{\; \type{\longrightarrow}_{#1} \;}
 \newcommand{\types}[4]{#1 \; \type{\propto} \; #2 \; \type{\vdash} \; #3 \; \type{\boxtimes} \; #4}
 \newcommand{\contains}[6]{#1 \; \type{\propto} \; #2 \; \type{\ni}_{#3} \; #4 \; \type{\propto} \; #5 \; \type{\boxtimes} \; #6}
+\newcommand{\containsusage}[4]{#1 \; \type{\ni}_{#2} \; #3 \; \type{\boxtimes} \; #4}
 \newcommand{\Var}{\type{VAR}}
 \newcommand{\Process}{\type{PROCESS}}
 \newcommand{\Unused}{\type{UNUSED}}
@@ -447,7 +448,8 @@ To show that the doubly recursive call terminates we index the equivalence relat
 
 Figure \ref{fig:reduction} models the operational semantics of the \picalc{}.
 Processes put in parallel reduce when they communicate over a common variable.
-The receiving process substitutes references to its most immediate variable with references to the variable sent by the process doing the output, and is then \emph{lowered} --- all variable references are decreased by one.
+The receiving process substitutes references to its most immediate variable with references to the variable sent by the process doing the output.
+The process is then \emph{lowered} --- all variable references are decreased by one.
 Reduction is closed under structural congruence and goes under parallel composition and scope restriction
 --- but notably not under input nor output, otherwise the sequencing of actions would not be preserved.
 In \S \ref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
@@ -479,8 +481,8 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
   \; \textsc{Reduces}
 
   \inferrule
-  {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n \\ uP : \Unused_0 \, P}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower \; 0 \; \subst{P}{j}{0} \; uP}{Q}}
+  {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower \; 0 \; (\subst{P}{j}{0})}{Q}}
 
   \inferrule
   {red : P \reduce{i} P'}
@@ -925,37 +927,64 @@ As a result, the proofs on typing derivations will perform a double induction: o
 Subject reduction (aka type preservation) relates the operational semantics and the typing system of a language.
 In its usual form, it states that if $P$ reduces to $Q$ and $P$ is well-typed under context $\Gamma$, then $Q$ is well-typed under $\Gamma$ too.
 In the linear \picalc{} however, reduction \emph{is} meant to transform the context: each time communication occurs over a channel, that channel is exhausted.
-In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity on both its input and output capabilities.
-In \S \ref{semantics}, we made sure to lift the index of this channel to the type level.
-If the channel is internal to the process, the context must not be modified; if it is external on index $i$, the input usage context at index $i$ must have $\ell_\#$ subtracted.
+In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
+In \S \ref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
 
 \begin{nitheorem}
   Let $P \reduce{c} Q$.
-  If $c$ is $\constr{internal}$, then let $\Delta \equiv \epsilon$;
-  if $c$ is $\constr{external}\; i$, then let $\Delta \equiv \ell_\# @ i$.
-  Let $\Gamma'$ and $\Gamma$ be usage contexts only differing in $\Delta$, so that $\opctx{\Gamma'}{\Delta}{\Gamma}$.
-  If $\types{\gamma}{\Gamma'}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$
+  If $c$ is $\constr{internal}$ to the process, the context must not be modified and thus $\Gamma' \equiv \Gamma$.
+  If $c$ is $\constr{external}\; i$, the input usage context at index $i$ must be decremented, and therefore $\containsusage{\Gamma'}{i}{\ell_\#}{\Gamma}$.
+  Then the typing derivation $\types{\gamma}{\Gamma'}{P}{\Xi}$ can be transformed into $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
+
+\begin{proof}
+  \hfill{}\\
+  \begin{itemize}
+    \item
+    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ from the following bits:
+    \begin{alignat*}{2}
+      \containsusage{&\Gamma'}{i}{\ell_\# &&}{\Gamma} \\
+      \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\ell_i &&}{\Psi} \\
+      \types{\gamma , t}{&\Psi , m}{P &&}{\Delta , \ell_{\o}} \\
+      \contains{\gamma}{&\Delta }{i}{\channel{t}{m}}{\ell_o &&}{\Theta} \\
+      \contains{\gamma}{&\Theta}{j}{t}{m &&}{\Xi}
+    \end{alignat*}
+
+    We start by using framing (Theorem \ref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel, so that we obtain the following:
+    \begin{alignat*}{2}
+      \types{\gamma , t}{& \Gamma , m}{P &&}{\Theta , \ell_{\o}} \\
+      \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
+    \end{alignat*}
+
+    We then use substitution (Theorem \ref{thm:substitution}) to obtain the following:
+    \begin{align*}
+      \types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}
+    \end{align*}
+
+    Finally, we use strengthening (Theorem \ref{thm:strengthening}) to lower the substituted variable index:
+    \begin{align*}
+      \types{\gamma , t}{\Gamma , m}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
+    \end{align*}
+  
+    \item
+    Reduction under composition with $\constr{par}$ proceeds by induction on the process that is being reduced.
+
+    \item
+    Reduction under scope restriction case splits on \textsc{Channel} $c$ on which communication occurs.
+    If this channel is internal to the process, or if it is external but on a channel other then the one introduced by the recent scope restriction, subject reduction proceeds inductively.
+    However, if reduction happens on channel that is being introduced, we use the Lemma \ref{lm:comm-capable} to subtract $\ell_\#$ from the channel's multiplicity first, then apply the induction hypothesis.
+
+    \item
+    Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and then the induction hypothesis.
+  \end{itemize}
+\end{proof}
 
 \begin{nilemma}
   \label{lm:comm-capable}
-  \todo{reformulate}
-  A well-typed process on which reduction occurs externally, must have this external multiplicity be capable of $\ell_\#$.
+  Every input usage context $\Gamma$ on a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces such that $P \reduce{\constr{external} \; i} Q$ has a multiplicity of at least $\ell_\#$ at index $i$.
 \end{nilemma}
-  
 \begin{proof}
-  For the base case $\constr{comm}$ \todo{}
-
-  Reduction under composition with $\constr{par}$ \todo{}
-
-  Reduction under scope restriction case splits on \textsc{Channel} $c$ on which communication occurs.
-  If this channel is internal to the process, or if it is external but on a channel other then the one introduced by the recent scope restriction, subject reduction proceeds inductively.
-  However, if reduction happens on the most recently introduced channel, we use the Lemma \ref{lm:comm-capable} to subtract $\ell_\#$ from the channel's multiplicity, then apply the induction hypothesis.
-
-  Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and then the induction hypothesis.
-  
-  
-
+  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
 \end{proof}
 
 \subsection{Framing}
@@ -965,6 +994,7 @@ Framing captures the idea that the well-typedness of a process does not depend o
 These unused resources are not introduced as new variables -- the typing context remains unaltered -- but rather as extra multiplicities that are carried from the input context to the output context.
 
 \begin{nitheorem}
+  \label{thm:framing}
   Let $P$ be a well-typed process from context $\Gamma_l$ to $\Xi_l$.
   Then, per Lemma \ref{lm:types-op}, there exists some $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
@@ -985,6 +1015,7 @@ In this paper, we use weakening to prove subject congruence.
 To do so, we need of a single insertion into a context, and thus we will limit our theorem statement to that, but there is no loss of generality.
 
 \begin{nitheorem}
+  \label{thm:weakening}
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let us insert an arbitrary type $t$ at position $i$ in the typing context and an arbitrary multiplicity $x$ at position $i$ into both the input and output contexts.
   Let us reflect this on the process $P$ by incrementing every index greater than or equal to $i$.
@@ -1001,6 +1032,7 @@ Strengthening states that removing unused variables from the typing and usage co
 The proof that a variable is unused within a process must be syntactical and cannot rely on the preservation of its usage annotations between the input and output contexts: a process can refer to a variable and still make no use of it -- e.g. by sending none of its multiplicities over a channel.
 
 \begin{nitheorem}
+  \label{thm:strengthening}
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable index that is not mentioned by $P$, such that $\Unused \; i \; P$.
   Then removing index $i$ from the typing context and both of the usage contexts and decrementing every variable in $P$ greater than $i$ preserves its well typedness, so that $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
@@ -1013,8 +1045,11 @@ The proof that a variable is unused within a process must be syntactical and can
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{nitheorem}
+  \label{thm:swapping}
   If $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{swap_i \; \gamma}{swap_i \; \Gamma}{swap_i \; P}{swap_i \; \Xi}$.
 \end{nitheorem}
+
+\todo{}
 
 \subsection{Subject Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1061,6 +1096,7 @@ In the \picalc{} however substitution takes another form: every reference to the
 In a resource-aware \picalc{}, that means that instead of exhausting all $m$ multiplicities of the innermost variable, we leave those unaltered and exhaust them from the element that is being sent.
 
 \begin{nitheorem}
+  \label{thm:substitution}
   Let $P$ be a process where the innermost variable has all its $m$ multiplities exhausted, such that $\types{\gamma , t}{\Gamma , m}{P}{\Psi , \ell_{\o}}$.
   Let $j$ be the index of the data that is being received.
   This data has at least $m$ multiplicities, such that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
@@ -1071,12 +1107,12 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
 \begin{proof}
   By induction on the typing derivation on $P$.
   To be able to proceed under scope restriction, we need to generalize the theorem so that the variable that is being substituted need not be $\constr{zero}$, but any variable $i$.
-  We introduce such generalization in Theorem \ref{th:subst-generalization}.
+  We introduce such generalization in Theorem \ref{thm:subst-generalization}.
   \todo{explain arguments}
 \end{proof}
 
 \begin{nitheorem}
-  \label{th:subst-generalization}
+  \label{thm:subst-generalization}
 
   We introduce an intermediate usage context $\Psi_m$.
   This intermediate context is the result of exhausting some $\Delta$ from the input context $\Gamma$, such that $\opctx{\Gamma}{\Delta}{\Psi_m}$.
