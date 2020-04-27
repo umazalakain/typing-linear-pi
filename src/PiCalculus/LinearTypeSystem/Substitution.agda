@@ -137,7 +137,7 @@ cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
            → Γ ≔ Δ ⊠ Ψ
            → All.lookup i Δ ≡ ℓ∅
            → γ ∝ Γᵢ ⊢ P ⊠ Ψᵢ
-           → γ ∝ Γⱼ ⊢ [ j / i ] P ⊠ Ψⱼ
+           → γ ∝ Γⱼ ⊢ substProc j i P ⊠ Ψⱼ
 
 ⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end with ⊠-get i Γ≔Δ∙Ψ | ∋-≡Idx ∈i | ∋-≡Idx ∋i
 ⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end | Γi≔Δi∙Ψi | refl | refl with ∋-lookup-≡ ∈i | ∋-lookup-≡ ∋i
@@ -184,7 +184,7 @@ switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | _ , Ψ≔ , _ =
 ⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
         → γ ∝ Ψ ∋[ j ] t ∝ m ⊠ Ξ
         → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
-        → γ -, t ∝ Γ -, m ⊢ [ suc j / zero ] P ⊠ Ξ -, m
+        → γ -, t ∝ Γ -, m ⊢ substProc (suc j) zero P ⊠ Ξ -, m
 ⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P with switch ⊢P y
 ⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P | Θ , y' , ⊢P' with ⊢-⊠ ⊢P'
 ⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P | Θ , y' , ⊢P' | (_ -, _) , (⊢P'≔ , _) =

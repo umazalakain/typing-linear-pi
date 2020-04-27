@@ -109,12 +109,12 @@ module PiCalculus.Semantics where
   substFin i j x | true because _ = i
   substFin i j x | false because _ = x
 
-  [_/_]_ : (i j : Fin n) → Scoped n → Scoped n
-  [ i / j ] 𝟘 = 𝟘
-  [ i / j ] (new P) = new ([ suc i / suc j ] P)
-  [ i / j ] (P ∥ Q) = ([ i / j ] P) ∥ ([ i / j ] Q)
-  [ i / j ] (x ⦅⦆ P) = substFin i j x ⦅⦆ ([ suc i / suc j ] P)
-  [ i / j ] (x ⟨ y ⟩ P) = substFin i j x ⟨ substFin i j y ⟩ ([ i / j ] P)
+  substProc : (i j : Fin n) → Scoped n → Scoped n
+  substProc i j 𝟘 = 𝟘
+  substProc i j (new P) = new (substProc (suc i) (suc j) P)
+  substProc i j (P ∥ Q) = (substProc i j P) ∥ (substProc i j Q)
+  substProc i j (x ⦅⦆ P) = substFin i j x ⦅⦆ (substProc (suc i) (suc j) P)
+  substProc i j (x ⟨ y ⟩ P) = substFin i j x ⟨ substFin i j y ⟩ (substProc i j P)
 
   substFin-unused : ∀ {i j} (x : Fin (suc n)) → j ≢ i → j ≢ substFin i j x
   substFin-unused {j = j} x j≢suci  with j Finₚ.≟ x
@@ -124,12 +124,15 @@ module PiCalculus.Semantics where
   subst-unused : {i j : Fin (suc n)}
                → j ≢ i
                → (P : Scoped (suc n))
-               → Unused j ([ i / j ] P)
+               → Unused j (substProc i j P)
   subst-unused j≢suci 𝟘 = tt
   subst-unused j≢suci (new P) = subst-unused (λ j≡suci → j≢suci (Finₚ.suc-injective j≡suci)) P
   subst-unused j≢suci (P ∥ Q) = subst-unused j≢suci P , subst-unused j≢suci Q
   subst-unused j≢suci (x ⦅⦆ P) = substFin-unused x j≢suci , subst-unused (λ j≡suci → j≢suci (Finₚ.suc-injective j≡suci)) P
   subst-unused j≢suci (x ⟨ y ⟩ P) = substFin-unused x j≢suci , substFin-unused y j≢suci , subst-unused j≢suci P
+
+  _[_/_]_ : Scoped (suc n) → (i j : Fin (suc n)) → (j≢i : j ≢ i) → Scoped n
+  P [ i / j ] j≢i = lower j (substProc i j P) (subst-unused j≢i P)
 
   data Channel : ℕ → Set where
     internal : ∀ {n}         → Channel n
@@ -146,9 +149,9 @@ module PiCalculus.Semantics where
 
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
+
     comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
-         → let uP = subst-unused (λ ()) P in
-           (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero ([ suc j / zero ] P) uP ∥ Q
+         → (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ (P [ suc j / zero ] (λ ())) ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'
