@@ -1126,8 +1126,10 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
       \draw[->,densely dotted] (xi-r) -- node[left] {$\ni_j l$} (theta);
     \end{tikzpicture}
     \caption{
-      Diagrammatic representation of the generalized substitution for process input.
-      Thanks to the additional premise in Remark \ref{re:delta-zero}, we know that $m$ is at least capable of $n$, i.e. $\opsquared{m}{\delta}{n}$ for some $\delta$.
+      Diagrammatic representation of the inductive substitution lemma.
+      Continuous lines represent known facts, dotted lines proof obligations.
+      From $\Delta_i = \ell_{\o}$, we can deduce that there exists some $\delta$ such that $\opsquared{m}{\delta}{n}$.
+      From that, we can find first $\ni_i l$ and then $\ni_j l$, splitting the diagram across its vertical axis, making it possible to inductively derive both $\vdash \subst{P}{j}{i}$ and $\vdash \subst{P}{j}{i}$.
     }
     \label{fig:subst}
   \end{subfigure}
@@ -1155,8 +1157,8 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
       \draw[->] (xi-r)    -- (psi-m);
     \end{tikzpicture}
     \caption{
-      Alternative approach without the $\ni_i n$ and $\ni_j n$ arrows.
-      These are not strictly necessary, but they make the inductive hypotheses compositional.
+      Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
+      These are not strictly necessary, but they ease the composition of the inductive hypotheses.
       Without them, framing lemmas would have to be used extensively.
     }
     \label{fig:subst-compositionality}
