@@ -534,7 +534,7 @@ Although the typing rules are for now completely syntax-directed, adding support
 If we were to keep typing judgments and annotation judgments separate, we would need a coherence relation making sure that the same choice is taken by both.
 We avoid doing so by combining them into a single judgment.
 
-We make use \emph{leftover typing}, a technique consisting of adding an \emph{output context of usages} to the usual \emph{input context of usages}.
+We make use \emph{leftover typing}, a technique consisting of adding an \emph{output usage context} to the usual \emph{input usage context}.
 This output context contains the leftovers: the multiplicities unused by the processes.
 Crucially, this output context can then be used as the input context of the continuation process.
 The typing rules are introduced in \S \ref{leftover-typing}.
