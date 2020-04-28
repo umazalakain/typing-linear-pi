@@ -97,7 +97,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{$\pi$ with leftovers: \\ a mechanisation in Agda}
-\titlerunning{$\pi$ with leftovers: a mechanisation in Agda}
+\titlerunning{$\pi$ with leftovers: all mechanisation in Agda}
 \author{Uma Zalakain}{University of Glasgow, Scotland}
        {u.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
 \author{Ornela Dardha}{University of Glasgow, Scotland}
@@ -1062,57 +1062,50 @@ Structural congruence is an equivalence relation that aims to overcome the seman
 \subsection{Substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-When function abstraction and application come together in the \lambdacalc{} with de Bruijn indices, every reference to the innermost variable in the body of the abstraction gets replaced with the argument of the application.
-In the \picalc{} however substitution takes another form: every reference to the innermost variable in the receiving process gets replaced with the reference to the data that is being sent over the channel.
+When function abstraction and application come together in the \lambdacalc{} with de Bruijn indices, every reference to the most recent variable in the body of the abstraction gets replaced with the argument of the application.
+In the \picalc{} however substitution takes another form: every reference to the most recent variable in the receiving process gets replaced with the reference to the data that is being sent over the channel.
 In a resource-aware \picalc{}, that means that instead of exhausting all $m$ multiplicities of the most recent variable, we leave those unaltered and exhaust them from the variable that is being received.
 
 \begin{nitheorem}
   \label{thm:substitution}
-  Let $P$ be a process where the innermost variable has all its $m$ multiplities exhausted, such that $\types{\gamma , t}{\Gamma , m}{P}{\Psi , \ell_{\o}}$.
-  Let $j$ be the index of the data that is being received.
-  This data has at least $m$ multiplicities, such that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
-  Then, we can substitute the most recent variable by $j$.
-  As a result, we will exhaust no multiplicities on the innermost variable and exhaust them in $j$ instead, therefore $\types{\gamma , t}{\Gamma , m}{\subst{P}{j}{\constr{zero}}}{\Xi , m}$.
+  Let $P$ be a process where the most recent variable has all its $m$ multiplities exhausted, such that $\types{\gamma , t}{\Gamma , m}{P}{\Psi , \ell_{\o}}$.
+  Let $j$ be the index of the data with $m$ multiplicities that is being received after $P$ is done, so that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
+  Then, we can substitute variable $\constr{zero}$ in $P$ with $\suc j$.
+  As a result, the multiplicities at $\constr{zero}$ will be preserved and those at $j$ will be consumed instead, resulting in $\types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}$.
 \end{nitheorem}
-
 \begin{proof}
-  By induction on the typing derivation on $P$.
-  To be able to proceed under scope restriction, we need to generalize the theorem so that the variable that is being substituted need not be $\constr{zero}$, but any variable $i$.
-  We introduce such generalization in Theorem \ref{thm:subst-generalization}.
+  We need to proceed by induction on $P$, and to do so means going under scope restriction.
+  We use the generalised version in Theorem \ref{thm:subst-generalization} so that the variable that is being substituted is not $\constr{zero}$ but any variable $i$.
   \todo{explain arguments}
 \end{proof}
 
 \begin{nitheorem}
   \label{thm:subst-generalization}
 
-  We introduce an intermediate usage context $\Psi_m$.
-  This intermediate context is the result of exhausting some $\Delta$ from the input context $\Gamma$, such that $\opctx{\Gamma}{\Delta}{\Psi_m}$.
-  From $\Psi_m$, exhausting $m$ at index $i$ yields $\Psi_l$; exhausting it at index $j$ yields $\Psi_j$, such that $\contains{\gamma}{\Psi_m}{i}{t}{m}{\Psi_l}$ and $\contains{\gamma}{\Psi_m}{j}{t}{m}{\Psi_r}$.
-  The input derivation on $P$ takes context $\Gamma$ and yields context $\Psi_l$, such that $\types{\gamma}{\Gamma}{P}{\Psi_l}$.
-  The output derivation on $\subst{P}{j}{i}$ takes the same context $\Gamma$ but yields back $\Psi_r$, such that $\types{\gamma}{\Gamma}{\subst{P}{j}{i}}{\Psi_r}$.
-
-  \begin{remark}
-    \label{re:delta-zero}
-    It is of uttermost importance that the variable that is being substituted has \emph{all} of its multiplicities substituted.
-    To enforce this, we add an additional premise: that in going from $\Gamma$ to the intermediate context $\Psi_m$ we must exhaust no multiplicities at index $i$ -- so that $m$ indeed captures the totality of the multiplicities that are being exhausted between $\Gamma$ and $\Psi_l$.
-    We capture this requirement by enforcing $\Delta_i \equiv \ell_{\o}$.
-  \end{remark}
+  Let the variable that is being substituted be $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$ and the variable that it is being substituted with $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$.
+  As shown in Figure \ref{fig:subst}, the process that is being substituted will pivot from the input usage context $\Gamma_i$ to the input usage context $\Gamma_j$.
+  Let there be two \emph{adjustment} variables $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$ and $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$.
+  The process that is being substituted will pivot from the output usage context $\Psi_i$ to the output usage context $\Psi_j$.
+  As shown in Figure \ref{fig:subst-alternative}, without this \emph{adjustment} composing the substitution of subprocesses is not at all trivial.
+  Assume that $P$ uses all $m$ multiplicities at index $i$.
+  To model this, require $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$ where index $i$ is $\ell_{\o}$.
+  The process that is typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$ will be typed $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$ after substitution.
 \end{nitheorem}
 
 \begin{figure}[h]
   \begin{subfigure}{.5\textwidth}
     \centering
     \begin{tikzpicture}
-      \node (gamma-l) at (0,6)   {$\Gamma_l$};
+      \node (gamma-i) at (0,6)   {$\Gamma_i$};
       \node (gamma-m)   at (0,3)   {$\Gamma$};
-      \node (gamma-r) at (0,0)   {$\Gamma_r$};
-      \node (xi-l)    at (3,5.5) {$\Xi_l$};
+      \node (gamma-j) at (0,0)   {$\Gamma_j$};
+      \node (xi-i)    at (3,5.5) {$\Xi_i$};
       \node (theta)   at (3,3.3) {$\Theta$};
       \node (delta-m) at (3,2.7) {};
-      \node (xi-r)    at (3,0.5) {$\Xi_r$};
-      \node (psi-l)   at (6,5)   {$\Psi_l$};
+      \node (xi-j)    at (3,0.5) {$\Xi_j$};
+      \node (psi-i)   at (6,5)   {$\Psi_i$};
       \node (psi-m)   at (6,3)   {$\Psi$};
-      \node (psi-r)   at (6,1)   {$\Psi_r$};
+      \node (psi-j)   at (6,1)   {$\Psi_j$};
 
       \draw[-]  (gamma-m) -- (delta-m.center);
       \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \ell_{\o}$}(psi-m);
@@ -1120,23 +1113,21 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
       \draw[->,densely dotted] (gamma-m) -- (theta);
       \draw[->,densely dotted] (theta) -- (psi-m);
       
-      \draw[->] (gamma-l) -- node[left] {$\ni_i m$} (gamma-m);
-      \draw[->] (gamma-r) -- node[left] {$\ni_j m$} (gamma-m);
-      \draw[->] (psi-l) -- node[right] {$\ni_i n$} (psi-m);
-      \draw[->] (psi-r) -- node[right] {$\ni_j n$} (psi-m);
+      \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
+      \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
+      \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
+      \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
 
-      \draw[->] (gamma-l) -- node[above] {$\vdash P$} (xi-l);
-      \draw[->] (xi-l) -- node[above] {$\vdash Q$} (psi-l);
-      \draw[->,densely dotted] (gamma-r) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-r);
-      \draw[->,densely dotted] (xi-r) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-r);
-      \draw[->,densely dotted] (xi-l) -- node[left] {$\ni_i l$} (theta);
-      \draw[->,densely dotted] (xi-r) -- node[left] {$\ni_j l$} (theta);
+      \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
+      \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
+      \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
+      \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
+      \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
+      \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
     \end{tikzpicture}
     \caption{
       Diagrammatic representation of the inductive substitution lemma.
       Continuous lines represent known facts, dotted lines proof obligations.
-      From $\Delta_i = \ell_{\o}$, we can deduce that there exists some $\delta$ such that $\opsquared{m}{\delta}{n}$.
-      From that, we can find first $\ni_i l$ and then $\ni_j l$, splitting the diagram across its vertical axis, making it possible to inductively derive both $\vdash \subst{P}{j}{i}$ and $\vdash \subst{P}{j}{i}$.
     }
     \label{fig:subst}
   \end{subfigure}
@@ -1144,37 +1135,71 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
   \begin{subfigure}{.4\textwidth}
     \centering
     \begin{tikzpicture}
-      \node (gamma-l) at (0,4)   {};
+      \node (gamma-i) at (0,4)   {};
       \node (gamma-m) at (0,2)   {};
-      \node (gamma-r) at (0,0)   {};
-      \node (xi-l)    at (2,5)   {};
+      \node (gamma-j) at (0,0)   {};
+      \node (xi-i)    at (2,5)   {};
       \node (xi-m)    at (2,3.5) {};
-      \node (xi-r)    at (2,2)   {};
+      \node (xi-j)    at (2,2)   {};
       \node (psi-m)   at (4,3.5) {};
 
-      \draw[->] (gamma-l) -- (xi-r);
-      \draw[->] (gamma-m) -- (xi-r);
-      \draw[->] (gamma-r) -- (xi-r);
-      \draw[->] (gamma-l) -- (gamma-m);
-      \draw[->] (gamma-r) -- (gamma-m);
-      \draw[->] (xi-l)    -- (xi-m);
-      \draw[->] (xi-r)    -- (xi-m);
-      \draw[->] (xi-l)    -- (psi-m);
+      \draw[->] (gamma-i) -- (xi-j);
+      \draw[->] (gamma-m) -- (xi-j);
+      \draw[->,densely dotted] (gamma-j) -- (xi-j);
+      \draw[->] (gamma-i) -- (gamma-m);
+      \draw[->] (gamma-j) -- (gamma-m);
+      \draw[->] (xi-i)    -- (xi-m);
+      \draw[->] (xi-j)    -- (xi-m);
+      \draw[->] (xi-i)    -- (psi-m);
       \draw[->] (xi-m)    -- (psi-m);
-      \draw[->] (xi-r)    -- (psi-m);
+      \draw[->,densely dotted] (xi-j)    -- (psi-m);
     \end{tikzpicture}
     \caption{
       Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
-      These are not strictly necessary, but they ease the composition of the inductive hypotheses.
-      Without them, framing lemmas would have to be used extensively.
+      Composition is non-trivial.
     }
-    \label{fig:subst-compositionality}
+    \label{fig:subst-alternative}
   \end{subfigure}
+  \caption{Substitution with and without the \emph{adjustment} arrows $\ni_i n$ and $\ni_j n$}
 \end{figure}
 
 \begin{proof}
-  \todo{BIG TODO}
+  By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  \begin{itemize}
+    \item
+      From constructor $\constr{end}$ we derive $\Gamma_i \equiv \Psi_i$.
+      From $\Delta_i \equiv \ell_{\o}$ follows that $m \equiv n$.
+      Therefore $\Gamma_j \equiv \Psi_j$ and $\constr{end}$ can be applied.
+
+    \item
+      For constructor $\constr{chan}$ we proceed inductively, applying the constructor $\suc$ to all arrows $\ni_i m$, $\ni_j m$, $\ni_i n$ and $\ni_j n$.
+      
+    \item
+      For constructor $\constr{recv}$ we split $\Delta$ so that we can proceed inductively on the continuation.
+      We first observe that given that there exists an arrow from $\Gamma_i$ to $\Psi_i$ and $\Delta$ at index $i$ is $\ell_{\o}$, for any $m$ and $n$, there is some $\delta$ such that $\opsquared{m}{\delta}{n}$.
+ l     \begin{itemize}
+        \item
+          If the input occurs on the variable that is being substituted, we derive $\opsquared{m}{\ell_i}{l}$ for some $l$ and construct an arrow $\containsusage{\Xi_i}{i}{l}{\Gamma}$ (used for the inductive call).
+          Similarly, we construct the arrows $\containsusage{\Gamma_j}{j}{\ell_i}{\Xi_j}$ (used as the new channel on which input occurs) and $\containsusage{\Xi_j}{j}{l}{\Gamma}$ (used for the inductive call) for some $\Xi_j$.
+        \item
+          If the input occurs on some variable $x$ other than the one that is being substituted, we construct the arrows $\containsusage{\Xi_i}{i}{m}{\Theta}$ (used for the inductive call) and $containsusage{\Gamma}{x}{\ell_i}{\Theta}$ for some $\Theta$.
+          We can then find $\Xi_j$ and construct the two arrows $\containsusage{\Gamma_j}{x}{\ell_i}{\Xi_j}$ (used as the new channel on which input occurs) and $\containsusage{Xi_j}{j}{m}{\Theta}$ (used for the inductive call).
+          From the fact that there exists a composition of arrows from $\Xi_i$ to $\Psi$, we can conclude that $\Theta$ is splitting $\Delta$ such that $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
+          As $\ell_{\o}$ is a minimal element, if $\Delta$ is $\ell_{\o}$ at index $i$, then it must be $\ell_{\o}$ at index $i$ for $\Delta_1$ and $\Delta_2$ as well.
+      \end{itemize}
+
+    \item
+      $\constr{send}$ applies the ideas outlined for the $\constr{recv}$ constructor to both the channel doing the output and the transmitted data.
+
+    \item
+      For $\constr{comp}$ we first find a $\delta$, $\Theta$, $\Delta_1$ and $\Delta_2$ such that $\containsusage{\Xi_i}{i}{\delta}{\Theta}$ and $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
+      Given that $\Delta$ is $\ell_{\o}$ at index $i$, we know that $\Delta_1$ and $\Delta_2$ are so too.
+      We observe that $\opsquared{m}{\delta}{\omega}$ where $\omega$ is what subprocess $P$ consumes at index $i$.
+      We use this to construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
+      We use these constructions to make two inductive calls (on the derivation of $P$ and $Q$) and compose their result.
+  \end{itemize}  
 \end{proof}
+
 
 \subsection{Subject Reduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
