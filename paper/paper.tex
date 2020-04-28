@@ -96,7 +96,7 @@
 \newcommand{\eqeq}{\; \type{\equiv} \;}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{Typing a linear \picalc}
+\title{Mechanising a linear \picalc}
 \author{Uma Zalakain}{University of Glasgow, Scotland}
        {u.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
 \author{Ornela Dardha}{University of Glasgow, Scotland}
@@ -113,7 +113,7 @@
 </ccs2012>
 \end{CCSXML}
 \ccsdesc[300]{Theory of computation~Process calculi}
-\keywords{pi calculus, linear, types, concurrency}
+\keywords{pi-calculus, linear types, concurrency, mecahnization, Agda}
 \supplement{\url{https://github/umazalakain/typing-linear-pi}}
 \acknowledgements{We want to thank Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,15 +123,19 @@
 \maketitle
 
 \begin{abstract}
-  \todo{OD: the abstract requires an opening. Before diving into what we present, it is useful to give context of what the problem is and why it is important.}
-  We present the syntax, operational semantics, and typing rules of a \picalc{} with linear and shared types.
+  The \picalc{} is a computational model for communication and concurrency.
+  The \emph{linear} \picalc{} is a typed version of the \picalc{} where channel resources must be used exactly once.
+  With the rise of session types as a formalism to model real-world distributed system, the linear \picalc{} re-emerged as the underlying theoretical and practical framework for session types and communication-based distributed programming \cite{DardhaGS12,Padovani17,ScalasY16,ScalasDHY17}.
+  While there have been several extensions to session typed \picalc{}, the linear \picalc{} remains essentially unchanged and a foundational calculus.
+
+  We present the \emph{first} fully mechanised \picalc{} featuring linear types, as well as gradual and shared types.
+  We present syntax, operational semantics, and typing rules and the corresponding type safety properties.
   We use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
-  We generalize the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, gradual and shared typing.
+  We generalise the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, gradual and shared typing.
   We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 
-  This formalization has been fully mechanized with Agda and is available at \url{https://github.com/umazalakain/typing-linear-pi}.
-  \todo{OD: remove links and put them as reference under @misc}
+  The formalisation is fully mechanised in Agda and is available at \url{https://github.com/umazalakain/typing-linear-pi}.
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1178,8 +1182,10 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
       \draw[->,densely dotted] (xi-r) -- node[left] {$\ni_j l$} (theta);
     \end{tikzpicture}
     \caption{
-      Diagrammatic representation of the generalized substitution for process input.
-      Thanks to the additional premise in Remark \ref{re:delta-zero}, we know that $m$ is at least capable of $n$, i.e. $\opsquared{m}{\delta}{n}$ for some $\delta$.
+      Diagrammatic representation of the inductive substitution lemma.
+      Continuous lines represent known facts, dotted lines proof obligations.
+      From $\Delta_i = \ell_{\o}$, we can deduce that there exists some $\delta$ such that $\opsquared{m}{\delta}{n}$.
+      From that, we can find first $\ni_i l$ and then $\ni_j l$, splitting the diagram across its vertical axis, making it possible to inductively derive both $\vdash \subst{P}{j}{i}$ and $\vdash \subst{P}{j}{i}$.
     }
     \label{fig:subst}
   \end{subfigure}
@@ -1207,8 +1213,8 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
       \draw[->] (xi-r)    -- (psi-m);
     \end{tikzpicture}
     \caption{
-      Alternative approach without the $\ni_i n$ and $\ni_j n$ arrows.
-      These are not strictly necessary, but they make the inductive hypotheses compositional.
+      Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
+      These are not strictly necessary, but they ease the composition of the inductive hypotheses.
       Without them, framing lemmas would have to be used extensively.
     }
     \label{fig:subst-compositionality}
