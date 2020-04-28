@@ -909,9 +909,10 @@ As a result, the proofs on typing derivations will perform a double induction: o
      r : \types{\gamma}{\Delta}{Q}{\Xi}}
     {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
   \end{mathpar}
-  \caption{Left-over typing for a resource-aware typing system.}
+  \caption{Leftover typing for a resource-aware typing system.}
   \label{fig:types}
   \end{figure}
+  \todo{align typing rules to make them more readable}
 \end{nidefinition}
 
 \begin{nilemma}
@@ -1028,20 +1029,28 @@ Structural congruence is an equivalence relation that aims to overcome the seman
 \begin{proof}
   By induction on \textsc{Equals}.
   The case $\constr{struct}$ and its symmetric one under $\constr{sym}$ are the nontrivial ones.
-  For those, we proceed by induction on \textsc{StructCong}.
-  The case $\constr{comp-assoc}$ is trivial because the encoding with leftover typing of the typing rules naturally preserves associativity.
-  The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (Theorem \ref{thm:framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
-  The middle-point of the resulting derivation on $\comp{Q}{P}$ will no longer be the same.
-  The case $\constr{comp-end}$ is trivial because in the typing rule for process $\PO$ the input and output contexts are one and the same.
-  In the $\constr{scope-end}$ case, the typing rules $\constr{chan}$ and $\constr{end}$ work together to constraint the multiplicity of the newly create channel to $\ell_{\o}$, making the proof trivial.
-  In the opposite direction, we will need to instantiate the newly created channel to a concrete type and multiplicities.
-  For this, we will use type $\unit$ and multiplicities $\ell_{\o}$.
-  In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of Lemma $\ref{lm:types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
-  We then use strengthening (Theorem \ref{thm:strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
-  In the reverse direction, we will weaken $P$ so that it can accept an additional variable.
-  We will then use Lemma \ref{lm:lower-lift} to show that lifting a lowered $P$ leaves $P$ unchanged.
-  Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in Theorem \ref{thm:swapping}.
-  In the reverse direction, we will use swapping and then use Lemma \ref{lm:swap-swap} to show that swapping indices twice leaves $P$ unchanged.
+  For those, we proceed by induction on \textsc{StructCong}:
+  \begin{itemize}
+    \item
+      The case $\constr{comp-assoc}$ is trivial because the encoding with leftover typing of the typing rules naturally preserves associativity.
+    \item
+      The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (Theorem \ref{thm:framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
+      The usage context on which $Q$ and $P$ coincide in $\comp{Q}{P}$ will no longer be the same.
+    \item
+      The case $\constr{comp-end}$ is trivial because in the typing rule for process $\PO$ the input and output contexts are one and the same.
+    \item
+      In the $\constr{scope-end}$ case, the typing rules $\constr{chan}$ and $\constr{end}$ work together to constraint the multiplicity of the newly create channel to $\ell_{\o}$, making the proof trivial.
+      In the opposite direction, we will need to instantiate the newly created channel to a concrete type and multiplicities.
+      For this, we will use type $\unit$ and multiplicities $\ell_{\o}$.
+    \item
+      In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of Lemma $\ref{lm:types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
+      We then use strengthening (Theorem \ref{thm:strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
+      In the reverse direction, we will weaken $P$ so that it can accept an additional variable.
+      We will then use Lemma \ref{lm:lower-lift} to show that lifting a lowered $P$ leaves $P$ unchanged.
+    \item
+      Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in Theorem \ref{thm:swapping}.
+      In the reverse direction, we will use swapping and then use Lemma \ref{lm:swap-swap} to show that swapping indices twice leaves $P$ unchanged.
+  \end{itemize}
 \end{proof}
 \todo{make sure constructor names in code coincide}
 
