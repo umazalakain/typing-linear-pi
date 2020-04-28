@@ -925,88 +925,10 @@ As a result, the proofs on typing derivations will perform a double induction: o
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Subject Reduction}
-\label{subject-reduction}
+\section{Type Safety}
+\label{type-safety}
 
-Subject reduction (aka type preservation) relates the operational semantics and the typing system of a language.
-In its usual form, it states that if $P$ reduces to $Q$ and $P$ is well-typed under context $\Gamma$, then $Q$ is well-typed under $\Gamma$ too.
-In the linear \picalc{} however, reduction \emph{is} meant to transform the context: each time communication occurs over a channel, that channel is exhausted.
-In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
-In \S \ref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
-
-\begin{nitheorem}
-  Let $P \reduce{c} Q$.
-  If $c$ is $\constr{internal}$ to the process, the context must not be modified and thus $\Gamma' \equiv \Gamma$.
-  If $c$ is $\constr{external}\; i$, the input usage context at index $i$ must be decremented, and therefore $\containsusage{\Gamma'}{i}{\ell_\#}{\Gamma}$.
-  Then the typing derivation $\types{\gamma}{\Gamma'}{P}{\Xi}$ can be transformed into $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-\end{nitheorem}
-
-\begin{proof}
-  \hfill{}\\
-  \begin{itemize}
-    \item
-    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower \; 0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in Figure \ref{fig:subject-reduction:a}.
-    We start by using framing (Theorem \ref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel and then apply substitution (Theorem \ref{thm:substitution}) and strengthening (Theorem \ref{thm:strengthening}).
-
-    \begin{figure}[h]
-      \setlength{\mathindent}{0pt}
-      \begin{subfigure}{.3\textwidth}
-        \begin{alignat*}{2}
-          \containsusage{&\Gamma'}{i}{\ell_\# &&}{\Gamma} \\
-          \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\ell_i &&}{\Psi} \\
-          \types{\gamma , t}{&\Psi , m}{P &&}{\Delta , \ell_{\o}} \\
-          \contains{\gamma}{&\Delta }{i}{\channel{t}{m}}{\ell_o &&}{\Theta} \\
-          \contains{\gamma}{&\Theta}{j}{t}{m &&}{\Xi}
-        \end{alignat*}
-        \caption{Initial assumptions.}
-        \label{fig:subject-reduction:a}
-      \end{subfigure}
-      % Do not leave empty space
-      \begin{subfigure}{.5\textwidth}
-        \begin{alignat*}{2}
-          \types{\gamma , t}{& \Gamma , m}{P &&}{\Theta , \ell_{\o}} \\
-          \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
-        \end{alignat*}
-        \caption{Rearrange $\ell_o$ witness, and merge with $\ell_i$ witness into $\ell_\#$.}
-      \end{subfigure}
-      % Do not leave empty space
-      \begin{subfigure}{.5\textwidth}
-        \begin{align*}
-          \types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}
-        \end{align*}
-        \caption{Substitution.}
-      \end{subfigure}
-      % Do not leave empty space
-      \begin{subfigure}{.5\textwidth}
-        \begin{align*}
-          \types{\gamma , t}{\Gamma , m}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
-        \end{align*}
-        \caption{Strengthening.}
-      \end{subfigure}
-      \caption{Proof steps for the $\constr{comm}$ case in subject reduction.}
-    \end{figure}
-  
-    \item
-    Reduction under composition with $\constr{par}$ proceeds by induction on the process that is being reduced.
-
-    \item
-    Reduction under scope restriction case splits on the channel $c$ on which communication occurs.
-    If the channel is $\constr{internal}$ to the process subject reduction proceeds inductively.
-    If the channel is $\constr{external}\; \constr{zero}$ -- i.e. the channel that is being introduced by the scope restriction -- we use the Lemma \ref{lm:comm-capable} to subtract $\ell_\#$ from the channel's multiplicity first, then apply the induction hypothesis.
-    If the channel is $\constr{external}\; (\suc i)$ subject reduction proceeds inductively.
-
-    \item
-    Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and then the induction hypothesis.
-  \end{itemize}
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:comm-capable}
-  Every input usage context $\Gamma$ on a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces such that $P \reduce{\constr{external} \; i} Q$ has a multiplicity of at least $\ell_\#$ at index $i$.
-\end{nilemma}
-\begin{proof}
-  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
-\end{proof}
+\todo{intro}
 
 \subsection{Framing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1127,15 +1049,15 @@ Structural congruence is an equivalence relation that aims to overcome the seman
 
 When function abstraction and application come together in the \lambdacalc{} with de Bruijn indices, every reference to the innermost variable in the body of the abstraction gets replaced with the argument of the application.
 In the \picalc{} however substitution takes another form: every reference to the innermost variable in the receiving process gets replaced with the reference to the data that is being sent over the channel.
-In a resource-aware \picalc{}, that means that instead of exhausting all $m$ multiplicities of the innermost variable, we leave those unaltered and exhaust them from the element that is being sent.
+In a resource-aware \picalc{}, that means that instead of exhausting all $m$ multiplicities of the most recent variable, we leave those unaltered and exhaust them from the variable that is being received.
 
 \begin{nitheorem}
   \label{thm:substitution}
   Let $P$ be a process where the innermost variable has all its $m$ multiplities exhausted, such that $\types{\gamma , t}{\Gamma , m}{P}{\Psi , \ell_{\o}}$.
   Let $j$ be the index of the data that is being received.
   This data has at least $m$ multiplicities, such that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
-  Then, we can substitute the innermost variable by $j$.
-  As a result, we will exhaust no multiplicities on the innermost variable and exhaust them in $j$ instead, such that $\types{\gamma , t}{\Gamma , m}{\subst{P}{j}{\constr{zero}}}{\Xi , m}$.
+  Then, we can substitute the most recent variable by $j$.
+  As a result, we will exhaust no multiplicities on the innermost variable and exhaust them in $j$ instead, therefore $\types{\gamma , t}{\Gamma , m}{\subst{P}{j}{\constr{zero}}}{\Xi , m}$.
 \end{nitheorem}
 
 \begin{proof}
@@ -1237,6 +1159,89 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
 
 \begin{proof}
   \todo{BIG TODO}
+\end{proof}
+
+\subsection{Subject Reduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+Subject reduction (aka type preservation) relates the operational semantics and the typing system of a language.
+In its usual form, it states that if $P$ reduces to $Q$ and $P$ is well-typed under context $\Gamma$, then $Q$ is well-typed under $\Gamma$ too.
+In the linear \picalc{} however, reduction \emph{is} meant to transform the context: each time communication occurs over a channel, that channel is exhausted.
+In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
+In \S \ref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
+
+\begin{nitheorem}
+  Let $P \reduce{c} Q$.
+  If $c$ is $\constr{internal}$ to the process, the context must not be modified and thus $\Gamma' \equiv \Gamma$.
+  If $c$ is $\constr{external}\; i$, the input usage context at index $i$ must be decremented, and therefore $\containsusage{\Gamma'}{i}{\ell_\#}{\Gamma}$.
+  Then the typing derivation $\types{\gamma}{\Gamma'}{P}{\Xi}$ can be transformed into $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+\end{nitheorem}
+
+\begin{proof}
+  \hfill{}\\
+  \begin{itemize}
+    \item
+    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower \; 0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in Figure \ref{fig:subject-reduction:a}.
+    We start by using framing (Theorem \ref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel and then apply substitution (Theorem \ref{thm:substitution}) and strengthening (Theorem \ref{thm:strengthening}).
+
+    \begin{figure}[h]
+      \setlength{\mathindent}{0pt}
+      \begin{subfigure}{.3\textwidth}
+        \begin{alignat*}{2}
+          \containsusage{&\Gamma'}{i}{\ell_\# &&}{\Gamma} \\
+          \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\ell_i &&}{\Psi} \\
+          \types{\gamma , t}{&\Psi , m}{P &&}{\Delta , \ell_{\o}} \\
+          \contains{\gamma}{&\Delta }{i}{\channel{t}{m}}{\ell_o &&}{\Theta} \\
+          \contains{\gamma}{&\Theta}{j}{t}{m &&}{\Xi}
+        \end{alignat*}
+        \caption{Initial assumptions.}
+        \label{fig:subject-reduction:a}
+      \end{subfigure}
+      % Do not leave empty space
+      \begin{subfigure}{.5\textwidth}
+        \begin{alignat*}{2}
+          \types{\gamma , t}{& \Gamma , m}{P &&}{\Theta , \ell_{\o}} \\
+          \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
+        \end{alignat*}
+        \caption{Rearrange $\ell_o$ witness, and merge with $\ell_i$ witness into $\ell_\#$.}
+      \end{subfigure}
+      % Do not leave empty space
+      \begin{subfigure}{.5\textwidth}
+        \begin{align*}
+          \types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}
+        \end{align*}
+        \caption{Substitution.}
+      \end{subfigure}
+      % Do not leave empty space
+      \begin{subfigure}{.5\textwidth}
+        \begin{align*}
+          \types{\gamma , t}{\Gamma , m}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
+        \end{align*}
+        \caption{Strengthening.}
+      \end{subfigure}
+      \caption{Proof steps for the $\constr{comm}$ case in subject reduction.}
+    \end{figure}
+  
+    \item
+    Reduction under composition with $\constr{par}$ proceeds by induction on the process that is being reduced.
+
+    \item
+    Reduction under scope restriction case splits on the channel $c$ on which communication occurs.
+    If the channel is $\constr{internal}$ to the process subject reduction proceeds inductively.
+    If the channel is $\constr{external}\; \constr{zero}$ -- i.e. the channel that is being introduced by the scope restriction -- we use the Lemma \ref{lm:comm-capable} to subtract $\ell_\#$ from the channel's multiplicity first, then apply the induction hypothesis.
+    If the channel is $\constr{external}\; (\suc i)$ subject reduction proceeds inductively.
+
+    \item
+    Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and then the induction hypothesis.
+  \end{itemize}
+\end{proof}
+
+\begin{nilemma}
+  \label{lm:comm-capable}
+  Every input usage context $\Gamma$ on a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces such that $P \reduce{\constr{external} \; i} Q$ has a multiplicity of at least $\ell_\#$ at index $i$.
+\end{nilemma}
+\begin{proof}
+  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
