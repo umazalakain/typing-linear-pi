@@ -990,9 +990,10 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
     Reduction under composition with $\constr{par}$ proceeds by induction on the process that is being reduced.
 
     \item
-    Reduction under scope restriction case splits on \textsc{Channel} $c$ on which communication occurs.
-    If this channel is internal to the process, or if it is external but on a channel other then the one introduced by the recent scope restriction, subject reduction proceeds inductively.
-    However, if reduction happens on channel that is being introduced, we use the Lemma \ref{lm:comm-capable} to subtract $\ell_\#$ from the channel's multiplicity first, then apply the induction hypothesis.
+    Reduction under scope restriction case splits on the channel $c$ on which communication occurs.
+    If the channel is $\constr{internal}$ to the process subject reduction proceeds inductively.
+    If the channel is $\constr{external}\; \constr{zero}$ -- i.e. the channel that is being introduced by the scope restriction -- we use the Lemma \ref{lm:comm-capable} to subtract $\ell_\#$ from the channel's multiplicity first, then apply the induction hypothesis.
+    If the channel is $\constr{external}\; (\suc i)$ subject reduction proceeds inductively.
 
     \item
     Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and then the induction hypothesis.
