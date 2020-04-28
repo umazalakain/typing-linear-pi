@@ -125,17 +125,17 @@
 \begin{abstract}
   The \picalc{} is a computational model for communication and concurrency.
   The \emph{linear} \picalc{} is a typed version of the \picalc{} where channel resources must be used exactly once.
-  With the rise of session types as a formalism to model real-world distributed system, the linear \picalc{} re-emerged as the underlying theoretical and practical framework for session types and communication-based distributed programming \cite{DardhaGS12,Padovani17,ScalasY16,ScalasDHY17}.
-  While there have been several extensions to session typed \picalc{}, the linear \picalc{} remains essentially unchanged and a foundational calculus.
+  With the rise of session types as a formalism to model real-world distributed systems, the linear \picalc{} has re-emerged as the underlying theoretical and practical framework for session types and communication-based distributed programming \cite{DardhaGS12,Padovani17,ScalasY16,ScalasDHY17}.
+  While there have been several extensions to the session typed \picalc{}, the linear \picalc{} remains essentially unchanged and stable as a foundational calculus.
 
   We present the \emph{first} fully mechanised \picalc{} featuring linear types, as well as gradual and shared types.
-  We present syntax, operational semantics, and typing rules and the corresponding type safety properties.
+  We present its syntax, operational semantics, and typing rules and the corresponding type safety properties.
   We use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
   We generalise the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, gradual and shared typing.
   We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 
-  The formalisation is fully mechanised in Agda and is available at \url{https://github.com/umazalakain/typing-linear-pi}.
+  Our formalisation is fully mechanised in Agda. \cite{Zalakain2020Agda}
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
