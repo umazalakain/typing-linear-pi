@@ -142,10 +142,16 @@
 \section{Introduction}
 We live in a concurrent world where any given state is often computed interactively by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and even construct such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
-The \picalc{} \cite{MilnerPW92,Milner99,Sangio01} is a computational model for communication and concurrency. It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
+The \picalc{} \cite{MilnerPW92,Milner99,Sangio01} is the most successful computational model for communication and concurrency.
+It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
 \todo{OD: The key point here is that the pi-calculus, especically the linear one, is a sufficcient core calculus where all research on concurrent and ditrubuted systems can be achieved. That is why we are inspecting it. The goal is to bring all distributed systems features (in the future) into the formalised world.}
-Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted, too.
+Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted.
+
+The discovery of linear logic by J.-Y. Girard \cite{Girard87} opened new avenues in computing science and introduced linear types and type systems for (functional) programming languages \cite{Wadler90,Bernardy2018} \todo{fill the gaps with more PLs}.
+
 The \emph{linear} \picalc{} \cite{KPT96,Sangio01} is a typed version of the \picalc{} where the linear type system restricts the usage of channel resources to exactly ones.
+Session types \cite{H93,THK94,HVK98}...
+Linearity is key in session types and the linear \picalc{} is the theoretica and practical framework and session types can be expressed in terms of linear \picalc{} \cite{DardhaGS12,DardhaGS17}.
 
 We type the syntax for the \picalc{} in \S \ref{syntax}.
 We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every unbound variable is accounted for in the type of the process that uses it.
