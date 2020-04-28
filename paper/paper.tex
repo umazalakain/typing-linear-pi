@@ -941,30 +941,46 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
   \hfill{}\\
   \begin{itemize}
     \item
-    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ from the following bits:
-    \begin{alignat*}{2}
-      \containsusage{&\Gamma'}{i}{\ell_\# &&}{\Gamma} \\
-      \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\ell_i &&}{\Psi} \\
-      \types{\gamma , t}{&\Psi , m}{P &&}{\Delta , \ell_{\o}} \\
-      \contains{\gamma}{&\Delta }{i}{\channel{t}{m}}{\ell_o &&}{\Theta} \\
-      \contains{\gamma}{&\Theta}{j}{t}{m &&}{\Xi}
-    \end{alignat*}
+    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower \; 0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in Figure \ref{fig:subject-reduction:a}.
+    We start by using framing (Theorem \ref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel and then apply substitution (Theorem \ref{thm:substitution}) and strengthening (Theorem \ref{thm:strengthening}).
 
-    We start by using framing (Theorem \ref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel, so that we obtain the following:
-    \begin{alignat*}{2}
-      \types{\gamma , t}{& \Gamma , m}{P &&}{\Theta , \ell_{\o}} \\
-      \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
-    \end{alignat*}
-
-    We then use substitution (Theorem \ref{thm:substitution}) to obtain the following:
-    \begin{align*}
-      \types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}
-    \end{align*}
-
-    Finally, we use strengthening (Theorem \ref{thm:strengthening}) to lower the substituted variable index:
-    \begin{align*}
-      \types{\gamma , t}{\Gamma , m}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
-    \end{align*}
+    \begin{figure}[h]
+      \setlength{\mathindent}{0pt}
+      \begin{subfigure}{.3\textwidth}
+        \begin{alignat*}{2}
+          \containsusage{&\Gamma'}{i}{\ell_\# &&}{\Gamma} \\
+          \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\ell_i &&}{\Psi} \\
+          \types{\gamma , t}{&\Psi , m}{P &&}{\Delta , \ell_{\o}} \\
+          \contains{\gamma}{&\Delta }{i}{\channel{t}{m}}{\ell_o &&}{\Theta} \\
+          \contains{\gamma}{&\Theta}{j}{t}{m &&}{\Xi}
+        \end{alignat*}
+        \caption{Initial assumptions.}
+        \label{fig:subject-reduction:a}
+      \end{subfigure}
+      % Do not leave empty space
+      \begin{subfigure}{.5\textwidth}
+        \begin{alignat*}{2}
+          \types{\gamma , t}{& \Gamma , m}{P &&}{\Theta , \ell_{\o}} \\
+          \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
+        \end{alignat*}
+        \caption{Rearrange $\ell_o$ witness, and merge with $\ell_i$ witness into $\ell_\#$.}
+      \end{subfigure}
+      % Do not leave empty space
+      \begin{subfigure}{.5\textwidth}
+        \begin{align*}
+          \types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}
+        \end{align*}
+        \caption{Substitution.}
+      \end{subfigure}
+      % Do not leave empty space
+      \begin{subfigure}{.5\textwidth}
+        \begin{align*}
+          \types{\gamma , t}{\Gamma , m}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
+        \end{align*}
+        \caption{Strengthening.}
+      \end{subfigure}
+      \caption{Proof steps for the $\constr{comm}$ case in subject reduction.}
+    \end{figure}
   
     \item
     Reduction under composition with $\constr{par}$ proceeds by induction on the process that is being reduced.
@@ -1064,21 +1080,21 @@ Structural congruence is an equivalence relation that aims to overcome the seman
 \end{nitheorem}
 
 \begin{proof}
-  By induction on \textsc{EQUALS}.
+  By induction on \textsc{Equals}.
   The case $\constr{struct}$ and its symmetric one under $\constr{sym}$ are the nontrivial ones.
   For those, we proceed by induction on \textsc{StructCong}.
   The case $\constr{comp-assoc}$ is trivial because the encoding with leftover typing of the typing rules naturally preserves associativity.
-  The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (\S \ref{framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
+  The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (Theorem \ref{thm:framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
   The middle-point of the resulting derivation on $\comp{Q}{P}$ will no longer be the same.
   The case $\constr{comp-end}$ is trivial because in the typing rule for process $\PO$ the input and output contexts are one and the same.
   In the $\constr{scope-end}$ case, the typing rules $\constr{chan}$ and $\constr{end}$ work together to constraint the multiplicity of the newly create channel to $\ell_{\o}$, making the proof trivial.
   In the opposite direction, we will need to instantiate the newly created channel to a concrete type and multiplicities.
   For this, we will use type $\unit$ and multiplicities $\ell_{\o}$.
   In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of Lemma $\ref{lm:types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
-  We will then use strengthening (\S \ref{strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
+  We then use strengthening (Theorem \ref{thm:strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
   In the reverse direction, we will weaken $P$ so that it can accept an additional variable.
   We will then use Lemma \ref{lm:lower-lift} to show that lifting a lowered $P$ leaves $P$ unchanged.
-  Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in \S \ref{swapping}.
+  Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in Theorem \ref{thm:swapping}.
   In the reverse direction, we will use swapping and then use Lemma \ref{lm:swap-swap} to show that swapping indices twice leaves $P$ unchanged.
 \end{proof}
 \todo{make sure constructor names in code coincide}
