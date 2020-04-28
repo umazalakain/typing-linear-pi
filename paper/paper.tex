@@ -140,13 +140,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\todo{OD:
-It is important to emphasise that this is the first fully formalised pi-calculus from syntax to OS to typing rules, spanning from linear to shared types, "gradually".}
 We live in a concurrent world where any given state is often computed interactively by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and even construct such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
-The \picalc{} \cite{} is a formal language that abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
+The \picalc{} \cite{MilnerPW92,Milner99,Sangio01} is a computational model for communication and concurrency. It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
 \todo{OD: The key point here is that the pi-calculus, especically the linear one, is a sufficcient core calculus where all research on concurrent and ditrubuted systems can be achieved. That is why we are inspecting it. The goal is to bring all distributed systems features (in the future) into the formalised world.}
-Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted too.
+Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted, too.
+The \emph{linear} \picalc{} \cite{KPT96,Sangio01} is a typed version of the \picalc{} where the linear type system restricts the usage of channel resources to exactly ones.
+
 We type the syntax for the \picalc{} in \S \ref{syntax}.
 We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every unbound variable is accounted for in the type of the process that uses it.
 \todo{OD: don't put references to section just yet. This first part should describe the what and why of the problem.
