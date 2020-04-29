@@ -94,7 +94,6 @@
 \newcommand{\Quantifier}{\type{QUANTIFIER}}
 \newcommand{\eq}[1]{\; \type{=}_{#1} \;}
 \newcommand{\eqeq}{\; \type{\equiv} \;}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{$\pi$ with leftovers: \\ a mechanisation in Agda}
 \titlerunning{$\pi$ with leftovers: all mechanisation in Agda}
@@ -141,28 +140,61 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+% The way I want to write the intro:
+% -- describe what is the picalc and why it is IMPORTATNT
+% -- describe what are linear types and why programming with them is IMPORTATNT
+% -- join together by saying that is why we focus on linear pi calculus but we do more than just that: we have linear, gradual and shared types
+% -- put emphasis on mechanisation in Agda
+
 We live in a concurrent world where any given state is often computed interactively by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and even construct such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
-The \picalc{} \cite{MilnerPW92,Milner99,Sangio01} is the most successful computational model for communication and concurrency.
+
+The \picalc{} introduced by Milner et al. in the early '90s \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
-\todo{OD: The key point here is that the pi-calculus, especically the linear one, is a sufficcient core calculus where all research on concurrent and ditrubuted systems can be achieved. That is why we are inspecting it. The goal is to bring all distributed systems features (in the future) into the formalised world.}
 Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted.
+The \picalc{} is at the basis of programming language implementations for concurrency, such as Pict \cite{Pierce} and more recently Go \cite{Golang}.
+Moreover, at the state-of-the-art, the \picalc{} features a wide plethora of types, ranging from basic types, linear types, types for liveness properties, such as deadlock freedom or termination, and most notably, session types \cite{K07}, making the \picalc{} a fully-fledged tool for modelling and verification of concurrent and distributed systems.
 
-The discovery of linear logic by J.-Y. Girard \cite{Girard87} opened new avenues in computing science and introduced linear types and type systems for (functional) programming languages \cite{Wadler90,Bernardy2018} \todo{fill the gaps with more PLs}.
+In a parallel track in the early '90s, the discovery of linear logic by J.-Y. Girard \cite{Girard87} opened new avenues in computing science and introduced linear types and type systems for (functional) programming languages \cite{Curry-Howard,Wadler90,Bernardy2018}, allowing for resource-aware programming and efficient implementation.
+Linearity later led to uniqueness of typing in Clean \cite{BarendsenS96} or ownership typing in Rust \cite{MatsakisK14}.
 
-The \emph{linear} \picalc{} \cite{KPT96,Sangio01} is a typed version of the \picalc{} where the linear type system restricts the usage of channel resources to exactly ones.
-Session types \cite{H93,THK94,HVK98}...
-Linearity is key in session types and the linear \picalc{} is the theoretica and practical framework and session types can be expressed in terms of linear \picalc{} \cite{DardhaGS12,DardhaGS17}.
+The \picalc{} was not an exception to the influence of linearity.
+Kobayashi et al. \cite{KPT96} defined the \emph{linear} \picalc{}, which is a typed version of the \picalc{} where the linear type system restricts the usage of channel resources to exactly ones.
+%
+With the rise of session types \cite{H93,THK94,HVK98}, linearity was reproposed in the \picalc{}, which is
+the most successful framework where session types have been used.
+Session types are a type formalism used in communication-structured modelling and programming and linearity is a key feature in order to guarantee type safety.
+Recent work brought back to light the linear \picalc{}, because session types can be expressed in terms of linear types \cite{DardhaGS12,DardhaGS17}.
+The encoding of session types into linear types not only has theoretical benefits in terms expressivity of session types and reusability of theoretical results from the linear \picalc{}, but also at the implementation level.
+The encoding has been used as a technique to implement session types languages such as OCaml \cite{Padovani17} or Scala \cite{ScalasY16,ScalasDHY17}.
+As such, linear \picalc{} is the underlying theoretical and practical framework of session types.
 
+Considering the relevance of the \picalc{} as a core calculus to model concurrent and distributed system and linearity for resource-aware programming, in this paper we take it a step further and investigate a \picalc{} featuring linear, gradual and shared types under the same unique framework and mechanise it all in Agda.
+We can use this framework as a core for type safe distributed programming with a range of types from linear to shared.
+
+\subsection{Contribution}
+Our contributions can be summarised as follows later explained in details, together with the corresponding sections where they can be found.
+\begin{itemize}
+  \item Machine verified formalisation of the syntax and semantics of linear \picalc{}
+
+  \item Typing with leftovers applied to the \picalc{}, where a range of type systems from linear to gradual and shared can be obtained
+
+  \item Abstraction over multiplicities
+
+  \item Full proofs of subject reduction and auxiliary lemmas
+
+  \item Full formalisation available in Agda
+\end{itemize}
+
+\paragraph*{Syntax}
 We type the syntax for the \picalc{} in \S \ref{syntax}.
 We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every unbound variable is accounted for in the type of the process that uses it.
-\todo{OD: don't put references to section just yet. This first part should describe the what and why of the problem.
-In the contributions section below, we can use references to sections to show where those contributions can be found.}
 In the \lambdacalc{} all computations are local and happen on syntactically contiguous terms; in the \picalc{} however communicating subprocesses can be non-contiguous and even have different parent processes.
 One way to define a reduction relation modulo these syntactic minutiae is to define a structural congruence \cite{} relation that acts as a quotient type.
 A term $A$ can then be freely rewritten into a term $B$ as long as $A$ is structurally congruent to $B$.
 We type this equivalence relation in \S \ref{structural-congruence}.
 
+\paragraph*{Semantics}
 In the \lambdacalc{} function application is the main computational engine; in the \picalc{} it is inter-process communication what drives computation.
 Two subprocesses can communicate anywhere in a process but under input and output, which must be respected to ensure the sequential behavior.
 We type a reduction relation that acts as an operational semantics modulo subject congruence in \S \ref{operational-semantics}.
@@ -184,6 +216,7 @@ It also ensures that every declared communication channel must be used.
 The linear \picalc{} is also interesting because together with product types it is isomorphic to session types \cite{} -- which are used to encode communication protocols.
 We provide a typing system for the linear \picalc{} in \S \ref{type-system} as extensional rules on sitting on top of the unruly well-scoped syntax.
 
+\paragraph*{Typing with leftovers}
 Linear type systems need of context splits.
 These are tricky to handle constructively without explicitly asking the user to supply them.
 Leftover typing \cite{} is a type theoretical technique that addresses this.
@@ -194,20 +227,9 @@ We generalize our algebra on usage multiplicities in \S \ref{multiplicities}.
 As a result, we are able to model a mix of shared, linear, and gradual types.
 \todo{reformulate paragraph}
 
-\todo{subject reduction}
+\paragraph*{Subject reduction}
 
-\subsection{Contribution}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{description}
-  \item [Machine verified formalisation of the linear pi calculus]
-
-  \item [Typing with leftovers applied to the pi calculus]
-
-  \item [Abstraction over multiplicities]
-
-  \item [Full formalisation available in Agda]
-\end{description}
+\paragraph*{On mechanisation in Agda}
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
