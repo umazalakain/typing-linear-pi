@@ -138,6 +138,10 @@
   Our formalisation is fully mechanised in Agda. \cite{Zalakain2020Agda}
 \end{abstract}
 
+\todo{rename Scoped to Process in code}
+\todo{make sure all citations are there}
+\todo{change colors, color functions}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 % The way I want to write the intro:
@@ -340,8 +344,8 @@ To present things to the user, we substitute indices by their related names.
 In the \lambdacalc{} $\beta$-reduction operates on syntactically adjacent terms.
 In the \picalc{} however, the syntax introduces unnecessary distinctions
 (e.g. semantically, parallel composition is defined modulo associativity and commutativity).
-There are several ways around this, a structural congruence relation being one of the historical ones.
-(Others include labeled transition systems and higher inductive types.)
+There are several ways around this, a structural congruence relation being one of the historical ones \cite{}.
+(Others include labeled transition systems \cite{} and higher inductive types \cite{}.)
 
 \subsection{Structural Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -350,9 +354,10 @@ There are several ways around this, a structural congruence relation being one o
 Structural congruence is a congruent equivalence relation on processes.
 Any two structurally congruent processes are strongly bisimilar: they are can follow each other's reduction steps \cite{}.
 Figure \ref{fig:struct-cong-base} lists the base cases of structural congruence.
-The type $\Unused_i \; Q$ is an inductive proof on $Q$ that witnesses that the index $i$ does not appear nor in the inputs nor in the outputs of the process.
-The function $lower \; i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
-Finally, $swap \; i \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps variable references $i$ and $\suc i$.
+The type $\Unused_i \; Q$ is an inductive proof that witnesses that the variable index $i$ does not appear nor in the inputs nor in the outputs of $Q$.
+The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
+Finally, $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
+In all three, $i$ is incremented every time we go under a binder.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -385,13 +390,13 @@ Finally, $swap \; i \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
   { }
   {\constr{scope-comm} : \new \new P \eqeq \new \new swap \; 0 \; P}
 \end{mathpar}
-\caption{Structural rewriting rules. Premises $P$, $Q$ and $R$ are of type $\Process_n$ where $n$ can be inferred.}
+\caption{Base cases of structural congruence.}
 \label{fig:struct-cong-base}
 \end{figure}
 
 \begin{nilemma}
   \label{lm:lower-lift}
-  The function $lower \; i \; P \; uP$ has an inverse $lift \; i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $lift \; i \; (lower \; i \; P \; uP) \equiv P$.
+  The function $lower_i \; P \; uP$ has an inverse $lift_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $lift_i \; (lower_i \; P \; uP) \equiv P$.
 \end{nilemma}
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
@@ -399,18 +404,18 @@ Finally, $swap \; i \; P$ traverses $P$ (scoped under $\suc \suc n$) and swaps v
   
 \begin{nilemma}
   \label{lm:swap-swap}
-  The function $swap \; i \; P$ is its own inverse: $swap \; i \; (swap \; i \; P) \equiv P$.
+  The function $swap_i \; P$ is its own inverse: $swap_i \; (swap_i \; P) \equiv P$.
 \end{nilemma}
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
 Structural congruence is a congruent equivalence relation.
-As such, rewrites can happen at any point in a process' recursive definition, and they are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{fig:struct-cong}.
-In \S \ref{subject-congruence} we will prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then $Q$ is well-typed.
-Specifically, in the case of transitivity, we must prove that if $P$ is structurally congruent with $Q$ and $Q$ with $R$, and $P$ is well-typed, then so is $R$.
-To do so, we will have to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
-To show that the doubly recursive call terminates we index the equivalence relation $=$ by the type $\Rec$, which models the structure of the recursion.
+As such, rewrites can happen anywhere inside a process, and are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{fig:struct-cong}.
+In \S \ref{subject-congruence} we prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then so is $Q$.
+In the transitivity case, we must show that if $P$ is structurally congruent to $Q$ and $Q$ is to $R$, and $P$ is well-typed, then so is $R$.
+To do so, we need to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
+To show the typechecker that the doubly recursive call terminates we index the equivalence relation $=$ by a type $\Rec$ that models the structure of the recursion.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -468,8 +473,7 @@ To show that the doubly recursive call terminates we index the equivalence relat
   {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
   {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
 \end{mathpar}
-\caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.
-  Premises $P$, $P'$, $Q$, and $R$ are of type $\Process_n$ where $n$ can be inferred.}
+\caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.}
 \label{fig:struct-cong}
 \end{figure}
   
