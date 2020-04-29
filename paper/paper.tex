@@ -141,6 +141,7 @@
 \todo{rename Scoped to Process in code}
 \todo{make sure all citations are there}
 \todo{change colors, color functions}
+\todo{do not distinguish fields from functions, it is not worth it}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -539,66 +540,25 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 \section{Resource-aware Typing System}
 \label{type-system}
 
-
-A \emph{resource-aware} typing system for the \emph{\picalc{}} is distinctive in several ways.
-
-\begin{description}
-  \item [As a resource-aware typing system,] the language is constrained not just by types, but also by their usage annotations.
-    We must be able to add up and split usage contexts, to do so we introduce a generalized algebra in \S \ref{multiplicities}.
-    We provide an independent inductive definition of typing contexts and usage contexts in \S \ref{contexts}.
-    \todo{why independent}
-
-  \item [As a typing system for the \picalc{},] the terms (processes) in the typing judgment do not come accompanied by a type -- processes have no type.
-    It is the communication channels that are annotated with types and usages.
-    Typing judgments assert that the process correctly uses the channels in the context under which it is typed.
-\end{description}
-
-In this paper, we combine typing and annotation judgments into a single judgment.
-Although the typing rules are for now completely syntax-directed, adding support for branching would introduce choice in the typing derivations.
-If we were to keep typing judgments and annotation judgments separate, we would need a coherence relation making sure that the same choice is taken by both.
-We avoid doing so by combining them into a single judgment.
-
-We make use \emph{leftover typing}, a technique consisting of adding an \emph{output usage context} to the usual \emph{input usage context}.
-This output context contains the leftovers: the multiplicities unused by the processes.
-Crucially, this output context can then be used as the input context of the continuation process.
-The typing rules are introduced in \S \ref{leftover-typing}.
+Typing systems for the \picalc{} ensure that processes make a correct use of their channels.
+Typing judgments are of the form $\Gamma \vdash P$ (for some typing context $\Gamma$ and some process $P$) --- types only appear in the contexts of typing judgments.
+A resource-aware typing system for the \picalc{} must take resource usages into account, and needs an algebra on these --- a way of \emph{splitting} resources on parallel composition, of \emph{ticking off} resources on input and output.
+We characterise such an algebra in \S \ref{multiplicities}.
+We define independent typing contexts and usage contexts in \S \ref{context}.
+We provide a typing judgment for a resource-aware \picalc{} in \S \ref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{multiplicities}
 
-In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 or 1.
-In this paper we generalize over linearity and provide an algebra on multiplicities that is capable of encoding shared and gradual types as well.
-The algebra has a single binary operator $(\cdot)$ that crushes multiplicities together.
-It must satisfy the following constraints:
-\begin{description}
-
-\item [Partiality]
-  Not all multiplicities are necessarily compatible: in the linear \picalc{} $1$ cannot be split into $1$ and $1$.
-\item [Functionality]
-  Given two multiplicities $y$ and $z$, it must be computable whether a third multiplicity $x$ exists such that $\op{x}{y}{z}$.
-  If such an $x$ exists, it must be unique.
-    
-\item [Injectivity]
-  We need to be able to \emph{subtract} multiplicities.
-  To do so, we rely on $\op{x}{y}{z}$ uniquely determining $y$ for any $x$ and $z$.
-
-\item [Associativity]
-  As a direct consequence of the structural congruence rule $\comp{P}{\comp{Q}{R}} \equiv \comp{\comp{P}{Q}}{R}$.
-
-\item [Commutativity]
-  As a direct consequence of the structural congruence rule $\comp{P}{Q} \equiv \comp{Q}{P}$.
-
-\item [Distinguished elements]
-  There must be a neutral element $0$ absorbed on both sides.
-  The neutral element $0$ must also be the minimal element.
-  There must be a special element $1$ to record usage.
-\end{description}
+In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
+In this paper we generalize the type of multiplicities by defining an algebra any such type must comply with.
+Shared, gradual and linear usage types all satisfy these algebraic laws.
 
 \begin{nidefinition}
-  Together, the aforementioned constraints give raise to a \emph{partial commutative monoid}.
-  We deal with partiality by modeling the monoidal operation as a terniary relation.
-  An algebra on the carrier set $C$ forms a $\Quantifier_C$ iff it satisfies the fields in Figure \ref{fig:multiplicities}.
+  The algebra on multiplicities must be \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associtive}, and \emph{commutative}, and needs a \emph{minimal neutral element}.
+  It also requires a special element that is to be used to count inputs and outputs.
+  We define the laws of such a \emph{partial commutative monoid} as a type $\Quantifier_C$ on a carrier set $C$ in Figure \ref{fig:multiplicities} --- we use a terniary relation to model the monoidal operation.
   
   \begin{figure}[h]
   \begin{equation}
@@ -621,77 +581,50 @@ It must satisfy the following constraints:
 \end{nidefinition}
 
 \begin{note}
-  We will often work with input and output multiplicities pairs, and thus we use the notation $\Carrier^2$ to stand for the type $\Carrier \times \Carrier$, and $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where all of its properties are trivially lifted.
+  We will often work with input and output multiplicities as pairs.
+  We use the notation $\Carrier^2$ to stand for the type $\Carrier \times \Carrier$, and $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where all properties are trivially lifted.
 \end{note}
 
-\begin{nidefinition}
-  An indexed set of partial commutative monoids is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it.
-  This allows for several algebras to coexist in the same type system.
-  Figure \ref{fig:indexed-multiplicities} captures these requirements: each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
-  We require the index type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
-  
-  \begin{figure}[h]
-  \begin{equation}
-  \begin{split}
-    &\field{IDX}          &:{} &\Set \\
-    &\field{\exists IDX}  &:{} &\field{IDX} \\
-    &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
-    &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
-  \end{split}
-  \end{equation}
-  \caption{Indexed set of partial commutative monoids.}
-  \label{fig:indexed-multiplicities}
-  \end{figure}
-\end{nidefinition}
-
-\subsubsection{Example Type Systems}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\todo{Add typing derivations for example processes}
+Shared, gradual and linear multiplicity types can all be defined as an instance of the properties in Figure \ref{fig:multiplicities}.
+For examples of how these multiplicity types are used in typing derivations, refer to \S \ref{example-derivations}.
 
 \begin{description}
-
-\item [Shared]
-
-The carrier $C$ is implemented as a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
-Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
-The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
-All other laws are trivially satisfied.
-
-\item [Linear]
-
-The carrier $C$ is implemented as a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
-The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$), and is uninhabited in every other case.
-All other rules follow trivially.
-
-\item [Gradual]
-
-The carrier $C$ is implemented as the type of natural numbers $\N$.
-The element $\zero$ corresponds 0, and $\one$ to 1.
-The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
-All other rules follow trivially from the algebraic rules for the addition of naturals.
-\todo{OD: in addition to the above, could we have examples of typing a process in each of the above type systems? It can be the same process everywhere and we can show how the typing changes...}
+  \item [Shared]
+    The carrier $C$ is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
+    Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
+    The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
+    All other laws are trivially satisfied.
+  \item [Gradual]
+    The carrier $C$ is implemented as the type of natural numbers $\N$.
+    The element $\zero$ corresponds to 0, and $\one$ to 1.
+    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
+    All other rules follow trivially from the algebraic rules for the addition of naturals.
+  \item [Linear]
+    The carrier $C$ is implemented as a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
+    The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$), and is uninhabited in every other case.
+    All other rules follow trivially.
 \end{description}
 
 \subsection{Contexts}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{contexts}
 
-In a resource-aware \picalc{} type multiplicities change every time input and output occurs; however, the types themselves remain constant.
-If multiplicities need not to depend on types, keeping types and multiplicities in independent contexts allows for a more modular approach to the algebra on contexts of multiplicities.
-In this paper we choose that approach, which entails accepting that base non-channel types have dedicated input and output multiplicities too -- we will take care of impeding that any actual input or output can occur through them in the typing rules.
+In a resource-aware \picalc{}, usage annotations are transformed as a result of input and output; types howeverr are preserved.
+In our case, usage annotations do not depend on types, and keeping types and usages in separate contexts allows for a more modular approach in our proofs.
+
+\subsubsection{Typing Contexts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 \begin{nidefinition}
   Figure \ref{fig:prectx} defines types as either unit types, base types or channel types.
-  Unit types $\unit$ provide a proof of inhabitance for types, needed for the $\new \PO_{\suc n} \eqeq \PO_n$ rule in subject congruence.
-
-  Base types $\base{n}$ use a natural number $n$ that can be reified into a type by the host language.
-  Using natural numbers instead of type universes is convenient: there is no need to litter type types with universe polymorphism.
+  The unit type $\unit$ serves as a proof of inhabitance for types (we can trivially obtain it), and is used to such end in subject congruence --- for the $\new \PO_{\suc n} \eqeq \PO_n$ rule.
+  The base type $\base{n}$ uses a natural number $n$ to represent types.
+  This natural number can then be interpreted as a type in the host language.
+  Using natural numbers instead of type universes is convenient: less universe polymorphism poluting specifications.
   
-  Channel types $\channel{t}{x}$ use $t$ as the type of data sent over the channel and $x$ as the capability of the data sent over the channel.
-  When data is received on a channel of type $\channel{t}{x}$, the type $t$ will be appended to the context of types $\PreCtx_n$ and the capability $x$ to the context of capabilities $\Ctx_{idxs}$.
+  The channel type $\channel{t}{x}$ uses $t$ to stand for the type of data that is being transmitted over the channel, and $x$ to stand for what usages of that data are transmitted. 
   
-  Types form length-indexed \emph{pre-contexts} $\PreCtx_n$.
+  We keep track of types in a length-indexed \emph{pre-context} $\PreCtx_n$.
   
   \begin{figure}[h]
   \begin{mathpar}
@@ -732,6 +665,28 @@ In this paper we choose that approach, which entails accepting that base non-cha
   \end{figure}
 \end{nidefinition}
 
+\subsubsection{Usage Contexts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+\begin{nidefinition}
+  An indexed set of partial commutative monoids is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it.
+  This allows for several algebras to coexist in the same type system.
+  Figure \ref{fig:indexed-multiplicities} captures these requirements: each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
+  We require the index type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
+  
+  \begin{figure}[h]
+  \begin{equation}
+  \begin{split}
+    &\field{IDX}          &:{} &\Set \\
+    &\field{\exists IDX}  &:{} &\field{IDX} \\
+    &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
+    &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
+  \end{split}
+  \end{equation}
+  \caption{Indexed set of partial commutative monoids.}
+  \label{fig:indexed-multiplicities}
+  \end{figure}
+\end{nidefinition}
 \begin{nidefinition}
   To allow different multiplicity algebras to coexist we first define a length-indexed context of carrier indices $\Idxs_n$ (see \ref{fig:ctx}).
   On top of it, we define a context of multiplicities $\Ctx_{idxs}$.
@@ -782,6 +737,18 @@ In this paper we choose that approach, which entails accepting that base non-cha
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{leftover-typing}
 
+%%%% REARRANGE
+In this paper, we combine typing and annotation judgments into a single judgment.
+Although the typing rules are for now completely syntax-directed, adding support for branching would introduce choice in the typing derivations.
+If we were to keep typing judgments and annotation judgments separate, we would need a coherence relation making sure that the same choice is taken by both.
+We avoid doing so by combining them into a single judgment.
+%%%%
+
+We make use \emph{leftover typing}, a technique consisting of adding an \emph{output usage context} to the usual \emph{input usage context}.
+This output context contains the leftovers: the multiplicities unused by the processes.
+Crucially, this output context can then be used as the input context of the continuation process.
+The typing rules are introduced in \S \ref{leftover-typing}.
+
 We use leftover typing \cite{} to encode our typing rules.
 The insight of this approach is to use input and output contexts in the typing judgment.
 Our typing judgment on processes are of the form $\types{\gamma}{\Gamma}{P}{\Delta}$ (introduced in Figure \ref{fig:types}).
@@ -828,7 +795,7 @@ As a result, the proofs on typing derivations will perform a double induction: o
   
     \inferrule
     {\opsquared{x}{y}{z}}
-    {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{zero}{t}{y}{\Gamma \comma z}}
+    {\constr{zero} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{zero}}{t}{y}{\Gamma \comma z}}
     
     \inferrule
     {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
@@ -939,6 +906,11 @@ As a result, the proofs on typing derivations will perform a double induction: o
   \todo{align typing rules to make them more readable}
 \end{nidefinition}
 
+\subsubsection{Example derivations}
+
+\todo{OD: in addition to the above, could we have examples of typing a process in each of the above type systems? It can be the same process everywhere and we can show how the typing changes...}
+
+
 \begin{nilemma}
   \label{lm:types-unused}
   If $P$ is well-typed under input context $\Gamma$ and output context $\Xi$, and variable $i$ is unused within $P$, then $\Gamma_i \equiv \Xi_i$.
@@ -954,6 +926,7 @@ As a result, the proofs on typing derivations will perform a double induction: o
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type Safety}
@@ -1097,10 +1070,10 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
 
 \begin{nitheorem}
   \label{thm:substitution}
-  Let $P$ be a process where the most recent variable has all its $m$ multiplities exhausted, such that $\types{\gamma , t}{\Gamma , m}{P}{\Psi , \ell_{\o}}$.
+  Let $P$ be a process where the most recent variable has all its $m$ multiplities exhausted, such that $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \ell_{\o}}$.
   Let $j$ be the index of the data with $m$ multiplicities that is being received after $P$ is done, so that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
   Then, we can substitute variable $\constr{zero}$ in $P$ with $\suc j$.
-  As a result, the multiplicities at $\constr{zero}$ will be preserved and those at $j$ will be consumed instead, resulting in $\types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}$.
+  As a result, the multiplicities at $\constr{zero}$ will be preserved and those at $j$ will be consumed instead, resulting in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi \comma m}$.
 \end{nitheorem}
 \begin{proof}
   We need to proceed by induction on $P$, and to do so means going under scope restriction.
@@ -1260,7 +1233,7 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
         \begin{alignat*}{2}
           \containsusage{&\Gamma'}{i}{\ell_\# &&}{\Gamma} \\
           \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\ell_i &&}{\Psi} \\
-          \types{\gamma , t}{&\Psi , m}{P &&}{\Delta , \ell_{\o}} \\
+          \types{\gamma \comma t}{&\Psi \comma m}{P &&}{\Delta \comma \ell_{\o}} \\
           \contains{\gamma}{&\Delta }{i}{\channel{t}{m}}{\ell_o &&}{\Theta} \\
           \contains{\gamma}{&\Theta}{j}{t}{m &&}{\Xi}
         \end{alignat*}
@@ -1270,7 +1243,7 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
       % Do not leave empty space
       \begin{subfigure}{.5\textwidth}
         \begin{alignat*}{2}
-          \types{\gamma , t}{& \Gamma , m}{P &&}{\Theta , \ell_{\o}} \\
+          \types{\gamma \comma t}{& \Gamma \comma m}{P &&}{\Theta \comma \ell_{\o}} \\
           \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
         \end{alignat*}
         \caption{Rearrange $\ell_o$ witness, and merge with $\ell_i$ witness into $\ell_\#$.}
@@ -1278,14 +1251,14 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
       % Do not leave empty space
       \begin{subfigure}{.5\textwidth}
         \begin{align*}
-          \types{\gamma , t}{\Gamma , m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi , m}
+          \types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi \comma m}
         \end{align*}
         \caption{Substitution.}
       \end{subfigure}
       % Do not leave empty space
       \begin{subfigure}{.5\textwidth}
         \begin{align*}
-          \types{\gamma , t}{\Gamma , m}{lower_0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
+          \types{\gamma \comma t}{\Gamma \comma m}{lower_0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi \comma m}
         \end{align*}
         \caption{Strengthening.}
       \end{subfigure}
