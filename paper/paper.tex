@@ -384,11 +384,11 @@ In all three, $i$ is incremented every time we go under a binder.
   
   \inferrule
   {uQ : \Unused_0 \, Q}
-  {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{lower \; 0 \; \; Q \; uQ}}
+  {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{lower_0 \; \; Q \; uQ}}
 
   \inferrule
   { }
-  {\constr{scope-comm} : \new \new P \eqeq \new \new swap \; 0 \; P}
+  {\constr{scope-comm} : \new \new P \eqeq \new \new swap_0 \; P}
 \end{mathpar}
 \caption{Base cases of structural congruence.}
 \label{fig:struct-cong-base}
@@ -482,17 +482,17 @@ To show the typechecker that the doubly recursive call terminates we index the e
 \label{operational-semantics}
 
 Figure \ref{fig:reduction} models the operational semantics of the \picalc{}.
-Processes put in parallel reduce when they communicate over a common variable.
-The receiving process substitutes references to its most immediate variable with references to the variable sent by the process doing the output.
+Processes put in parallel reduce when they communicate over a common channel.
+The receiving process substitutes references to its most immediate variable with references to the variable that is being sent by the process doing the output.
 The process is then \emph{lowered} --- all variable references are decreased by one.
 Reduction is closed under structural congruence and goes under parallel composition and scope restriction
---- but notably not under input nor output, otherwise the sequencing of actions would not be preserved.
+--- notably, not under input nor output, or otherwise the sequencing of actions would not be preserved.
 In \S \ref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
-However, this reduction operation is effectful: it consumes the variable over which communication happens.
-If this variable is external to $P$ (it resides in its context) then the context in which $Q$ is typed must change.
-To keep track of this information, we lift the variable index over which communication occurs to the type level.
-Every time we come out of a binder we decrement this variable.
-To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ --- as opposed to an $inc$ function that would not.
+However, this reduction operation is effectful: it consumes the channel over which communication occurs.
+If this channel is external to $P$ (it resides in its context) then the context in which $Q$ is typed must change.
+To keep track of this information, we lift the index of the channel to the type level.
+We use a $dec$ function to decrement the index of the channel every time we come out of a binder.
+This function saturates at $\constr{internal}$ --- meaning communication happens internally to the process.
 
 
 \begin{figure}[h]
@@ -517,7 +517,7 @@ To do so, we make use of a $dec$ function that saturates at $\constr{internal}$ 
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower \; 0 \; (\subst{P}{j}{0})}{Q}}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower_0 \; (\subst{P}{j}{0})}{Q}}
 
   \inferrule
   {red : P \reduce{i} P'}
@@ -962,6 +962,7 @@ As a result, the proofs on typing derivations will perform a double induction: o
 \todo{intro}
 
 \subsection{Framing}
+\label{framing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Framing captures the idea that the well-typedness of a process does not depend on its unused resources.
@@ -979,6 +980,7 @@ These unused resources are not introduced as new variables -- the typing context
 \end{proof}
 
 \subsection{Weakening}
+\label{weakening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Weakening states that adding new variables to the typing and usage contexts preserves the well-typedness of a process.
@@ -1000,6 +1002,7 @@ To do so, we need of a single insertion into a context, and thus we will limit o
 \end{proof}
 
 \subsection{Strengthening}
+\label{strengthening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Strengthening states that removing unused variables from the typing and usage contexts preserves the well-typedness of a process.
@@ -1008,7 +1011,7 @@ The proof that a variable is unused within a process must be syntactical and can
 \begin{nitheorem}
   \label{thm:strengthening}
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let $i$ be a variable index that is not mentioned by $P$, such that $\Unused \; i \; P$.
+  Let $i$ be a variable index that is not mentioned by $P$, such that $\Unused_i \; P$.
   Then removing index $i$ from the typing context and both of the usage contexts and decrementing every variable in $P$ greater than $i$ preserves its well typedness, so that $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
@@ -1016,6 +1019,7 @@ The proof that a variable is unused within a process must be syntactical and can
 \end{proof}
 
 \subsection{Swapping}
+\label{swapping}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Swapping two variables (in the typing context, input and output usage contexts and process) preserves the well-typedness of a process.
@@ -1084,6 +1088,7 @@ Structural congruence is an equivalence relation that aims to overcome the seman
 \end{remark}
 
 \subsection{Substitution}
+\label{substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 When function abstraction and application come together in the \lambdacalc{} with de Bruijn indices, every reference to the most recent variable in the body of the abstraction gets replaced with the argument of the application.
@@ -1226,6 +1231,7 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
 
 
 \subsection{Subject Reduction}
+\label{subject-reduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 Subject reduction (aka type preservation) relates the operational semantics and the typing system of a language.
@@ -1245,7 +1251,7 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
   \hfill{}\\
   \begin{itemize}
     \item
-    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower \; 0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in Figure \ref{fig:subject-reduction:a}.
+    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower_0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in Figure \ref{fig:subject-reduction:a}.
     We start by using framing (Theorem \ref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel and then apply substitution (Theorem \ref{thm:substitution}) and strengthening (Theorem \ref{thm:strengthening}).
 
     \begin{figure}[h]
@@ -1279,7 +1285,7 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
       % Do not leave empty space
       \begin{subfigure}{.5\textwidth}
         \begin{align*}
-          \types{\gamma , t}{\Gamma , m}{lower \; 0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
+          \types{\gamma , t}{\Gamma , m}{lower_0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi , m}
         \end{align*}
         \caption{Strengthening.}
       \end{subfigure}
