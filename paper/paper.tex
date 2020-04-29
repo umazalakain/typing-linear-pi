@@ -188,7 +188,7 @@ Our contributions can be summarised as follows later explained in details, toget
 
 \paragraph*{Syntax}
 We type the syntax for the \picalc{} in \S \ref{syntax}.
-We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every unbound variable is accounted for in the type of the process that uses it.
+We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
 In the \lambdacalc{} all computations are local and happen on syntactically contiguous terms; in the \picalc{} however communicating subprocesses can be non-contiguous and even have different parent processes.
 One way to define a reduction relation modulo these syntactic minutiae is to define a structural congruence \cite{} relation that acts as a quotient type.
 A term $A$ can then be freely rewritten into a term $B$ as long as $A$ is structurally congruent to $B$.
@@ -252,13 +252,13 @@ As a result, we are able to model a mix of shared, linear, and gradual types.
   \caption{Notation used in this paper}
 \end{figure}
 
-Data type definitions have double lines and index-free synonyms as rule names, for ease of reference.
-Otherwise, we use the constructor name as the name of a typing rule.
-We omit universe levels for brevity.
+Data type definitions have double lines and index-free synonyms as rule names (for ease of reference).
+We otherwise use the constructor name as the name of a typing rule.
+Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned by type definitions but omitted in constructors.
 $\type{TYPES}$ are in blue and uppercased (with indices as subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red, and variables and functions in black.
-Some constructors can be shared across types and disambiguated by context.
-\todo{OD: the next part to be filled should be the notation, so that when I go through the paper, I can use this as a manual.}
+Some constructor names are overloaded --- they and disambiguated by context.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 \label{syntax}
@@ -266,16 +266,12 @@ Some constructors can be shared across types and disambiguated by context.
 In the \picalc{} both scope restriction and input introduce abstractions.
 The bodies of these constructs need a way of referring to their argument.
 Using names as variable references is a popular option amongst humans.
-However, names are cumbersome to mechanize: inserting a new variable into a context means proving that the name of such variable is different from all other variable names in context.
+However, names are cumbersome to mechanize: inserting a new variable into a context means proving that the name of such variable is different to all other variable names in context.
 Moreover, names are of no significance to machines.
 
-Machines need constructs they can algorithmically act upon.
-The idea de Bruijn had \cite{} was to use a natural number $n$ (aka \emph{index}) to refer to the variable introduced $n$ binders ago.
-Binders no longer introduce any names.
-\todo{OD: IMPORTATNT!
-There is too much on lambda-calculus; I suggest you give examples and illustrate your points on the pi-calculus only from now on. It can get too broad and lack focus otherwise... It is fine in the Introduction as you are giving an overview.}
+The idea de Bruijn had \cite{} was to use a natural number $n$ (aka \emph{index}) to refer to the variable introduced $n$ binders ago --- and binders no longer introduce names.
 \begin{example}
-The expression $\lambda g . (\lambda f . f g) g$ in the \lambdacalc{} would translate to $\lambda (\lambda 0 1) 0$.
+The \picalc{} term $(\textbf{new} \; x) (x ( y ) . y \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new} \; y) (x \langle y \rangle . y ( z ) .\mathbf{0}))$ would translate to $(\textbf{new}) (0 () . 0 \langle \texttt{"Hello world"} \rangle . \mathbf{0} \parallel (\textbf{new}) (1 \langle 0 \rangle . 0 () . \mathbf{0}))$.
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
 Humans often find this confusing.
