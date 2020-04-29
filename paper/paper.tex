@@ -142,6 +142,7 @@
 \todo{make sure all citations are there}
 \todo{change colors, color functions}
 \todo{do not distinguish fields from functions, it is not worth it}
+\todo{go over guillaume's paper again}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -670,7 +671,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 \subsubsection{Usage Contexts}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-We choose to allow the use of multiple coexisting multiplicity algebras in our typing system.
+We choose to allow multiple multiplicity algebras to coexist in our typing system.
 We do so by defining an indexed set of usage algebras.
 
 \begin{nidefinition}
@@ -735,45 +736,37 @@ We do so by defining an indexed set of usage algebras.
 \end{note}
 
 \subsection{Typing with Leftovers}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{leftover-typing}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-%%%% REARRANGE
-In this paper, we combine typing and annotation judgments into a single judgment.
-Although the typing rules are for now completely syntax-directed, adding support for branching would introduce choice in the typing derivations.
-If we were to keep typing judgments and annotation judgments separate, we would need a coherence relation making sure that the same choice is taken by both.
-We avoid doing so by combining them into a single judgment.
-%%%%
-
-We make use \emph{leftover typing}, a technique consisting of adding an \emph{output usage context} to the usual \emph{input usage context}.
-This output context contains the leftovers: the multiplicities unused by the processes.
-Crucially, this output context can then be used as the input context of the continuation process.
-The typing rules are introduced in \S \ref{leftover-typing}.
-
-We use leftover typing \cite{} to encode our typing rules.
-The insight of this approach is to use input and output contexts in the typing judgment.
-Our typing judgment on processes are of the form $\types{\gamma}{\Gamma}{P}{\Delta}$ (introduced in Figure \ref{fig:types}).
-This assertion is in fact both a typing judgment on $\gamma$ and a usage judgment on $\Gamma$ and $\Delta$.
-These two judgments could, in fact, happen separately: our typing rules are completely syntax directed.
-However, if we were to introduce branching, typing derivations would have to make choices, and the two separate judgments would need of a third relation to make sure that their choices agree.
-To avoid this, we merge both judgments into a single one.
-The typing context $\gamma$ needs to be explicit because the usage context $\Gamma$ and $\Delta$ do not in any way depend on it -- in fact, they are only related by their common length.
-
-While the typing contexts are preserved through the typing derivation, the usage contexts change.
-We use input and output usage contexts to capture this transformation.
-This has two main advantages: for one, the usage modifications effected by both input and output can be enclosed in a self-containing typing and usage judgment for variable references (also with an output context); but more crucially, we avoid requesting an explicit constructive proof of context splitting for parallel composition -- if $P$ is typed under $\Gamma_l$ and $Q$ under $\Gamma_r$, then to type $\comp{P}{Q}$ under $\Gamma_m$ a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$ would be needed.
-The search for such a proof can be automated, but its existence is still required.
-Moreover, providing a typing derivation for $P$ gets the user no usage annotations to type $Q$.
-By using output usage contexts, we get the leftovers from the derivation on $P$ and use them to type $Q$.
-This is the recurring theme in leftover typing: usage contexts are threaded through the premises.
-
-The typing and usage judgments on both processes and variable references are of an inductive form.
-As a result, the proofs on typing derivations will perform a double induction: once on the derivation of the process, once on the derivation of the variable reference.
+We make use \emph{leftover typing} \cite{}, an approach that, in addition to the usual typing context and input usage context, adds an extra output usage context to the typing rules.
+This output context contains the \emph{leftovers} of the process being typed --- its unused multiplicities.
+Crucially, the leftovers can then be used as an input to some othew typing derivation.
+Adopting this techinque has two main advantages:
+\begin{itemize}
+  \item
+    The input and output actions do no longer need to transform the usage context through functions, but can use a variable reference type with both an input and an output usage context to encapsulate these transformations.
+  \item
+    Parallel composition no longer needs an explicit context splitting proof --- a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$ where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
+    Such a proof could be obtained through automated search --- but it is better yet to avoid needing it.
+    With leftover typing, we use the leftovers of $P$ to type $Q$.
+\end{itemize}
+  
+We introduce two judgments: one for variable references (Definition \ref{def:varref}), one for processes (Definition \ref{def:types}).
 
 \begin{nidefinition}
-  Akin to the typing and usage judgment on processes, in Figure \ref{fig:variable-references} we present a typing and usage judgment on variable references -- also indexed over a typing context and an input an output usage context.
-  However, in addition to this, variable references also record the index, the type, and the usage annotation of the variable reference.
-  The base case $\constr{zero}$ ensures that $t$ is the most immediate type in typing context, and splits the most immediate annotation in the input context $x$ into the usage annotation for the variable $y$ and the annotation in the output context $z$.
+  \label{def:varref}
+
+  Like processes, variable reference judgments (Figure \ref{fig:variable-references}) are indexed by a typing context and an input and output usage context.
+  In addition to these, variable reference judgments are also indexed by their position in the contexts, their type, and their usage annotation.
+  
+  The base case $\constr{zero}$ asserts that $t$ is the most immediate type in typing context, and splits the most immediate usage annotation $x$ in the input context into the usage annotation $y$ the usage annotation $z$ in the output context.
+  This is the only place in the typing system where the algebra on multiplicities is used.
+
+  \begin{remark}
+    We use $\field{\cdot-compute}$ to aliviate the user from the proof burden $\opsquared{x}{y}{z}$.
+  \end{remark}
+
   The inductive case $\constr{suc}$ appends an extra type to the typing context, and an extra usage annotation to both the input and output usage context.
 
   \begin{figure}[h]
@@ -802,38 +795,23 @@ As a result, the proofs on typing derivations will perform a double induction: o
     {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
     {\constr{suc} \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
   \end{mathpar}
-  \caption{Variable references as proofs on the typing context and input and output multiplicity contexts.}
+  \caption{Variable reference judgments.}
   \label{fig:variable-references}
   \end{figure}
 \end{nidefinition}
-
-\begin{remark}
-  We use $\field{\cdot-unique}$ to relieve the user from the proof burden $\opsquared{x}{y}{z}$ in the base case $\constr{zero}$.
-  This is the only place in the typing system that uses the algebra on multiplicities.
-\end{remark}
 
 \begin{example}
 \todo{example}
 \end{example}
 
-\begin{nilemma}
-  The typing context $\gamma$ at index $i$ is type $t$.
-\end{nilemma}
-\begin{nilemma}
-  The input annotation in context $\Gamma$ at index $i$ is the result of aggregating (as per the algebra) $y$ and the output annotation in context $\Delta$ at index $i$.
-\end{nilemma}
-\begin{nilemma}
-  For every index $j$ other than $i$, the input annotation in context $\Gamma$ at index $i$ is the output annotation in $\Delta$ at index $i$.
-\end{nilemma}
-\begin{nilemma}
-  \todo{Add feedback and feedfront}
-\end{nilemma}
-\begin{corollary}
-  Given the witness $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$, $\Gamma \equiv \Delta$ iff $y \equiv \zero$.
-\end{corollary}
-\proof{All proofs are by structural induction on \textsc{VarRef}.}
-
 \begin{nidefinition}
+  \label{def:types}
+
+  Our judgment on processes is of the form $\types{\gamma}{\Gamma}{P}{\Delta}$ (Figure \ref{fig:types}).
+  This assertion combines a judgment on types ($\gamma$) and a judgment on usages ($\Gamma$ and $\Delta$).
+  They could be kept as two separate judgments, but doing so would risk incoherence: if there is any choice to be made, the judgment on types could choose to go left while the judgment on usages chooses to go right.
+  The constructions instroduced in this paper make the typing derivations completely syntax directed and thus this problem inexistent, but we nevertheless choose to keep both judgments as one for simplicity.
+
   The typing relation \textsc{Types} presented in Figure \ref{fig:types} is indexed over a context of types $\gamma$, a context of input multiplicities $\Gamma$, the process $P$ that is being typed, and the context of output capabilities $\Delta$, and notated as $\types{\gamma}{\Gamma}{P}{\Delta}$.
   \todo{empty output context}
   The typing rules are in one-to-one correspondence with the underlying syntax for processes, and thus we say they are syntax-directed.
