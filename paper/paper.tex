@@ -274,12 +274,12 @@ The idea de Bruijn had \cite{} was to use a natural number $n$ (aka \emph{index}
 The \picalc{} term $(\textbf{new} \; x) (x ( y ) . y \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new} \; y) (x \langle y \rangle . y ( z ) .\mathbf{0}))$ would translate to $(\textbf{new}) (0 () . 0 \langle \texttt{"Hello world"} \rangle . \mathbf{0} \parallel (\textbf{new}) (1 \langle 0 \rangle . 0 () . \mathbf{0}))$.
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
-Humans often find this confusing.
-There is however no reason not to annotate these indices with the original names bestowed by humans.
-Machines can then manipulate references mechanically while still using names to present terms to humans.
+Humans may find this confusing.
+There is however no reason not to annotate these indices with the original names bestowed upon them by humans.
+Machines can then manipulate references mechanically whilst using names to present terms to humans.
 
-A variable occurring under $n$ abstractions has $n$ things to refer to.
-References outside of that range have no associated meaning.
+A variable occurring under $n$ abstractions has $n$ possible variables to refer to.
+References outside of that range are meaningless.
 It is useful to rule out these nonsensical terms syntactically.
 In Figure \ref{fig:var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 
@@ -327,11 +327,11 @@ As shown in Figure \ref{fig:syntax}, we increase the \emph{depth} counter every 
 \label{fig:syntax}
 \end{figure}
 
-Using type-level de Bruijn indices makes our syntax well-scoped by construction, and the semantics of our language can now be defined on the totality of the syntax.
-User-friendliness can still be recovered through a function that converts processes with names into (possibly) processes with indices.
-This function keeps track of what index is associated with what name, and traverses the process recursively, taking note of new binders and substituting variable references.
+Using type-level de Bruijn indices makes our syntax well-scoped by construction --- the semantics of our language can now be defined on the totality of the syntax.
+User-friendliness can still be recovered through a function that converts processes with named variables into (possibly) processes with indexed variables.
+This function recursively traverses processes, keeping track of what name is associated with each index.
 If the process is ill-scoped, the function returns nothing.
-To present things back to the user, we print indices as their named annotations.
+To present things to the user, we substitute indices by their related names.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
