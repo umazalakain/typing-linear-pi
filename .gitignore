@@ -31,3 +31,4 @@
 *.vtc
 auto/
 *.gz(busy)
+*.dict
