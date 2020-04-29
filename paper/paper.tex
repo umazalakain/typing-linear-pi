@@ -586,6 +586,7 @@ Shared, gradual and linear usage types all satisfy these algebraic laws.
 \begin{note}
   We will often work with input and output multiplicities as pairs.
   We use the notation $\Carrier^2$ to stand for a $\Carrier \times \Carrier$ tuple, and $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where all properties are trivially lifted.
+  Henceworth, we use $\ell_{\o}$ to denote the pair $(0 \comma 0)$, $\ell_i$ for the pair $(1 \comma 0)$, $\ell_o$ for $(0 \comma 1)$ and $\ell_{\#}$ for $(1 \comma 1)$.
 \end{note}
 
 Shared, gradual and linear multiplicity types can all be defined as an instance of the properties in Figure \ref{fig:multiplicities}.
@@ -820,8 +821,6 @@ The constructions instroduced in this paper make the typing derivations complete
   The typing derivation of the continuation process $P$ is provided with this channel with multiplicity $(y \comma y)$.
   Process $P$ must then completely exhaust this channel, and to that end we substitute $(y , y)$ in the input context with $\ell_{\o}$ in the output context.
 
-  \todo{comment on synonyms $\ell_i$ etc}
-  
   Receiving requires a proof $chan_i$ that selects a channel at index $i$ with multiplicity $\ell_i$ available, over which data with type $t$ and multiplicity $x$ is going to be sent.
   Note that this index $i$ is then used in the syntax of the typed process.
   After consuming $\ell_i$ from this channel, we use the leftover context $\Xi$ to type the continuation.
@@ -885,6 +884,7 @@ The constructions instroduced in this paper make the typing derivations complete
 \end{nidefinition}
 
 \subsubsection{Example derivations}
+\label{example-derivations}
 
 \todo{OD: in addition to the above, could we have examples of typing a process in each of the above type systems? It can be the same process everywhere and we can show how the typing changes...}
 
