@@ -276,7 +276,8 @@ Moreover, names are of no significance to machines.
 
 The idea de Bruijn had \cite{} was to use a natural number $n$ (aka \emph{index}) to refer to the variable introduced $n$ binders ago --- and binders no longer introduce names.
 \begin{example}
-The \picalc{} term $(\textbf{new} \; x) (x ( y ) . y \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new} \; y) (x \langle y \rangle . y ( z ) .\mathbf{0}))$ would translate to $(\textbf{new}) (0 () . 0 \langle \texttt{"Hello world"} \rangle . \mathbf{0} \parallel (\textbf{new}) (1 \langle 0 \rangle . 0 () . \mathbf{0}))$.
+\hfill{}\\
+The \picalc{} term \hfill{} $(\textbf{new} \; x) (x ( y ) . y \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new} \; y) (x \langle y \rangle . y ( z ) .\mathbf{0}))$ \\ is represented as \hfill{} $(\textbf{new}) (0 () . 0 \langle \texttt{"Hello world"} \rangle . \mathbf{0} \parallel (\textbf{new}) (1 \langle 0 \rangle . 0 () . \mathbf{0}))$.
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
 Humans may find this confusing.
@@ -544,7 +545,7 @@ Typing systems for the \picalc{} ensure that processes make a correct use of the
 Typing judgments are of the form $\Gamma \vdash P$ (for some typing context $\Gamma$ and some process $P$) --- types only appear in the contexts of typing judgments.
 A resource-aware typing system for the \picalc{} must take resource usages into account, and needs an algebra on these --- a way of \emph{splitting} resources on parallel composition, of \emph{ticking off} resources on input and output.
 We characterise such an algebra in \S \ref{multiplicities}.
-We define independent typing contexts and usage contexts in \S \ref{context}.
+We define independent typing contexts and usage contexts in \S \ref{contexts}.
 We provide a typing judgment for a resource-aware \picalc{} in \S \ref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
@@ -555,6 +556,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 In this paper we generalize the type of multiplicities by defining an algebra any such type must comply with.
 Shared, gradual and linear usage types all satisfy these algebraic laws.
 
+\todo{we haven't introduced the forall and implicit syntax}
 \begin{nidefinition}
   The algebra on multiplicities must be \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associtive}, and \emph{commutative}, and needs a \emph{minimal neutral element}.
   It also requires a special element that is to be used to count inputs and outputs.
@@ -668,11 +670,12 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 \subsubsection{Usage Contexts}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+We choose to allow the use of multiple coexisting multiplicity algebras in our typing system.
+We do so by defining an indexed set of usage algebras.
+
 \begin{nidefinition}
-  An indexed set of partial commutative monoids is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it.
-  This allows for several algebras to coexist in the same type system.
-  Figure \ref{fig:indexed-multiplicities} captures these requirements: each index $i$ has a corresponding carrier type $\field{CARRIER}_i$ such that $\field{CARRIER}_i$ satisfies the algebra $\Quantifier_{\field{CARRIER}_i}$.
-  We require the index type to be inhabited -- necessary to prove type preservation on $\new \PO_{\suc n} \eqeq \PO_n$.
+  An indexed set of usage algebras is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it, as captured by Figure \ref{fig:indexed-multiplicities}.
+  We require the index type to be inhabited -- proving subject congruence on $\new \PO_{\suc n} \eqeq \PO_n$ requires an inhabited carrier set.
   
   \begin{figure}[h]
   \begin{equation}
@@ -687,12 +690,9 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \label{fig:indexed-multiplicities}
   \end{figure}
 \end{nidefinition}
+
 \begin{nidefinition}
-  To allow different multiplicity algebras to coexist we first define a length-indexed context of carrier indices $\Idxs_n$ (see \ref{fig:ctx}).
-  On top of it, we define a context of multiplicities $\Ctx_{idxs}$.
-  We lift the algebra on multiplicities to multiplicity contexts by constraining the algebra on multiplicity contexts to act on  contexts defined on the same underlying context of carrier indices.
-  We use two multiplicities over a common index to represent multiplicities for both the input and the output capabilities ($\Carrier_{idx}^2$).
-  
+  A context of usages $\Ctx_{idxs}$ is indexed by a length-indexed context of indices $\Idxs_n$, as shown in Figure \ref{fig:ctx}.
   \begin{figure}[h]
   \begin{mathpar}
     \datatype
@@ -730,7 +730,8 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 \end{nidefinition}
 
 \begin{note}
-  We lift the monoidal operation on pairs of multiplicities $\opsquared{x}{y}{z}$ to a monoidal operation on contexts with the same underlying vector of indices $\opctx{\Gamma}{\Delta}{\Xi}$, where all the properties of the partial monoid are trivially lifted to contexts.
+  We lift the monoidal operation on multiplicity pairs $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on contexts of usages with the same underlying context of indices.
+  All the properties of the partial monoid are trivially lifted.
 \end{note}
 
 \subsection{Typing with Leftovers}
