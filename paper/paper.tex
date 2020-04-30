@@ -604,11 +604,8 @@ For examples of how these multiplicity types are used in typing derivations, ref
 In a resource-aware \picalc{}, usage annotations are transformed as a result of input and output; types howeverr are preserved.
 In our case, usage annotations do not depend on types, and keeping types and usages in separate contexts allows for a more modular approach in our proofs.
 
-\subsubsection{Typing Contexts}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
 \begin{nidefinition}
-  Figure \ref{fig:prectx} defines types as either unit types, base types or channel types.
+  We define types (Figure \ref{fig:prectx}) as either unit types, base types or channel types.
   The unit type $\unit$ serves as a proof of inhabitance for types (we can trivially obtain it), and is used to such end in subject congruence --- for the $\new \PO_{\suc n} \eqeq \PO_n$ rule.
   The base type $\base{n}$ uses a natural number $n$ to represent types.
   This natural number can then be interpreted as a type in the host language.
@@ -657,13 +654,8 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \end{figure}
 \end{nidefinition}
 
-\subsubsection{Usage Contexts}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-We choose to allow multiple multiplicity algebras to coexist in our typing system.
-We do so by defining an indexed set of usage algebras.
-
 \begin{nidefinition}
+  We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
   An indexed set of usage algebras is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it, as captured by Figure \ref{fig:indexed-multiplicities}.
   We require the index type to be inhabited -- proving subject congruence on $\new \PO_{\suc n} \eqeq \PO_n$ requires an inhabited carrier set.
   
@@ -730,15 +722,18 @@ We do so by defining an indexed set of usage algebras.
 
 We make use \emph{leftover typing} \cite{}, an approach that, in addition to the usual typing context and input usage context, adds an extra output usage context to the typing rules.
 This output context contains the \emph{leftovers} of the process being typed --- its unused multiplicities.
-Crucially, the leftovers can then be used as an input to some othew typing derivation.
-Adopting this techinque has two main advantages:
+Crucially, the leftovers can then be used as an input to some other typing derivation.
+Adopting this techinque has three main advantages:
 \begin{itemize}
   \item
-    The input and output actions do no longer need to transform the usage context through functions, but can use a variable reference type with both an input and an output usage context to encapsulate these transformations.
+    The input and output actions no longer transform the usage context through functions.
+    Instead, they use a variable reference type with both an input and an output usage context that encapsulates these transformations.
   \item
     Parallel composition no longer needs an explicit context splitting proof --- a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$ where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
     Such a proof could be obtained through automated search --- but it is better yet to avoid needing it.
     With leftover typing, we use the leftovers of $P$ to type $Q$.
+  \item
+    Theorems like framing (\S \ref{framing}), weakening (\S \ref{weakening}) and strengthening (\S \ref{strengthening}) become suddenly stateable.
 \end{itemize}
   
 We introduce two judgments: one for variable references (Definition \ref{def:varref}), one for processes (Definition \ref{def:types}).
