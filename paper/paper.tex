@@ -163,35 +163,33 @@ As humans, we aim to model, predict, and build such interactive systems; as math
 The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
 Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted.
-The \picalc{} is at the basis of design and implementation of programming languages for concurrency, such as Pict \cite{Pierce} and more recently Go \cite{Golang}.
-Moreover, at the state-of-the-art, the \picalc{} features a wide plethora of types, ranging from basic types, linear types, types for liveness properties, such as deadlock freedom, livelock freedom or termination, and most notably, session types \cite{K07}, making the \picalc{} a fully-fledged tool for modelling and verification of concurrent and distributed systems.
+The \picalc{} acts as a foundation for the design and implementation of programming languages for concurrency, such as Pict \cite{Pierce} and (more recently) Go \cite{Golang}.
+Moreover, at the state-of-the-art, the \picalc{} features a wide plethora of types: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types \cite{K07}. This makes the \picalc{} a fully-fledged tool for the modelling and verification of concurrent and distributed systems.
 
-In a parallel track, the discovery of linear logic by J.-Y. Girard \cite{Girard87} opened new avenues in computing science in the early '90s and introduced \emph{linear types} for (functional) programming languages \cite{Curry-Howard,Wadler90,Bernardy2018}.
-Linear type systems restrict the usage of resources to \emph{exactly ones}.
-Enforcing ``no duplicating'' and ``no discarding'' of resources via linearity, allows for resource-aware programming and efficient implementation \cite{Wadler90}.
-Later on, linearity inspired unique types, as in Clean \cite{BarendsenS96} or ownership types, as in Rust \cite{MatsakisK14}.
+In a parallel track, J.-Y. Girard's development of linear logic \cite{Girard87} in the early '90s opened new avenues in computing science by introducing \emph{linear types} for (functional) programming languages \cite{Curry-Howard,Wadler90,Bernardy2018}.
+Linear type systems guarantee that resources are used \emph{exactly once}.
+Enforcing ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
+Later on, linearity inspired unique types (as in Clean \cite{BarendsenS96}) and ownership types (as in Rust \cite{MatsakisK14}).
 
 The \picalc{} also benefited from this linearity wave in early '90s.
-Kobayashi et al. \cite{KPT96} defined the {linear} \picalc{}, which is a typed version of the \picalc{} where the linear type system restricts the usage of channels to {exactly ones}.
+Kobayashi et al. \cite{KPT96} defined the {linear} \picalc{}, a typed version of the \picalc{} where the linear type system restricts the usage of channels, which must be used exactly once.
 
-In the meantime, the rise of session types \cite{H93,THK94,HVK98} gave linearity in the \picalc{} a different flavour.
-Session types are a type formalism used in communication-centric programming and the \picalc{} is the original and still
-the most successful framework where session types are defined.
-Linearity in session types means that a channel can be owned only by one communicating participant, but the channel itself can be used multiple times, as specified by the structure of a session type.
-Linearity in session types is a key ingredient in order to guarantee type safety.
+In the meantime, the rise of session types \cite{H93,THK94,HVK98} gave a different flavour to the linearity in the \picalc{}.
+Session types are a type formalism used in communication-centric programming.
+In session types, linearity ensures that a channel must be owned by exactly one communicating participant, even if the channel itself can be used multiple times, as specified by the structure of its session type.
+Linearity in session types is the key ingredient that guarantees type safety.
 
-Recent work \cite{DardhaGS12,Dardha14,DardhaGS17} turned again the spotlight on the linear \picalc{} \cite{KPT96}, via an encoding of session types into linear types.
-This encoding not only has theoretical benefits in terms expressivity of session types and reusability of theoretical results from the linear \picalc{}, but most importantly it is useful at a practical level.
-The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} or Scala \cite{ScalasY16,ScalasDHY17}.
-This means we can use the linear \picalc{} as an underlying theoretical and practical framework on top of which we can build session types.
+Recent work \cite{DardhaGS12,Dardha14,DardhaGS17} pushed the linear \picalc{} into the spotlight again \cite{KPT96}, thanks to an encoding of session types into linear types.
+This encoding not only has theoretical benefits in terms of expressivity of session types and reusability of theoretical results from the linear \picalc{}, but is useful at a practical level too.
+The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}.
+This means that we can use the linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be built.
 
-Considering the importance of the \picalc{} and linearity in modelling concurrent and distributed systems, in this paper we focus our investigation on both and go beyond.
-We present for the first time a full mechanisation in Agda of a \picalc{} with linear, gradual and shared types all under the same unified framework.
-
-In order to obtain this unification of type systems, we use leftover typing for the first time in the \picalc{}, following Allais \cite{Allais2018a}.
-The user can choose among the possible type systems by instantiating our $\pi$ with leftovers, which gives as a result one of the three typed $\pi$s.
-Ultimately, we can use $\pi$ with leftovers as a unified framework for type safe distributed modelling and programming with a range of type systems, on top of which we can build more advanced types, theories and languages.
-While linearity is needed for type safety, gradual types and shared types are needed to build real-world systems.
+Considering the importance of the \picalc{} and of linearity in modelling concurrent and distributed systems, in this paper we focus our research on both and go beyond.
+We present for the first time a full mechanisation in Agda of a \picalc{} with linear, gradual and shared types, all under the same unified framework.
+We do so by defining a specification for an algebra on multiplicities and using it to apply leftover typing (following Allais \cite{Allais2018a}) to the \picalc{} for the first time.
+The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
+Ultimately, we can use $\pi$ with leftovers as a unified framework for type safe distributed modelling and programming with a variety of type systems, on top of which more advanced types, theories and languages can be built.
+While linearity is needed for type safety, gradual types and shared types are needed for real-world systems.
 
 \subsection{Contributions}
 Our contributions are given in the following together with the corresponding sections.
