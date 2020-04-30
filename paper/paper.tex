@@ -1193,6 +1193,15 @@ In the linear \picalc{} however, reduction \emph{is} meant to transform the cont
 In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
 In \S \ref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
 
+\begin{nilemma}
+  \label{lm:comm-capable}
+  As an auxiliary lemma, we must establish that every input usage context $\Gamma$ of a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces by communicating on a channel external to it (that is, $P \reduce{\constr{external} \; i} Q$ for some $Q$) has a multiplicity of at least $\lio$ at index $i$.
+\end{nilemma}
+
+\begin{proof}
+  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
+\end{proof}
+
 \begin{nitheorem}
   Let $P \reduce{c} Q$.
   If $c$ is $\constr{internal}$ to the process, the context must not be modified and thus $\Gamma' \equiv \Gamma$.
@@ -1255,16 +1264,8 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
     If the channel is $\constr{external}\; (\suc i)$ subject reduction proceeds inductively.
 
     \item
-    Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and then the induction hypothesis.
+    Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and the induction hypothesis.
   \end{itemize}
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:comm-capable}
-  Every input usage context $\Gamma$ on a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces such that $P \reduce{\constr{external} \; i} Q$ has a multiplicity of at least $\lio$ at index $i$.
-\end{nilemma}
-\begin{proof}
-  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
