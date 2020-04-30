@@ -171,7 +171,7 @@ Linear type systems guarantee that resources are used \emph{exactly once}.
 Enforcing ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
 Later on, linearity inspired unique types (as in Clean \cite{BarendsenS96}) and ownership types (as in Rust \cite{MatsakisK14}).
 
-The \picalc{} also benefited from this linearity wave in early '90s.
+The \picalc{} also benefited from this linearity wave in the early '90s.
 Kobayashi et al. \cite{KPT96} defined the {linear} \picalc{}, a typed version of the \picalc{} where the linear type system restricts the usage of channels, which must be used exactly once.
 
 In the meantime, the rise of session types \cite{H93,THK94,HVK98} gave a different flavour to the linearity in the \picalc{}.
@@ -192,71 +192,37 @@ Ultimately, we can use $\pi$ with leftovers as a unified framework for type safe
 While linearity is needed for type safety, gradual types and shared types are needed for real-world systems.
 
 \subsection{Contributions}
-Our contributions are given in the following together with the corresponding sections.
+Our contributions are the following:
 \begin{itemize}
-  \item \textbf{Machine verified formalisation of the syntax and semantics of the \picalc{}}: The syntax for the \picalc{} is given in \S \ref{syntax}.
-  We use de Bruijn indices \cite{} as variable references, and dependent types to make the syntax well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
-  We define the operational semantics of the \picalc{} by a reduction relation in \S \ref{operational-semantics}.
-  The base case of every such reduction is communication over a channel; we take care to track this information at the type level so that we can then use it for subject reduction (aka type preservation) theorem.
+\item \textbf{Formalisation of the syntax and semantics of the \picalc{}}:
+  Section \S \ref{syntax} uses type level de Bruijn indices \cite{} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
+  Section \S \ref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
+  This operational semantics is given as a reduction relation on processes.
+  The reduction relation tracks at the type level what channel the communication occurs on, so that this information can then be used to state subject reduction --- ak-a type preservation.
+  It is also defined modulo structural congruence --- a relation that acts as a quotient type that gets rid of the unecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
-  \item \textbf{Machine verified typing with leftovers for the \picalc{} with linear, gradual and shared types}:
-  Linear type systems need of context splits.
-  These are tricky to handle constructively without explicitly asking the user to supply them.
-  Leftover typing \cite{} is a type theoretical technique that addresses this.
-  It does so by carrying both an input and an output context (the leftovers).
-  The output context can then be used as the input context of the continuations.
-  We apply this technique to the \picalc{} in \S \ref{leftover-typing}.
-  We generalize our algebra on usage multiplicities in \S \ref{multiplicities}.
-  As a result, we are able to model a mix of shared, linear, and gradual types.
-  \todo{reformulate paragraph}
-  Another property of particular interest in concurrent and distributed systems is the avoidance of race conditions.
-  A type system that excludes multiple usages of a resource excludes race conditions. Linear \picalc{} not only avoids races, but ensures \emph{communication privacy}: if both endpoints of a channel are acquired no other process can eavesdrop.
-  It also ensures that every declared communication channel must be used.
-  We provide a typing system for the linear \picalc{} in \S \ref{type-system} as extensional rules on sitting on top of the unruly well-scoped syntax.
-  
-  \item \textbf{Machine verified proofs of subject reduction and auxiliary lemmas for all $\pi$ with leftovers}:
-  
-  \item \textbf{Full formalisation in Agda available at \cite{Zalakain2020Agda}}:
+  \item \textbf{Leftover typing for the \picalc{}, with linear, gradual and shared types}:
+  Section \S \ref{type-system} provides the type system for a resource-aware \picalc{}.
+  The type system is \emph{resource-aware} in that it allows the user to provide a resource-aware algebra that is then applied to the type-system.
+  Linear types, gradual types and shared types are all instances of such a resource-aware algebra too.
+  Any \emph{partial commutative monoid} that is cancellative and has a minimal element is a valid such algebra.
+  Multiple of these algebras can be applied to a single type system --- contexts keep information about what algebra should be applied to which element.
+
+  The typing judgments use \emph{leftover typing} to model the resource-aware \picalc{}.
+  This approach adds a leftover usage context to the typing judgments.
+  Typing derivations take the resources of their input usage context, consume some of them, and leave the rest as leftovers in the output usage context.
+  These technique renders explicit context splits unecessary.
+
+  \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
+  Section \S \ref{type-safety} builds on several theorems to proof subject reduction for our type system.
+  Here too, leftover typing renders the proofs for some of these lemmas straightforward, while for others it makes it possible to state them in the first place.
+  We prove \textbf{framing} (well-typedness is independent of the unused resources of a process), \textbf{weakening} (new variables that are added to both the input and output usage context preserve well-typedness), and \textbf{strengthening} (removing the variables that are unused by a process preserves well-typedness).
+  We use these to prove \textbf{subject congruence} (structural congruence rules can be freely applied while preserving well-typedness) and \textbf{substitution} (a variable can be substituted for another as long as this other variable is capable of doing everything the original one did), and use these to prove \textbf{subject reduction} (a well-typed process that reduces will still be well-typed).
+
+  \item \textbf{Fully mechanised formalisation available in Agda}:
+  This work has been fully formalised in Agda and is publicly avaible \cite{Zalakain2020Agda}.
+
 \end{itemize}
-
-%\paragraph*{Syntax}
-%In the \lambdacalc{} all computations are local and happen on syntactically contiguous terms; in the \picalc{} however communicating subprocesses can be non-contiguous and even have different parent processes.
-%One way to define a reduction relation modulo these syntactic minutiae is to define a structural congruence \cite{} relation that acts as a quotient type.
-%A term $A$ can then be freely rewritten into a term $B$ as long as $A$ is structurally congruent to $B$.
-
-
-%\paragraph*{Semantics}
-% In the \lambdacalc{} function application is the main computational engine; in the \picalc{} it is inter-process communication what drives computation.
-% Two subprocesses can communicate anywhere in a process but under input and output, which must be respected to ensure the sequential behavior.
-% We type a reduction relation that acts as an operational semantics modulo subject congruence in \S \ref{operational-semantics}.
-% The base case of every such reduction is communication over a channel; we take care to track this information at the type level so that we can then use it to state the theorem for subject reduction (aka type preservation).
-
-% As with the untyped \lambdacalc{}, the untyped \picalc{} can be used to construct a wide variety of ill-behaved terms --- for some characterization of ill-behaved.
-% One can use type systems to constructively obtain a subset of terms for which certain properties hold.
-% As an example, the simply typed \lambdacalc{} ensures that the argument supplied to a function is of the expected type.
-% Correspondingly, the simply typed \picalc{} \cite{} ensures that the data sent over a channel is of the expected type.
-% This property is often referred to as \emph{communication safety}.
-
-% \todo{Mention that our semantics is prior to our typing (Curry-style)}
-
-% Another property of particular interest to concurrent systems is the avoidance of race conditions.
-% A type system that excludes multiple usages of a resource excludes race conditions.
-% In the linear \picalc{} \cite{} channels must be used exactly once.
-% This not only avoids races, but ensures \emph{communication privacy}: if both endpoints of a channel are acquired no other process can eavesdrop.
-% It also ensures that every declared communication channel must be used.
-% The linear \picalc{} is also interesting because together with product types it is isomorphic to session types \cite{} -- which are used to encode communication protocols.
-% We provide a typing system for the linear \picalc{} in \S \ref{type-system} as extensional rules on sitting on top of the unruly well-scoped syntax.
-
-% \paragraph*{Typing with leftovers}
-% Linear type systems need of context splits.
-% These are tricky to handle constructively without explicitly asking the user to supply them.
-% Leftover typing \cite{} is a type theoretical technique that addresses this.
-% It does so by carrying both an input and an output context (the leftovers).
-% The output context can then be used as the input context of the continuations.
-% We apply this technique to the \picalc{} in \S \ref{leftover-typing}.
-% We generalize our algebra on usage multiplicities in \S \ref{multiplicities}.
-% As a result, we are able to model a mix of shared, linear, and gradual types.
-% \todo{reformulate paragraph}
 
 
 \subsection{Notation}
@@ -280,7 +246,7 @@ Our contributions are given in the following together with the corresponding sec
   \caption{Notation used in this paper}
 \end{figure}
 
-Data type definitions have double lines and index-free synonyms as rule names (for ease of reference).
+Data type definitions use double lines and index-free synonyms as rule names (for ease of reference).
 We otherwise use the constructor name as the name of a typing rule.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned by type definitions but omitted in constructors.
