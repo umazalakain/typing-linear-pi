@@ -86,10 +86,12 @@ here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {y z : Carrier idx ²} �
      → γ -, t ∝ Γ -, proj₁ (toWitness check) ∋[ zero ] t ∝ y ⊠ Γ -, z
 here ⦃ check ⦄ = let _ , x≔y∙²z = toWitness check in zero , zero x≔y∙²z
 
-there : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs} {x : Carrier idx ²} {x' : Carrier idx' ²}
-      → γ       ∝ Γ       ∋[     i ] t ∝ x ⊠ Δ
-      → γ -, t' ∝ Γ -, x' ∋[ suc i ] t ∝ x ⊠ Δ -, x'
-there (i , j) = suc i , suc j
+infixr 20 there_
+
+there_ : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs} {x : Carrier idx ²} {x' : Carrier idx' ²}
+       → γ       ∝ Γ       ∋[     i ] t ∝ x ⊠ Δ
+       → γ -, t' ∝ Γ -, x' ∋[ suc i ] t ∝ x ⊠ Δ -, x'
+there_ (i , j) = suc i , suc j
 
 -- Typing judgment γ ∝ Γ ⊢ P ⊠ Δ where P is a well-typed process
 -- under typing context γ and input and output usage contexts Γ and Δ

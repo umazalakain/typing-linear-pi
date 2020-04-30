@@ -135,13 +135,16 @@ module Shared-Linear where
   _ : [] -, 𝟙 ∝[ [] -, SHARED ] [] -, ω∙ ⊢ υ ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ⊠ ε
   _ = chan 𝟙 ω∙ {LINEAR} 1∙
       (comp (send here (there here) end)
-      (recv  here end))
+      (recv here end))
 
-  _ : [] -, 𝟙 ∝[ [] -, SHARED ] [] -, ω∙ ⊢ υ ((zero ⦅⦆ (zero ⦅⦆ 𝟘)) ∥ (υ (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘))) ⊠ ε
+  p : Scoped 1
+  p = υ ((zero ⦅⦆ (zero ⦅⦆ 𝟘)) ∥ (υ (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘)))
+
+  _ : [] -, 𝟙 ∝[ [] -, SHARED ] [] -, ω∙ ⊢ p ⊠ ε
   _ = chan C[ 𝟙 ∝ ω∙ ] {LINEAR} ℓᵢ {LINEAR} 1∙ (comp
            (recv here (recv here end))
-           (chan 𝟙 ω∙ true
-                 (send (there here) here (send here (there (there here)) end))))
+           (chan 𝟙 ω∙ 1∙
+                 (send (there here) here (send here (there there here) end))))
 
 
 module Linear where
