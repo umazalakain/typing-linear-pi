@@ -65,21 +65,21 @@ subject-cong (stop scope-scope-comm) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) =
 subject-cong (cong-symm (stop comp-assoc)) (comp (comp ⊢P ⊢Q) ⊢R) = comp ⊢P (comp ⊢Q ⊢R)
 subject-cong (cong-symm (stop comp-symm)) (comp ⊢P ⊢Q) = comp-comm (comp ⊢P ⊢Q)
 subject-cong (cong-symm (stop comp-end)) ⊢P = comp ⊢P end
-subject-cong (cong-symm (stop scope-end)) end = chan {idx' = ∃Idx} {idx = ∃Idx} 𝟙 (0∙ , 0∙) 0∙ end
+subject-cong (cong-symm (stop scope-end)) end = chan 𝟙 {∃Idx} (0∙ , 0∙) {∃Idx} 0∙ end
 subject-cong (cong-symm (stop (scope-ext u))) (comp ⊢P (chan t c μ ⊢Q)) = chan t c μ (comp (subst (λ ● → _ ∝ _ ⊢ ● ⊠ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ⊢Q)
 subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ₁ ⊢P)) = chan _ _ _ (chan _ _ _ (subst (λ ● → _ ∝ _ ⊢ ● ⊠ _) (swap-swap zero _) (⊢-swap zero ⊢P)))
 
 -- Equivalence and congruence
 subject-cong cong-refl ⊢P = ⊢P
 subject-cong (cong-trans P≅Q Q≅R) ⊢P = subject-cong Q≅R (subject-cong P≅Q ⊢P)
-subject-cong (new-cong P≅Q) (chan t m μ ⊢P) = chan t m μ (subject-cong P≅Q ⊢P)
+subject-cong (υ-cong P≅Q) (chan t m μ ⊢P) = chan t m μ (subject-cong P≅Q ⊢P)
 subject-cong (comp-cong P≅Q) (comp ⊢P ⊢R) = comp (subject-cong P≅Q ⊢P) ⊢R
 subject-cong (input-cong P≅Q) (recv x ⊢P) = recv x (subject-cong P≅Q ⊢P)
 subject-cong (output-cong P≅Q) (send x y ⊢P) = send x y (subject-cong P≅Q ⊢P)
 subject-cong (cong-symm cong-refl) ⊢P = ⊢P
 subject-cong (cong-symm (cong-symm P≅Q)) ⊢P = subject-cong P≅Q ⊢P
 subject-cong (cong-symm cong-trans P≅Q P≅R) ⊢P = subject-cong (cong-symm P≅Q) (subject-cong (cong-symm P≅R) ⊢P)
-subject-cong (cong-symm (new-cong P≅Q)) (chan t m μ ⊢P) = chan t m μ (subject-cong (cong-symm P≅Q) ⊢P)
+subject-cong (cong-symm (υ-cong P≅Q)) (chan t m μ ⊢P) = chan t m μ (subject-cong (cong-symm P≅Q) ⊢P)
 subject-cong (cong-symm (comp-cong P≅Q)) (comp ⊢P ⊢R) = comp (subject-cong (cong-symm P≅Q) ⊢P) ⊢R
 subject-cong (cong-symm (input-cong P≅Q)) (recv x ⊢P) = recv x (subject-cong (cong-symm P≅Q) ⊢P)
 subject-cong (cong-symm (output-cong P≅Q)) (send x y ⊢P) = send x y (subject-cong (cong-symm P≅Q) ⊢P)

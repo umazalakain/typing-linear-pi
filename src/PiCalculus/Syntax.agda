@@ -14,18 +14,18 @@ record Parameters : Set₁ where
 
 module Syntax (P : Parameters) where
   infix 20 _∥_
-  infixr 15 ⦅new_⦆_
+  infixr 15 ⦅υ_⦆_
   infixr 9 _⦅_⦆_
   infixr 9 _⟨_⟩_
 
   open Parameters P
 
   data Process (Γ : Ctx) : Set where
-    𝟘       : Process Γ
-    ⦅new_⦆_ : (b : Bnd) → Process (Γ ,- b) → Process Γ
-    _∥_     : Process Γ → Process Γ → Process Γ
-    _⦅_⦆_   : Var Γ → (b : Bnd) → Process (Γ ,- b) → Process Γ
-    _⟨_⟩_   : Var Γ → Var Γ → Process Γ → Process Γ
+    𝟘     : Process Γ
+    ⦅υ_⦆_ : (b : Bnd) → Process (Γ ,- b) → Process Γ
+    _∥_   : Process Γ → Process Γ → Process Γ
+    _⦅_⦆_ : Var Γ → (b : Bnd) → Process (Γ ,- b) → Process Γ
+    _⟨_⟩_ : Var Γ → Var Γ → Process Γ → Process Γ
 
 module Raw where
 
@@ -61,7 +61,7 @@ module Scoped where
   module Scoped = Syntax.Process p
   Scoped = Syntax.Process p
 
-  pattern new_ P = Syntax.⦅new_⦆_ _ P
+  pattern υ_ P = Syntax.⦅υ_⦆_ _ P
   pattern _⦅⦆_ x P = Syntax._⦅_⦆_ x _ P
 
 module Conversion where
@@ -81,8 +81,8 @@ module Conversion where
 
   raw→scoped : ∀ {n} → Vec String n → Raw tt → Maybe (Scoped n)
   raw→scoped ctx 𝟘                              = just 𝟘
-  raw→scoped ctx (⦅new b ⦆ P)                   = do P' ← raw→scoped (b ∷ ctx) P
-                                                     just (new P')
+  raw→scoped ctx (⦅υ b ⦆ P)                     = do P' ← raw→scoped (b ∷ ctx) P
+                                                     just (υ P')
   raw→scoped ctx (P ∥ Q)                        = do P' ← raw→scoped ctx P
                                                      Q' ← raw→scoped ctx Q
                                                      just (P' ∥ Q')

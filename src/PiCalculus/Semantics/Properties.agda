@@ -29,7 +29,7 @@ private
 lift-lower : (i : Fin (suc n)) (P : Scoped (suc n)) (uP : Unused i P)
            → lift i (lower i P uP) ≡ P
 lift-lower i 𝟘 uP = refl
-lift-lower i (new P) uP
+lift-lower i (υ P) uP
   rewrite lift-lower (suc i) P uP = refl
 lift-lower i (P ∥ Q) (uP , uQ)
   rewrite lift-lower i P uP
@@ -106,7 +106,7 @@ swapFin-swapFin i x | no ¬p | no ¬q | no ¬r | no ¬s = refl
 
 swap-swap : ∀ (i : Fin n) (P : Scoped (suc n)) → swap i (swap i P) ≡ P
 swap-swap i 𝟘 = refl
-swap-swap i (new P) rewrite swap-swap (suc i) P = refl
+swap-swap i (υ P) rewrite swap-swap (suc i) P = refl
 swap-swap i (P ∥ Q) rewrite swap-swap i P | swap-swap i Q = refl
 swap-swap i (x ⦅⦆ P) rewrite swapFin-swapFin i x | swap-swap (suc i) P = refl
 swap-swap i (x ⟨ y ⟩ P) rewrite swapFin-swapFin i x | swapFin-swapFin i y | swap-swap i P = refl

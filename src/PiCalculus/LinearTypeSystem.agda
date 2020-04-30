@@ -98,10 +98,10 @@ data _∝_⊢_⊠_ : PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set whe
   end : γ ∝ Γ ⊢ 𝟘 ⊠ Γ
 
   -- Note (μ , μ): the created channel is balanced
-  chan : (t : Type) (m : Carrier idx' ²) (μ : Carrier idx)
+  chan : (t : Type) {idx' : Idx} (m : Carrier idx' ²) {idx : Idx} (μ : Carrier idx)
        → γ -, C[ t ∝ m ] ∝ Γ -, (μ , μ) ⊢ P     ⊠ Δ -, ℓ∅
        -----------------------------------------------------
-       → γ               ∝ Γ            ⊢ new P ⊠ Δ
+       → γ               ∝ Γ            ⊢ υ P ⊠ Δ
 
   recv : {t : Type} {m : (Carrier idx') ²}
        → (x : γ      ∝ Γ       ∋[ i ] C[ t ∝ m ] ∝ ℓᵢ {idx} ⊠ Ξ)
@@ -120,3 +120,6 @@ data _∝_⊢_⊠_ : PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set whe
        → γ ∝ Δ ⊢ Q     ⊠ Ξ
        -------------------
        → γ ∝ Γ ⊢ P ∥ Q ⊠ Ξ
+
+_∝[_]_⊢_⊠_ : PreCtx n → (idxs : Idxs n) → Ctx idxs → Scoped n → Ctx idxs → Set
+γ ∝[ idxs ] Γ ⊢ P ⊠ Δ = _∝_⊢_⊠_ {idxs = idxs} γ Γ P Δ
