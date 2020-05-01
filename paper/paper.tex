@@ -257,39 +257,39 @@ Some constructor names are overloaded --- they and disambiguated by context.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 \label{syntax}
+We let $x, y,\ldots$ range over \emph{channel names} or \emph{variables} and
+$P, Q,\ldots$ over processes.
 The syntax of the \picalc{} \cite{Sangio01} is given by the following grammar.
-We let $x, y,\ldots$ denote channel \emph{names} and
-$P, Q,\ldots$ denote processes.
 \begin{equation*}
   \begin{split}
     P,Q ::=      & \; \PO       &\text{(terminated process)}  \\
-                |& \; (\new{}x)\  P   & \text{(restriction)} \\
+                |& \; (\new{}x)  P   & \text{(restriction)} \\
                 |& \; \comp{P}{Q}  & \text{(parallel composition)} \\
-                |& \; \recvp{x}{y}.P  & \text{(receive)} \\
-                |& \; \sendp{x}{y}.P   &\text{(send)}
+                |& \; \recvp{x}{y}.P  & \text{(input)} \\
+                |& \; \sendp{x}{y}.P   &\text{(output)}
   \end{split}
 \end{equation*}
+Process $\PO$ denotes the terminated process, where no operations can further occur.
+Process $(\new{}x)P$ is the restriction process where channel $x$ is created new and is bound with scope $P$.
+Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
+Processes $\recvp{x}{y}.P$ and $\sendp{x}{y}.P$ denote respectively the input and output processes of a variable/channel $y$ over a channel $x$, with continuation $P$.
 
-In the \picalc{} both scope restriction and input introduce abstractions.
-The bodies of these constructs need a way of referring to their argument.
-Using names as variable references is a popular option amongst humans.
-However, names are cumbersome to mechanize: inserting a new variable into a context means proving that the name of such variable is different to all other variable names in context.
-Moreover, names are of no significance to machines whatsoever.
-
-The idea de Bruijn had \cite{} was to use a natural number $n$ (aka \emph{index}) to refer to the variable introduced $n$ binders ago --- and to have binders no longer introduce names.
+Scope restriction $(\new{}x)P$ and input $\recvp{x}{y}.P$ both introduce bound names in $P$.
+In order to mechanise the \picalc{} syntax in Agda, we need a way to deal with bound names in these continuation processes.
+Channel names are cumbersome to mechanise: inserting a new variable into a context means proving that the name of such variable is different to all other variable names in context.
+Instead we adopt de Bruijn indices \cite{} where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
+\todo{rewrite the sytanx below, following the syntax above}
 \begin{example}
 \hfill{}\\
 The \picalc{} term \hfill{} $(\textbf{new} \; x) (x ( y ) . y \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new} \; y) (x \langle y \rangle . y ( z ) .\mathbf{0}))$ \\ is represented as \hfill{} $(\textbf{new}) (0 () . 0 \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new}) (1 \langle 0 \rangle . 0 () . \mathbf{0}))$.
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
-Humans may find this confusing.
-There is however no reason not to annotate these indices with the original names bestowed upon them by humans.
-Machines can then manipulate references mechanically whilst using names to present terms to humans.
 
 A variable occurring under $n$ abstractions has $n$ possible variables to refer to.
 References outside of that range are meaningless.
 It is useful to rule out these nonsensical terms syntactically.
-In Figure \ref{fig:var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
+\todo{replace ref with autoref everywhere...}
+In  \autoref{fig:var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -312,7 +312,7 @@ In Figure \ref{fig:var} we do so by introducing the indexed family of types $\Va
 
 Every time we go under a binder, the number of binders a variable might refer to increments by one.
 To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-As shown in Figure \ref{fig:syntax}, we increase the \emph{depth} counter every time we create a new channel or receive some input.
+Figure \ref{fig:syntax} shows the syntax of \picalc{} in Agda. We increase the \emph{depth} counter by 1 in channel restriction and input processes.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -331,15 +331,13 @@ As shown in Figure \ref{fig:syntax}, we increase the \emph{depth} counter every 
               |& \; \send{\Var_n}{\Var_n}\Process_n
 \end{split}
 \end{equation*}
-\caption{Well-scoped grammar using de Bruijn indices}
+\caption{Well-scoped grammar for \picalc{} using de Bruijn indices}
 \label{fig:syntax}
 \end{figure}
 
 Using type-level de Bruijn indices makes our syntax well-scoped by construction --- the semantics of our language can now be defined on the totality of the syntax.
-User-friendliness can still be recovered through a function that converts processes with named variables into (possibly) processes with indexed variables.
-This function recursively traverses processes, keeping track of what name is associated with each index.
-If the process is ill-scoped, the function returns nothing.
-To present things to the user, we substitute indices by their related names.
+In order to make the de Bruijn indices representation more human-readable, we can annotate these indices with the original channel names.
+Machines can then manipulate references mechanically whilst using channel names to present \picalc{} terms back to humans.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
