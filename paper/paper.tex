@@ -196,14 +196,14 @@ While linearity is needed for type safety, gradual types and shared types are ne
 Our contributions are the following:
 \begin{itemize}
 \item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
-  Section \S \ref{syntax} uses type level de Bruijn indices \cite{} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
-  Section \S \ref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
+  \autoref{syntax} uses type level de Bruijn indices \cite{} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
+  \autoref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
   This operational semantics is given as a reduction relation on processes.
   The reduction relation tracks at the type level what channel the communication occurs on, so that this information can then be used to state subject reduction --- ak-a type preservation.
   It is also defined modulo structural congruence --- a relation that acts as a quotient type that gets rid of the unecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
   \item \textbf{Leftover typing for the \picalc{}, with linear, gradual and shared types}:
-  Section \S \ref{type-system} provides the type system for a resource-aware \picalc{}.
+  \autoref{type-system} provides the type system for a resource-aware \picalc{}.
   The type system is \emph{resource-aware} in that it allows the user to provide a resource-aware algebra that is then applied to the type-system.
   Linear types, gradual types and shared types are all instances of such a resource-aware algebra too.
   Any \emph{partial commutative monoid} that is cancellative and has a minimal element is a valid such algebra.
@@ -215,7 +215,7 @@ Our contributions are the following:
   These technique renders explicit context splits unecessary.
 
   \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
-  Section \S \ref{type-safety} builds on several theorems to proof subject reduction for our type system.
+  \autoref{type-safety} builds on several theorems to proof subject reduction for our type system.
   Here too, leftover typing renders the proofs for some of these lemmas straightforward, while for others it makes it possible to state them in the first place.
   We prove \textbf{framing} (well-typedness is independent of the unused resources of a process), \textbf{weakening} (new variables that are added to both the input and output usage context preserve well-typedness), and \textbf{strengthening} (removing the variables that are unused by a process preserves well-typedness).
   We use these to prove \textbf{subject congruence} (structural congruence rules can be freely applied while preserving well-typedness) and \textbf{substitution} (a variable can be substituted for another as long as this other variable is capable of doing everything the original one did), and use these to prove \textbf{subject reduction} (a well-typed process that reduces will still be well-typed).
@@ -233,7 +233,7 @@ Our contributions are the following:
   \begin{mathpar}
     \datatype
     { }
-    {\type{\N} : \Set}
+    {\type{\N} : et}
     \; \textsc{Nat}
 
     \inferrule
@@ -249,7 +249,7 @@ Our contributions are the following:
 
 Data type definitions use double lines and index-free synonyms as rule names (for ease of reference).
 We otherwise use the constructor name as the name of a typing rule.
-Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
+Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $et$.
 Implicit arguments are mentioned by type definitions but omitted in constructors.
 $\type{TYPES}$ are in blue and uppercased (with indices as subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red, and variables and functions in black.
 Some constructor names are overloaded --- they and disambiguated by context.
@@ -295,7 +295,7 @@ In  \autoref{fig:var} we do so by introducing the indexed family of types $\Var_
 \begin{mathpar}
   \datatype
   {n : \N}
-  {\Var_n : \Set}
+  {\Var_n : et}
   \; \textsc{Var}
 
   \inferrule
@@ -312,13 +312,13 @@ In  \autoref{fig:var} we do so by introducing the indexed family of types $\Var_
 
 Every time we go under a binder, the number of binders a variable might refer to increments by one.
 To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-Figure \ref{fig:syntax} shows the syntax of \picalc{} in Agda. We increase the \emph{depth} counter by 1 in channel restriction and input processes.
+\autoref{fig:syntax} shows the syntax of \picalc{} in Agda. We increase the \emph{depth} counter by 1 in channel restriction and input processes.
 
 \begin{figure}[h]
 \begin{mathpar}
   \datatype
   {n : \N}
-  {\Process_n : \Set}
+  {\Process_n : et}
   \; \textsc{Process}
 \end{mathpar}
   
@@ -354,7 +354,7 @@ There are several ways around this, a structural congruence relation being one o
 \label{structural-congruence}
 
 Structural congruence is a congruent equivalence relation on processes.
-Figure \ref{fig:struct-cong-base} lists the base cases of structural congruence.
+\autoref{fig:struct-cong-base} lists the base cases of structural congruence.
 The type $\Unused_i \; Q$ is an inductive proof that witnesses that the variable index $i$ does not appear nor in the inputs nor in the outputs of $Q$.
 The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
 Finally, $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
@@ -364,7 +364,7 @@ In all three, $i$ is incremented every time we go under a binder.
 \begin{mathpar}
   \datatype
   { }
-  {P \eqeq Q : \Set}
+  {P \eqeq Q : et}
   \; \textsc{StructCong}
 
   \inferrule
@@ -412,8 +412,8 @@ In all three, $i$ is incremented every time we go under a binder.
 \end{proof}
 
 Structural congruence is a congruent equivalence relation.
-As such, rewrites can happen anywhere inside a process, and are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{fig:struct-cong}.
-In \S \ref{subject-congruence} we prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then so is $Q$.
+As such, rewrites can happen anywhere inside a process, and are closed under reflexivity, symmetry and transitivity as shown in \autoref{fig:struct-cong}.
+In  \autoref{subject-congruence} we prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then so is $Q$.
 In the transitivity case, we must show that if $P$ is structurally congruent to $Q$ and $Q$ is to $R$, and $P$ is well-typed, then so is $R$.
 To do so, we need to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
 To show the typechecker that the doubly recursive call terminates we index the equivalence relation $=$ by a type $\Rec$ that models the structure of the recursion.
@@ -422,7 +422,7 @@ To show the typechecker that the doubly recursive call terminates we index the e
 \begin{mathpar}
   \datatype
   { }
-  {\Rec : \Set}
+  {\Rec : et}
   \; \textsc{Rec}
 
   \inferrule
@@ -439,7 +439,7 @@ To show the typechecker that the doubly recursive call terminates we index the e
   
   \datatype
   {P \, Q : \Process_n \\ r : \Rec}
-  {P \eq{r} Q : \Set}
+  {P \eq{r} Q : et}
   \; \textsc{Equals}
 
   \inferrule
@@ -482,13 +482,13 @@ To show the typechecker that the doubly recursive call terminates we index the e
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{operational-semantics}
 
-Figure \ref{fig:reduction} models the operational semantics of the \picalc{}.
+\autoref{fig:reduction} models the operational semantics of the \picalc{}.
 Processes put in parallel reduce when they communicate over a common channel.
 The receiving process substitutes references to its most immediate variable with references to the variable that is being sent by the process doing the output.
 The process is then \emph{lowered} --- all variable references are decreased by one.
 Reduction is closed under structural congruence and goes under parallel composition and scope restriction
 --- notably, not under input nor output, or otherwise the sequencing of actions would not be preserved.
-In \S \ref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
+In  \autoref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
 However, this reduction operation is effectful: it consumes the channel over which communication occurs.
 If this channel is external to $P$ (it resides in its context) then the context in which $Q$ is typed must change.
 To keep track of this information, we lift the index of the channel to the type level.
@@ -500,7 +500,7 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 \begin{mathpar}
   \datatype
   {n : \N}
-  {\Channel_n : \Set}
+  {\Channel_n : et}
   \; \textsc{Channel}
 
   \inferrule
@@ -513,7 +513,7 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 
   \datatype
   {i : \Channel_n \\ P \; Q : \Process_n}
-  {P \reduce{i} Q : \Set}
+  {P \reduce{i} Q : et}
   \; \textsc{Reduces}
 
   \inferrule
@@ -543,9 +543,9 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 Typing systems for the \picalc{} ensure that processes make a correct use of their channels.
 Typing judgments are of the form $\Gamma \vdash P$ (for some typing context $\Gamma$ and some process $P$) --- types only appear in the contexts of typing judgments.
 A resource-aware typing system for the \picalc{} must take resource usages into account, and needs an algebra on these --- a way of \emph{splitting} resources on parallel composition, of \emph{ticking off} resources on input and output.
-We characterise such an algebra in \S \ref{multiplicities}.
-We define independent typing contexts and usage contexts in \S \ref{contexts}.
-We provide a typing judgment for a resource-aware \picalc{} in \S \ref{leftover-typing}.
+We characterise such an algebra in  \autoref{multiplicities}.
+We define independent typing contexts and usage contexts in  \autoref{contexts}.
+We provide a typing judgment for a resource-aware \picalc{} in  \autoref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -559,14 +559,14 @@ Shared, gradual and linear usage types all satisfy these algebraic laws.
 \begin{nidefinition}
   The algebra on multiplicities must be \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associtive}, and \emph{commutative}, and needs a \emph{minimal neutral element}.
   It also requires a special element that is to be used to count inputs and outputs.
-  We define the laws of such a \emph{partial commutative monoid} as a type $\Quantifier_C$ on a carrier set $C$ in Figure \ref{fig:multiplicities} --- we use a terniary relation to model the monoidal operation.
+  We define the laws of such a \emph{partial commutative monoid} as a type $\Quantifier_C$ on a carrier set $C$ in \autoref{fig:multiplicities} --- we use a terniary relation to model the monoidal operation.
   
   \begin{figure}[h]
   \begin{equation}
   \begin{aligned}
     &\zero                  &:{} &                      &        & C \\
     &\one                   &:{} &                      &        & C \\
-    &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
+    &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to et \\
     &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
     &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
     &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
@@ -587,8 +587,8 @@ Shared, gradual and linear usage types all satisfy these algebraic laws.
   Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$.
 \end{note}
 
-Shared, gradual and linear multiplicity types can all be defined as an instance of the properties in Figure \ref{fig:multiplicities}.
-For examples of how these multiplicity types are used in typing derivations, refer to Example \ref{example-derivations}.
+Shared, gradual and linear multiplicity types can all be defined as an instance of the properties in \autoref{fig:multiplicities}.
+For examples of how these multiplicity types are used in typing derivations, refer to Example \autoref{example-derivations}.
 
 \begin{description}
   \item [Shared]
@@ -615,7 +615,7 @@ In a resource-aware \picalc{}, usage annotations are transformed as a result of 
 In our case, usage annotations do not depend on types, and keeping types and usages in separate contexts allows for a more modular approach in our proofs.
 
 \begin{nidefinition}
-  We define types (Figure \ref{fig:prectx}) as either unit types, base types or channel types.
+  We define types (\autoref{fig:prectx}) as either unit types, base types or channel types.
   The unit type $\unit$ serves as a proof of inhabitance for types (we can trivially obtain it), and is used to such end in subject congruence --- for the $\new \PO_{\suc n} \eqeq \PO_n$ rule.
   The base type $\base{n}$ uses a natural number $n$ to represent types.
   This natural number can then be interpreted as a type in the host language.
@@ -629,7 +629,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \begin{mathpar}
     \datatype
     { }
-    {\Type : \Set}
+    {\Type : et}
     \; \textsc{Type}
   
     \inferrule
@@ -648,7 +648,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \begin{mathpar}
     \datatype
     {n : \N}
-    {\PreCtx_n : \Set}
+    {\PreCtx_n : et}
     \; \textsc{PreCtx}
   
     \inferrule
@@ -666,15 +666,15 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
-  An indexed set of usage algebras is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it, as captured by Figure \ref{fig:indexed-multiplicities}.
+  An indexed set of usage algebras is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it, as captured by \autoref{fig:indexed-multiplicities}.
   We require the index type to be inhabited -- proving subject congruence on $\new \PO_{\suc n} \eqeq \PO_n$ requires an inhabited carrier set.
   
   \begin{figure}[h]
   \begin{equation}
   \begin{split}
-    &\field{IDX}          &:{} &\Set \\
+    &\field{IDX}          &:{} &et \\
     &\field{\exists IDX}  &:{} &\field{IDX} \\
-    &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
+    &\field{CARRIER}      &:{} &\field{IDX} \to et \\
     &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
   \end{split}
   \end{equation}
@@ -684,12 +684,12 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 \end{nidefinition}
 
 \begin{nidefinition}
-  A context of usages $\Ctx_{idxs}$ is indexed by a length-indexed context of indices $\Idxs_n$, as shown in Figure \ref{fig:ctx}.
+  A context of usages $\Ctx_{idxs}$ is indexed by a length-indexed context of indices $\Idxs_n$, as shown in \autoref{fig:ctx}.
   \begin{figure}[h]
   \begin{mathpar}
     \datatype
     {n : \N}
-    {\Idxs_n : \Set}
+    {\Idxs_n : et}
     \; \textsc{Idxs}
   
     \inferrule
@@ -704,7 +704,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
         
     \datatype
     {idxs : \Idxs_n}
-    {\Ctx_{idxs} : \Set}
+    {\Ctx_{idxs} : et}
     \; \textsc{Ctx}
   
     
@@ -743,10 +743,10 @@ Adopting this techinque has three main advantages:
     Such a proof could be obtained through automated search --- but it is better yet to avoid needing it.
     With leftover typing, we use the leftovers of $P$ to type $Q$.
   \item
-    Theorems like framing (\S \ref{framing}), weakening (\S \ref{weakening}) and strengthening (\S \ref{strengthening}) become suddenly stateable.
+    Theorems like framing ( \autoref{framing}), weakening ( \autoref{weakening}) and strengthening ( \autoref{strengthening}) become suddenly stateable.
 \end{itemize}
   
-We introduce two judgments: one for variable references (Definition \ref{def:varref}), one for processes (Definition \ref{def:types}).
+We introduce two judgments: one for variable references (\autoref{def:varref}), one for processes (\autoref{def:types}).
 Both of them combine a judgment on types and a judgment on usages.
 These could be kept separate, but doing so would risk incoherence: if typing derivations had any choice to make, the judgment on types could choose to do one thing while the judgment on usages chooses to do another.
 The constructions instroduced in this paper make the typing derivations completely syntax directed and render this problem inexistent, but we nevertheless choose to keep both judgments as one, for simplicity.
@@ -754,7 +754,7 @@ The constructions instroduced in this paper make the typing derivations complete
 \begin{nidefinition}
   \label{def:varref}
 
-  The \textsc{VarRef} relation presented in Figure \ref{fig:variable-references} is indexed by a typing context and an input and output usage context.
+  The \textsc{VarRef} relation presented in \autoref{fig:variable-references} is indexed by a typing context and an input and output usage context.
   In addition to these, it also keeps track of its position in the contexts, its type, and its usage annotation.
   
   The base case $\constr{here}$ asserts that $t$ is the most immediate type in typing context, and splits the most immediate usage annotation $x$ in the input context into the usage annotation $y$ the usage annotation $z$ in the output context.
@@ -781,7 +781,7 @@ The constructions instroduced in this paper make the typing derivations complete
         idx : \Idx \\\\
         y : \Carrier_{idx}^2} \\
       \Delta : \Ctx_{idxs}}
-    {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}
+    {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : et}
     \; \textsc{VarRef}
   
     \inferrule
@@ -808,7 +808,7 @@ The constructions instroduced in this paper make the typing derivations complete
 \begin{nidefinition}
   \label{def:types}
 
-  The typing relation \textsc{Types} presented in Figure \ref{fig:types} is indexed by a typing context, an input and an output usage context, and the process $P$ being typed.
+  The typing relation \textsc{Types} presented in \autoref{fig:types} is indexed by a typing context, an input and an output usage context, and the process $P$ being typed.
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -819,7 +819,7 @@ The constructions instroduced in this paper make the typing derivations complete
         \Gamma : \Ctx_{idxs}} \\
       P : \Process_n \\
       \Delta : \Ctx_{idxs}}
-    {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
+    {\types{\gamma}{\Gamma}{P}{\Delta} : et}
     \; \textsc{Types}
     
     \inferrule
@@ -934,7 +934,7 @@ These unused resources are not introduced as new variables -- the typing context
 \begin{nitheorem}
   \label{thm:framing}
   Let $P$ be a well-typed process from context $\Gamma_l$ to $\Xi_l$.
-  Then, per Lemma \ref{lm:types-op}, there exists some $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
+  Then, per \autoref{lm:types-op}, there exists some $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
@@ -1025,7 +1025,7 @@ Structural congruence is an equivalence relation that aims to overcome the seman
     \item
       The case $\constr{comp-assoc}$ is trivial because the encoding with leftover typing of the typing rules naturally preserves associativity.
     \item
-      The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (Theorem \ref{thm:framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
+      The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (\autoref{thm:framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
       The usage context on which $Q$ and $P$ coincide in $\comp{Q}{P}$ will no longer be the same.
     \item
       The case $\constr{comp-end}$ is trivial because in the typing rule for process $\PO$ the input and output contexts are one and the same.
@@ -1034,13 +1034,13 @@ Structural congruence is an equivalence relation that aims to overcome the seman
       In the opposite direction, we will need to instantiate the newly created channel to a concrete type and multiplicities.
       For this, we will use type $\unit$ and multiplicities $\lz$.
     \item
-      In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of Lemma $\ref{lm:types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
-      We then use strengthening (Theorem \ref{thm:strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
+      In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of $\autoref{lm:types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
+      We then use strengthening (\autoref{thm:strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
       In the reverse direction, we will weaken $P$ so that it can accept an additional variable.
-      We will then use Lemma \ref{lm:lower-lift} to show that lifting a lowered $P$ leaves $P$ unchanged.
+      We will then use \autoref{lm:lower-lift} to show that lifting a lowered $P$ leaves $P$ unchanged.
     \item
-      Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in Theorem \ref{thm:swapping}.
-      In the reverse direction, we will use swapping and then use Lemma \ref{lm:swap-swap} to show that swapping indices twice leaves $P$ unchanged.
+      Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in \autoref{thm:swapping}.
+      In the reverse direction, we will use swapping and then use \autoref{lm:swap-swap} to show that swapping indices twice leaves $P$ unchanged.
   \end{itemize}
 \end{proof}
 \todo{make sure constructor names in code coincide}
@@ -1067,7 +1067,7 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
 \end{nitheorem}
 \begin{proof}
   We need to proceed by induction on $P$, and to do so means going under scope restriction.
-  We use the generalised version in Theorem \ref{thm:subst-generalization} so that the variable that is being substituted is not $\constr{zero}$ but any variable $i$.
+  We use the generalised version in \autoref{thm:subst-generalization} so that the variable that is being substituted is not $\constr{zero}$ but any variable $i$.
   \todo{explain arguments}
 \end{proof}
 
@@ -1075,10 +1075,10 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
   \label{thm:subst-generalization}
 
   Let the variable that is being substituted be $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$ and the variable that it is being substituted with $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$.
-  As shown in Figure \ref{fig:subst}, the process that is being substituted will pivot from the input usage context $\Gamma_i$ to the input usage context $\Gamma_j$.
+  As shown in \autoref{fig:subst}, the process that is being substituted will pivot from the input usage context $\Gamma_i$ to the input usage context $\Gamma_j$.
   Let there be two \emph{adjustment} variables $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$ and $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$.
   The process that is being substituted will pivot from the output usage context $\Psi_i$ to the output usage context $\Psi_j$.
-  As shown in Figure \ref{fig:subst-alternative}, without this \emph{adjustment} composing the substitution of subprocesses is not at all trivial.
+  As shown in \autoref{fig:subst-alternative}, without this \emph{adjustment} composing the substitution of subprocesses is not at all trivial.
   Assume that $P$ uses all $m$ multiplicities at index $i$.
   To model this, require $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$ where index $i$ is $\lz$.
   The process that is typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$ will be typed $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$ after substitution.
@@ -1201,7 +1201,7 @@ Subject reduction (aka type preservation) relates the operational semantics and 
 In its usual form, it states that if $P$ reduces to $Q$ and $P$ is well-typed under context $\Gamma$, then $Q$ is well-typed under $\Gamma$ too.
 In the linear \picalc{} however, reduction \emph{is} meant to transform the context: each time communication occurs over a channel, that channel is exhausted.
 In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
-In \S \ref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
+In  \autoref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
 
 \begin{nilemma}
   \label{lm:comm-capable}
@@ -1223,8 +1223,8 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
   \hfill{}\\
   \begin{itemize}
     \item
-    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower_0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in Figure \ref{fig:subject-reduction:a}.
-    We start by using framing (Theorem \ref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel and then apply substitution (Theorem \ref{thm:substitution}) and strengthening (Theorem \ref{thm:strengthening}).
+    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower_0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in \autoref{fig:subject-reduction:a}.
+    We start by using framing (\autoref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel and then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
 
     \begin{figure}[h]
       \setlength{\mathindent}{0pt}
@@ -1270,11 +1270,11 @@ In \S \ref{semantics}, we made sure to lift the index of the communicating chann
     \item
     Reduction under scope restriction case splits on the channel $c$ on which communication occurs.
     If the channel is $\constr{internal}$ to the process subject reduction proceeds inductively.
-    If the channel is $\constr{external}\; \constr{zero}$ -- i.e. the channel that is being introduced by the scope restriction -- we use the Lemma \ref{lm:comm-capable} to subtract $\lio$ from the channel's multiplicity first, then apply the induction hypothesis.
+    If the channel is $\constr{external}\; \constr{zero}$ -- i.e. the channel that is being introduced by the scope restriction -- we use the \autoref{lm:comm-capable} to subtract $\lio$ from the channel's multiplicity first, then apply the induction hypothesis.
     If the channel is $\constr{external}\; (\suc i)$ subject reduction proceeds inductively.
 
     \item
-    Finally, in the $\constr{struct}$ case, we apply subject congruence (Theorem \ref{thm:subject-congruence}) and the induction hypothesis.
+    Finally, in the $\constr{struct}$ case, we apply subject congruence (\autoref{thm:subject-congruence}) and the induction hypothesis.
   \end{itemize}
 \end{proof}
 
