@@ -261,80 +261,94 @@ Some constructor names are overloaded --- they and disambiguated by context.
 \section{Syntax}
 \label{syntax}
 Let $x, y,\ldots$ range over \emph{variables} and $P, Q,\ldots$ over processes.
-The syntax of the \picalc{} \cite{Sangio01} is given by the following grammar.
-\begin{equation*}
-  \begin{split}
-    P,Q ::=      & \; \PO       &\text{(terminated process)}  \\
-                |& \; (\new{}x)  P   & \text{(restriction)} \\
-                |& \; \comp{P}{Q}  & \text{(parallel composition)} \\
-                |& \; \recvp{x}{y}. \; P  & \text{(input)} \\
-                |& \; \sendp{x}{y}. \; P   &\text{(output)}
-  \end{split}
-\end{equation*}
+The syntax of the \picalc{} \cite{Sangio01} is given by grammar in \autoref{fig:syntax-names}.
+
+\begin{figure}[h]
+  \begin{subfigure}{1\textwidth}
+    \begin{mathpar}
+      \datatype
+      {n : \N}
+      {\Var_n : \Set}
+      \; \textsc{Var}
+
+      \inferrule
+      {n : \N}
+      {\constr{0} : \Var_{\suc n}}
+
+      \inferrule
+      {x : \Var_n}
+      {\suc x : \Var_{\suc n}}
+
+      \datatype
+      {n : \N}
+      {\Process_n : \Set}
+      \; \textsc{Process}
+    \end{mathpar}
+  \end{subfigure}
+  \begin{subfigure}[t]{.2\textwidth}
+    \begin{equation*}
+      \begin{split}
+        P,Q ::=      & \; \PO                \\ 
+                    |& \; (\new{}x)  P       \\ 
+                    |& \; \comp{P}{Q}        \\ 
+                    |& \; \recvp{x}{y}. \; P \\ 
+                    |& \; \sendp{x}{y}. \; P 
+      \end{split}
+    \end{equation*}
+    \caption{Ill-scoped grammar with names}
+    \label{fig:syntax-names}
+  \end{subfigure}
+  \hspace{.1\textwidth}
+  \begin{subfigure}[t]{.7\textwidth}
+    \begin{equation*}
+      \begin{split}
+        \Process_n ::=& \; \PO_n               &&\text{(process termination)}   \\ 
+        |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
+        |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel composition)} \\ 
+        |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
+        |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
+      \end{split}
+    \end{equation*}
+    \caption{Well-scoped grammar with type-level de Bruijn indices}
+    \label{fig:syntax}
+  \end{subfigure}
+  \caption{}
+\end{figure}
+
 Process $\PO$ denotes the terminated process, where no operations can further occur.
 Process $(\new{}x)P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
-Processes $\recvp{x}{y}.P$ and $\sendp{x}{y}.P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
+Processes $\recvp{x}{y}. \; P$ and $\sendp{x}{y}. \; P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
 
-Scope restriction $(\new{}x)P$ and input $\recvp{x}{y}.P$ both introduce bound names in $P$.
+Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y}. \; P$ both introduce bound names in $P$.
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
+Furthermore, names do not guarantee that the syntax well-scoped.
 Instead, we use de Bruijn indices \cite{}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
 \begin{example}
-\hfill{}\\
-The \picalc{} term \hfill{} $(\new{}x ) (\comp {\recvp{x}{y} . \; \sendp{y}{\texttt{"Hello world!"}} . \; \PO} {(\new{} y) (\sendp{x}{y} . \; \recvp{y}{z} . \; \PO)})$ \\ is represented as \hfill{} $\new{} (\comp {\recv{0} . \; \send{0}{\texttt{"Hello world!"}} . \; \PO} {\new{} (\send{1}{0} . \; \recv{0} . \; \PO)})$.
+  \begin{equation*}
+    \begin{split}
+      & (\new{}x ) && (\comp {\recvp{x}{y} && . \; \sendp{y}{\texttt{"Hello world!"}} . \; \PO} {(\new{} y) && (\sendp{x}{y} . \; \recvp{y}{z} && . \; \PO)})
+      & \text{names}
+      \\
+      & \new{} && (\comp {\recv{0} && . \; \send{0}{\texttt{"Hello world!"}} . \; \PO} {\new{} && (\send{1}{0} . \; \recv{0} && . \; \PO)})
+      & \text{de Bruijn}
+      \\
+    \end{split}
+  \end{equation*}
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
 
 A variable occurring under $n$ abstractions has $n$ possible variables to refer to.
 References outside of that range are meaningless.
 It is useful to rule out these nonsensical terms syntactically.
-In  \autoref{fig:var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
+In \autoref{fig:syntax}, we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 
-\begin{figure}[h]
-\begin{mathpar}
-  \datatype
-  {n : \N}
-  {\Var_n : \Set}
-  \; \textsc{Var}
-
-  \inferrule
-  {n : \N}
-  {\constr{0} : \Var_{\suc n}}
-
-  \inferrule
-  {x : \Var_n}
-  {\suc x : \Var_{\suc n}}
-\end{mathpar}
-\caption{Types of size $n$}
-\label{fig:var}
-\end{figure}
 
 Every time we go under a binder, the number of binders a variable might refer to increments by one.
 To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
 We increase the \emph{depth} counter by 1 in channel restriction and input processes.
 \autoref{fig:syntax} showcases a \picalc{} syntax that is well-scoped by construction thanks to type-level de Bruijn indices.
-
-\begin{figure}[h]
-\begin{mathpar}
-  \datatype
-  {n : \N}
-  {\Process_n : \Set}
-  \; \textsc{Process}
-\end{mathpar}
-  
-\begin{equation*}
-\begin{split}
-  \Process_n ::=& \; \PO_n                    \\
-              |& \; \new{} \Process_{\suc n}          \\
-              |& \; \comp{\Process_n}{\Process_n}          \\
-              |& \; \recv{\Var_n}{}\Process_{\suc n} \\
-              |& \; \send{\Var_n}{\Var_n}\Process_n
-\end{split}
-\end{equation*}
-\caption{Well-scoped grammar for \picalc{} using de Bruijn indices}
-\label{fig:syntax}
-\end{figure}
 
 The semantics of our language can now be defined on the totality of the syntax.
 
