@@ -391,48 +391,6 @@ In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof that wit
 The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
 In $\constr{scope-comm}$ function $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
-
-
-
-Structural congruence is a congruent equivalence relation.
-As such, rewrites can happen anywhere inside a process, and are closed under reflexivity, symmetry and transitivity as shown by the first row of \autoref{fig:struct-cong}.
-The rest of the rules defines structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively restriction, composition, input and output.
-%In \S \ref{subject-congruence} we prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then so is $Q$.
-
-
-\begin{figure}[h]
-\begin{mathpar}
-  \inferrule
-  { }
-  {\constr{refl} : P \eq{\constr{zero}} P}
-
-  \inferrule
-  {eq : P \eq{r} Q}
-  {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
-
-  \inferrule
-  {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
-  {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
-
-  \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-scope} \; eq : \new P \eq{\constr{one} \; r} \new P'}
-
-  \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-comp} \; eq : \comp{P}{Q} \eq{\constr{one} \; r} \comp{P'}{Q}}
-
-  \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-recv} \; eq : \recv{x}P \eq{\constr{one} \; r} \recv{x}P'}
-
-  \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
-\end{mathpar}
-\caption{Structural congruence under contexts.}
-\label{fig:struct-cong}
-\end{figure}
   
 \subsection{Operational Semantics}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

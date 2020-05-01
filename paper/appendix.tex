@@ -1,6 +1,7 @@
 %% Appendix
 \section{Structural Congruence}
 \label{app:struct}
+
 \begin{nilemma}
   \label{lm:lower-lift}
   The function $lower_i \; P \; uP$ has an inverse $lift_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $lift_i \; (lower_i \; P \; uP) \equiv P$.
@@ -16,6 +17,11 @@
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
+
+
+Structural congruence is a congruent equivalence relation.
+As such, rewrites can happen anywhere inside a process, and are closed under reflexivity, symmetry and transitivity as shown by the first row of \autoref{fig:struct-cong1}.
+The rest of the rules defines structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively restriction, composition, input and output.
 
 \begin{figure}[h]
   \begin{mathpar}
@@ -80,3 +86,46 @@
 In the transitivity rule, we must show that if $P$ is structurally congruent to $Q$ and $Q$ is to $R$, and $P$ is well-typed, then so is $R$.
 To do so, we need to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
 To show the typechecker that the doubly recursive call terminates we index the equivalence relation $=$ by a type $\Rec$ that models the structure of the recursion.
+
+\section{Operational Semantics}
+\label{app:os}
+
+\begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    {n : \N}
+    {\Channel_n : \Set}
+    \; \textsc{Channel}
+  
+    \inferrule
+    { }
+    {\constr{internal} : \Channel_n}
+  
+    \inferrule
+    {i : \Var_n}
+    {\constr{external} \; i : \Channel_n}
+  
+    \datatype
+    {i : \Channel_n \\ P \; Q : \Process_n}
+    {P \reduce{i} Q : \Set}
+    \; \textsc{Reduces}
+  
+    \inferrule
+    {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n}
+    {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower_0 \; (\subst{P}{j}{0})}{Q}}
+  
+    \inferrule
+    {red : P \reduce{i} P'}
+    {\constr{par} \; red : \comp{P}{Q} \reduce{i} \comp{P'}{Q}}
+  
+    \inferrule
+    {red : P \reduce{i} Q}
+    {\constr{res} \; red : \new P \reduce{dec\; i} \new Q}
+  
+    \inferrule
+    {eq : P = P' \\ red : P' \reduce{i} Q}
+    {\constr{struct} \; eq \; red : P \reduce{i} Q}
+  \end{mathpar}
+  \caption{Operational semantics indexed by the channel over which reduction occurs.}
+  \label{fig:reduction1}
+  \end{figure}
