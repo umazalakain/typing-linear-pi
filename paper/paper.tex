@@ -194,7 +194,7 @@ While linearity is needed for type safety, gradual types and shared types are ne
 \subsection{Contributions}
 Our contributions are the following:
 \begin{itemize}
-\item \textbf{Formalisation of the syntax and semantics of the \picalc{}}:
+\item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
   Section \S \ref{syntax} uses type level de Bruijn indices \cite{} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
   Section \S \ref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
   This operational semantics is given as a reduction relation on processes.
@@ -343,7 +343,6 @@ There are several ways around this, a structural congruence relation being one o
 \label{structural-congruence}
 
 Structural congruence is a congruent equivalence relation on processes.
-Any two structurally congruent processes are strongly bisimilar: they are can follow each other's reduction steps \cite{}.
 Figure \ref{fig:struct-cong-base} lists the base cases of structural congruence.
 The type $\Unused_i \; Q$ is an inductive proof that witnesses that the variable index $i$ does not appear nor in the inputs nor in the outputs of $Q$.
 The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
