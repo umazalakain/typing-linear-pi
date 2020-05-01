@@ -57,7 +57,7 @@
 \newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
 \newcommand{\sendp}[2]{#1 \; \constr{\langle} \; #2 \; \constr{\rangle} \;}
 \newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
-\newcommand{\recvp}[2]{#1 \; \constr{(}#2\constr{)} \;}
+\newcommand{\recvp}[2]{#1 \; \constr{(} \; #2 \; \constr{)} \;}
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
@@ -234,7 +234,7 @@ Our contributions are the following:
   \begin{mathpar}
     \datatype
     { }
-    {\type{\N} : et}
+    {\type{\N} : \Set}
     \; \textsc{Nat}
 
     \inferrule
@@ -250,7 +250,7 @@ Our contributions are the following:
 
 Data type definitions use double lines and index-free synonyms as rule names (for ease of reference).
 We otherwise use the constructor name as the name of a typing rule.
-Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $et$.
+Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned by type definitions but omitted in constructors.
 $\type{TYPES}$ are in blue and uppercased (with indices as subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red, and variables and functions in black.
 Some constructor names are overloaded --- they and disambiguated by context.
@@ -266,8 +266,8 @@ The syntax of the \picalc{} \cite{Sangio01} is given by the following grammar.
     P,Q ::=      & \; \PO       &\text{(terminated process)}  \\
                 |& \; (\new{}x)  P   & \text{(restriction)} \\
                 |& \; \comp{P}{Q}  & \text{(parallel composition)} \\
-                |& \; \recvp{x}{y}.P  & \text{(input)} \\
-                |& \; \sendp{x}{y}.P   &\text{(output)}
+                |& \; \recvp{x}{y}. \; P  & \text{(input)} \\
+                |& \; \sendp{x}{y}. \; P   &\text{(output)}
   \end{split}
 \end{equation*}
 Process $\PO$ denotes the terminated process, where no operations can further occur.
@@ -294,7 +294,7 @@ In  \autoref{fig:var} we do so by introducing the indexed family of types $\Var_
 \begin{mathpar}
   \datatype
   {n : \N}
-  {\Var_n : et}
+  {\Var_n : \Set}
   \; \textsc{Var}
 
   \inferrule
@@ -317,7 +317,7 @@ To propagate this information, we index processes according to their \emph{depth
 \begin{mathpar}
   \datatype
   {n : \N}
-  {\Process_n : et}
+  {\Process_n : \Set}
   \; \textsc{Process}
 \end{mathpar}
   
@@ -363,7 +363,7 @@ In all three, $i$ is incremented every time we go under a binder.
 \begin{mathpar}
   \datatype
   { }
-  {P \eqeq Q : et}
+  {P \eqeq Q : \Set}
   \; \textsc{StructCong}
 
   \inferrule
@@ -421,7 +421,7 @@ To show the typechecker that the doubly recursive call terminates we index the e
 \begin{mathpar}
   \datatype
   { }
-  {\Rec : et}
+  {\Rec : \Set}
   \; \textsc{Rec}
 
   \inferrule
@@ -438,7 +438,7 @@ To show the typechecker that the doubly recursive call terminates we index the e
   
   \datatype
   {P \, Q : \Process_n \\ r : \Rec}
-  {P \eq{r} Q : et}
+  {P \eq{r} Q : \Set}
   \; \textsc{Equals}
 
   \inferrule
@@ -499,7 +499,7 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 \begin{mathpar}
   \datatype
   {n : \N}
-  {\Channel_n : et}
+  {\Channel_n : \Set}
   \; \textsc{Channel}
 
   \inferrule
@@ -512,7 +512,7 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 
   \datatype
   {i : \Channel_n \\ P \; Q : \Process_n}
-  {P \reduce{i} Q : et}
+  {P \reduce{i} Q : \Set}
   \; \textsc{Reduces}
 
   \inferrule
@@ -628,7 +628,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \begin{mathpar}
     \datatype
     { }
-    {\Type : et}
+    {\Type : \Set}
     \; \textsc{Type}
   
     \inferrule
@@ -647,7 +647,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \begin{mathpar}
     \datatype
     {n : \N}
-    {\PreCtx_n : et}
+    {\PreCtx_n : \Set}
     \; \textsc{PreCtx}
   
     \inferrule
@@ -688,7 +688,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \begin{mathpar}
     \datatype
     {n : \N}
-    {\Idxs_n : et}
+    {\Idxs_n : \Set}
     \; \textsc{Idxs}
   
     \inferrule
@@ -703,7 +703,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
         
     \datatype
     {idxs : \Idxs_n}
-    {\Ctx_{idxs} : et}
+    {\Ctx_{idxs} : \Set}
     \; \textsc{Ctx}
   
     
@@ -780,7 +780,7 @@ The constructions instroduced in this paper make the typing derivations complete
         idx : \Idx \\\\
         y : \Carrier_{idx}^2} \\
       \Delta : \Ctx_{idxs}}
-    {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : et}
+    {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}
     \; \textsc{VarRef}
   
     \inferrule
@@ -818,7 +818,7 @@ The constructions instroduced in this paper make the typing derivations complete
         \Gamma : \Ctx_{idxs}} \\
       P : \Process_n \\
       \Delta : \Ctx_{idxs}}
-    {\types{\gamma}{\Gamma}{P}{\Delta} : et}
+    {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
     \; \textsc{Types}
     
     \inferrule
