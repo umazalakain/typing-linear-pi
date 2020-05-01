@@ -348,7 +348,7 @@ We introduce the operational semantics for the \picalc{}, starting with structur
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{structural-congruence}
 
-The complete structural congruence is given in \autoref{app:struct}.
+Structural congruence $\eqeq$ is fully defined in \autoref{app:struct}.
 \autoref{fig:struct-cong-base} lists the base cases.
 
 \todo{remove space between inferrules}
@@ -387,26 +387,29 @@ The complete structural congruence is given in \autoref{app:struct}.
 \label{fig:struct-cong-base}
 \end{figure}
 
+The first three rules on $\constr{comp}$ state respectively, associativity, symmetry, and $\PO$ as the neutral element for parallel composition.
+The last three rules on $\constr{scope}$ state respectively, garbage collection, scope extrusion and commutativity of restrictions.
+
 In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof that witnesses that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
 The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
 In $\constr{scope-comm}$ function $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
-\subsection{Operational Semantics}
+\subsection{Reduction Relation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{operational-semantics}
 
-The operational semantics of the \picalc{} is defined via a reduction relation in \autoref{fig:reduction}.
+The operational semantics of the \picalc{} is defined via a reduction relation $\reduce{}$ in \autoref{fig:reduction}.
 In rule $\constr{comm}$, processes in parallel reduce when they communicate over the same index ${i}$.
 The input process $\recv{i}P$ substitutes in $P$ references to the most immediate variable placeholder with references to the variable sent by the output process $\send{i}{j}{Q}$.
 The continuation $\subst{P}{j}{0}$ is then \emph{lowered} --- all variable references are decreased by one.
-Reduction is closed under parallel composition (rule $\constr{par}$), scope restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
---- notably, not under input nor output, otherwise the sequencing of actions would not be preserved \cite{Sangio01}.
+Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
+--- notably, not under input or output, otherwise the sequencing of actions would not be preserved \cite{Sangio01}.
 %In  \autoref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
 
 \todo{this paragraph below is not clear}
-Notice that the reduction relation in \autoref{fig:reduction} is effectful: it consumes the channel over which communication occurs.
-If the channel is external to $P$ (it resides in its context) then the context in which $Q$ is typed must change.
+Notice that reduction is effectful: it consumes the channel over which communication occurs.
+If the channel is $\constr{external}$ to $P$ (it resides in its typing context) then the context in which $Q$ is typed must change.
 To keep track of this information, we lift the index of the channel to the type level.
 We use a $dec$ function to decrement the index of the channel every time we come out of a binder.
 This function saturates at $\constr{internal}$ --- meaning communication happens internally to the process.
