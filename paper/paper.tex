@@ -348,7 +348,7 @@ In \autoref{fig:syntax}, we do so by introducing the indexed family of types $\V
 Every time we go under a binder, the number of binders a variable might refer to increments by one.
 To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
 We increase the \emph{depth} counter by 1 in channel restriction and input processes.
-\autoref{fig:syntax} showcases a \picalc{} syntax that is well-scoped by construction thanks to type-level de Bruijn indices.
+\autoref{fig:syntax} showcases a \picalc{} syntax that is well-scoped by construction using type-level de Bruijn indices.
 
 The semantics of our language can now be defined on the totality of the syntax.
 
@@ -417,7 +417,7 @@ In rule $\constr{comm}$, parallel processes reduce when they communicate over a 
 As a result of that communication, the continuation of the input process $P$ gets all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
 After substitution, $\subst{P}{j}{0}$ is \emph{lowered} --- all variable references are decreased by one.
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
---- notably, not under input or output, otherwise the sequencing of actions would not be preserved \cite{Sangio01}.
+--- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
 We keep track of the channel over which communication occurs so that we can state subject reduction.
 We use a $dec$ function to decrement the index of this channel every time we come out of a binder.
@@ -468,67 +468,49 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 \section{Resource-aware Typing System}
 \label{type-system}
 
-A resource-aware typing system for the \picalc{} must take resource usages into account, and needs an algebra on these --- a way of \emph{splitting} resources on parallel composition, of \emph{ticking off} resources on input and output.
-We characterise such an algebra in  \autoref{multiplicities}.
-We define independent typing contexts and usage contexts in  \autoref{contexts}.
-We provide a typing system with leftovers for a resource-aware \picalc{} in  \autoref{leftover-typing}.
+We characterise a usage algebra for our typing system in \autoref{multiplicities}.
+This algebra defines the way in which resources are \emph{split} on parallel composition; the way in which resources are \emph{consumed} on input and output.
+We then define typing and usage contexts in \autoref{contexts}.
+We provide a typing system for a resource-aware \picalc{} in \autoref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{multiplicities}
 
-In the linear \picalc{} each channel has an input or an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
-We generalise multiplicities by defining an algebra such that linear, gradual and shared types all satisfy these algebraic laws.
+In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
+We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types.
 
-\todo{we haven't introduced the forall and implicit syntax}
 \begin{nidefinition}
-  The algebra on multiplicities must be \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associtive}, and \emph{commutative}, and needs a \emph{minimal neutral element}.
-  It also requires a special element that is to be used to count inputs and outputs.
-  We define the laws of such a \emph{partial commutative monoid} as a type $\Quantifier_C$ on a carrier set $C$ in \autoref{fig:multiplicities} --- we use a terniary relation to model the monoidal operation.
-  
-  \begin{figure}[h]
-  \begin{equation}
-  \begin{aligned}
-    &\zero                  &:{} &                      &        & C \\
-    &\one                   &:{} &                      &        & C \\
-    &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to et \\
-    &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
-    &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-    &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-    &\field{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-    &\field{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
-    &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-    &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
-  \end{aligned}
-  \end{equation}
-  \caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid.}
-  \label{fig:multiplicities}
-  \end{figure}
+  Our usage algebra is a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associtive}, and \emph{commutative}.
+  It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
+  It has an element $\one$ that is used to count inputs and outputs.
+  For a formal definition, refer to \autoref{fig:multiplicities} in \autoref{app:usage-algebra}.
 \end{nidefinition}
 
 \begin{note}
-  We will often work with input and output multiplicities as pairs.
-  We use the notation $\Carrier^2$ to stand for a $\Carrier \times \Carrier$ tuple, and $\op{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where all properties are trivially lifted.
+  We will often work with pairs of input and output multiplicities.
+  We use the notation $\Carrier^2$ to stand for a $\Carrier \times \Carrier$ tuple of input and output multiplicities, respectively.
+  We use $\op{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are trivially lifted.
   Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
 \end{note}
 
-Linear, gradual and shared types are all defined as an instance of the laws in \autoref{fig:multiplicities}.
-We illustrate these types in typing derivations in \autoref{example-derivations}.
+Linear, gradual and shared types are all defined as an instance of our usage algebra.
+Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
 \begin{description}
   \item [Linear]
-    The carrier $C$ is implemented as a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
+    The carrier is a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
     The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$), and is uninhabited in every other case.
     All other rules follow trivially.
 
     \item [Gradual]
-    The carrier $C$ is implemented as the type of natural numbers $\N$.
+    The carrier is the type of natural numbers $\N$.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
     The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
     All other rules follow trivially from the algebraic rules for the addition of natural numbers.
 
     \item [Shared]
-    The carrier $C$ is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
+    The carrier is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
     Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
     The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
     All other rules follow trivially.
@@ -598,9 +580,9 @@ In our case, usage annotations do not depend on types, and keeping types and usa
   \begin{figure}[h]
   \begin{equation}
   \begin{split}
-    &\field{IDX}          &:{} &et \\
+    &\field{IDX}          &:{} &\Set \\
     &\field{\exists IDX}  &:{} &\field{IDX} \\
-    &\field{CARRIER}      &:{} &\field{IDX} \to et \\
+    &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
     &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
   \end{split}
   \end{equation}
