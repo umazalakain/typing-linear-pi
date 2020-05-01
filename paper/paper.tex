@@ -54,9 +54,10 @@
 \newcommand{\PO}{\constr{\mathbf{0}}}
 \newcommand{\comp}[2]{#1 \; \constr{\parallel} \; #2}
 \newcommand{\new}{\constr{\boldsymbol{\nu}} \;}
-\newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}\newcommand{\sendp}[2]{#1 \constr{\langle} #2 \constr{\rangle}}
+\newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
+\newcommand{\sendp}[2]{#1 \; \constr{\langle} \; #2 \; \constr{\rangle} \;}
 \newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
-\newcommand{\recvp}[2]{#1 \constr{(}#2\constr{)}}
+\newcommand{\recvp}[2]{#1 \; \constr{(}#2\constr{)} \;}
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
@@ -278,17 +279,15 @@ Scope restriction $(\new{}x)P$ and input $\recvp{x}{y}.P$ both introduce bound n
 In order to mechanise the \picalc{} syntax in Agda, we need a way to deal with bound names in these continuation processes.
 Channel names are cumbersome to mechanise: inserting a new variable into a context means proving that the name of such variable is different to all other variable names in context.
 Instead we adopt de Bruijn indices \cite{} where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
-\todo{rewrite the sytanx below, following the syntax above}
 \begin{example}
 \hfill{}\\
-The \picalc{} term \hfill{} $(\textbf{new} \; x) (x ( y ) . y \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new} \; y) (x \langle y \rangle . y ( z ) .\mathbf{0}))$ \\ is represented as \hfill{} $(\textbf{new}) (0 () . 0 \langle \texttt{"Hello world!"} \rangle . \mathbf{0} \parallel (\textbf{new}) (1 \langle 0 \rangle . 0 () . \mathbf{0}))$.
+The \picalc{} term \hfill{} $(\new{}x ) (\comp {\recvp{x}{y} . \; \sendp{y}{\texttt{"Hello world!"}} . \; \PO} {(\new{} y) (\sendp{x}{y} . \; \recvp{y}{z} . \; \PO)})$ \\ is represented as \hfill{} $\new{} (\comp {\recv{0} . \; \send{0}{\texttt{"Hello world!"}} . \; \PO} {\new{} (\send{1}{0} . \; \recv{0} . \; \PO)})$.
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
 
 A variable occurring under $n$ abstractions has $n$ possible variables to refer to.
 References outside of that range are meaningless.
 It is useful to rule out these nonsensical terms syntactically.
-\todo{replace ref with autoref everywhere...}
 In  \autoref{fig:var} we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 
 \begin{figure}[h]
