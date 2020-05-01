@@ -159,6 +159,8 @@
 % -- join together by saying that is why we focus on linear pi calculus but we do more than just that: we have linear, gradual and shared types
 % -- put emphasis on mechanisation in Agda
 
+\todo{highlight that we can talk about a resource even if it has been exhausted (e.g. we can send 0 multiplicities of a channel over another channel}
+
 We live in a concurrent world where any given state is often computed interactively by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and build such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
 
@@ -1095,7 +1097,7 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
           If the input occurs on the variable that is being substituted, we derive $\opsquared{m}{\li}{l}$ for some $l$ and construct an arrow $\containsusage{\Xi_i}{i}{l}{\Gamma}$ (used for the inductive call).
           Similarly, we construct the arrows $\containsusage{\Gamma_j}{j}{\li}{\Xi_j}$ (used as the new channel on which input occurs) and $\containsusage{\Xi_j}{j}{l}{\Gamma}$ (used for the inductive call) for some $\Xi_j$.
         \item
-          If the input occurs on some variable $x$ other than the one that is being substituted, we construct the arrows $\containsusage{\Xi_i}{i}{m}{\Theta}$ (used for the inductive call) and $containsusage{\Gamma}{x}{\li}{\Theta}$ for some $\Theta$.
+          If the input occurs on some variable $x$ other than the one that is being substituted, we construct the arrows $\containsusage{\Xi_i}{i}{m}{\Theta}$ (used for the inductive call) and $\containsusage{\Gamma}{x}{\li}{\Theta}$ for some $\Theta$.
           We can then find $\Xi_j$ and construct the two arrows $\containsusage{\Gamma_j}{x}{\li}{\Xi_j}$ (used as the new channel on which input occurs) and $\containsusage{Xi_j}{j}{m}{\Theta}$ (used for the inductive call).
           From the fact that there exists a composition of arrows from $\Xi_i$ to $\Psi$, we can conclude that $\Theta$ is splitting $\Delta$ such that $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
           As $\lz$ is a minimal element, if $\Delta$ is $\lz$ at index $i$, then it must be $\lz$ at index $i$ for $\Delta_1$ and $\Delta_2$ as well.
@@ -1202,16 +1204,21 @@ In  \autoref{semantics}, we made sure to lift the index of the communicating cha
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
 
+\cite{Allais2018a}
+typing with leftovers
+bidirectional typing rules
+decidable typechecking and type inference
+limited to a linear type system
+framing, weakening, substitution
+soundness and completeness with respect to a sequent calculus for intuitionistic linear logic
+
+\cite{Thiemann2019}
+\cite{Rouvoet2020}
+\cite{Veltri2020}
+
 \cite{previous-work} polymorphic tokens, HOAS
 
-\cite{typing-with-leftovers}
-
-\cite{Higher-inductive-types-for-congruence}
-
 \cite{LTS-semantics}
-
-\cite{work-on-session-types}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Future Work}
