@@ -199,7 +199,7 @@ While linearity is needed for type safety, gradual types and shared types are ne
 Our contributions are the following:
 \begin{itemize}
 \item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
-  \autoref{syntax} uses type level de Bruijn indices \cite{} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
+  \autoref{syntax} uses type level de Bruijn indices \cite{deBruijn1972} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
   \autoref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
   This operational semantics is given as a reduction relation on processes.
   The reduction relation tracks at the type level what channel the communication occurs on, so that this information can then be used to state subject reduction --- ak-a type preservation.
@@ -324,7 +324,7 @@ Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y}. \; P$ both introduce
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
 Furthermore, names do not guarantee that the syntax well-scoped.
-Instead, we use de Bruijn indices \cite{}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
+Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
 \begin{example}
   \begin{equation*}
     \begin{split}
@@ -519,18 +519,16 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \subsection{Typing Contexts}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{contexts}
-In a resource-aware \picalc{}, usage annotations are transformed as a result of input and output; types however are preserved.
-In our case, usage annotations do not depend on types, and keeping types and usages in separate contexts allows for a more modular approach in our proofs.
+
+We keep typing contexts and usage contexts separate.
+The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
 
 \begin{nidefinition}
-  We define types (\autoref{fig:prectx}) as either unit types, base types or channel types.
-  The unit type $\unit$ serves as a proof of inhabitance for types (we can trivially obtain it), and is used to such end in subject congruence --- for the $\new \PO_{\suc n} \eqeq \PO_n$ rule.
-  The base type $\base{n}$ uses a natural number $n$ to represent types.
-  This natural number can then be interpreted as a type in the host language.
-  Using natural numbers instead of type universes is convenient: less universe polymorphism poluting specifications.
-  
-  The channel type $\channel{t}{x}$ uses $t$ to stand for the type of data that is being transmitted over the channel, and $x$ to stand for what usages of that data are transmitted. 
-  
+  \autoref{fig:prectx} defines types as either unit types, base types or channel types.
+  The unit type $\unit$ serves as a proof of inhabitance for types.
+  The base type $\base{n}$ uses natural numbers as placeholders for types --- the host language can interpret the former into the latter.
+  This is for convenience, so that there is less universe polymorphism poluting specifications.
+  The type $\channel{t}{x}$ of a channel determines what type of data and what usage annotations are sent over that channel.
   We keep track of types in a length-indexed \emph{pre-context} $\PreCtx_n$.
   
   \begin{figure}[h]
@@ -574,25 +572,14 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
-  An indexed set of usage algebras is a set of indices such that for every index there exists a carrier $C$ with a $\Quantifier_C$ algebra defined on it, as captured by \autoref{fig:indexed-multiplicities}.
-  We require the index type to be inhabited -- proving subject congruence on $\new \PO_{\suc n} \eqeq \PO_n$ requires an inhabited carrier set.
-  
-  \begin{figure}[h]
-  \begin{equation}
-  \begin{split}
-    &\field{IDX}          &:{} &\Set \\
-    &\field{\exists IDX}  &:{} &\field{IDX} \\
-    &\field{CARRIER}      &:{} &\field{IDX} \to \Set \\
-    &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{CARRIER}_i}
-  \end{split}
-  \end{equation}
-  \caption{Indexed set of partial commutative monoids.}
-  \label{fig:indexed-multiplicities}
-  \end{figure}
+  An indexed set of usage algebras is a set of indices together with an interpretation of indices into types, and an interpretation of indices into usage algebras on that type.
+  This indexed set must be non-empty.
+  Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:indexed-set-usage-algebra} for a formal definition.
 \end{nidefinition}
 
 \begin{nidefinition}
-  A context of usages $\Ctx_{idxs}$ is indexed by a length-indexed context of indices $\Idxs_n$, as shown in \autoref{fig:ctx}.
+  We keep track of usages annotations in a context $\Ctx_{idxs}$ that is indexed by a length-indexed context of indices $\Idxs_n$, as shown in \autoref{fig:ctx}.
+
   \begin{figure}[h]
   \begin{mathpar}
     \datatype
@@ -630,7 +617,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 \end{nidefinition}
 
 \begin{note}
-  We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with a common underlying context of indices.
+  We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have a common underlying context of indices.
   All the properties of the partial monoid are trivially lifted.
 \end{note}
 
@@ -648,7 +635,7 @@ Adopting this techinque has three main advantages:
     Instead, they use a variable reference type with both an input and an output usage context that encapsulates these transformations.
   \item
     Parallel composition no longer needs an explicit context splitting proof --- a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$ where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
-    Such a proof could be obtained through automated search --- but it is better yet to avoid needing it.
+    Such a proof could be obtained through automated search --- but it is better yet not to need it.
     With leftover typing, we use the leftovers of $P$ to type $Q$.
   \item
     Theorems like framing ( \autoref{framing}), weakening ( \autoref{weakening}) and strengthening ( \autoref{strengthening}) become suddenly stateable.
