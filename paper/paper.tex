@@ -459,20 +459,19 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 \section{Resource-aware Typing System}
 \label{type-system}
 
-Typing systems for the \picalc{} ensure that processes make a correct use of their channels.
-Typing judgments are of the form $\Gamma \vdash P$ (for some typing context $\Gamma$ and some process $P$) --- types only appear in the contexts of typing judgments.
+A typing context $\Gamma$ is a partial function from channel names to types.
+A typing judgment is of the form $\Gamma \vdash P$, reading ``process $P$ is well typed under the typing context $\Gamma$''.
 A resource-aware typing system for the \picalc{} must take resource usages into account, and needs an algebra on these --- a way of \emph{splitting} resources on parallel composition, of \emph{ticking off} resources on input and output.
 We characterise such an algebra in  \autoref{multiplicities}.
 We define independent typing contexts and usage contexts in  \autoref{contexts}.
-We provide a typing judgment for a resource-aware \picalc{} in  \autoref{leftover-typing}.
+We provide a typing system with leftovers for a resource-aware \picalc{} in  \autoref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{multiplicities}
 
-In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
-In this paper we generalize the type of multiplicities by defining an algebra any such type must comply with.
-Shared, gradual and linear usage types all satisfy these algebraic laws.
+In the linear \picalc{} each channel has an input or an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
+We generalise multiplicities by defining an algebra such that linear, gradual and shared types all satisfy these algebraic laws.
 
 \todo{we haven't introduced the forall and implicit syntax}
 \begin{nidefinition}
@@ -502,35 +501,38 @@ Shared, gradual and linear usage types all satisfy these algebraic laws.
 
 \begin{note}
   We will often work with input and output multiplicities as pairs.
-  We use the notation $\Carrier^2$ to stand for a $\Carrier \times \Carrier$ tuple, and $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where all properties are trivially lifted.
-  Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$.
+  We use the notation $\Carrier^2$ to stand for a $\Carrier \times \Carrier$ tuple, and $\op{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where all properties are trivially lifted.
+  Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
 \end{note}
 
-Shared, gradual and linear multiplicity types can all be defined as an instance of the properties in \autoref{fig:multiplicities}.
-For examples of how these multiplicity types are used in typing derivations, refer to Example \autoref{example-derivations}.
+\todo{note I've changed the order of presentation from linear to shared, check if it breaks anything!}
+Linear, gradual and shared types are all defined as an instance of the laws in \autoref{fig:multiplicities}.
+We illustrate these types in typing derivations in \autoref{example-derivations}.
 
 \begin{description}
-  \item [Shared]
-    The carrier $C$ is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
-    Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
-    The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
-    All other laws are trivially satisfied.
-  \item [Gradual]
-    The carrier $C$ is implemented as the type of natural numbers $\N$.
-    The element $\zero$ corresponds to 0, and $\one$ to 1.
-    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
-    All other rules follow trivially from the algebraic rules for the addition of naturals.
   \item [Linear]
     The carrier $C$ is implemented as a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
     The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$), and is uninhabited in every other case.
     All other rules follow trivially.
+
+    \item [Gradual]
+    The carrier $C$ is implemented as the type of natural numbers $\N$.
+    The element $\zero$ corresponds to 0, and $\one$ to 1.
+    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
+    All other rules follow trivially from the algebraic rules for the addition of natural numbers.
+
+    \item [Shared]
+    The carrier $C$ is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
+    Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
+    The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
+    All other rules follow trivially.
 \end{description}
 
-\subsection{Contexts}
+\subsection{Typing Contexts}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{contexts}
-
-In a resource-aware \picalc{}, usage annotations are transformed as a result of input and output; types howeverr are preserved.
+\todo{is usage annotation the same as multiplicities? if yes, just use the former as too many notions}
+In a resource-aware \picalc{}, usage annotations are transformed as a result of input and output; types however are preserved.
 In our case, usage annotations do not depend on types, and keeping types and usages in separate contexts allows for a more modular approach in our proofs.
 
 \begin{nidefinition}
@@ -1119,7 +1121,7 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
 Subject reduction (aka type preservation) relates the operational semantics and the typing system of a language.
 In its usual form, it states that if $P$ reduces to $Q$ and $P$ is well-typed under context $\Gamma$, then $Q$ is well-typed under $\Gamma$ too.
 In the linear \picalc{} however, reduction \emph{is} meant to transform the context: each time communication occurs over a channel, that channel is exhausted.
-In our case, and because we generalize linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
+In our case, and because we generalise linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
 In  \autoref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
 
 \begin{nilemma}
