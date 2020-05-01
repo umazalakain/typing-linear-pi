@@ -1,0 +1,82 @@
+%% Appendix
+\section{Structural Congruence}
+\label{app:struct}
+\begin{nilemma}
+  \label{lm:lower-lift}
+  The function $lower_i \; P \; uP$ has an inverse $lift_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $lift_i \; (lower_i \; P \; uP) \equiv P$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+  
+\begin{nilemma}
+  \label{lm:swap-swap}
+  The function $swap_i \; P$ is its own inverse: $swap_i \; (swap_i \; P) \equiv P$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+
+\begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    { }
+    {\Rec : \Set}
+    \; \textsc{Rec}
+  
+    \inferrule
+    { }
+    {\constr{zero} : \Rec}
+    
+    \inferrule
+    {r : \Rec}
+    {\constr{one} \; r : \Rec}
+  
+    \inferrule
+    {r \; s : \Rec}
+    {\constr{two} \; r \; s : \Rec}
+    
+    \datatype
+    {P \, Q : \Process_n \\ r : \Rec}
+    {P \eq{r} Q : \Set}
+    \; \textsc{Equals}
+  
+    \inferrule
+    {eq : P \eqeq Q}
+    {\constr{struct} \; eq : P \eq{\constr{zero}} Q}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-scope} \; eq : \new P \eq{\constr{one} \; r} \new P'}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-comp} \; eq : \comp{P}{Q} \eq{\constr{one} \; r} \comp{P'}{Q}}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-recv} \; eq : \recv{x}P \eq{\constr{one} \; r} \recv{x}P'}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
+  
+    \inferrule
+    { }
+    {\constr{refl} : P \eq{\constr{zero}} P}
+  
+    \inferrule
+    {eq : P \eq{r} Q}
+    {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
+  
+    \inferrule
+    {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
+    {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
+  \end{mathpar}
+  \caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.}
+  \label{fig:struct-cong1}
+  \end{figure}
+
+In the transitivity rule, we must show that if $P$ is structurally congruent to $Q$ and $Q$ is to $R$, and $P$ is well-typed, then so is $R$.
+To do so, we need to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
+To show the typechecker that the doubly recursive call terminates we index the equivalence relation $=$ by a type $\Rec$ that models the structure of the recursion.
