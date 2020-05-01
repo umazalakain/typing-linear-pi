@@ -396,15 +396,17 @@ In all the above, $i$ is incremented every time we go under a binder.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{operational-semantics}
 
-\autoref{fig:reduction} models the operational semantics of the \picalc{}.
-Processes put in parallel reduce when they communicate over a common channel.
-The receiving process substitutes references to its most immediate variable with references to the variable that is being sent by the process doing the output.
-The process is then \emph{lowered} --- all variable references are decreased by one.
-Reduction is closed under structural congruence and goes under parallel composition and scope restriction
---- notably, not under input nor output, or otherwise the sequencing of actions would not be preserved.
-In  \autoref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
-However, this reduction operation is effectful: it consumes the channel over which communication occurs.
-If this channel is external to $P$ (it resides in its context) then the context in which $Q$ is typed must change.
+The operational semantics of the \picalc{} is defined via a reduction relation in \autoref{fig:reduction}.
+In rule $\constr{comm}$, processes in parallel reduce when they communicate over the same index ${i}$.
+The input process $\recv{i}P$ substitutes in $P$ references to the most immediate variable placeholder with references to the variable sent by the output process $\send{i}{j}{Q}$.
+The continuation $\subst{P}{j}{0}$ is then \emph{lowered} --- all variable references are decreased by one.
+Reduction is closed under parallel composition (rule $\constr{par}$), scope restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
+--- notably, not under input nor output, otherwise the sequencing of actions would not be preserved \cite{Sangio01}.
+%In  \autoref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
+
+\todo{this paragraph below is not clear}
+Notice that the reduction relation in \autoref{fig:reduction} is effectful: it consumes the channel over which communication occurs.
+If the channel is external to $P$ (it resides in its context) then the context in which $Q$ is typed must change.
 To keep track of this information, we lift the index of the channel to the type level.
 We use a $dec$ function to decrement the index of the channel every time we come out of a binder.
 This function saturates at $\constr{internal}$ --- meaning communication happens internally to the process.
