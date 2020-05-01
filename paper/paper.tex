@@ -260,10 +260,8 @@ Some constructor names are overloaded --- they and disambiguated by context.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 \label{syntax}
-We let $x, y,\ldots$ range over \emph{channel names} or \emph{variables} and
-$P, Q,\ldots$ over processes.
+Let $x, y,\ldots$ range over \emph{variables} and $P, Q,\ldots$ over processes.
 The syntax of the \picalc{} \cite{Sangio01} is given by the following grammar.
-\todo{maybe put both syntaxes in two columns to save space}
 \begin{equation*}
   \begin{split}
     P,Q ::=      & \; \PO       &\text{(terminated process)}  \\
@@ -274,14 +272,14 @@ The syntax of the \picalc{} \cite{Sangio01} is given by the following grammar.
   \end{split}
 \end{equation*}
 Process $\PO$ denotes the terminated process, where no operations can further occur.
-Process $(\new{}x)P$ is the restriction process where channel $x$ is created new and is bound with scope $P$.
+Process $(\new{}x)P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
-Processes $\recvp{x}{y}.P$ and $\sendp{x}{y}.P$ denote respectively the input and output processes of a variable/channel $y$ over a channel $x$, with continuation $P$.
+Processes $\recvp{x}{y}.P$ and $\sendp{x}{y}.P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
 
 Scope restriction $(\new{}x)P$ and input $\recvp{x}{y}.P$ both introduce bound names in $P$.
-In order to mechanise the \picalc{} syntax in Agda, we need a way to deal with bound names in these continuation processes.
-Channel names are cumbersome to mechanise: inserting a new variable into a context means proving that the name of such variable is different to all other variable names in context.
-Instead we adopt de Bruijn indices \cite{} where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
+In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
+Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
+Instead, we use de Bruijn indices \cite{}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
 \begin{example}
 \hfill{}\\
 The \picalc{} term \hfill{} $(\new{}x ) (\comp {\recvp{x}{y} . \; \sendp{y}{\texttt{"Hello world!"}} . \; \PO} {(\new{} y) (\sendp{x}{y} . \; \recvp{y}{z} . \; \PO)})$ \\ is represented as \hfill{} $\new{} (\comp {\recv{0} . \; \send{0}{\texttt{"Hello world!"}} . \; \PO} {\new{} (\send{1}{0} . \; \recv{0} . \; \PO)})$.
@@ -314,7 +312,8 @@ In  \autoref{fig:var} we do so by introducing the indexed family of types $\Var_
 
 Every time we go under a binder, the number of binders a variable might refer to increments by one.
 To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-\autoref{fig:syntax} shows the syntax of \picalc{} in Agda. We increase the \emph{depth} counter by 1 in channel restriction and input processes.
+We increase the \emph{depth} counter by 1 in channel restriction and input processes.
+\autoref{fig:syntax} showcases a \picalc{} syntax that is well-scoped by construction thanks to type-level de Bruijn indices.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -337,9 +336,7 @@ To propagate this information, we index processes according to their \emph{depth
 \label{fig:syntax}
 \end{figure}
 
-Using type-level de Bruijn indices makes our syntax well-scoped by construction --- the semantics of our language can now be defined on the totality of the syntax.
-In order to make the de Bruijn indices representation more human-readable, we can annotate these indices with the original channel names.
-Machines can then manipulate references mechanically whilst using channel names to present \picalc{} processes back to humans.
+The semantics of our language can now be defined on the totality of the syntax.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
@@ -350,8 +347,8 @@ We introduce the operational semantics for the \picalc{}, starting with structur
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{structural-congruence}
 
-Structural congruence $\eqeq$ is fully defined in \autoref{app:struct}.
-\autoref{fig:struct-cong-base} lists the base cases.
+We define the base cases of a structural congruence relation \textsc{StructCong} in \autoref{fig:struct-cong-base}.
+Its congruent equivalence closure \textsc{Equals} is provided in \autoref{app:struct}.
 
 \todo{remove space between inferrules}
 \begin{figure}[h]
@@ -378,7 +375,7 @@ Structural congruence $\eqeq$ is fully defined in \autoref{app:struct}.
   {\constr{scope-end} : \new \PO_{\suc n} \eqeq \PO_n}
   
   \inferrule
-  {uQ : \Unused_0 \, Q}
+  {uQ : \Unused_0 \; Q}
   {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{lower_0 \; \; Q \; uQ}}
 
   \inferrule
@@ -389,31 +386,27 @@ Structural congruence $\eqeq$ is fully defined in \autoref{app:struct}.
 \label{fig:struct-cong-base}
 \end{figure}
 
-The first three rules on $\constr{comp}$ state respectively, associativity, symmetry, and $\PO$ as the neutral element for parallel composition.
-The last three rules on $\constr{scope}$ state respectively, garbage collection, scope extrusion and commutativity of restrictions.
+The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as the neutral element of parallel composition, respectively.
+The last three ($\constr{scope}-$*) state, garbage collection, scope extrusion and commutativity of restrictions, respectively.
 
-In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof that witnesses that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
+In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
 The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
-In $\constr{scope-comm}$ function $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
+In $\constr{scope-comm}$ the function $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
 \subsection{Reduction Relation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{operational-semantics}
 
-The operational semantics of the \picalc{} is defined via a reduction relation $\reduce{}$ in \autoref{fig:reduction}.
-In rule $\constr{comm}$, processes in parallel reduce when they communicate over the same index ${i}$.
-The input process $\recv{i}P$ substitutes in $P$ references to the most immediate variable placeholder with references to the variable sent by the output process $\send{i}{j}{Q}$.
-The continuation $\subst{P}{j}{0}$ is then \emph{lowered} --- all variable references are decreased by one.
+The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} indexed by the channel $i$ on which communication occurs (\autoref{fig:reduction}).
+In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel ${i}$.
+As a result of that communication, the continuation of the input process $P$ gets all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
+After substitution, $\subst{P}{j}{0}$ is \emph{lowered} --- all variable references are decreased by one.
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input or output, otherwise the sequencing of actions would not be preserved \cite{Sangio01}.
-%In  \autoref{subject-reduction} we prove that if $P$ reduces to $Q$ and $P$ is well-typed, so is $Q$.
 
-\todo{this paragraph below is not clear}
-Notice that reduction is effectful: it consumes the channel over which communication occurs.
-If the channel is $\constr{external}$ to $P$ (it resides in its typing context) then the context in which $Q$ is typed must change.
-To keep track of this information, we lift the index of the channel to the type level.
-We use a $dec$ function to decrement the index of the channel every time we come out of a binder.
+We keep track of the channel over which communication occurs so that we can state subject reduction.
+We use a $dec$ function to decrement the index of this channel every time we come out of a binder.
 This function saturates at $\constr{internal}$ --- meaning communication happens internally to the process.
 
 
@@ -461,8 +454,6 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
 \section{Resource-aware Typing System}
 \label{type-system}
 
-A typing context $\Gamma$ is a partial function from channel names to types.
-A typing judgment is of the form $\Gamma \vdash P$, reading ``process $P$ is well typed under the typing context $\Gamma$''.
 A resource-aware typing system for the \picalc{} must take resource usages into account, and needs an algebra on these --- a way of \emph{splitting} resources on parallel composition, of \emph{ticking off} resources on input and output.
 We characterise such an algebra in  \autoref{multiplicities}.
 We define independent typing contexts and usage contexts in  \autoref{contexts}.
@@ -507,7 +498,6 @@ We generalise multiplicities by defining an algebra such that linear, gradual an
   Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
 \end{note}
 
-\todo{note I've changed the order of presentation from linear to shared, check if it breaks anything!}
 Linear, gradual and shared types are all defined as an instance of the laws in \autoref{fig:multiplicities}.
 We illustrate these types in typing derivations in \autoref{example-derivations}.
 
@@ -533,7 +523,6 @@ We illustrate these types in typing derivations in \autoref{example-derivations}
 \subsection{Typing Contexts}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{contexts}
-\todo{is usage annotation the same as multiplicities? if yes, just use the former as too many notions}
 In a resource-aware \picalc{}, usage annotations are transformed as a result of input and output; types however are preserved.
 In our case, usage annotations do not depend on types, and keeping types and usages in separate contexts allows for a more modular approach in our proofs.
 
@@ -645,7 +634,7 @@ In our case, usage annotations do not depend on types, and keeping types and usa
 \end{nidefinition}
 
 \begin{note}
-  We lift the monoidal operation on multiplicity pairs $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on contexts of usages with the same underlying context of indices.
+  We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with a common underlying context of indices.
   All the properties of the partial monoid are trivially lifted.
 \end{note}
 
