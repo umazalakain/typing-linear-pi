@@ -574,7 +574,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
   An indexed set of usage algebras is a set of indices together with an interpretation of indices into types, and an interpretation of indices into usage algebras on that type.
   This indexed set must be non-empty.
-  Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:indexed-set-usage-algebra} for a formal definition.
+  Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:usage-algebra} for a formal definition.
 \end{nidefinition}
 
 \begin{nidefinition}
@@ -625,26 +625,23 @@ The former are preserved throughout a typing derivation; the latter are transfor
 \label{leftover-typing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-We make use \emph{leftover typing} \cite{}, an approach that, in addition to the usual typing context and input usage context, adds an extra output usage context to the typing rules.
-This output context contains the \emph{leftovers} of the process being typed --- its unused multiplicities.
-Crucially, the leftovers can then be used as an input to some other typing derivation.
-Adopting this techinque has three main advantages:
+We use \emph{leftover typing} \cite{Allais2018a} for our typing rules, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
+This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
+These leftovers can then be used as an input to another typing derivation.
+This techinque presents three main advantages:
 \begin{itemize}
   \item
-    The input and output actions no longer transform the usage context through functions.
-    Instead, they use a variable reference type with both an input and an output usage context that encapsulates these transformations.
+    The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgment with both an input and an output usage context.
   \item
-    Parallel composition no longer needs an explicit context splitting proof --- a proof $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$ where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
-    Such a proof could be obtained through automated search --- but it is better yet not to need it.
-    With leftover typing, we use the leftovers of $P$ to type $Q$.
+    The need for an extensional context splitting proof for parallel composition is eradicated.
+    Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
+    This could be obtained through automated search --- but it is better yet not to need it.
+    Leftover typing uses the leftovers of $P$ to type $Q$.
   \item
-    Theorems like framing ( \autoref{framing}), weakening ( \autoref{weakening}) and strengthening ( \autoref{strengthening}) become suddenly stateable.
+    New theorems (like framing (\autoref{framing}), weakening (\autoref{weakening}) and strengthening (\autoref{strengthening}) can suddenly be state.
 \end{itemize}
   
-We introduce two judgments: one for variable references (\autoref{def:varref}), one for processes (\autoref{def:types}).
-Both of them combine a judgment on types and a judgment on usages.
-These could be kept separate, but doing so would risk incoherence: if typing derivations had any choice to make, the judgment on types could choose to do one thing while the judgment on usages chooses to do another.
-The constructions instroduced in this paper make the typing derivations completely syntax directed and render this problem inexistent, but we nevertheless choose to keep both judgments as one, for simplicity.
+We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
 
 \begin{nidefinition}
   \label{def:varref}
@@ -797,21 +794,6 @@ The constructions instroduced in this paper make the typing derivations complete
   \end{lstlisting}
 \end{example}
 
-\begin{nilemma}
-  \label{lm:types-unused}
-  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, if the variable $i$ is unused within $P$, then $\Gamma$ at $i$ is equivalent to $\Xi$ at $i$.
-\end{nilemma}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:types-op}
-  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, there exists some $\Delta$ such that $\opctx{\Gamma}{\Delta}{\Xi}$.
-\end{nilemma}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type Safety}
