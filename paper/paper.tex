@@ -260,6 +260,7 @@ Some constructor names are overloaded --- they and disambiguated by context.
 We let $x, y,\ldots$ range over \emph{channel names} or \emph{variables} and
 $P, Q,\ldots$ over processes.
 The syntax of the \picalc{} \cite{Sangio01} is given by the following grammar.
+\todo{maybe put both syntaxes in two columns to save space}
 \begin{equation*}
   \begin{split}
     P,Q ::=      & \; \PO       &\text{(terminated process)}  \\
@@ -337,29 +338,21 @@ Figure \ref{fig:syntax} shows the syntax of \picalc{} in Agda. We increase the \
 
 Using type-level de Bruijn indices makes our syntax well-scoped by construction --- the semantics of our language can now be defined on the totality of the syntax.
 In order to make the de Bruijn indices representation more human-readable, we can annotate these indices with the original channel names.
-Machines can then manipulate references mechanically whilst using channel names to present \picalc{} terms back to humans.
+Machines can then manipulate references mechanically whilst using channel names to present \picalc{} processes back to humans.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 \label{semantics}
-
-In the \lambdacalc{} $\beta$-reduction operates on syntactically adjacent terms.
-In the \picalc{} however, the syntax introduces unnecessary distinctions
-(e.g. semantically, parallel composition is defined modulo associativity and commutativity).
-There are several ways around this, a structural congruence relation being one of the historical ones \cite{}.
-(Others include labeled transition systems \cite{} and higher inductive types \cite{}.)
+We introduce the operational semantics for the \picalc{}, starting with structural congruence.
 
 \subsection{Structural Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{structural-congruence}
 
-Structural congruence is a congruent equivalence relation on processes.
-Figure \ref{fig:struct-cong-base} lists the base cases of structural congruence.
-The type $\Unused_i \; Q$ is an inductive proof that witnesses that the variable index $i$ does not appear nor in the inputs nor in the outputs of $Q$.
-The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
-Finally, $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
-In all three, $i$ is incremented every time we go under a binder.
+The complete structural congruence is given in \autoref{app:struct}.
+Figure \ref{fig:struct-cong-base} lists the base cases.
 
+\todo{remove space between inferrules}
 \begin{figure}[h]
 \begin{mathpar}
   \datatype
@@ -395,56 +388,32 @@ In all three, $i$ is incremented every time we go under a binder.
 \label{fig:struct-cong-base}
 \end{figure}
 
-\begin{nilemma}
-  \label{lm:lower-lift}
-  The function $lower_i \; P \; uP$ has an inverse $lift_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $lift_i \; (lower_i \; P \; uP) \equiv P$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-  
-\begin{nilemma}
-  \label{lm:swap-swap}
-  The function $swap_i \; P$ is its own inverse: $swap_i \; (swap_i \; P) \equiv P$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
+In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof that witnesses that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
+The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
+In $\constr{scope-comm}$ function $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
+In all the above, $i$ is incremented every time we go under a binder.
+
+
 
 Structural congruence is a congruent equivalence relation.
-As such, rewrites can happen anywhere inside a process, and are closed under reflexivity, symmetry and transitivity as shown in Figure \ref{fig:struct-cong}.
-In \S \ref{subject-congruence} we prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then so is $Q$.
-In the transitivity case, we must show that if $P$ is structurally congruent to $Q$ and $Q$ is to $R$, and $P$ is well-typed, then so is $R$.
-To do so, we need to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
-To show the typechecker that the doubly recursive call terminates we index the equivalence relation $=$ by a type $\Rec$ that models the structure of the recursion.
+As such, rewrites can happen anywhere inside a process, and are closed under reflexivity, symmetry and transitivity as shown by the first row of Figure \ref{fig:struct-cong}.
+The rest of the rules defines structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively restriction, composition, input and output.
+%In \S \ref{subject-congruence} we prove that if two processes $P$ and $Q$ are structurally congruent and $P$ is well-typed, then so is $Q$.
+
 
 \begin{figure}[h]
 \begin{mathpar}
-  \datatype
-  { }
-  {\Rec : \Set}
-  \; \textsc{Rec}
-
   \inferrule
   { }
-  {\constr{zero} : \Rec}
-  
-  \inferrule
-  {r : \Rec}
-  {\constr{one} \; r : \Rec}
+  {\constr{refl} : P \eq{\constr{zero}} P}
 
   \inferrule
-  {r \; s : \Rec}
-  {\constr{two} \; r \; s : \Rec}
-  
-  \datatype
-  {P \, Q : \Process_n \\ r : \Rec}
-  {P \eq{r} Q : \Set}
-  \; \textsc{Equals}
+  {eq : P \eq{r} Q}
+  {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
 
   \inferrule
-  {eq : P \eqeq Q}
-  {\constr{struct} \; eq : P \eq{\constr{zero}} Q}
+  {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
+  {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
 
   \inferrule
   {eq : P \eq{r} P'}
@@ -461,20 +430,8 @@ To show the typechecker that the doubly recursive call terminates we index the e
   \inferrule
   {eq : P \eq{r} P'}
   {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
-
-  \inferrule
-  { }
-  {\constr{refl} : P \eq{\constr{zero}} P}
-
-  \inferrule
-  {eq : P \eq{r} Q}
-  {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
-
-  \inferrule
-  {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
-  {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
 \end{mathpar}
-\caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.}
+\caption{Structural congruence under contexts.}
 \label{fig:struct-cong}
 \end{figure}
   
@@ -1317,4 +1274,9 @@ Work that will be done time permiting:
 
 \newpage
 \bibliography{paper}
+
+%%
+\newpage
+\appendix
+\input{appendix.tex}
 \end{document}
