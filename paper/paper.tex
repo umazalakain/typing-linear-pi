@@ -486,13 +486,6 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   For a formal definition, refer to \autoref{fig:multiplicities} in \autoref{app:usage-algebra}.
 \end{nidefinition}
 
-\begin{note}
-  We will often work with pairs of input and output multiplicities.
-  We use the notation $\Usage^2$ to stand for a $\Usage \times \Usage$ tuple of input and output multiplicities, respectively.
-  We use $\op{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted elementwise.
-  Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
-\end{note}
-
 Linear, gradual and shared types are all defined as an instance of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
@@ -518,6 +511,20 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing Contexts}
 \label{contexts}
+
+\begin{nidefinition}
+  We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
+  An indexed set of usage algebras is a set of indices $\Idx$ together with an interpretation $\Usage_{idx}$ of indices into types, and an interpretation of indices into usage algebras on that type.
+  $\Idx$ must be non-empty.
+  Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:usage-algebra} for a formal definition.
+\end{nidefinition}
+
+\begin{note}
+  We will often work with pairs of input and output multiplicities.
+  We use the notation $\Usage_{idx}^2$ to stand for a $\Usage_{idx} \times \Usage_{idx}$ tuple of input and output multiplicities, respectively.
+  We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted elementwise.
+  Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
+\end{note}
 
 We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
@@ -567,13 +574,6 @@ The former are preserved throughout a typing derivation; the latter are transfor
   \caption{Types and length-indexed typing contexts.}
   \label{fig:prectx}
   \end{figure}
-\end{nidefinition}
-
-\begin{nidefinition}
-  We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
-  An indexed set of usage algebras is a set of indices together with an interpretation of indices into types, and an interpretation of indices into usage algebras on that type.
-  This indexed set must be non-empty.
-  Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:usage-algebra} for a formal definition.
 \end{nidefinition}
 
 \begin{nidefinition}
