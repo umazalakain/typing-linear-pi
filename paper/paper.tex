@@ -92,7 +92,7 @@
 \newcommand{\Type}{\type{TYPE}\;}
 \newcommand{\Idx}{\type{IDX}\;}
 \newcommand{\Idxs}{\type{IDXS}}
-\newcommand{\Carrier}{\type{CARRIER}}
+\newcommand{\Usage}{\type{USAGE}}
 \newcommand{\N}{\type{\mathbb{N}}}
 \newcommand{\Channel}{\type{CHANNEL}}
 \newcommand{\Rec}{\type{REC}}
@@ -488,7 +488,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
 
 \begin{note}
   We will often work with pairs of input and output multiplicities.
-  We use the notation $\Carrier^2$ to stand for a $\Carrier \times \Carrier$ tuple of input and output multiplicities, respectively.
+  We use the notation $\Usage^2$ to stand for a $\Usage \times \Usage$ tuple of input and output multiplicities, respectively.
   We use $\op{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted elementwise.
   Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
 \end{note}
@@ -519,7 +519,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \subsection{Typing Contexts}
 \label{contexts}
 
-We keep typing contexts and usage contexts separate.
+We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
 
 \begin{nidefinition}
@@ -546,7 +546,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
     {\base{n} : \Type}
   
     \inferrule
-    {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Carrier_{idx}^2}}
+    {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Usage_{idx}^2}}
     {\channel{t}{x} : \Type}
   \end{mathpar}
   
@@ -607,7 +607,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
         {[] : Ctx_{[]}}
         
     \inferrule
-        {\Gamma : \Ctx_{idxs} \\ x : \Carrier_{idx} ^2}
+        {\Gamma : \Ctx_{idxs} \\ x : \Usage_{idx} ^2}
         {\Gamma \comma x : \Ctx_{idxs \comma idx}}
   \end{mathpar}
   \caption{Length-indexed context of carrier indices with a context of multiplicities on top.}
@@ -669,7 +669,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
       t : \Type \\
       \stacked{
         idx : \Idx \\\\
-        y : \Carrier_{idx}^2} \\
+        y : \Usage_{idx}^2} \\
       \Delta : \Ctx_{idxs}}
     {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}
     \; \textsc{VarRef}
@@ -717,7 +717,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
     {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
   
     \inferrule
-    {t : \Type \\ x : \Carrier_{idx}^2 \\ y : \Carrier_{idx'} \\\\
+    {t : \Type \\ x : \Usage_{idx}^2 \\ y : \Usage_{idx'} \\\\
      cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
     {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
   
@@ -798,12 +798,11 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 \label{framing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Framing captures the idea that the well-typedness of a process only depends on the resources consumed by it.
-These unused resources are not introduced as new variables -- the typing context remains unaltered -- but rather as extra multiplicities that are carried from the input context to the output context.
+Framing captures the idea that the well-typedness of a process is independent of its leftover resources.
 
 \begin{nitheorem}
   \label{thm:framing}
-  Let $P$ be a well-typed process from context $\Gamma_l$ to $\Xi_l$.
+  Let $P$ be a well-typed process $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
   Then, per \autoref{lm:types-op}, there exists some $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
@@ -816,18 +815,14 @@ These unused resources are not introduced as new variables -- the typing context
 \label{weakening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Weakening states that adding new variables to the typing and usage contexts preserves the well-typedness of a process.
-The multiplicities of these new variables will be carried from the input context to the output context.
-Usually, weakening is presented through order preserving embeddings.
-Order preserving embeddings model a series of insertions into a context.
-In this paper, we use weakening to prove subject congruence.
-To do so, we need of a single insertion into a context, and thus we will limit our theorem statement to that, but there is no loss of generality.
+Weakening states that adding new variables to the typing and input and output usage contexts preserves the well-typedness of a process.
+The usage annotations of the new variables will be left untouched as leftovers.
 
 \begin{nitheorem}
   \label{thm:weakening}
-  Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let us insert an arbitrary type $t$ at position $i$ in the typing context and an arbitrary multiplicity $x$ at position $i$ into both the input and output contexts.
-  Let us reflect this on the process $P$ by incrementing every index greater than or equal to $i$.
+  Let $P$ be a well-typed process $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Insert an arbitrary type $t$ at position $i$ in the typing context, and an arbitrary usage annotation $x$ at position $i$ into both the input and output contexts.
+  Increment every referrence to a variable greater than or equal to $i$ in process $P$.
   The resulting process will be well-typed so that $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
