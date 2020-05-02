@@ -65,7 +65,7 @@
 \newcommand{\comma}{\; \constr{,} \;}
 
 % Functions
-\newcommand{\subst}[3]{#1 \; [ \; #2 \; / \;#3 \;]}
+\newcommand{\subst}[3]{#1 \; [ \; #3 \; \mapsto \;#2 \;]}
 \newcommand{\opsquared}[3]{#1 \, \coloneqq \, #2 \, \cdot^2 \, #3}
 \newcommand{\opctx}[3]{#1 \, \coloneqq \, #2 \, \otimes \, #3}
 
@@ -120,7 +120,7 @@
 \ccsdesc[300]{Theory of computation~Process calculi}
 \keywords{pi-calculus, linear types, leftover typing, concurrency, mechanization, Agda}
 \supplement{\url{https://github/umazalakain/typing-linear-pi}}
-\acknowledgements{We want to thank Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
+\acknowledgements{We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 \funding{Supported by the UK EPSRC grant EP/K034413/1, ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233
   ``Behavioural Application Program Interfaces'' (BehAPI).}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -145,7 +145,6 @@
   Our formalisation is fully mechanised in Agda. \cite{Zalakain2020Agda}
 \end{abstract}
 
-\todo{rename Scoped to Process in code}
 \todo{make sure all citations are there}
 \todo{change colors, color functions}
 \todo{do not distinguish fields from functions, it is not worth it}
@@ -421,7 +420,7 @@ Reduction is closed under parallel composition (rule $\constr{par}$), restrictio
 
 We keep track of the channel over which communication occurs so that we can state subject reduction.
 We use a $dec$ function to decrement the index of this channel every time we come out of a binder.
-This function saturates at $\constr{internal}$ --- meaning communication happens internally to the process.
+This function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
 
 
 \begin{figure}[h]
@@ -440,8 +439,8 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
   {\constr{external} \; i : \Channel_n}
 
   \datatype
-  {i : \Channel_n \\ P \; Q : \Process_n}
-  {P \reduce{i} Q : \Set}
+  {c : \Channel_n \\ P \; Q : \Process_n}
+  {P \reduce{c} Q : \Set}
   \; \textsc{Reduces}
 
   \inferrule
@@ -449,16 +448,16 @@ This function saturates at $\constr{internal}$ --- meaning communication happens
   {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower_0 \; (\subst{P}{j}{0})}{Q}}
 
   \inferrule
-  {red : P \reduce{i} P'}
-  {\constr{par} \; red : \comp{P}{Q} \reduce{i} \comp{P'}{Q}}
+  {red : P \reduce{c} P'}
+  {\constr{par} \; red : \comp{P}{Q} \reduce{c} \comp{P'}{Q}}
 
   \inferrule
-  {red : P \reduce{i} Q}
-  {\constr{res} \; red : \new P \reduce{dec\; i} \new Q}
+  {red : P \reduce{c} Q}
+  {\constr{res} \; red : \new P \reduce{dec\; c} \new Q}
 
   \inferrule
-  {eq : P = P' \\ red : P' \reduce{i} Q}
-  {\constr{struct} \; eq \; red : P \reduce{i} Q}
+  {eq : P = P' \\ red : P' \reduce{c} Q}
+  {\constr{struct} \; eq \; red : P \reduce{c} Q}
 \end{mathpar}
 \caption{Operational semantics indexed by the channel over which reduction occurs.}
 \label{fig:reduction}
@@ -490,7 +489,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
 \begin{note}
   We will often work with pairs of input and output multiplicities.
   We use the notation $\Carrier^2$ to stand for a $\Carrier \times \Carrier$ tuple of input and output multiplicities, respectively.
-  We use $\op{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are trivially lifted.
+  We use $\op{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted elementwise.
   Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
 \end{note}
 
@@ -500,8 +499,8 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \begin{description}
   \item [Linear]
     The carrier is a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
-    The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{\one}$), and is uninhabited in every other case.
-    All other rules follow trivially.
+    The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited in every other case.
+    All other properties are lifted elementwise.
 
     \item [Gradual]
     The carrier is the type of natural numbers $\N$.
@@ -527,7 +526,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
   \autoref{fig:prectx} defines types as either unit types, base types or channel types.
   The unit type $\unit$ serves as a proof of inhabitance for types.
   The base type $\base{n}$ uses natural numbers as placeholders for types --- the host language can interpret the former into the latter.
-  This is for convenience, so that there is less universe polymorphism poluting specifications.
+  This is for convenience, so that there is less universe polymorphism polluting specifications.
   The type $\channel{t}{x}$ of a channel determines what type of data and what usage annotations are sent over that channel.
   We keep track of types in a length-indexed \emph{pre-context} $\PreCtx_n$.
   
@@ -547,7 +546,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
     {\base{n} : \Type}
   
     \inferrule
-    {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Carrier_{idx}}}
+    {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Carrier_{idx}^2}}
     {\channel{t}{x} : \Type}
   \end{mathpar}
   
@@ -799,7 +798,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 \label{framing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Framing captures the idea that the well-typedness of a process does not depend on its unused resources.
+Framing captures the idea that the well-typedness of a process only depends on the resources consumed by it.
 These unused resources are not introduced as new variables -- the typing context remains unaltered -- but rather as extra multiplicities that are carried from the input context to the output context.
 
 \begin{nitheorem}
