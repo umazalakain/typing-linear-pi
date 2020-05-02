@@ -357,8 +357,8 @@ The semantics of our language can now be defined on the totality of the syntax.
 \label{semantics}
 We introduce the operational semantics for the \picalc{}, starting with structural congruence.
 
-\subsection{Structural Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Structural Congruence}
 \label{structural-congruence}
 
 We define the base cases of a structural congruence relation \textsc{StructCong} in \autoref{fig:struct-cong-base}.
@@ -408,8 +408,8 @@ The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger 
 In $\constr{scope-comm}$ the function $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
-\subsection{Reduction Relation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reduction Relation}
 \label{operational-semantics}
 
 The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} indexed by the channel $i$ on which communication occurs (\autoref{fig:reduction}).
@@ -516,8 +516,8 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
     All other rules follow trivially.
 \end{description}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing Contexts}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{contexts}
 
 We keep typing contexts and usage contexts separate.
@@ -621,9 +621,9 @@ The former are preserved throughout a typing derivation; the latter are transfor
   All the properties of the partial monoid are trivially lifted.
 \end{note}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 We use \emph{leftover typing} \cite{Allais2018a} for our typing rules, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
@@ -638,25 +638,24 @@ This techinque presents three main advantages:
     This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
   \item
-    New theorems (like framing (\autoref{framing}), weakening (\autoref{weakening}) and strengthening (\autoref{strengthening}) can suddenly be state.
+    New theorems (\textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening})) can suddenly be stated.
 \end{itemize}
   
 We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
+Both of these are indexed by a typing context, an input usage context, and an output usage context.
 
 \begin{nidefinition}
   \label{def:varref}
 
-  The \textsc{VarRef} relation presented in \autoref{fig:variable-references} is indexed by a typing context and an input and output usage context.
-  In addition to these, it also keeps track of its position in the contexts, its type, and its usage annotation.
-  
-  The base case $\constr{here}$ asserts that $t$ is the most immediate type in typing context, and splits the most immediate usage annotation $x$ in the input context into the usage annotation $y$ the usage annotation $z$ in the output context.
-  This is the only place in the typing system where the algebra on multiplicities is used.
+  The \textsc{VarRef} relation presented in \autoref{fig:variable-references} keeps track of the index, type, and usage annotation of a variable within a particular typing and usage context.
+  The leftover usage context is the result of subtracting the usage annotation from the input usage context.
+
+  The base case $\constr{here}$ splits the usage annotation $x$ into $y$ and $z$, the leftovers.
+  This splitting is as per the usage algebra defined on the index of the usage annotation.
 
   \begin{remark}
-    We use $\field{\cdot-compute}$ to aliviate the user from the proof burden $\opsquared{x}{y}{z}$.
+    We use the functionality of the monoidal relation to aliviate the user from the proof burden $\opsquared{x}{y}{z}$.
   \end{remark}
-
-  The inductive case $\constr{there}$ appends an extra type to the typing context, and an extra usage annotation to both the input and output usage context.
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -690,8 +689,8 @@ We introduce two judgments: one on variable references (\autoref{def:varref}), o
 \end{nidefinition}
 
 \begin{example}
-  The following is an example that asserts that the input usage context is capable of $\li$ on a $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{zero}$, and that consuming such $\li$ results in the stated leftovers.
-  \begin{lstlisting}[mathescape,caption=Here \_ introduces an anonymous declaration that must be immediately followed by its definition.]
+  The following example asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{zero}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
+  \begin{lstlisting}[mathescape,caption=Here the underscore \_ introduces an anonymous declaration immediately followed by its definition.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\constr{suc} \; \constr{zero}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\constr{there} \; \constr{here}$
   \end{lstlisting}
@@ -1080,15 +1079,6 @@ In the linear \picalc{} however, reduction \emph{is} meant to transform the cont
 In our case, and because we generalise linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
 In  \autoref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
 
-\begin{nilemma}
-  \label{lm:comm-capable}
-  As an auxiliary lemma, we must establish that every input usage context $\Gamma$ of a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces by communicating on a channel external to it (that is, $P \reduce{\constr{external} \; i} Q$ for some $Q$) has a multiplicity of at least $\lio$ at index $i$.
-\end{nilemma}
-
-\begin{proof}
-  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
-\end{proof}
-
 \begin{nitheorem}
   Let $P \reduce{c} Q$.
   If $c$ is $\constr{internal}$ to the process, the context must not be modified and thus $\Gamma' \equiv \Gamma$.
@@ -1158,13 +1148,10 @@ In  \autoref{semantics}, we made sure to lift the index of the communicating cha
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
 
-\cite{Allais2018a}
-typing with leftovers
-bidirectional typing rules
-decidable typechecking and type inference
-limited to a linear type system
-framing, weakening, substitution
-soundness and completeness with respect to a sequent calculus for intuitionistic linear logic
+This work is heavily based on the work by Allais \cite{Allais2018a}.
+Allais uses leftover typing to build a bidirectional type system for the linear \lambdacalc{}.
+He proves type preservation and provides a procedure that decides type checking and type inference.
+He then goes on showing the soundness and completeness with respect to the sequent calculus for intuitionistic linear logic.
 
 \cite{Thiemann2019}
 \cite{Rouvoet2020}
