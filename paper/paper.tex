@@ -202,7 +202,7 @@ Our contributions are the following:
   \autoref{syntax} uses type level de Bruijn indices \cite{deBruijn1972} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
   \autoref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
   This operational semantics is given as a reduction relation on processes.
-  The reduction relation tracks at the type level what channel the communication occurs on, so that this information can then be used to state subject reduction --- ak-a type preservation.
+  The reduction relation tracks at the type level what channel the communication occurs on, so that this information can then be used to state subject reduction --- aka type preservation.
   It is also defined modulo structural congruence --- a relation that acts as a quotient type that gets rid of the unecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
   \item \textbf{Leftover typing for the \picalc{}, with linear, gradual and shared types}:
@@ -374,7 +374,7 @@ Its congruent equivalence closure \textsc{Equals} is provided in \autoref{app:st
 
   \inferrule
   { }
-  {\constr{comp-assoc} : \comp{P}{\comp{Q}{R}} \eqeq \comp{\comp{P}{Q}}{R}}
+  {\constr{comp-assoc} : \comp{P}{(\comp{Q}{R})} \eqeq \comp{(\comp{P}{Q})}{R}}
 
   \inferrule
   { }
@@ -401,7 +401,7 @@ Its congruent equivalence closure \textsc{Equals} is provided in \autoref{app:st
 \end{figure}
 
 The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as the neutral element of parallel composition, respectively.
-The last three ($\constr{scope}-$*) state, garbage collection, scope extrusion and commutativity of restrictions, respectively.
+The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
 
 In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
 The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
