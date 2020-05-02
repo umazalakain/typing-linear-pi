@@ -699,7 +699,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 \begin{nidefinition}
   \label{def:types}
 
-  The typing relation \textsc{Types} presented in \autoref{fig:types} is indexed by a typing context, an input and an output usage context, and the process $P$ being typed.
+  The typing relation \textsc{Types} presented in \autoref{fig:types} asserts that process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$.
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -744,40 +744,35 @@ Both of these are indexed by a typing context, an input usage context, and an ou
   \label{fig:types}
   \end{figure}
 
-  The process termination case is only concerned with usage contexts.
-  Its input usage context is returned as leftovers.
+  Process termination threads usage annotations unchanged from input to output.
 
-  Scope restriction expects three arguments: the type $t$ of data being transmitted; the input and output multiplicities $x$ of the data being transmitted; and the multiplicity $y$ assigned to the channel itself.
-  The same multiplicity $y$ is used as the input multiplicity and as the output multiplicity of the channel, so these are balanced.
-  The typing derivation of the continuation process $P$ is provided with this channel with multiplicity $(y \comma y)$.
-  Process $P$ must then completely exhaust this channel, and to that end we substitute $(y , y)$ in the input context with $\lz$ in the output context.
+  Scope restriction expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
+  This multiplicity $y$ is used for both input and output, so that these are balanced.
+  The continuation process $P$ is provided with the new channel with usage annotation $(y \comma y)$, which it must completely exhaust.
 
-  Receiving requires a proof $chan_i$ that selects a channel at index $i$ with multiplicity $\li$ available, over which data with type $t$ and multiplicity $x$ is going to be sent.
-  Note that this index $i$ is then used in the syntax of the typed process.
-  After consuming $\li$ from this channel, we use the leftover context $\Xi$ to type the continuation.
-  The continuation is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{zero}$.
-  This multiplicity $x$ must be completely exhausted by the continuation process.
+  Receiving needs a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  Note that the index $i$ is used in the syntax of the typed process.
+  We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{zero}$.
+  The received element $x$ must be completely exhausted by the continuation process.
 
-  Similar to input, output requires a proof $chan_i$ that selects a channel at index $i$ with multiplicity $\lo$ available, over which data with type $t$ and multiplicity $x$ is going to be sent.
-  Note that this index $i$ is then used in the syntax of the typed process.
-  After consuming $\lo$ from this channel, we use the leftover context $\Delta$ to type the continuation.
-  The continuation must select the element at index $j$ that is being sent.
-  This element must have type $t$ and at least multiplicity $x$ --- as per the channel's type.
-  The result of consuming these multiplicity $x$ is the leftover context $\Xi$, which is then used to type the continuation process.
+  Similar to input, sending needs a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as specified by the channel $chan_i$.
+  The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
   
-  Parallel composition is only concerned with usage contexts.
-  It uses the leftovers of the left-hand process to type the right-hand process.
+  Parallel composition uses the leftovers of left-hand process to type the right-hand process.
 \end{nidefinition}
 
 \begin{example}
   \label{example-derivations}
-  The following example uses both linear and shared types to type the process $p$. 
-  We use $\omega$ as a synonym for a $(\one \comma \one)$ multiplicity in an algebra for shared types.
-  The usage context $\epsilon$ signifies the empty context where all multiplicities are $(\zero \comma \zero)$.
-  The typing derivation creates a new channel over which $\li$ multiplicities of a type $\channel{\unit}{\omega}$ are sent.
-  This channel is initialized with a linear multiplicity of $(\one \comma \one)$, and therefore must be used exactly once for sending and once for receiving.
-  The right-hand parallel subprocess then creates a new channel as per the specification $\channel{\unit}{\omega}$.
+  The example below uses linear and shared types to type the process $p$. 
+  We define $\omega$ as a $(\one \comma \one)$ usage in an algebra for shared types.
+  We define $\epsilon$ as the empty usage context where all usages are $(\zero \comma \zero)$.
+  The typing derivation creates a new channel with usage $(\one \comma \one)$.
+  This channel transmits $\li$ multiplicities of a type $\channel{\unit}{\omega}$.
+  The right-hand subprocess creates a channel with usage $(\one \comma \one)$.
+  This channel transmits $\omega$ multiplicities of a type $\unit$.
+  Part of this channel ($(\one \comma \zero)$) is sent over the channel created by the parent process.
   
   \begin{lstlisting}[mathescape]
   $p$ : $\Process_1$
