@@ -212,17 +212,17 @@ Our contributions are the following:
 \begin{itemize}
 \item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
   \autoref{syntax} uses type level de Bruijn indices \cite{deBruijn1972} to introduce a syntax that is well-scoped by construction: every free variable is accounted for in the type of the process that uses it.
-  \autoref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
+  \autoref{semantics} provides an operational semantics for the \picalc{}, prior to any typing.
   This operational semantics is given as a reduction relation on processes.
   The reduction relation tracks at the type level what channel the communication occurs on, so that this information can then be used to state subject reduction --- aka type preservation.
-  It is also defined modulo structural congruence --- a relation that acts as a quotient type that gets rid of the unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
+  The relation is defined modulo structural congruence --- a relation that acts as a quotient type that gets rid of the unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
   \item \textbf{Leftover typing for the \picalc{}, with linear, gradual and shared types}:
   \autoref{type-system} provides the type system for a resource-aware \picalc{}.
   The type system is \emph{resource-aware} in that it allows the user to provide a resource-aware algebra that is then applied to the type-system.
-  Linear types, gradual types and shared types are all instances of such a resource-aware algebra too.
-  Any \emph{partial commutative monoid} that is cancellative and has a minimal element is a valid such algebra.
-  Multiple of these algebras can be applied to a single type system --- contexts keep information about what algebra should be applied to which element.
+  Linear types, gradual types and shared types are all instances of such a resource-aware algebra.
+  Any \emph{partial commutative monoid} that is \emph{functional}, \emph{cancellative} and has a minimal element is a valid such algebra.
+  Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element.
 
   The typing judgments use \emph{leftover typing} to model the resource-aware \picalc{}.
   This approach adds a leftover usage context to the typing judgments.
@@ -230,10 +230,8 @@ Our contributions are the following:
   These technique renders explicit context splits unnecessary.
 
   \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
-  \autoref{type-safety} builds on several theorems to proof subject reduction for our type system.
-  Here too, leftover typing renders the proofs for some of these lemmas straightforward, while for others it makes it possible to state them in the first place.
-  We prove \textbf{framing} (well-typedness is independent of the unused resources of a process), \textbf{weakening} (new variables that are added to both the input and output usage context preserve well-typedness), and \textbf{strengthening} (removing the variables that are unused by a process preserves well-typedness).
-  We use these to prove \textbf{subject congruence} (structural congruence rules can be freely applied while preserving well-typedness) and \textbf{substitution} (a variable can be substituted for another as long as this other variable is capable of doing everything the original one did), and use these to prove \textbf{subject reduction} (a well-typed process that reduces will still be well-typed).
+  Leftover typing allows \emph{framing}, \emph{weakening} and \emph{strengthening} theorems to be stated.
+  We use these to prove \emph{subject congruence}, and together with \emph{substitution}, to prove \emph{subject reduction}.  
 
   \item \textbf{Fully mechanised formalisation available in Agda}:
   This work has been fully formalised in Agda and is publicly available \cite{Zalakain2020Agda}.
