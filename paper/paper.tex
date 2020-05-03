@@ -491,7 +491,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types.
 
 \begin{nidefinition}
-  We define our usage algebra to be a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associative}, and \emph{commutative}.
+  We define our usage algebra to be a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
   For a formal definition, refer to \autoref{fig:multiplicities} in \autoref{app:usage-algebra}.
@@ -764,7 +764,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
   The received element $x$ must be completely exhausted by the continuation process.
 
   Similar to input, sending needs a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
-  We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as specified by the channel $chan_i$.
+  We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of channel $chan_i$.
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
   
@@ -1139,6 +1139,8 @@ He then goes on showing the soundness and completeness with respect to the seque
 \section{Future Work}
 
 Work that will be done time permitting:
+
+Erika Kreuer: model usage algebra as a state machine?
 
 \begin{description}
 
