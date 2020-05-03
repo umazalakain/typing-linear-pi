@@ -34,6 +34,20 @@
 \newtheorem{nitheorem}[theorem]{Theorem}
 \newtheorem{nilemma}[theorem]{Lemma}
 
+% An i with a heart on top
+\usepackage{pifont}
+\usepackage{graphics}
+\newcommand\iheart{%
+    \begingroup
+    \settowidth{\dimen0}{i}%
+    i%
+    \llap{\makebox[\dimen0][c]{%
+        \kern-0.000em%
+        \raisebox{1.1ex}{\scalebox{0.30}{\ding{170}}}%
+    }}%
+    \endgroup
+}
+
 % No line numbers
 \nolinenumbers
 
@@ -120,7 +134,7 @@
 \ccsdesc[300]{Theory of computation~Process calculi}
 \keywords{pi-calculus, linear types, leftover typing, concurrency, mechanization, Agda}
 \supplement{\url{https://github/umazalakain/typing-linear-pi}}
-\acknowledgements{We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
+\acknowledgements{We want to thank Er\iheart ka Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 \funding{Supported by the UK EPSRC grant EP/K034413/1, ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233
   ``Behavioural Application Program Interfaces'' (BehAPI).}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
