@@ -298,10 +298,10 @@ The syntax of the \picalc{} \cite{Sangio01} is given by grammar in \autoref{fig:
     \begin{equation*}
       \begin{split}
         P,Q ::=      & \; \PO                \\ 
-                    |& \; (\new{}x)  P       \\ 
+                    |& \; (\new{}x) \; P       \\ 
                     |& \; \comp{P}{Q}        \\ 
-                    |& \; \recvp{x}{y}. \; P \\ 
-                    |& \; \sendp{x}{y}. \; P 
+                    |& \; \recvp{x}{y} P \\ 
+                    |& \; \sendp{x}{y} P 
       \end{split}
     \end{equation*}
     \caption{Ill-scoped grammar with names}
@@ -325,11 +325,11 @@ The syntax of the \picalc{} \cite{Sangio01} is given by grammar in \autoref{fig:
 \end{figure}
 
 Process $\PO$ denotes the terminated process, where no operations can further occur.
-Process $(\new{}x)P$ creates a new channel $x$ bound with scope $P$.
+Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
-Processes $\recvp{x}{y}. \; P$ and $\sendp{x}{y}. \; P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
+Processes $\recvp{x}{y} P$ and $\sendp{x}{y} P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
 
-Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y}. \; P$ both introduce bound names in $P$.
+Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y} \; P$ both introduce bound names in $P$.
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
 Furthermore, names do not guarantee that the syntax well-scoped.
@@ -337,11 +337,11 @@ Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n
 \begin{example}
   \begin{equation*}
     \begin{split}
-      & (\new{}x ) && (\comp {\recvp{x}{y} && . \; \sendp{y}{\texttt{"Hello world!"}} . \; \PO} {(\new{} y) && (\sendp{x}{y} . \; \recvp{y}{z} && . \; \PO)})
-      & \text{names}
+      & (\new{}x ) && (\comp {\recvp{x}{y} && \; \sendp{y}{a} \; \PO} {(\new{} y) && (\sendp{x}{y} \; \recvp{y}{z} && \; \PO)})
+      && \text{names}
       \\
-      & \new{} && (\comp {\recv{0} && . \; \send{0}{\texttt{"Hello world!"}} . \; \PO} {\new{} && (\send{1}{0} . \; \recv{0} && . \; \PO)})
-      & \text{de Bruijn}
+      & \new{} && (\comp {\recv{0} && \; \send{0}{a} \; \PO} {\new{} && (\send{1}{0} \; \recv{0} && \; \PO)})
+      && \text{de Bruijn}
       \\
     \end{split}
   \end{equation*}
