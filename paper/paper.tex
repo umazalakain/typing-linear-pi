@@ -406,11 +406,11 @@ Its congruent equivalence closure \textsc{Equals} is provided in \autoref{app:st
   
   \inferrule
   {uQ : \Unused_0 \; Q}
-  {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{lower_0 \; \; Q \; uQ}}
+  {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{lower_{\constr{0}} \; \; Q \; uQ}}
 
   \inferrule
   { }
-  {\constr{scope-comm} : \new \new P \eqeq \new \new swap_0 \; P}
+  {\constr{scope-comm} : \new \new P \eqeq \new \new swap_{\constr{0}} \; P}
 \end{mathpar}
 \caption{Base cases of structural congruence.}
 \label{fig:struct-cong-base}
@@ -431,7 +431,7 @@ In all the above, $i$ is incremented every time we go under a binder.
 The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} indexed by the channel $i$ on which communication occurs (\autoref{fig:reduction}).
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel ${i}$.
 As a result of that communication, the continuation of the input process $P$ gets all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
-After substitution, $\subst{P}{j}{0}$ is \emph{lowered} --- all variable references are decreased by one.
+After substitution, $\subst{P}{j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one.
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
@@ -462,7 +462,7 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower_0 \; (\subst{P}{j}{0})}{Q}}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower_{\constr{0}} \; (\subst{P}{j}{\constr{0}})}{Q}}
 
   \inferrule
   {red : P \reduce{c} P'}
@@ -497,7 +497,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types.
 
 \begin{nidefinition}
-  Our usage algebra is a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associative}, and \emph{commutative}.
+  We define our usage algebra to be a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
   For a formal definition, refer to \autoref{fig:multiplicities} in \autoref{app:usage-algebra}.
@@ -582,7 +582,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
   
     \inferrule
         { }
-        {[] : \PreCtx_0}
+        {[] : \PreCtx_{\constr{0}}}
   
         \inferrule
             {\gamma : \PreCtx_n \\ t : \Type}
@@ -605,7 +605,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
   
     \inferrule
         { }
-        {[] : \Idxs_0}
+        {[] : \Idxs_{\constr{0}}}
   
     \inferrule
         {idxs : \Idxs_n \\ idx : \Idx}
@@ -693,7 +693,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
   
     \inferrule
     {\opsquared{x}{y}{z}}
-    {\constr{here} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{zero}}{t}{y}{\Gamma \comma z}}
+    {\constr{here} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
     
     \inferrule
     {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
@@ -705,9 +705,9 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 \end{nidefinition}
 
 \begin{example}
-  The following example asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{zero}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
+  The following example asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
   \begin{lstlisting}[mathescape,caption=Here the underscore \_ introduces an anonymous declaration immediately followed by its definition.]
-  _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\constr{suc} \; \constr{zero}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
+  _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\constr{suc} \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\constr{there} \; \constr{here}$
   \end{lstlisting}
 \end{example}
@@ -768,7 +768,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 
   Receiving needs a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
   Note that the index $i$ is used in the syntax of the typed process.
-  We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{zero}$.
+  We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
 
   Similar to input, sending needs a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
@@ -792,8 +792,8 @@ Both of these are indexed by a typing context, an input usage context, and an ou
   
   \begin{lstlisting}[mathescape]
   $p$ : $\Process_1$
-  $p$ = $\new{} (\comp{\recv{\constr{zero}} (\recv{\constr{zero}} \PO)}
-                    {\new{} (\send{\constr{suc} \; \constr{zero}} {\constr{zero}} (\send{\constr{zero}}{\constr{suc} \; \constr{suc} \; \constr{zero}}) \; \PO)})$
+  $p$ = $\new{} (\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}
+                    {\new{} (\send{\constr{suc} \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\constr{suc} \; \constr{suc} \; \constr{0}}) \; \PO)})$
 
   _ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \omega}{p}{\epsilon}$
   _ = $\constr{chan} \; \channel{\unit}{\omega} \; \li \; \one$
@@ -836,11 +836,9 @@ Inserting a new variable into the context preserves the well-typedness of a proc
 
 \begin{nitheorem}
   \label{thm:weakening}
-  Let $P$ be a well-typed process $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Insert an arbitrary type $t$ at position $i$ in the typing context, and an arbitrary usage annotation $x$ at position $i$ into both the input and output contexts.
-  For simplicity, we overload $insert$ and use it to insert types in typing contexts and usage annotations in usage contexts.
-  Increment every variable reference greater than or equal to $i$ in process $P$.
-  The resulting process is well-typed so that $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
+  Let $insert_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
+  Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Then lifting every variable greater than or equal to $i$ in $P$ is well-typed under $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
@@ -851,15 +849,18 @@ Inserting a new variable into the context preserves the well-typedness of a proc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Removing an unused variable preserves the well-typedness of a process.
-The proof that a variable is unused within a process must be syntactical and cannot rely on the preservation of its usage annotations as leftovers: a process can refer to a variable and still make no use of it --- by sending $\lz$ usage annotations over a channel.
+We say a variable is \emph{unused} within a process if neither inputs nor outputs refer to it.
+
+\begin{remark}
+  It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned within $P$ --- $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
+\end{remark}
 
 \begin{nitheorem}
   \label{thm:strengthening}
+  Let $delete_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable index not mentioned by $P$, such that $\Unused_i \; P$.
-  Remove the elements at index $i$ from the typing and usage contexts and decrement every variable in $P$ greater than $i$.
-  For simplicity, we overload $delete$ and use it to delete types from typing contexts and usage annotations from usage contexts.
-  The result preserves the well-typedness of the process, so that $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
+  Then lowering every variable greater than or equal to $i$ in $P$ is well-typed under $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
@@ -874,7 +875,7 @@ Swapping two variables preserves the well-typedness of a process.
 \begin{remark}
   We limit ourselves to the swapping of adjacent variables $i$ and $\suc i$.
   Doing so is enough to prove subject reduction.
-  The swapping of any two variables can be modeled as a sequence of contiguous variable swappings.
+  More generally, any two variables can be swapped by performing a series of adjacent variable swappings.
 \end{remark}
 
 \begin{nitheorem}
@@ -892,79 +893,56 @@ Swapping two variables preserves the well-typedness of a process.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
 
-Structural congruence is an equivalence relation that aims to overcome the semantically meaningless difference introduced by the syntax of the \picalc{}.
-
 \begin{nitheorem}
   \label{thm:subject-congruence}
-  Applying structural congruence rules to a well-typed process should preserve its well-typedness under the same typing and usage contexts.
-  If $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+  Applying structural congruence rules to a well-typed process preserves its well-typedness.
+  That is, if $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
 \begin{proof}
   By induction on \textsc{Equals}.
-  The case $\constr{struct}$ and its symmetric one under $\constr{sym}$ are the nontrivial ones.
+  The base cases under $\constr{struct}$ (and their symmetric variants under $\constr{sym}$) are the nontrivial ones.
   For those, we proceed by induction on \textsc{StructCong}:
   \begin{itemize}
     \item
-      The case $\constr{comp-assoc}$ is trivial because the encoding with leftover typing of the typing rules naturally preserves associativity.
+      The case $\constr{comp-assoc}$ is trivial: leftover typing is naturally associative.
     \item
-      The $\constr{comp-sym}$ case for a process $\comp{P}{Q}$ is however more complicated: $P$ must use framing (\autoref{thm:framing}) to shift its output context to $Q$'s; $Q$ must use framing to shift its input context to $P$'s.
-      The usage context on which $Q$ and $P$ coincide in $\comp{Q}{P}$ will no longer be the same.
+      In the $\constr{comp-sym}$ case for a process $\comp{P}{Q}$, we need framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of of $Q$ to the one of $P$.
+      The point at which $Q$ and $P$ join in $\comp{Q}{P}$ will no longer be the same.
     \item
-      The case $\constr{comp-end}$ is trivial because in the typing rule for process $\PO$ the input and output contexts are one and the same.
+      The case $\constr{comp-end}$ is trivial: the typing rule for a process $\PO$ has the same input and output contexts.
     \item
-      In the $\constr{scope-end}$ case, the typing rules $\constr{chan}$ and $\constr{end}$ work together to constraint the multiplicity of the newly create channel to $\lz$, making the proof trivial.
-      In the opposite direction, we will need to instantiate the newly created channel to a concrete type and multiplicities.
-      For this, we will use type $\unit$ and multiplicities $\lz$.
+      In the $\constr{scope-end}$ case, we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
+      In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$..
     \item
-      In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we will make use of $\autoref{lm:types-unused}$ to show that as the typing derivation on $P$ will preserved the multiplicity of the recently introduced variable unchanged.
-      We then use strengthening (\autoref{thm:strengthening}) to delete the recently introduced variable from $P$, and then compose with the typing derivation of $Q$ under $\constr{chan}$.
-      In the reverse direction, we will weaken $P$ so that it can accept an additional variable.
-      We will then use \autoref{lm:lower-lift} to show that lifting a lowered $P$ leaves $P$ unchanged.
+      In the $\constr{scope-ext}$ case for a process $\new \comp{P}{Q}$, we use \autoref{lm:types-unused} to show that $P$ preserves the usage annotations of the unused variable.
+      We then use strengthening (\autoref{thm:strengthening}) to delete the unused variable from $P$, and compose the result with typing derivation on $Q$ wrapped in $\constr{chan}$.
+      In the reverse direction, we weaken (\autoref{thm:weakening}) $P$ so that it accepts the additional variable.
+      We then use \autoref{lm:lower-lift} to show that lowering and then lifting $P$ results in $P$.
     \item
-      Finally, for the $\constr{scope-comm}$ rule, we will use swapping as shown in \autoref{thm:swapping}.
-      In the reverse direction, we will use swapping and then use \autoref{lm:swap-swap} to show that swapping indices twice leaves $P$ unchanged.
+      In the $\constr{scope-comm}$ case, we use swapping (\autoref{thm:swapping}).
+      In the reverse direction, we use swapping and then \autoref{lm:swap-swap} to show that swapping two elements in $P$ twice leaves $P$ unchanged.
   \end{itemize}
 \end{proof}
-\todo{make sure constructor names in code coincide}
-
-\begin{remark}
-  We encode the recursive structure of \textsc{Equals} in its inductive definition -- by indexing its type with \textsc{Rec}.
-  This acts as a justification of the well-formedness of the recursion scheme, which Agda cannot immediately see as terminating due to the interaction between the transitive and symmetric cases.
-\end{remark}
 
 \subsection{Substitution}
 \label{substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-When function abstraction and application come together in the \lambdacalc{} with de Bruijn indices, every reference to the most recent variable in the body of the abstraction gets replaced with the argument of the application.
-In the \picalc{} however substitution takes another form: every reference to the most recent variable in the receiving process gets replaced with the reference to the data that is being sent over the channel.
-In a resource-aware \picalc{}, that means that instead of exhausting all $m$ multiplicities of the most recent variable, we leave those unaltered and exhaust them from the variable that is being received.
-
-\begin{nitheorem}
-  \label{thm:substitution}
-  Let $P$ be a process where the most recent variable has all its $m$ multiplicities exhausted, such that $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
-  Let $j$ be the index of the data with $m$ multiplicities that is being received after $P$ is done, so that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
-  Then, we can substitute variable $\constr{zero}$ in $P$ with $\suc j$.
-  As a result, the multiplicities at $\constr{zero}$ will be preserved and those at $j$ will be consumed instead, resulting in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi \comma m}$.
-\end{nitheorem}
-\begin{proof}
-  We need to proceed by induction on $P$, and to do so means going under scope restriction.
-  We use the generalised version in \autoref{thm:subst-generalization} so that the variable that is being substituted is not $\constr{zero}$ but any variable $i$.
-  \todo{explain arguments}
-\end{proof}
+\autoref{thm:subst-generalization} proves a generalized version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
+\autoref{thm:substitution} instantiates the generalized version to the concrete case where $i$ is $\constr{0}$, as required by subject reduction.
 
 \begin{nitheorem}
   \label{thm:subst-generalization}
-
-  Let the variable that is being substituted be $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$ and the variable that it is being substituted with $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$.
-  As shown in \autoref{fig:subst}, the process that is being substituted will pivot from the input usage context $\Gamma_i$ to the input usage context $\Gamma_j$.
-  Let there be two \emph{adjustment} variables $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$ and $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$.
-  The process that is being substituted will pivot from the output usage context $\Psi_i$ to the output usage context $\Psi_j$.
-  As shown in \autoref{fig:subst-alternative}, without this \emph{adjustment} composing the substitution of subprocesses is not at all trivial.
-  Assume that $P$ uses all $m$ multiplicities at index $i$.
-  To model this, require $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$ where index $i$ is $\lz$.
-  The process that is typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$ will be typed $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$ after substitution.
+  Let process $P$ be well-typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$,
+  Let $\ni_i m$ be a \textsc{VarRef} $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$ for some $m$ and $\Gamma$.
+  Let $\ni_i n$ be a \textsc{VarRef} $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$ for some $m$ and $\Psi$.
+  Let $\Gamma$ and $\Psi$ be related such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
+  Let $\Delta$ have a usage annotation $\lz$ at position $i$.
+  Let $\ni_j m$ be a \textsc{VarRef} $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$ for some $\Gamma_j$.
+  Let $\ni_j n$ be a \textsc{VarRef} $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$ for some $\Psi_j$.
+  Then substituting $i$ with $j$ in $P$ will be well-typed such that $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+  Refer to \autoref{fig:subst} for a diagramatic representation.
 \end{nitheorem}
 
 \begin{figure}[h]
@@ -1031,78 +1009,88 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
     \end{tikzpicture}
     \caption{
       Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
-      Composition is non-trivial.
+      This approach makes composing typing derivations before and after substitution more difficult.
     }
     \label{fig:subst-alternative}
   \end{subfigure}
   \caption{Substitution with and without the \emph{adjustment} arrows $\ni_i n$ and $\ni_j n$}
 \end{figure}
 
+\begin{nidefinition}
+  For convenience, we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
+\end{nidefinition}
+  
 \begin{proof}
   By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   \begin{itemize}
     \item
-      From constructor $\constr{end}$ we derive $\Gamma_i \equiv \Psi_i$.
+      For constructor $\constr{end}$ we get $\Gamma_i \equiv \Psi_i$.
       From $\Delta_i \equiv \lz$ follows that $m \equiv n$.
       Therefore $\Gamma_j \equiv \Psi_j$ and $\constr{end}$ can be applied.
 
     \item
-      For constructor $\constr{chan}$ we proceed inductively, applying the constructor $\suc$ to all arrows $\ni_i m$, $\ni_j m$, $\ni_i n$ and $\ni_j n$.
+      For constructor $\constr{chan}$ we proceed inductively, wrapping arrows $\ni_i m$, $\ni_j m$, $\ni_i n$ and $\ni_j n$ with $\constr{there}$.
       
     \item
-      For constructor $\constr{recv}$ we split $\Delta$ so that we can proceed inductively on the continuation.
-      We first observe that given that there exists an arrow from $\Gamma_i$ to $\Psi_i$ and $\Delta$ at index $i$ is $\lz$, for any $m$ and $n$, there is some $\delta$ such that $\opsquared{m}{\delta}{n}$.
+      For constructor $\constr{recv}$ we must split $\Delta$ to proceed inductively on the continuation.
+      Observe that given the arrow from $\Gamma_i$ to $\Psi_i$ and given that $\Delta$ is $\lz$ at index $i$, there must exist some $\delta$ such that $\opsquared{m}{\delta}{n}$.
  l     \begin{itemize}
         \item
-          If the input occurs on the variable that is being substituted, we derive $\opsquared{m}{\li}{l}$ for some $l$ and construct an arrow $\containsusage{\Xi_i}{i}{l}{\Gamma}$ (used for the inductive call).
-          Similarly, we construct the arrows $\containsusage{\Gamma_j}{j}{\li}{\Xi_j}$ (used as the new channel on which input occurs) and $\containsusage{\Xi_j}{j}{l}{\Gamma}$ (used for the inductive call) for some $\Xi_j$.
+          If the input is on the variable being substituted, we split $m$ such that $\opsquared{m}{\li}{l}$ for some $l$, and construct an arrow $\containsusage{\Xi_i}{i}{l}{\Gamma}$ for the inductive call.
+          Similarly, we construct for some $\Xi_j$ the arrows $\containsusage{\Gamma_j}{j}{\li}{\Xi_j}$ as the new input channel, and $\containsusage{\Xi_j}{j}{l}{\Gamma}$ for the inductive call.
         \item
-          If the input occurs on some variable $x$ other than the one that is being substituted, we construct the arrows $\containsusage{\Xi_i}{i}{m}{\Theta}$ (used for the inductive call) and $\containsusage{\Gamma}{x}{\li}{\Theta}$ for some $\Theta$.
-          We can then find $\Xi_j$ and construct the two arrows $\containsusage{\Gamma_j}{x}{\li}{\Xi_j}$ (used as the new channel on which input occurs) and $\containsusage{Xi_j}{j}{m}{\Theta}$ (used for the inductive call).
-          From the fact that there exists a composition of arrows from $\Xi_i$ to $\Psi$, we can conclude that $\Theta$ is splitting $\Delta$ such that $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
-          As $\lz$ is a minimal element, if $\Delta$ is $\lz$ at index $i$, then it must be $\lz$ at index $i$ for $\Delta_1$ and $\Delta_2$ as well.
+          If the input is on a variable $x$ other than the one being substituted, we construct the arrows $\containsusage{\Xi_i}{i}{m}{\Theta}$ (for the inductive call) and $\containsusage{\Gamma}{x}{\li}{\Theta}$ for some $\Theta$.
+          We then construct for some $\Xi_j$ the arrows $\containsusage{\Gamma_j}{x}{\li}{\Xi_j}$ (the new output channel) and $\containsusage{Xi_j}{j}{m}{\Theta}$ (for the inductive call).
+          Given there exists a composition of arrows from $\Xi_i$ to $\Psi$, we conclude that $\Theta$ splits $\Delta$ such that $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
+          As $\lz$ is a minimal element, then $\Delta_1$ must be $\lz$ at index $i$, and so must $\Delta_2$.
       \end{itemize}
 
     \item
-      $\constr{send}$ applies the ideas outlined for the $\constr{recv}$ constructor to both the channel doing the output and the transmitted data.
+      $\constr{send}$ applies the ideas outlined for the $\constr{recv}$ constructor to both the \textsc{VarRef} doing the output, and the \textsc{VarRef} for the sent data.
 
     \item
       For $\constr{comp}$ we first find a $\delta$, $\Theta$, $\Delta_1$ and $\Delta_2$ such that $\containsusage{\Xi_i}{i}{\delta}{\Theta}$ and $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
-      Given that $\Delta$ is $\lz$ at index $i$, we know that $\Delta_1$ and $\Delta_2$ are so too.
-      We observe that $\opsquared{m}{\delta}{\omega}$ where $\omega$ is what subprocess $P$ consumes at index $i$.
-      We use this to construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
-      We use these constructions to make two inductive calls (on the derivation of $P$ and $Q$) and compose their result.
+      Given $\Delta$ is $\lz$ at index $i$, we conclude that $\Delta_1$ and $\Delta_2$ are too.
+      Observe that $\opsquared{m}{\delta}{\psi}$, where $\psi$ is the usage annotation at index $i$ consumed by the subprocess $P$.
+      We construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
+      We can now make two inductive calls (on the derivation of $P$ and $Q$) and compose their results.
   \end{itemize}  
 \end{proof}
 
+
+\begin{nitheorem}
+  \label{thm:substitution}
+  Let $P$ be a process typed under $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
+  Let $\ni_j m$ be a \textsc{VarRef} $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
+  Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well-typed under $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
+\end{nitheorem}
+\begin{proof}
+  Use framing to derive $\contains{\gamma}{\Gamma}{j}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
+  Supply these to the generalised \autoref{thm:subst-generalization}.
+\end{proof}
 
 \subsection{Subject Reduction}
 \label{subject-reduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-Subject reduction (aka type preservation) relates the operational semantics and the typing system of a language.
-In its usual form, it states that if $P$ reduces to $Q$ and $P$ is well-typed under context $\Gamma$, then $Q$ is well-typed under $\Gamma$ too.
-In the linear \picalc{} however, reduction \emph{is} meant to transform the context: each time communication occurs over a channel, that channel is exhausted.
-In our case, and because we generalise linearity to a partial monoid, the channel over which the communication occurs will loose a multiplicity $\one$ on both its input and output capabilities.
-In  \autoref{semantics}, we made sure to lift the index of the communicating channel to the type level, now we use it to state subject reduction.
+In the linear \picalc{} reduction affects the usage context: communicating over a channel takes away $\one$ input and $\one$ output multiplicity.
 
 \begin{nitheorem}
   Let $P \reduce{c} Q$.
-  If $c$ is $\constr{internal}$ to the process, the context must not be modified and thus $\Gamma' \equiv \Gamma$.
-  If $c$ is $\constr{external}\; i$, the input usage context at index $i$ must be decremented, and therefore $\containsusage{\Gamma'}{i}{\lio}{\Gamma}$.
-  Then the typing derivation $\types{\gamma}{\Gamma'}{P}{\Xi}$ can be transformed into $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+  If $c$ is $\constr{internal}$, then $\Gamma' \equiv \Gamma$.
+  If however $c$ is $\constr{external}\; i$, then $\containsusage{\Gamma'}{i}{\lio}{\Gamma}$.
+  Given $\types{\gamma}{\Gamma'}{P}{\Xi}$ then after reduction $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
 \begin{proof}
   \hfill{}\\
   \begin{itemize}
     \item
-    In the base case $\constr{comm}$ we need to construct a typing derivation $\types{\gamma}{\Gamma}{lower_0 \allowbreak \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi}$ starting from the assumptions in \autoref{fig:subject-reduction:a}.
-    We start by using framing (\autoref{thm:framing}) to rearrange the consumption of the input and output multiplicities of the communicating channel and then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
+    In the $\constr{comm}$ case we apply framing (\autoref{thm:framing}) to rearrange the assumptions in \autoref{fig:subject-reduction:a} into the proofs in \autoref{fig:subject-reduction:b}.
+    We then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
 
     \begin{figure}[h]
-      \setlength{\mathindent}{0pt}
-      \begin{subfigure}{.3\textwidth}
+      \begin{subfigure}{.5\textwidth}
         \begin{alignat*}{2}
           \containsusage{&\Gamma'}{i}{\lio &&}{\Gamma} \\
           \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\li &&}{\Psi} \\
@@ -1119,36 +1107,22 @@ In  \autoref{semantics}, we made sure to lift the index of the communicating cha
           \types{\gamma \comma t}{& \Gamma \comma m}{P &&}{\Theta \comma \lz} \\
           \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
         \end{alignat*}
-        \caption{Rearrange $\lo$ witness, and merge with $\li$ witness into $\lio$.}
+        \caption{Shift witness for $\lo$ and merge with the one for $\li$ into $\lio$.}
+        \label{fig:subject-reduction:b}
       \end{subfigure}
-      % Do not leave empty space
-      \begin{subfigure}{.5\textwidth}
-        \begin{align*}
-          \types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi \comma m}
-        \end{align*}
-        \caption{Substitution.}
-      \end{subfigure}
-      % Do not leave empty space
-      \begin{subfigure}{.5\textwidth}
-        \begin{align*}
-          \types{\gamma \comma t}{\Gamma \comma m}{lower_0 \; (\subst{P}{\suc j}{\constr{zero}})}{\Xi \comma m}
-        \end{align*}
-        \caption{Strengthening.}
-      \end{subfigure}
-      \caption{Proof steps for the $\constr{comm}$ case in subject reduction.}
     \end{figure}
   
     \item
-    Reduction under composition with $\constr{par}$ proceeds by induction on the process that is being reduced.
+    Reduction under $\constr{par}$ proceeds by induction on the process that is being reduced.
 
     \item
     Reduction under scope restriction case splits on the channel $c$ on which communication occurs.
-    If the channel is $\constr{internal}$ to the process subject reduction proceeds inductively.
-    If the channel is $\constr{external}\; \constr{zero}$ -- i.e. the channel that is being introduced by the scope restriction -- we use the \autoref{lm:comm-capable} to subtract $\lio$ from the channel's multiplicity first, then apply the induction hypothesis.
-    If the channel is $\constr{external}\; (\suc i)$ subject reduction proceeds inductively.
+    If $c$ is $\constr{internal}$ subject reduction proceeds inductively.
+    If $c$ is $\constr{external}\; \constr{0}$ -- i.e. the channel that is being introduced by the scope restriction -- we use \autoref{lm:comm-capable} to subtract $\lio$ from the channel's usage annotation and then apply the induction hypothesis.
+    If $c$ is $\constr{external}\; (\suc i)$ subject reduction proceeds inductively.
 
     \item
-    Finally, in the $\constr{struct}$ case, we apply subject congruence (\autoref{thm:subject-congruence}) and the induction hypothesis.
+    In the $\constr{struct}$ case, we apply subject congruence (\autoref{thm:subject-congruence}) and the induction hypothesis.
   \end{itemize}
 \end{proof}
 
