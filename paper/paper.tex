@@ -1,5 +1,6 @@
 \documentclass[a4paper,UKenglish,cleveref, autoref, thm-restate,authorcolumns]{lipics-v2019}
 
+\usepackage[dvipsnames]{xcolor}
 \usepackage[utf8]{inputenc}
 \usepackage{url}
 \usepackage{todonotes}
@@ -63,9 +64,9 @@
 \newcommand{\stacked}[1]{\mprset{flushleft} \inferrule*{}{#1}}
 \newcommand{\datatype}[2]{{\mprset{fraction={===}} \inferrule{#1}{#2}}}
 
-\newcommand{\type}[1]{\textcolor{blue}{\operatorname{#1}}}
-\newcommand{\constr}[1]{\textcolor{olive}{\operatorname{#1}}}
-\newcommand{\field}[1]{\textcolor{red}{\operatorname{#1}}}
+\newcommand{\type}[1]{\textcolor{BlueViolet}{\operatorname{#1}}}
+\newcommand{\constr}[1]{\textcolor{BurntOrange}{\operatorname{#1}}}
+\newcommand{\func}[1]{\textcolor{OliveGreen}{\operatorname{#1}}}
 
 % Constructors
 \newcommand{\PO}{\constr{\mathbf{0}}}
@@ -82,18 +83,16 @@
 \newcommand{\comma}{\; \constr{,} \;}
 
 % Functions
-\newcommand{\subst}[3]{#1 \; [ \; #3 \; \mapsto \;#2 \;]}
-\newcommand{\opsquared}[3]{#1 \, \coloneqq \, #2 \, \cdot^2 \, #3}
-\newcommand{\opctx}[3]{#1 \, \coloneqq \, #2 \, \otimes \, #3}
-
-% Fields
-\newcommand{\op}[3]{#1 \; \field{\coloneqq} \; #2 \; \field{\cdot} \; #3}
-\newcommand{\zero}{\field{0\cdot}}
-\newcommand{\one}{\field{1\cdot}}
-\newcommand{\li}{\ell_i}
-\newcommand{\lo}{\ell_o}
-\newcommand{\lz}{\ell_{\o}}
-\newcommand{\lio}{\ell_{\#}}
+\newcommand{\subst}[3]{#1 \; \func{[} \; #3 \; \func{\mapsto} \;#2 \; \func{]}}
+\newcommand{\op}[3]{#1 \; \func{\coloneqq} \; #2 \; \func{\cdot} \; #3}
+\newcommand{\opsquared}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\cdot^2} \, #3}
+\newcommand{\opctx}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\otimes} \, #3}
+\newcommand{\zero}{\func{0\cdot}}
+\newcommand{\one}{\func{1\cdot}}
+\newcommand{\li}{\func{\ell_i}}
+\newcommand{\lo}{\func{\ell_o}}
+\newcommand{\lz}{\func{\ell_{\o}}}
+\newcommand{\lio}{\func{\ell_{\#}}}
 
 % Types
 \newcommand{\Set}{\type{SET}}
@@ -163,9 +162,6 @@
 \end{abstract}
 
 \todo{make sure all citations are there}
-\todo{change colors, color functions}
-\todo{do not distinguish fields from functions, it is not worth it}
-\todo{go over guillaume's paper again}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -270,8 +266,7 @@ Data type definitions use double lines and index-free synonyms as rule names (fo
 We otherwise use the constructor name as the name of a typing rule.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned by type definitions but omitted in constructors.
-$\type{TYPES}$ are in blue and uppercased (with indices as subscripts), $\constr{constructors}$ are in olive, $\field{fields}$ in red, and variables and functions in black.
-Some constructor names are overloaded --- they and disambiguated by context.
+$\type{TYPES}$ are blue volet (uppercased, with indices as subscripts), $\constr{constructors}$ are burnt orange, $\func{functions}$ are olive green, variables are black, and some constructor names are overloaded --- and disambiguated by context.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
@@ -406,11 +401,11 @@ Its congruent equivalence closure \textsc{Equals} is provided in \autoref{app:st
   
   \inferrule
   {uQ : \Unused_0 \; Q}
-  {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{lower_{\constr{0}} \; \; Q \; uQ}}
+  {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{\func{lower}_{\constr{0}} \; \; Q \; uQ}}
 
   \inferrule
   { }
-  {\constr{scope-comm} : \new \new P \eqeq \new \new swap_{\constr{0}} \; P}
+  {\constr{scope-comm} : \new \new P \eqeq \new \new \func{swap}_{\constr{0}} \; P}
 \end{mathpar}
 \caption{Base cases of structural congruence.}
 \label{fig:struct-cong-base}
@@ -420,8 +415,8 @@ The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\P
 The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
 
 In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
-The function $lower_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
-In $\constr{scope-comm}$ the function $swap_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
+The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index bigger than $i$.
+In $\constr{scope-comm}$ the function $\func{swap}_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -436,7 +431,7 @@ Reduction is closed under parallel composition (rule $\constr{par}$), restrictio
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
 We keep track of the channel over which communication occurs so that we can state subject reduction.
-We use a $dec$ function to decrement the index of this channel every time we come out of a binder.
+We use a $\func{dec}$ function to decrement the index of this channel every time we come out of a binder.
 This function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
 
 
@@ -462,7 +457,7 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{lower_{\constr{0}} \; (\subst{P}{j}{\constr{0}})}{Q}}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{\func{lower}_{\constr{0}} \; (\subst{P}{j}{\constr{0}})}{Q}}
 
   \inferrule
   {red : P \reduce{c} P'}
@@ -470,10 +465,10 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 
   \inferrule
   {red : P \reduce{c} Q}
-  {\constr{res} \; red : \new P \reduce{dec\; c} \new Q}
+  {\constr{res} \; red : \new P \reduce{\func{dec}\; c} \new Q}
 
   \inferrule
-  {eq : P = P' \\ red : P' \reduce{c} Q}
+  {eq : P \eq{r} P' \\ red : P' \reduce{c} Q}
   {\constr{struct} \; eq \; red : P \reduce{c} Q}
 \end{mathpar}
 \caption{Operational semantics indexed by the channel over which reduction occurs.}
@@ -538,7 +533,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
 \begin{note}
   We will often work with pairs of input and output multiplicities.
-  We use the notation $\Usage_{idx}^2$ to stand for a $\Usage_{idx} \times \Usage_{idx}$ tuple of input and output multiplicities, respectively.
+  We use the notation $\Usage_{idx}^{\func{2}}$ to stand for a $\Usage_{idx} \times \Usage_{idx}$ tuple of input and output multiplicities, respectively.
   We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
   Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
 \end{note}
@@ -570,7 +565,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
     {\base{n} : \Type}
   
     \inferrule
-    {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Usage_{idx}^2}}
+    {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Usage_{idx}^{\func{2}}}}
     {\channel{t}{x} : \Type}
   \end{mathpar}
   
@@ -611,8 +606,6 @@ The former are preserved throughout a typing derivation; the latter are transfor
         {idxs : \Idxs_n \\ idx : \Idx}
         {idxs \comma idx : \Idxs_{\suc n}}
   
-        \\
-        
     \datatype
     {idxs : \Idxs_n}
     {\Ctx_{idxs} : \Set}
@@ -621,10 +614,10 @@ The former are preserved throughout a typing derivation; the latter are transfor
     
     \inferrule
         { }
-        {[] : Ctx_{[]}}
+        {[] : \Ctx_{[]}}
         
     \inferrule
-        {\Gamma : \Ctx_{idxs} \\ x : \Usage_{idx} ^2}
+        {\Gamma : \Ctx_{idxs} \\ x : \Usage_{idx} ^{\func{2}}}
         {\Gamma \comma x : \Ctx_{idxs \comma idx}}
   \end{mathpar}
   \caption{Length-indexed context of carrier indices with a context of multiplicities on top.}
@@ -686,7 +679,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
       t : \Type \\
       \stacked{
         idx : \Idx \\\\
-        y : \Usage_{idx}^2} \\
+        y : \Usage_{idx}^{\func{2}}} \\
       \Delta : \Ctx_{idxs}}
     {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}
     \; \textsc{VarRef}
@@ -734,7 +727,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
     {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
   
     \inferrule
-    {t : \Type \\ x : \Usage_{idx}^2 \\ y : \Usage_{idx'} \\\\
+    {t : \Type \\ x : \Usage_{idx}^{\func{2}} \\ y : \Usage_{idx'} \\\\
      cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
     {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
   
@@ -836,9 +829,9 @@ Inserting a new variable into the context preserves the well-typedness of a proc
 
 \begin{nitheorem}
   \label{thm:weakening}
-  Let $insert_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
+  Let $\func{insert}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then lifting every variable greater than or equal to $i$ in $P$ is well-typed under $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
+  Then lifting every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{insert}_i \; t \; \gamma}{\func{insert}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{insert}_i \; x \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
@@ -857,10 +850,10 @@ We say a variable is \emph{unused} within a process if neither inputs nor output
 
 \begin{nitheorem}
   \label{thm:strengthening}
-  Let $delete_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
+  Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable index not mentioned by $P$, such that $\Unused_i \; P$.
-  Then lowering every variable greater than or equal to $i$ in $P$ is well-typed under $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
+  Then lowering every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{delete}_i \; \gamma}{\func{delete}_i \; \Gamma}{\func{lower}_i \; P}{\func{delete}_i \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
@@ -880,10 +873,11 @@ Swapping two variables preserves the well-typedness of a process.
 
 \begin{nitheorem}
   \label{thm:swapping}
-  Let $swap_i$ be a function that swaps variables $i$ and $\suc i$.
-  For simplicity, we overload $swap$ and use it to swap types in a typing context, multiplicities in a usage context, and variable references in a process.
+  Let $\func{swap}_i$ be a function that swaps variables $i$ and $\suc i$.
+  For simplicity, we overload $\func{swap}$ and use it to swap types in a typing context, multiplicities in a usage context, and variable references in a process.
+  \todo{}
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then $\types{swap_i \; \gamma}{swap_i \; \Gamma}{swap_i \; P}{swap_i \; \Xi}$.
+  Then $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.

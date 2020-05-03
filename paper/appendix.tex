@@ -89,13 +89,13 @@ We then encapsulate a set carriers and their algebras in \autoref{fig:indexed-mu
   &\zero                  &:{} &                      &        & C \\
   &\one                   &:{} &                      &        & C \\
   &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to et \\
-  &\field{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
-  &\field{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-  &\field{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  &\field{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-  &\field{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
-  &\field{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-  &\field{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
+  &\func{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
+  &\func{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+  &\func{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+  &\func{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
+  &\func{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
+  &\func{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
+  &\func{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
 \end{aligned}
 \end{equation}
 \caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid.}
@@ -105,10 +105,10 @@ We then encapsulate a set carriers and their algebras in \autoref{fig:indexed-mu
 \begin{figure}[h]
   \begin{equation}
     \begin{split}
-      &\field{IDX}          &:{} &\Set \\
-      &\field{\exists IDX}  &:{} &\field{IDX} \\
-      &\field{USAGE}        &:{} &\field{IDX} \to \Set \\
-      &\field{QUANTIFIERS}  &:{} &(i : \field{IDX}) \to \Quantifier_{\field{USAGE}_i}
+      &\func{IDX}          &:{} &\Set \\
+      &\func{\exists IDX}  &:{} &\func{IDX} \\
+      &\func{USAGE}        &:{} &\func{IDX} \to \Set \\
+      &\func{QUANTIFIERS}  &:{} &(i : \func{IDX}) \to \Quantifier_{\func{USAGE}_i}
     \end{split}
   \end{equation}
   \caption{Indexed set of usage algebras.}
@@ -120,7 +120,7 @@ We then encapsulate a set carriers and their algebras in \autoref{fig:indexed-mu
 
 \begin{nilemma}
   \label{lm:lower-lift}
-  The function $lower_i \; P \; uP$ has an inverse $lift_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $lift_i \; (lower_i \; P \; uP) \equiv P$.
+  The function $\func{lower}_i \; P \; uP$ has an inverse $\func{lift}_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $\func{lift}_i \; (\func{lower}_i \; P \; uP) \equiv P$.
 \end{nilemma}
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
@@ -128,7 +128,7 @@ We then encapsulate a set carriers and their algebras in \autoref{fig:indexed-mu
 
 \begin{nilemma}
   \label{lm:swap-swap}
-  The function $swap_i \; P$ is its own inverse: $swap_i \; (swap_i \; P) \equiv P$.
+  The function $\func{swap}_i \; P$ is its own inverse: $\func{swap}_i \; (\func{swap}_i \; P) \equiv P$.
 \end{nilemma}
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
