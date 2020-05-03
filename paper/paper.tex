@@ -480,6 +480,13 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   For a formal definition, refer to \autoref{fig:multiplicities} in \autoref{app:usage-algebra}.
 \end{nidefinition}
 
+\begin{note}
+  We will often work with pairs of input and output multiplicities.
+  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \times \type{C}$ tuple of input and output multiplicities, respectively.
+  We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
+  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
+\end{note}
+
 Linear, gradual and shared types are all defined as an instance of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
@@ -512,13 +519,6 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
   $\Idx$ must be non-empty.
   Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:usage-algebra} for a formal definition.
 \end{nidefinition}
-
-\begin{note}
-  We will often work with pairs of input and output multiplicities.
-  We use the notation $\Usage_{idx}^{\func{2}}$ to stand for a $\Usage_{idx} \times \Usage_{idx}$ tuple of input and output multiplicities, respectively.
-  We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
-  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
-\end{note}
 
 We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
