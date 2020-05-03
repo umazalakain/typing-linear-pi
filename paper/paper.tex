@@ -829,15 +829,15 @@ Framing captures the idea that the well-typedness of a process is independent of
 \label{weakening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Weakening states that adding new variables to the typing and input and output usage contexts preserves the well-typedness of a process.
-The usage annotations of the new variables will be left untouched as leftovers.
+Adding a new variable to the context preserves the well-typedness of a process as long as the usage annotation of that variable is preserved unchanged as a leftover.
 
 \begin{nitheorem}
   \label{thm:weakening}
   Let $P$ be a well-typed process $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Insert an arbitrary type $t$ at position $i$ in the typing context, and an arbitrary usage annotation $x$ at position $i$ into both the input and output contexts.
-  Increment every referrence to a variable greater than or equal to $i$ in process $P$.
-  The resulting process will be well-typed so that $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
+  For simplicity, we overload $insert$ and use it to insert types in typing contexts and usage annotations in usage contexts.
+  Increment every variable referrence greater than or equal to $i$ in process $P$.
+  The resulting process is well-typed so that $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
@@ -847,14 +847,16 @@ The usage annotations of the new variables will be left untouched as leftovers.
 \label{strengthening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Strengthening states that removing unused variables from the typing and usage contexts preserves the well-typedness of a process.
-The proof that a variable is unused within a process must be syntactical and cannot rely on the preservation of its usage annotations between the input and output contexts: a process can refer to a variable and still make no use of it -- e.g. by sending none of its multiplicities over a channel.
+Removing an unused variable preserves the well-typedness of a process.
+The proof that a variable is unused within a process must be syntactical and cannot rely on the preservation of its usage annotations as leftovers: a process can refer to a variable and still make no use of it --- by sending $\lz$ usage annotations over a channel.
 
 \begin{nitheorem}
   \label{thm:strengthening}
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let $i$ be a variable index that is not mentioned by $P$, such that $\Unused_i \; P$.
-  Then removing index $i$ from the typing context and both of the usage contexts and decrementing every variable in $P$ greater than $i$ preserves its well typedness, so that $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
+  Let $i$ be a variable index not mentioned by $P$, such that $\Unused_i \; P$.
+  Remove the elements at index $i$ from the typing and usage contexts and decrement every variable in $P$ greater than $i$.
+  For simplicity, we overload $delete$ and use it to delete types from typing contexts and usage annotations from usage contexts.
+  The result preserves the well-typedness of the process, so that $\types{delete_i \; \gamma}{delete_i \; \Gamma}{lower_i \; P}{delete_i \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
@@ -864,14 +866,13 @@ The proof that a variable is unused within a process must be syntactical and can
 \label{swapping}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Swapping two variables (in the typing context, input and output usage contexts and process) preserves the well-typedness of a process.
+Swapping two variables preserves the well-typedness of a process.
 
 \begin{remark}
   We limit ourselves to the swapping of contiguous variables $i$ and $\suc i$.
   Doing so is enough to prove subject reduction.
   The swapping of any two variables can be modeled as a sequence of contiguous variable swappings.
 \end{remark}
-
 
 \begin{nitheorem}
   \label{thm:swapping}
