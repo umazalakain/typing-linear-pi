@@ -7,6 +7,7 @@
 \usepackage{amssymb}
 \usepackage[fleqn]{amsmath}
 \usepackage{amsbsy}
+\usepackage{mathbbol}
 \usepackage{mathtools}
 \usepackage[many]{tcolorbox}
 \bibliographystyle{plainurl}
@@ -35,23 +36,6 @@
 \newtheorem{nitheorem}[theorem]{Theorem}
 \newtheorem{nilemma}[theorem]{Lemma}
 
-% An i with a heart on top
-\usepackage{pifont}
-\usepackage{graphics}
-\newcommand\iheart{%
-    \begingroup
-    \settowidth{\dimen0}{i}%
-    i%
-    \llap{\makebox[\dimen0][c]{%
-        \color{white}%
-        \raisebox{1.23ex}{\scalebox{0.40}{$\blacksquare$}}%
-      }}%
-    \llap{\makebox[\dimen0][c]{%
-        \raisebox{1.23ex}{\scalebox{0.20}{\ding{170}}}%
-    }}%
-    \endgroup
-}
-
 % No line numbers
 \nolinenumbers
 
@@ -69,7 +53,7 @@
 \newcommand{\func}[1]{\textcolor{OliveGreen}{\operatorname{#1}}}
 
 % Constructors
-\newcommand{\PO}{\constr{\mathbf{0}}}
+\newcommand{\PO}{\constr{\mathbb{0}}}
 \newcommand{\comp}[2]{#1 \; \constr{\parallel} \; #2}
 \newcommand{\new}{\constr{\boldsymbol{\nu}} \;}
 \newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
@@ -136,7 +120,7 @@
 \ccsdesc[300]{Theory of computation~Process calculi}
 \keywords{pi-calculus, linear types, leftover typing, concurrency, mechanization, Agda}
 \supplement{\url{https://github/umazalakain/typing-linear-pi}}
-\acknowledgements{We want to thank Er\iheart ka Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
+\acknowledgements{We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 \funding{Supported by the UK EPSRC grant EP/K034413/1, ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233
   ``Behavioural Application Program Interfaces'' (BehAPI).}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -373,7 +357,6 @@ We introduce the operational semantics for the \picalc{}, starting with structur
 We define the base cases of a structural congruence relation \textsc{StructCong} in \autoref{fig:struct-cong-base}.
 Its congruent equivalence closure \textsc{Equals} is provided in \autoref{app:struct}.
 
-\todo{remove space between inferrules}
 \begin{figure}[h]
 \begin{mathpar}
   \datatype
@@ -546,7 +529,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
   The base type $\base{n}$ uses natural numbers as placeholders for types --- the host language can interpret the former into the latter.
   This is for convenience, so that there is less universe polymorphism polluting specifications.
   The type $\channel{t}{x}$ of a channel determines what type of data and what usage annotations are sent over that channel.
-  We keep track of types in a length-indexed \emph{pre-context} $\PreCtx_n$.
+  We keep track of types in a length-indexed $\PreCtx_n$.
   
   \begin{figure}[h]
   \begin{mathpar}
