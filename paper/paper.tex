@@ -424,7 +424,8 @@ In all the above, $i$ is incremented every time we go under a binder.
 The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} indexed by the channel $i$ on which communication occurs (\autoref{fig:reduction}).
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel ${i}$.
 As a result of that communication, the continuation of the input process $P$ gets all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
-After substitution, $\subst{P}{j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one.
+After substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one.
+To do so, we apply \autoref{lm:subst-unused} in \autoref{app:lemmas} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$.
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
@@ -455,7 +456,7 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{\func{lower}_{\constr{0}} \; (\subst{P}{j}{\constr{0}})}{Q}}
+  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{\func{lower}_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}}) \; uP'}{Q}}
 
   \inferrule
   {red : P \reduce{c} P'}

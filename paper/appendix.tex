@@ -115,8 +115,16 @@ We then encapsulate a set carriers and their algebras in \autoref{fig:indexed-mu
   \label{fig:indexed-multiplicities}
 \end{figure}
 
-\section{Lemmas for Type Safety}
-\label{app:lemmas-type-safety}
+\section{Lemmas}
+\label{app:lemmas}
+
+\begin{nilemma}
+  \label{lm:subst-unused}
+  For every variables $i$ and $j$, if $i \not\equiv j$ then $\Unused_i (\subst{P}{j}{i})$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 \begin{nilemma}
   \label{lm:lower-lift}
