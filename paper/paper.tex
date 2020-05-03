@@ -42,8 +42,11 @@
     \settowidth{\dimen0}{i}%
     i%
     \llap{\makebox[\dimen0][c]{%
-        \kern-0.000em%
-        \raisebox{1.1ex}{\scalebox{0.30}{\ding{170}}}%
+        \color{white}%
+        \raisebox{1.23ex}{\scalebox{0.40}{$\blacksquare$}}%
+      }}%
+    \llap{\makebox[\dimen0][c]{%
+        \raisebox{1.23ex}{\scalebox{0.20}{\ding{170}}}%
     }}%
     \endgroup
 }
@@ -181,7 +184,7 @@ The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational mo
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data through communication channels.
 Notably, it features \emph{channel mobility}: the channels themselves are first order constructs, and can therefore be transmitted.
 The \picalc{} acts as a foundation for the design and implementation of programming languages for concurrency, such as Pict \cite{Pierce} and (more recently) Go \cite{Golang}.
-Moreover, at the state-of-the-art, the \picalc{} features a wide plethora of types: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types \cite{K07}. This makes the \picalc{} a fully-fledged tool for the modelling and verification of concurrent and distributed systems.
+Moreover, at the state-of-the-art, the \picalc{} features a wide plethora of types: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types \cite{K07}. This makes the \picalc{} a fully-fledged tool for the modeling and verification of concurrent and distributed systems.
 
 In a parallel track, J.-Y. Girard's development of linear logic \cite{Girard87} in the early '90s opened new avenues in computing science by introducing \emph{linear types} for (functional) programming languages \cite{Curry-Howard,Wadler90,Bernardy2018}.
 Linear type systems guarantee that resources are used \emph{exactly once}.
@@ -201,11 +204,11 @@ This encoding not only has theoretical benefits in terms of expressivity of sess
 The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}.
 This means that we can use the linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be built.
 
-Considering the importance of the \picalc{} and of linearity in modelling concurrent and distributed systems, in this paper we focus our research on both and go beyond.
+Considering the importance of the \picalc{} and of linearity in modeling concurrent and distributed systems, in this paper we focus our research on both and go beyond.
 We present for the first time a full mechanisation in Agda of a \picalc{} with linear, gradual and shared types, all under the same unified framework.
 We do so by defining a specification for an algebra on multiplicities and using it to apply leftover typing (following Allais \cite{Allais2018a}) to the \picalc{} for the first time.
 The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
-Ultimately, we can use $\pi$ with leftovers as a unified framework for type safe distributed modelling and programming with a variety of type systems, on top of which more advanced types, theories and languages can be built.
+Ultimately, we can use $\pi$ with leftovers as a unified framework for type safe distributed modeling and programming with a variety of type systems, on top of which more advanced types, theories and languages can be built.
 While linearity is needed for type safety, gradual types and shared types are needed for real-world systems.
 
 \subsection{Contributions}
@@ -216,7 +219,7 @@ Our contributions are the following:
   \autoref{semantics} provides an operational semantics for the untyped \picalc{}, prior to any typing.
   This operational semantics is given as a reduction relation on processes.
   The reduction relation tracks at the type level what channel the communication occurs on, so that this information can then be used to state subject reduction --- aka type preservation.
-  It is also defined modulo structural congruence --- a relation that acts as a quotient type that gets rid of the unecessary syntactic minutiae introduced by the syntax of the \picalc{}.
+  It is also defined modulo structural congruence --- a relation that acts as a quotient type that gets rid of the unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
   \item \textbf{Leftover typing for the \picalc{}, with linear, gradual and shared types}:
   \autoref{type-system} provides the type system for a resource-aware \picalc{}.
@@ -228,7 +231,7 @@ Our contributions are the following:
   The typing judgments use \emph{leftover typing} to model the resource-aware \picalc{}.
   This approach adds a leftover usage context to the typing judgments.
   Typing derivations take the resources of their input usage context, consume some of them, and leave the rest as leftovers in the output usage context.
-  These technique renders explicit context splits unecessary.
+  These technique renders explicit context splits unnecessary.
 
   \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
   \autoref{type-safety} builds on several theorems to proof subject reduction for our type system.
@@ -237,7 +240,7 @@ Our contributions are the following:
   We use these to prove \textbf{subject congruence} (structural congruence rules can be freely applied while preserving well-typedness) and \textbf{substitution} (a variable can be substituted for another as long as this other variable is capable of doing everything the original one did), and use these to prove \textbf{subject reduction} (a well-typed process that reduces will still be well-typed).
 
   \item \textbf{Fully mechanised formalisation available in Agda}:
-  This work has been fully formalised in Agda and is publicly avaible \cite{Zalakain2020Agda}.
+  This work has been fully formalised in Agda and is publicly available \cite{Zalakain2020Agda}.
 
 \end{itemize}
 
@@ -494,7 +497,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types.
 
 \begin{nidefinition}
-  Our usage algebra is a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associtive}, and \emph{commutative}.
+  Our usage algebra is a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
   For a formal definition, refer to \autoref{fig:multiplicities} in \autoref{app:usage-algebra}.
@@ -507,7 +510,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
   \item [Linear]
     The carrier is a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
     The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited in every other case.
-    All other properties are lifted elementwise.
+    All other properties are lifted element-wise.
 
     \item [Gradual]
     The carrier is the type of natural numbers $\N$.
@@ -536,8 +539,8 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \begin{note}
   We will often work with pairs of input and output multiplicities.
   We use the notation $\Usage_{idx}^2$ to stand for a $\Usage_{idx} \times \Usage_{idx}$ tuple of input and output multiplicities, respectively.
-  We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted elementwise.
-  Henceworth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
+  We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
+  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
 \end{note}
 
 We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
@@ -641,7 +644,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
 We use \emph{leftover typing} \cite{Allais2018a} for our typing rules, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
-This techinque presents three main advantages:
+This technique presents three main advantages:
 \begin{itemize}
   \item
     The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgment with both an input and an output usage context.
@@ -667,7 +670,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
   This splitting is as per the usage algebra defined on the index of the usage annotation.
 
   \begin{remark}
-    We use the functionality of the monoidal relation to aliviate the user from the proof burden $\opsquared{x}{y}{z}$.
+    We use the functionality of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   \end{remark}
 
   \begin{figure}[h]
@@ -829,14 +832,14 @@ Framing captures the idea that the well-typedness of a process is independent of
 \label{weakening}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Adding a new variable to the context preserves the well-typedness of a process as long as the usage annotation of that variable is preserved unchanged as a leftover.
+Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 
 \begin{nitheorem}
   \label{thm:weakening}
   Let $P$ be a well-typed process $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Insert an arbitrary type $t$ at position $i$ in the typing context, and an arbitrary usage annotation $x$ at position $i$ into both the input and output contexts.
   For simplicity, we overload $insert$ and use it to insert types in typing contexts and usage annotations in usage contexts.
-  Increment every variable referrence greater than or equal to $i$ in process $P$.
+  Increment every variable reference greater than or equal to $i$ in process $P$.
   The resulting process is well-typed so that $\types{insert_i \; t \; \gamma}{insert_i \; x \; \Gamma}{lift_i \; P}{insert_i \; x \; \Xi}$.
 \end{nitheorem}
 \begin{proof}
@@ -940,7 +943,7 @@ In a resource-aware \picalc{}, that means that instead of exhausting all $m$ mul
 
 \begin{nitheorem}
   \label{thm:substitution}
-  Let $P$ be a process where the most recent variable has all its $m$ multiplities exhausted, such that $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
+  Let $P$ be a process where the most recent variable has all its $m$ multiplicities exhausted, such that $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $j$ be the index of the data with $m$ multiplicities that is being received after $P$ is done, so that $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
   Then, we can substitute variable $\constr{zero}$ in $P$ with $\suc j$.
   As a result, the multiplicities at $\constr{zero}$ will be preserved and those at $j$ will be consumed instead, resulting in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{zero}}}{\Xi \comma m}$.
@@ -1168,7 +1171,7 @@ He then goes on showing the soundness and completeness with respect to the seque
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Future Work}
 
-Work that will be done time permiting:
+Work that will be done time permitting:
 
 \begin{description}
 
