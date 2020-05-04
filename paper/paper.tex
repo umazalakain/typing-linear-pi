@@ -1120,14 +1120,41 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
 
+Most of the work on mechanising resource-aware calculi is very recent.
+
 This work is heavily based on the work by Allais \cite{Allais2018a}.
 Allais uses leftover typing to build a bidirectional type system for the linear \lambdacalc{}.
-He proves type preservation and provides a procedure that decides type checking and type inference.
+He proves type preservation and provides a decision procedure for type checking and type inference.
 He then goes on showing the soundness and completeness with respect to the sequent calculus for intuitionistic linear logic.
+Also extrinsic.
+Also in Agda.
+Also de Bruijn.
+We apply this to the \picalc{}.
+We generalise the usage algebra.
+Our type system is not bidirectional --- scope restriction needs usage annotations.
+Adding bidirectionality would provide us with a decision procedure for type checking.
 
 \cite{Thiemann2019}
+intrinsicly typed
+linear session types with recursion and subtyping.
+also in Agda.
+Also de Bruijn.
+semantics as an intrinsically typed CEK machine
+explicit context splits
+MicroSession, minimal GV, lambda calculus with session types
+contexts remove elements with multiplicity 0
+keeps a global session context
+
+\cite{Goto2016a}
+first session-type paper with a mechanised proof of type safety
+Session types
+Coq
+Extrinisically typed
+Session type polymorphism
+
 \cite{Rouvoet2020}
 \cite{Veltri2020}
+\cite{Gay2001}
 
 \cite{previous-work} polymorphic tokens, HOAS
 
