@@ -637,34 +637,42 @@ The former are preserved throughout a typing derivation; the latter are transfor
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
 
-We use \emph{leftover typing} \cite{Allais2018a} for our typing rules, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
+We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
-This technique presents three main advantages:
+Leftover typing presents three main advantages:
 \begin{itemize}
   \item
     The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgment with both an input and an output usage context.
   \item
-    The need for an extensional context splitting proof for parallel composition is eradicated.
-    Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
+    No need for an extensional context splitting proof for parallel composition.
+    Alternatively, such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
     This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
   \item
-    New theorems (\textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening})) can suddenly be stated.
+    New theorems (\textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening})) can suddenly be stated. \todo{explain suddenly}
 \end{itemize}
   
 We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
-Both of these are indexed by a typing context, an input usage context, and an output usage context.
+Both are indexed by a typing context ($\gamma$), an input usage context ($\Gamma$), and an output usage context or leftovers ($\Delta$).
+A typing context $\gamma$ keeps track of...  An input or output usage context $\Gamma,\Delta$ keeps track of...
 
 \begin{nidefinition}
   \label{def:varref}
 
-  The \textsc{VarRef} relation presented in \autoref{fig:variable-references} keeps track of the index, type, and usage annotation of a variable within a particular typing and usage context.
-  The leftover usage context is the result of subtracting the usage annotation from the input usage context.
+  The \textsc{VarRef} relation is presented in \autoref{fig:variable-references}.
+  The judgment $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ reads as "..." 
+  The premise of \textsc{VarRef} means that...
+  \todo{use parts from the commented sentences to complete the dots; refer to the greek letters.}
+  \todo{Again, not sure I like the notation of this judgement...Instead of the square I would put $\triangleright$ If the relation is symmetric, then use a symmetric symbol, otherwise a symbol that conveys direction. Also, it seems as if the direction changes with that epsilon inverted.}
+  % keeps track of the index, type, and usage annotation of a variable within a particular typing and usage context.
+  % The leftover usage context is the result of subtracting the usage annotation from the input usage context.
 
-  The base case $\constr{here}$ splits the usage annotation $x$ into $y$ and $z$, the leftovers.
-  This splitting is as per the usage algebra defined on the index of the usage annotation.
+  The base case $\constr{here}$ splits the usage annotation $x$ into $y$ and $z$, which are the leftovers.
+  This splitting is as per the usage algebra defined on the index of the usage annotation in \autoref{}.
+  $\constr{there}$...
 
+  \todo{integrate the remark somewhere else, rather than in a remark?}
   \begin{remark}
     We use the functionality of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   \end{remark}
@@ -701,17 +709,21 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 \end{nidefinition}
 
 \begin{example}
-  The following example asserts that the input $\channel{\unit}{\li}$ type at index $\suc \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
-  \begin{lstlisting}[mathescape,caption=Here the underscore \_ introduces an anonymous declaration immediately followed by its definition.]
+  Let us illustrate the use of channels with an example.
+  \begin{lstlisting}[label=lst:channels,mathescape,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\constr{suc} \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\constr{there} \; \constr{here}$
   \end{lstlisting}
+  \autoref{lst:channels} asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
+  The continuation means that...
+  Finally, $= \constr{there} \; \constr{here}$ means that...
 \end{example}
 
 \begin{nidefinition}
   \label{def:types}
 
-  The typing relation \textsc{Types} presented in \autoref{fig:types} asserts that process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$.
+  The typing relation \textsc{Types} is presented in \autoref{fig:types}.
+  The typing judgement $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that "process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$".
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -756,7 +768,8 @@ Both of these are indexed by a typing context, an input usage context, and an ou
   \label{fig:types}
   \end{figure}
 
-  Process termination threads usage annotations unchanged from input to output.
+  Some comments on the leftover typing system follow.
+  The inaction process does not change usage annotations.
 
   Scope restriction expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
   This multiplicity $y$ is used for both input and output, so that these are balanced.
@@ -773,11 +786,12 @@ Both of these are indexed by a typing context, an input usage context, and an ou
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
   
   Parallel composition uses the leftovers of left-hand process to type the right-hand process.
+  \todo{explain the rationale here as most people would expect a combination/splitting of typing context, which for us is not needed anymore. just add a sentence}
 \end{nidefinition}
 
 \begin{example}
   \label{example-derivations}
-  The example below uses linear and shared types to type the process $p$. 
+  Let us illustrate a derivation of typing with leftovers by the following example, which uses linear and shared types to type the process $p$. 
   We define $\omega$ as a $(\one \comma \one)$ usage in an algebra for shared types.
   We define $\epsilon$ as the empty usage context where all usages are $(\zero \comma \zero)$.
   The typing derivation creates a new channel with usage $(\one \comma \one)$.
@@ -798,6 +812,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
            $(\constr{chan} \; \unit \; \omega \; \one \; (\constr{send} \; (\constr{there} \; \constr{here}) \; \constr{here} \; (\constr{send} \; \constr{here} \; (\constr{there} \; \constr{here} \; \constr{there}) \; \constr{end})))
        )$
   \end{lstlisting}
+  \todo{not easy to follow. you need to expalin each bit of this derivation. when you comment you need to refer to what you are commenting on. either put things in bracket when commenting or refer to line number or whatnot}
 \end{example}
 
 
@@ -806,13 +821,13 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 \label{type-safety}
 
 \todo{intro}
-
+\todo{I wonder if we can remove the proofs everywhere and comment on them in the intro and where they can be found.}
 \subsection{Framing}
 \label{framing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Framing captures the idea that the well-typedness of a process is independent of its leftover resources.
-
+\todo{Do not forward refer when it comes to results. Never refer to results in the appendix. Consider that, if the paper get publshed, it will get so without the appendix. It should be *completely* self contained}
 \begin{nitheorem}
   \label{thm:framing}
   Let $P$ be a well-typed process $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
@@ -886,6 +901,8 @@ Swapping two variables preserves the well-typedness of a process.
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
+\todo{Maybe all previous subsections could be put into one "Auxiliary Results"}
+\todo{Replace the proofs with an intuition on the theorem}
 \subsection{Subject Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
@@ -896,6 +913,7 @@ Swapping two variables preserves the well-typedness of a process.
   That is, if $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
+\todo{considering that Equals is in the appendix, you cannot do induction on something that is not defined in the main text. Bring the proof in the appendix. Maybe briefly comment on the proof here}
 \begin{proof}
   By induction on \textsc{Equals}.
   The base cases under $\constr{struct}$ (and their symmetric variants under $\constr{sym}$) are the nontrivial ones.
@@ -928,7 +946,7 @@ Swapping two variables preserves the well-typedness of a process.
 
 \autoref{thm:subst-generalization} proves a generalized version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalized version to the concrete case where $i$ is $\constr{0}$, as required by subject reduction.
-
+\todo{Structure the theorem (in general the long ones) a bit more. Use itemize or similar. It's a blob of text.}
 \begin{nitheorem}
   \label{thm:subst-generalization}
   Let process $P$ be well-typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$,
@@ -1017,6 +1035,7 @@ Swapping two variables preserves the well-typedness of a process.
   For convenience, we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
 \end{nidefinition}
   
+\todo{I don't think a reviewer from CONCUR most likely will nto get the proof. Appendix! Replace it with a proof sketch where you comment on the diagram as well.}
 \begin{proof}
   By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   \begin{itemize}
@@ -1079,6 +1098,7 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
   Given $\types{\gamma}{\Gamma'}{P}{\Xi}$ then after reduction $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
+\todo{maybe only focus on the first case, internal and external and say the rest is by induction blah bla and details can be found in appenix/or github}
 \begin{proof}
   \hfill{}\\
   \begin{itemize}
@@ -1124,7 +1144,7 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\section{Related Work}
+\section{Conclusion, Related and Future Work}
 
 Leftover typing as presented in this paper is based on work by Allais \cite{Allais2018a}.
 Allais uses leftover typing to mechanise in Agda a bidirectional type system for the linear \lambdacalc{}.
@@ -1151,10 +1171,10 @@ Their type system uses reorering of contexts and extrinsic contex splits.
 \cite{Rouvoet2020}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusions}
-
+To conclude, in this paper...
 Mechanisation of the linear, gradual and shared \picalc{} in less than 1500 lines of code.
 
+As future work we intend to...
 Adding product types and sum types.
 Proving that progress preserves the balancing of channels.
 Erika Kreuer has suggested modeling the usage algebra as a state machine.
