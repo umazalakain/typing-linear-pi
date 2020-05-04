@@ -73,7 +73,7 @@
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
-\newcommand{\channel}[2]{\constr{C[} \; #1 \; \constr{\propto} \; #2 \; \constr{]}}
+\newcommand{\channel}[2]{\constr{C[} \; #1 \; \constr{;} \; #2 \; \constr{]}}
 \newcommand{\comma}{\; \constr{,} \;}
 
 % Functions
@@ -91,9 +91,9 @@
 % Types
 \newcommand{\Set}{\type{SET}}
 \newcommand{\reduce}[1]{\; \type{\longrightarrow}_{#1} \;}
-\newcommand{\types}[4]{#1 \; \type{\propto} \; #2 \; \type{\vdash} \; #3 \; \type{\boxtimes} \; #4}
-\newcommand{\contains}[6]{#1 \; \type{\propto} \; #2 \; \type{\ni}_{#3} \; #4 \; \type{\propto} \; #5 \; \type{\boxtimes} \; #6}
-\newcommand{\containsusage}[4]{#1 \; \type{\ni}_{#2} \; #3 \; \type{\boxtimes} \; #4}
+\newcommand{\types}[4]{#1 \; \type{;} \; #2 \; \type{\vdash} \; #3 \; \type{\triangleright} \; #4}
+\newcommand{\contains}[6]{#1 \; \type{;} \; #2 \; \type{\ni}_{#3} \; #4 \; \type{;} \; #5 \; \type{\triangleright} \; #6}
+\newcommand{\containsusage}[4]{#1 \; \type{\ni}_{#2} \; #3 \; \type{\triangleright} \; #4}
 \newcommand{\Var}{\type{VAR}}
 \newcommand{\Process}{\type{PROCESS}}
 \newcommand{\Unused}{\type{UNUSED}}
@@ -254,7 +254,7 @@ In particular, while linearity is needed for type safety in communication-centri
     {n : \type{\N}}
     {\suc n : \type{\N}}
   \end{mathpar}
-  \caption{Notation used in this paper}
+  \caption{Notation used in this paper.}
   \label{fig:notation}
 \end{figure}
 
@@ -301,7 +301,7 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
                     |& \; \sendp{x}{y} P 
       \end{split}
     \end{equation*}
-    \caption{Ill-scoped grammar with names}
+    \caption{Ill-scoped grammar with names.}
     \label{fig:syntax-names}
   \end{subfigure}
   \hspace{.05\textwidth}
@@ -315,7 +315,7 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
         |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
       \end{split}
     \end{equation*}
-    \caption{Well-scoped grammar with type-level de Bruijn indices}
+    \caption{Well-scoped grammar with type-level de Bruijn indices.}
     \label{fig:syntax}
   \end{subfigure}
   \caption{}
@@ -331,8 +331,6 @@ Processes $\recvp{x}{y} P$ and $\sendp{x}{y} P$ denote respectively the input an
 Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y} \; P$ both introduce bound names --- $x$ and $y$ in $P$, respectively.
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
-Furthermore, names do not guarantee that the syntax is well-scoped.
-\todo{It is not clear what ill vs well scoped means. Add a sentece saying: "By ill-scoped we mean... By well-scoped we mean... "}
 Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
 \begin{example}
   \begin{equation*}
@@ -350,17 +348,16 @@ That is, terms at different \emph{depths} use different indices to refer to the 
 
 A variable occurring under $n$ abstractions has $n$ possible variables to refer to.
 References outside of that range are meaningless.
-It is useful to rule out these nonsensical terms syntactically.
+It is useful to rule out these ill-scoped nonsensical terms syntactically.
 In \autoref{fig:syntax}, we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-Every time we go under a binder, we increase the index of the continuation process, allowing the variables within to refer to one more thing.
-\autoref{fig:syntax} showcases a \picalc{} syntax that is well-scoped by construction using type-level de Bruijn indices.
+Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within it to refer to one more thing.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 \label{semantics}
 Thanks to our well-scoped grammar in \autoref{fig:syntax}, the semantics of our language can now be defined on the totality of the syntax.
-We start by defining the structural congruence.
+We start by defining structural congruence.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Structural Congruence}
@@ -472,10 +469,10 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 \section{Resource-aware Typing System}
 \label{type-system}
 
-In \autoref{multiplicities} we characterise a usage algebra for our typing system.
+In \autoref{multiplicities} we characterise a usage algebra for our type system.
 It defines how resources are \emph{split} in parallel composition and \emph{consumed} in input and output.
 We define typing and usage contexts in \autoref{contexts}.
-We provide a typing system for a resource-aware \picalc{} in \autoref{leftover-typing}.
+We provide a type system for a resource-aware \picalc{} in \autoref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -529,8 +526,6 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \subsection{Typing Contexts}
 \label{contexts}
 
-\todo{unify typing system and type system. only use one terminology in the paper.}
-
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
   An indexed set of usage algebras is a type $\Idx$ of indices together with an interpretation $\Usage_{idx} : \Idx \to \Set$ of indices into types, and an interpretation of indices into usage algebras.
@@ -549,7 +544,6 @@ The former are preserved throughout a typing derivation; the latter are transfor
   This is for convenience, so that there is less universe polymorphism polluting specifications.
   The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel.
   This notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
-  \todo{I don't really like the symbol between t and x. Why not a simple semicolon ; ?}
   We keep track of types in a length-indexed $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
   
   \begin{figure}[h]
@@ -664,12 +658,10 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   The \textsc{VarRef} relation is presented in \autoref{fig:variable-references}.
   The judgment $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ reads as ``$\gamma$ at position $i$ is of type $t$, and subtracting $y$ at position $i$ from $\Gamma$ results in $\Delta$''.
 
-  \todo{Again, not sure I like the notation of this judgement...Instead of the square I would put $\triangleright$ If the relation is symmetric, then use a symmetric symbol, otherwise a symbol that conveys direction. Also, it seems as if the direction changes with that epsilon inverted.}
-
-  The base case $\constr{here}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$, which are the leftovers.
+  The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$, which are the leftovers.
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
   We use the functionality of the monoidal relation to alleviate the user from this proof burden.
-  The inductive case $\constr{there}$ preserves the usage annotation $x'$ from input to output. 
+  The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -691,11 +683,11 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   
     \inferrule
     {\opsquared{x}{y}{z}}
-    {\constr{here} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
+    {\constr{0} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
     
     \inferrule
     {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
-    {\constr{there} \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
+    {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
   \end{mathpar}
   \caption{Variable reference judgments.}
   \label{fig:variable-references}
@@ -706,10 +698,10 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   Let us illustrate the use of channels with an example.
   \begin{lstlisting}[label=lst:channels,mathescape,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
-  _ = $\constr{there} \; \constr{here}$
+  _ = $\suc \; \constr{0}$
   \end{lstlisting}
-  In \autoref{lst:channels}, the constructor $\constr{there}$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
-  The constructor $\constr{here}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving leftovers $\lo$.
+  In \autoref{lst:channels}, the constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
+  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving leftovers $\lo$.
 \end{example}
 
 \begin{nidefinition}
@@ -742,14 +734,14 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
     \inferrule
         {\stacked{
             chan_i : \contains{\gamma \hspace{1.2em}}{\Gamma \hspace{1.3em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
-            cont \hspace{0.6em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{5.6em}}{\Theta \comma \lz}}}
+            cont \hspace{0.6em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{4.6em}}{\Theta \comma \lz}}}
         {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
   
     \inferrule
         {\stacked{
             chan_i : \contains{\gamma}{\Gamma \hspace{0.2em}}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
-            loc_j \hspace{0.8em} : \contains{\gamma}{\Delta}{j}{t \hspace{3.7em}}{x \hspace{0.3em}}{\Xi} \\\\
-            cont \hspace{0.6em} : \types{\gamma}{\Xi \hspace{0.3em}}{P\hspace{5.8em}}{\Theta}}}
+            loc_j \hspace{0.8em} : \contains{\gamma}{\Delta}{j}{t \hspace{3.2em}}{x \hspace{0.3em}}{\Xi} \\\\
+            cont \hspace{0.6em} : \types{\gamma}{\Xi \hspace{0.3em}}{P\hspace{4.8em}}{\Theta}}}
         {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
   
     \inferrule
@@ -761,7 +753,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   \label{fig:types}
   \end{figure}
 
-  Some comments on the leftover typing system follow.
+  Some comments on the leftover type system follow.
   The inaction process does not change usage annotations.
 
   Scope restriction expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
@@ -784,28 +776,28 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
 \begin{example}
   \label{example-derivations}
-  Let us illustrate a derivation of typing with leftovers by the following example, which uses linear and shared types to type the process $p$. 
-  We define $\omega$ as a $(\one \comma \one)$ usage in an algebra for shared types.
-  We define $\epsilon$ as the empty usage context where all usages are $(\zero \comma \zero)$.
-  The typing derivation creates a new channel with usage $(\one \comma \one)$.
-  This channel transmits $\li$ multiplicities of a type $\channel{\unit}{\omega}$.
-  The right-hand subprocess creates a channel with usage $(\one \comma \one)$.
-  This channel transmits $\omega$ multiplicities of a type $\unit$.
-  Part of this channel ($(\one \comma \zero)$) is sent over the channel created by the parent process.
+  Let us type a derivation of the process $\func{p}$ using linear and shared types. 
+  Let $\omega$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
+  Let $\epsilon$ be the empty usage context --- where all usage annotations are $(\zero \comma \zero)$.
+  To type $\func{p}$, we need a channel over which we can transmit another channel.
+  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transiting data of type $\channel{\unit}{\omega}$, and declare (with $\li$) that we will only transmit its input capability.
+  The left-hand process is typed following its syntax.
+  On the right-hand, we need the channel that is going to be sent.
+  The type $\unit$ of this channel is entirely determined by the type of the channel over which it is going to be transmited.
+  Its usage annotation is $(\one \comma \one)$: we will transmit $\li$ and save $\lo$ for the continuation.
   
   \begin{lstlisting}[mathescape]
-  $p$ : $\Process_1$
-  $p$ = $\new{} (\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}
-                    {\new{} (\send{\constr{suc} \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\constr{suc} \; \constr{suc} \; \constr{0}}) \; \PO)})$
+  $\func{p}$ : $\Process_1$
+  $\func{p}$ = $\new{} \; ($
+       $\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
+       ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
 
-  _ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \omega}{p}{\epsilon}$
-  _ = $\constr{chan} \; \channel{\unit}{\omega} \; \li \; \one$
-      $(\constr{comp} \;
-       (\constr{recv} \; \constr{here} \; (\constr{recv} \; \constr{here} \; \constr{end}))$
-           $(\constr{chan} \; \unit \; \omega \; \one \; (\constr{send} \; (\constr{there} \; \constr{here}) \; \constr{here} \; (\constr{send} \; \constr{here} \; (\constr{there} \; \constr{here} \; \constr{there}) \; \constr{end})))
+  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \omega}{\func{p}}{\epsilon}$
+  $\func{\_}$ = $\constr{chan} \; \channel{\unit}{\omega} \; \li \; \one \; (\constr{comp}$
+       $(\constr{recv} \; \constr{0} \; (\constr{recv} \; \constr{0} \; \constr{end}))$
+       $(\constr{chan} \; \unit \; \omega \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
        )$
   \end{lstlisting}
-  \todo{not easy to follow. you need to expalin each bit of this derivation. when you comment you need to refer to what you are commenting on. either put things in bracket when commenting or refer to line number or whatnot}
 \end{example}
 
 
@@ -1038,7 +1030,7 @@ Swapping two variables preserves the well-typedness of a process.
       Therefore $\Gamma_j \equiv \Psi_j$ and $\constr{end}$ can be applied.
 
     \item
-      For constructor $\constr{chan}$ we proceed inductively, wrapping arrows $\ni_i m$, $\ni_j m$, $\ni_i n$ and $\ni_j n$ with $\constr{there}$.
+      For constructor $\constr{chan}$ we proceed inductively, wrapping arrows $\ni_i m$, $\ni_j m$, $\ni_i n$ and $\ni_j n$ with $\suc$.
       
     \item
       For constructor $\constr{recv}$ we must split $\Delta$ to proceed inductively on the continuation.
