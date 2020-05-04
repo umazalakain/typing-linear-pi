@@ -637,24 +637,24 @@ The former are preserved throughout a typing derivation; the latter are transfor
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
 
-We use \emph{leftover typing} \cite{Allais2018a} for our typing rules, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
+We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
-This technique presents three main advantages:
+Leftover typing presents three main advantages:
 \begin{itemize}
   \item
     The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgment with both an input and an output usage context.
   \item
-    The need for an extensional context splitting proof for parallel composition is eradicated.
-    Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
+    No need for an extensional context splitting proof for parallel composition.
+    Alternatively, such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
     This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
   \item
-    New theorems (\textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening})) can suddenly be stated.
+    New theorems (\textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening})) can suddenly be stated. \todo{explain suddenly}
 \end{itemize}
   
 We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
-Both of these are indexed by a typing context, an input usage context, and an output usage context.
+Both are indexed by a typing context, an input usage context, and an output usage context.
 
 \begin{nidefinition}
   \label{def:varref}
