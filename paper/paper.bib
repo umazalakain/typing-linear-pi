@@ -381,3 +381,34 @@
   number = {3}
 }
 
+@inproceedings{Atkey2018,
+  title = {Syntax and {{Semantics}} of {{Quantitative Type Theory}}},
+  booktitle = {Proceedings of the 33rd {{Annual ACM}}/{{IEEE Symposium}} on {{Logic}} in {{Computer Science}}},
+  author = {Atkey, Robert},
+  year = {2018},
+  month = jul,
+  pages = {56--65},
+  publisher = {{ACM}},
+  address = {{Oxford United Kingdom}},
+  doi = {10.1145/3209108.3209189},
+  abstract = {We present Quantitative Type Theory, a Type Theory that records usage information for each variable in a judgement, based on a previous system by McBride. The usage information is used to give a realizability semantics using a variant of Linear Combinatory Algebras, refining the usual realizability semantics of Type Theory by accurately tracking resource behaviour. We define the semantics in terms of Quantitative Categories with Families, a novel extension of Categories with Families for modelling resource sensitive type theories.},
+  file = {/home/uma/.zotero/data/storage/LZSZ65RF/Atkey - 2018 - Syntax and Semantics of Quantitative Type Theory.pdf},
+  isbn = {978-1-4503-5583-4},
+  language = {en},
+  note = {\url{https://dl.acm.org/doi/10.1145/3209108.3209189}}
+}
+
+@incollection{McBride2016,
+  title = {I {{Got Plenty}} o' {{Nuttin}}'},
+  booktitle = {A {{List}} of {{Successes That Can Change}} the {{World}}: {{Essays Dedicated}} to {{Philip Wadler}} on the {{Occasion}} of {{His}} 60th {{Birthday}}},
+  author = {McBride, Conor},
+  editor = {Lindley, Sam and McBride, Conor and Trinder, Phil and Sannella, Don},
+  year = {2016},
+  pages = {207--233},
+  publisher = {{Springer International Publishing}},
+  address = {{Cham}},
+  doi = {10.1007/978-3-319-30936-1_12},
+  abstract = {Work to date on combining linear types and dependent types has deliberately and successfully avoided doing so. Entirely fit for their own purposes, such systems wisely insist that types depend only on the replicable sublanguage, thus sidestepping the issue of counting uses of limited-use data either within types or in ways which are only really needed to shut the typechecker up. As a result, the linear implication (`lollipop') stubbornly remains a non-dependent \$\$S \textbackslash{}backslashmultimap T\$\$S{$\multimap$}T. This paper defines and establishes the basic metatheory of a type theory supporting a `dependent lollipop' \$\$(x\textbackslash{}backslash!:\textbackslash{}backslash!S)\textbackslash{}backslashmultimap T[x]\$\$(x:S){$\multimap$}T[x], where what the input used to be is in some way commemorated by the type of the output. For example, we might convert list to length-indexed vectors in place by a function with type \$\$(l\textbackslash{}backslash!:\textbackslash{}backslash!\textbackslash{}backslashmathsf \{List\}\textbackslash{}backslash,X)\textbackslash{}backslashmultimap \textbackslash{}backslashmathsf \{Vector\}\textbackslash{}backslash,X\textbackslash{}backslash,(\textbackslash{}backslashmathsf \{length\}\textbackslash{}backslash,l)\$\$(l:ListX){$\multimap$}VectorX(lengthl). Usage is tracked with resource annotations belonging to an arbitrary rig, or `riNg without Negation'. The key insight is to use the rig's zero to mark information in contexts which is present for purposes of contemplation rather than consumption, like a meal we remember fondly but cannot eat twice. We need no runtime copies of l to form the above vector type. We can have plenty of nothing with no additional runtime resource, and nothing is plenty for the construction of dependent types.},
+  isbn = {978-3-319-30936-1}
+}
+
