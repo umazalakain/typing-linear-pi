@@ -501,27 +501,24 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{note}
 
-\todo{you cannot refer to IDX if it is in the appendix. Assume the reader will never look at the appendix. Maybe it is worth bringing back fig 12 or 13? Can only one be brought back?}
-
-Linear, gradual and shared types (identified by a value in $\Idx$) are all defined as an instance of our usage algebra.
+Linear, gradual and shared types are all defined as an instance of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
-\todo{Explain what are Two and N. The whole sentence the carrier is a type Two is not clear...}
 \begin{description}
   \item [Linear]
-    The carrier is a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
+    The carrier is a type with two trivial elements $\constr{zero}$ and $\constr{one}$.
     The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited in every other case.
     All the properties of the algebra follow trivially.
     As an example, the multiplicity pair $\ell_i$ is represented as $(\constr{one} \comma \constr{zero})$.
 
     \item [Gradual]
-    The carrier is the type of natural numbers $\N$.
+    The carrier is the type of natural numbers.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
     The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
     All other properties of the algebra follow from the algebraic rules for the addition of natural numbers.
     As an example, we use $(5 \comma 3)$ to represent the multiplicities of a channel that is able to input 5 times and output 3 times.
 
     \item [Shared]
-    The carrier is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
+    The carrier is a type with a single trivial constructor $\constr{\omega}$.
     Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
     The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
     All the properties of the algebra follow trivially.
@@ -536,7 +533,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
-  An indexed set of usage algebras is a set of indices $\Idx$ together with an interpretation $\Usage_{idx}$ of indices into types, and an interpretation of indices into usage algebras on that type.
+  An indexed set of usage algebras is a type $\Idx$ of indices together with an interpretation $\Usage_{idx} : \Idx \to \Set$ of indices into types, and an interpretation of indices into usage algebras.
   $\Idx$ must be non-empty.
   Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:usage-algebra} for a formal definition.
 \end{nidefinition}
