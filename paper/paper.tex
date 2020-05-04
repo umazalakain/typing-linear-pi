@@ -1122,28 +1122,15 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
 
 Most of the work on mechanising resource-aware calculi is very recent.
 
-This work is heavily based on the work by Allais \cite{Allais2018a}.
-Allais uses leftover typing to build a bidirectional type system for the linear \lambdacalc{}.
+Leftover typing as presented in this paper is based on work by Allais \cite{Allais2018a}.
+Allais uses leftover typing to mechanise in Agda a bidirectional type system for the linear \lambdacalc{}.
+This type system sits on top of an untyped but well-scoped syntax with de Bruijn indices.
 He proves type preservation and provides a decision procedure for type checking and type inference.
-He then goes on showing the soundness and completeness with respect to the sequent calculus for intuitionistic linear logic.
-Also extrinsic.
-Also in Agda.
-Also de Bruijn.
-We apply this to the \picalc{}.
-We generalise the usage algebra.
-Our type system is not bidirectional --- scope restriction needs usage annotations.
-Adding bidirectionality would provide us with a decision procedure for type checking.
+In this paper, we apply his technique to the \picalc{}, but limit ourselves to type-checking (scope restriction needs usage annotations) terms, and focus on generalising the usage algebra.
 
-\cite{Thiemann2019}
-intrinsicly typed
-linear session types with recursion and subtyping.
-also in Agda.
-Also de Bruijn.
-semantics as an intrinsically typed CEK machine
-explicit context splits
-MicroSession, minimal GV, lambda calculus with session types
-contexts remove elements with multiplicity 0
-keeps a global session context
+Taking an intrinsic approach, Thiemann formalises in Agda the MicroSession (minimal GV \cite{}) calculus with support for recursion and subtyping \cite{Thiemann2019}.
+Context splits are given extrinsically, and exhausted elements are removed from typing contexts altogether.
+The semantics are given as an intrinsically typed CEK machine with a global context of session-typed channels.
 
 \cite{Goto2016a}
 first session-type paper with a mechanised proof of type safety
@@ -1158,14 +1145,14 @@ Session type polymorphism
 
 \cite{previous-work} polymorphic tokens, HOAS
 
-\cite{LTS-semantics}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Future Work}
 
 Work that will be done time permitting:
 
 Erika Kreuer: model usage algebra as a state machine?
+
+Adding bidirectionality would provide us with a decision procedure for type checking.
 
 \begin{description}
 
