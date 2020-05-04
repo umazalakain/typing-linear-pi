@@ -236,7 +236,7 @@ In particular, while linearity is needed for type safety in communication-centri
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+The notation used in this paper is given in \autoref{fig:notation}.
 \begin{figure}[h]
   \begin{mathpar}
     \datatype
@@ -253,13 +253,17 @@ In particular, while linearity is needed for type safety in communication-centri
     {\suc n : \type{\N}}
   \end{mathpar}
   \caption{Notation used in this paper}
+  \label{fig:notation}
 \end{figure}
 
 Data type definitions use double lines and index-free synonyms as rule names (for ease of reference).
-We otherwise use the constructor name as the name of a typing rule.
-Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
+For example ... \todo{complete the dots here, explain the rules above, in particular the 1+}
+We otherwise use the constructor name as the name of a typing rule. For example,...
+Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$. This means that ...
 Implicit arguments are mentioned by type definitions but omitted in constructors.
-$\type{TYPES}$ are blue volet (uppercased, with indices as subscripts), $\constr{constructors}$ are burnt orange, $\func{functions}$ are olive green, variables are black, and some constructor names are overloaded --- and disambiguated by context.
+
+We use colours to further distinguish the different entities in this paper.
+$\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\constr{constructors}$ are burnt orange, $\func{functions}$ are olive green, variables are black, and some constructor names are overloaded --- and disambiguated by context.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
