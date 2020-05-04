@@ -473,9 +473,8 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 \section{Resource-aware Typing System}
 \label{type-system}
 
-We characterise a usage algebra for our typing system in \autoref{multiplicities}.
-This algebra defines the way in which resources are \emph{split} on parallel composition; the way in which resources are \emph{consumed} on input and output.
-We then define typing and usage contexts in \autoref{contexts}.
+In \autoref{multiplicities} we characterise a usage algebra for our typing system. It defines how resources are \emph{split} in parallel composition and \emph{consumed} in input and output.
+We define typing and usage contexts in \autoref{contexts}.
 We provide a typing system for a resource-aware \picalc{} in \autoref{leftover-typing}.
 
 \subsection{Multiplicities and Capabilities}
@@ -493,38 +492,44 @@ We generalise over this notion by defining an algebra that is satisfied by linea
 \end{nidefinition}
 
 \begin{note}
+  \label{note:linearity}
   We will often work with pairs of input and output multiplicities.
   We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \times \type{C}$ tuple of input and output multiplicities, respectively.
   We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
-  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$, $\li$ for the pair $(1 \comma 0)$, $\lo$ for $(0 \comma 1)$ and $\lio$ for $(1 \comma 1)$, borrowing from the linear \picalc{} notation \cite{KPT96,Sangio01}.
+
+  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$ for a channel which cannot be used furether, $\li$ for the pair $(1 \comma 0)$ for a channel to be used in input only once, $\lo$ for $(0 \comma 1)$ for a channel to be used in output only once, and $\lio$ for $(1 \comma 1)$, for a channel to be used once in input and once in output. This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{note}
 
+\todo{you cannot refer to IDX if it is in the appendix. Assume the reader will never look at the appendix. Maybe it is worth bringing back fig 12 or 13? Can only one be brought back?}
 Linear, gradual and shared types (identified by a value in $\Idx$) are all defined as an instance of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
-
+\todo{Explain what are Two and N. The whole sentence the carrier is a type Two is not clear...}
 \begin{description}
   \item [Linear]
     The carrier is a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
     The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited in every other case.
     All other properties are lifted element-wise.
+    For example, a linear channel must be used exactly once as specified by the pair and as detailed in \autoref{note:linearity}.
 
     \item [Gradual]
     The carrier is the type of natural numbers $\N$.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
     The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
     All other rules follow trivially from the algebraic rules for the addition of natural numbers.
+    For example, a gradual channel can be used $x$ times in total: $y$ times for an action (input or output) and $z$ times for the co-action (output or input).
 
     \item [Shared]
     The carrier is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
     Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
     The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
     All other rules follow trivially.
+    For example, a shared channel can be used unrestrictedly many times in either input or output.
 \end{description}
-
+\todo{Added a last for example sentence to all. check}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing Contexts}
 \label{contexts}
-
+\todo{unify typing system and type system. only use one terminology in the paper.}
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
   An indexed set of usage algebras is a set of indices $\Idx$ together with an interpretation $\Usage_{idx}$ of indices into types, and an interpretation of indices into usage algebras on that type.
