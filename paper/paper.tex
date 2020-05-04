@@ -654,17 +654,25 @@ Leftover typing presents three main advantages:
 \end{itemize}
   
 We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
-Both are indexed by a typing context, an input usage context, and an output usage context.
+Both are indexed by a typing context ($\gamma$), an input usage context ($\Gamma$), and an output usage context or leftovers ($\Delta$).
+A typing context $\gamma$ keeps track of...  An input or output usage context $\Gamma,\Delta$ keeps track of...
 
 \begin{nidefinition}
   \label{def:varref}
 
-  The \textsc{VarRef} relation presented in \autoref{fig:variable-references} keeps track of the index, type, and usage annotation of a variable within a particular typing and usage context.
-  The leftover usage context is the result of subtracting the usage annotation from the input usage context.
+  The \textsc{VarRef} relation is presented in \autoref{fig:variable-references}.
+  The judgment $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ reads as "..." 
+  The premise of \textsc{VarRef} means that...
+  \todo{use parts from the commented sentences to complete the dots; refer to the greek letters.}
+  \todo{Again, not sure I like the notation of this judgement...Instead of the square I would put $\triangleright$ If the relation is symmetric, then use a symmetric symbol, otherwise a symbol that conveys direction. Also, it seems as if the direction changes with that epsilon inverted.}
+  % keeps track of the index, type, and usage annotation of a variable within a particular typing and usage context.
+  % The leftover usage context is the result of subtracting the usage annotation from the input usage context.
 
-  The base case $\constr{here}$ splits the usage annotation $x$ into $y$ and $z$, the leftovers.
-  This splitting is as per the usage algebra defined on the index of the usage annotation.
+  The base case $\constr{here}$ splits the usage annotation $x$ into $y$ and $z$, which are the leftovers.
+  This splitting is as per the usage algebra defined on the index of the usage annotation in \autoref{}.
+  $\constr{there}$...
 
+  \todo{integrate the remark somewhere else, rather than in a remark?}
   \begin{remark}
     We use the functionality of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   \end{remark}
@@ -701,17 +709,21 @@ Both are indexed by a typing context, an input usage context, and an output usag
 \end{nidefinition}
 
 \begin{example}
-  The following example asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
-  \begin{lstlisting}[mathescape,caption=Here the underscore \_ introduces an anonymous declaration immediately followed by its definition.]
+  Let us illustrate the use of channels with an example.
+  \begin{lstlisting}[label=lst:channels,mathescape,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\constr{suc} \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\constr{there} \; \constr{here}$
   \end{lstlisting}
+  \autoref{lst:channels} asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
+  The continuation means that...
+  Finally, $= \constr{there} \; \constr{here}$ means that...
 \end{example}
 
 \begin{nidefinition}
   \label{def:types}
 
-  The typing relation \textsc{Types} presented in \autoref{fig:types} asserts that process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$.
+  The typing relation \textsc{Types} is presented in \autoref{fig:types}.
+  The typing judgement $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that "process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$".
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -756,7 +768,8 @@ Both are indexed by a typing context, an input usage context, and an output usag
   \label{fig:types}
   \end{figure}
 
-  Process termination threads usage annotations unchanged from input to output.
+  Some comments on the leftover typing system follow.
+  The inaction process does not change usage annotations.
 
   Scope restriction expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
   This multiplicity $y$ is used for both input and output, so that these are balanced.
@@ -773,11 +786,12 @@ Both are indexed by a typing context, an input usage context, and an output usag
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
   
   Parallel composition uses the leftovers of left-hand process to type the right-hand process.
+  \todo{explain the rationale here as most people would expect a combination/splitting of typing context, which for us is not needed anymore. just add a sentence}
 \end{nidefinition}
 
 \begin{example}
   \label{example-derivations}
-  The example below uses linear and shared types to type the process $p$. 
+  Let us illustrate a derivation of typing with leftovers by the following example, which uses linear and shared types to type the process $p$. 
   We define $\omega$ as a $(\one \comma \one)$ usage in an algebra for shared types.
   We define $\epsilon$ as the empty usage context where all usages are $(\zero \comma \zero)$.
   The typing derivation creates a new channel with usage $(\one \comma \one)$.
@@ -798,6 +812,7 @@ Both are indexed by a typing context, an input usage context, and an output usag
            $(\constr{chan} \; \unit \; \omega \; \one \; (\constr{send} \; (\constr{there} \; \constr{here}) \; \constr{here} \; (\constr{send} \; \constr{here} \; (\constr{there} \; \constr{here} \; \constr{there}) \; \constr{end})))
        )$
   \end{lstlisting}
+  \todo{not easy to follow. you need to expalin each bit of this derivation. when you comment you need to refer to what you are commenting on. either put things in bracket when commenting or refer to line number or whatnot}
 \end{example}
 
 
