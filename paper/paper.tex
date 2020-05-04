@@ -162,7 +162,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \todo{highlight that we can talk about a resource even if it has been exhausted (e.g. we can send 0 multiplicities of a channel over another channel}
-\todo{check 'z' are replaced with 's' in formaliz*, mechaniz*; check modeling is modelling}
+\todo{check 'z' are replaced with 's' in formaliz*, mechaniz*; check modelling is modelling}
 \todo{rename section and subsections in reference to \S (not sure why the commands above are not doing it so check later)}
 We live in a concurrent world where any given state is often interactively computed by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and build such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
@@ -171,7 +171,7 @@ The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational mo
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data over communication channels.
 Notably, it features channel mobility: channels themselves are first order values, and can therefore be transmitted.
 The \picalc{} has been a foundation for the design and implementation of programming languages for concurrency, such as Pict \cite{Pierce} and (more recently) Go \cite{Golang}.
-At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types. This makes the \picalc{} a fully-fledged tool for modeling and verification of concurrent and distributed systems.
+At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types. This makes the \picalc{} a fully-fledged tool for modelling and verification of concurrent and distributed systems.
 
 In a parallel track, J.-Y. Girard's development of linear logic \cite{Girard87} in the early '90s opened new avenues in computing science by introducing \emph{linear types} for (functional) programming languages \cite{Curry-Howard,Wadler90,Bernardy2018}.
 Linear type systems guarantee that resources are used \emph{exactly once}.
@@ -660,7 +660,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$, which are the leftovers.
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
-  We use the functionality of the monoidal relation to alleviate the user from this proof burden.
+  We use the \emph{functionality} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
 
   \begin{figure}[h]
@@ -1088,31 +1088,7 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
   \hfill{}\\
   \begin{itemize}
     \item
-    In the $\constr{comm}$ case we apply framing (\autoref{thm:framing}) to rearrange the assumptions in \autoref{fig:subject-reduction:a} into the proofs in \autoref{fig:subject-reduction:b}.
-    We then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
-
-    \begin{figure}[h]
-      \begin{subfigure}{.5\textwidth}
-        \begin{alignat*}{2}
-          \containsusage{&\Gamma'}{i}{\lio &&}{\Gamma} \\
-          \contains{\gamma}{&\Gamma'}{i}{\channel{t}{m}}{\li &&}{\Psi} \\
-          \types{\gamma \comma t}{&\Psi \comma m}{P &&}{\Delta \comma \lz} \\
-          \contains{\gamma}{&\Delta }{i}{\channel{t}{m}}{\lo &&}{\Theta} \\
-          \contains{\gamma}{&\Theta}{j}{t}{m &&}{\Xi}
-        \end{alignat*}
-        \caption{Initial assumptions.}
-        \label{fig:subject-reduction:a}
-      \end{subfigure}
-      % Do not leave empty space
-      \begin{subfigure}{.5\textwidth}
-        \begin{alignat*}{2}
-          \types{\gamma \comma t}{& \Gamma \comma m}{P &&}{\Theta \comma \lz} \\
-          \contains{\gamma}{& \Theta}{j}{t}{m &&}{\Xi}
-        \end{alignat*}
-        \caption{Shift witness for $\lo$ and merge with the one for $\li$ into $\lio$.}
-        \label{fig:subject-reduction:b}
-      \end{subfigure}
-    \end{figure}
+    In the $\constr{comm}$ case we apply framing (\autoref{thm:framing}) to rearrange the assumptions and then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
   
     \item
     Reduction under $\constr{par}$ proceeds by induction on the process that is being reduced.
@@ -1162,7 +1138,7 @@ Mechanisation of the linear, gradual and shared \picalc{} in less than 1500 line
 As future work we intend to...
 Adding product types and sum types.
 Proving that progress preserves the balancing of channels.
-Erika Kreuer has suggested modeling the usage algebra as a state machine.
+Erika Kreuer has suggested modelling the usage algebra as a state machine.
 Adding bidirectionality would provide us with a decision procedure for type checking for a given context of algebras.
 
 \newpage
