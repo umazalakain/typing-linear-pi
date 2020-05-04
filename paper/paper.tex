@@ -701,7 +701,7 @@ Both of these are indexed by a typing context, an input usage context, and an ou
 \end{nidefinition}
 
 \begin{example}
-  The following example asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
+  The following example asserts that the input $\channel{\unit}{\li}$ type at index $\suc \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
   \begin{lstlisting}[mathescape,caption=Here the underscore \_ introduces an anonymous declaration immediately followed by its definition.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\constr{suc} \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\constr{there} \; \constr{here}$
