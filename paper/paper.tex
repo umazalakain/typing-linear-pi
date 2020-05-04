@@ -141,18 +141,20 @@
 
 \begin{abstract}
   The \picalc{} is a computational model for communication and concurrency.
-  The \emph{linear} \picalc{} is a typed version of the \picalc{} where channel resources must be used exactly once.
-  With the rise of session types as a formalism to model real-world distributed systems, the linear \picalc{} has re-emerged as the underlying theoretical and practical framework for session types and communication-based distributed programming \cite{DardhaGS12,Padovani17,ScalasY16,ScalasDHY17}.
-  While there have been several extensions to the session typed \picalc{}, the linear \picalc{} remains essentially unchanged and stable as a foundational calculus.
+  The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
+  It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, including \emph{session types} \cite{H93,THK94,HVK98}.
+  Linearity is key for type safety in session communication.
 
-  We present the \emph{first} fully mechanised \picalc{} featuring linear types, as well as gradual and shared types.
-  We present its syntax, operational semantics, and typing rules and the corresponding type safety properties.
-  We use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
+  We present the \emph{first} full mechanisation in Agda of a \picalc{} with \emph{linear}, \emph{gradual} and \emph{shared} types, all under the same unified framework.
+  While linearity is key for type safety in communication-centric programming, gradual and shared types are needed to model real-world software systems.
+  
+  We present syntax, semantics, type system and the corresponding type safety properties.
+  For the first time in \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
   We generalise the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, gradual and shared typing.
   We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
-
-  Our formalisation is fully mechanised in Agda. \cite{Zalakain2020Agda}
+%
+  Our formalisation is fully mechanised in Agda \cite{Zalakain2020Agda}.
 \end{abstract}
 
 \todo{make sure all citations are there}
@@ -193,7 +195,7 @@ Considering the relevance of the \picalc{} and of linearity in modelling concurr
 
 \emph{We present the first full mechanisation in Agda of a \picalc{} with linear, gradual and shared types, all under the same unified framework.}
 
-We do so by defining a specification for an algebra on $0,1,n$ and $\omega$ \emph{multiplicities} (how many times a channel can be used) and use it to apply for the first time leftover typing (following Allais \cite{Allais2018a}) to the \picalc{}.
+We do so by defining a specification for an algebra on \emph{multiplicities} (how many times a channel can be used) and use it to apply for the first time leftover typing (following Allais \cite{Allais2018a}) to the \picalc{}.
 The developer is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
 Ultimately, we can exploit this formalisation as a unified framework for type safe distributed modelling and programming with a variety of type systems, and build on top of it more advanced types, theories and languages.
 In particular, while linearity is needed for type safety in communication-centric programming, gradual and shared types are needed to model real-world systems.
