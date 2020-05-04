@@ -536,17 +536,21 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
   $\Idx$ must be non-empty.
   Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:usage-algebra} for a formal definition.
 \end{nidefinition}
+\todo{again, usage and idx occur here, but the formal defintion seems to be actually necessary. I'm thinking that both fig 12 and 13 are needed in the main text...}
 
 We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
+\todo{where is the def of CTX?}
 
 \begin{nidefinition}
-  \autoref{fig:prectx} defines types as either unit types, base types or channel types.
+  \autoref{fig:prectx} defines types as either unit types (rule $\unit$), base types (rule $\base{n}$) or channel types (rule $\channel{t}{x}$).
+  %
   The unit type $\unit$ serves as a proof of inhabitance for types.
-  The base type $\base{n}$ uses natural numbers as placeholders for types --- the host language can interpret the former into the latter.
-  This is for convenience, so that there is less universe polymorphism polluting specifications.
-  The type $\channel{t}{x}$ of a channel determines what type of data and what usage annotations are sent over that channel.
-  We keep track of types in a length-indexed $\PreCtx_n$.
+  The base type $\base{n}$ uses natural numbers as placeholders for types --- the host language can interpret the former into the latter. \todo{I don't get this... give an example for int, and just talk about pi, rather than a host language.}
+  %This is for convenience, so that there is less universe polymorphism polluting specifications.
+  The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel. This notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
+  \todo{I don't really like the symbol between t and x. Why not a simple semicolon ; ?}
+  We keep track of types in a length-indexed $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
   
   \begin{figure}[h]
   \begin{mathpar}
@@ -623,7 +627,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
   \label{fig:ctx}
   \end{figure}
 \end{nidefinition}
-
+\todo{Maybe fig 6 can go in appendix in order to make room for 12 and 13 to come back? This whole paragraph from def 6 below could be cut and brought to app? and only commented upon}
 \begin{note}
   We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have a common underlying context of indices.
   All the properties of the partial monoid are trivially lifted.
