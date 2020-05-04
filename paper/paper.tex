@@ -821,13 +821,13 @@ A typing context $\gamma$ keeps track of...  An input or output usage context $\
 \label{type-safety}
 
 \todo{intro}
-
+\todo{I wonder if we can remove the proofs everywhere and comment on them in the intro and where they can be found.}
 \subsection{Framing}
 \label{framing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Framing captures the idea that the well-typedness of a process is independent of its leftover resources.
-
+\todo{Do not forward refer when it comes to results. Never refer to results in the appendix. Consider that, if the paper get publshed, it will get so without the appendix. It should be *completely* self contained}
 \begin{nitheorem}
   \label{thm:framing}
   Let $P$ be a well-typed process $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
@@ -901,6 +901,8 @@ Swapping two variables preserves the well-typedness of a process.
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
+\todo{Maybe all previous subsections could be put into one "Auxiliary Results"}
+\todo{Replace the proofs with an intuition on the theorem}
 \subsection{Subject Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
@@ -911,6 +913,7 @@ Swapping two variables preserves the well-typedness of a process.
   That is, if $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
+\todo{considering that Equals is in the appendix, you cannot do induction on something that is not defined in the main text. Bring the proof in the appendix. Maybe briefly comment on the proof here}
 \begin{proof}
   By induction on \textsc{Equals}.
   The base cases under $\constr{struct}$ (and their symmetric variants under $\constr{sym}$) are the nontrivial ones.
@@ -943,7 +946,7 @@ Swapping two variables preserves the well-typedness of a process.
 
 \autoref{thm:subst-generalization} proves a generalized version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalized version to the concrete case where $i$ is $\constr{0}$, as required by subject reduction.
-
+\todo{Structure the theorem (in general the long ones) a bit more. Use itemize or similar. It's a blob of text.}
 \begin{nitheorem}
   \label{thm:subst-generalization}
   Let process $P$ be well-typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$,
@@ -1032,6 +1035,7 @@ Swapping two variables preserves the well-typedness of a process.
   For convenience, we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
 \end{nidefinition}
   
+\todo{I don't think a reviewer from CONCUR most likely will nto get the proof. Appendix! Replace it with a proof sketch where you comment on the diagram as well.}
 \begin{proof}
   By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   \begin{itemize}
@@ -1094,6 +1098,7 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
   Given $\types{\gamma}{\Gamma'}{P}{\Xi}$ then after reduction $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
+\todo{maybe only focus on the first case, internal and external and say the rest is by induction blah bla and details can be found in appenix/or github}
 \begin{proof}
   \hfill{}\\
   \begin{itemize}
