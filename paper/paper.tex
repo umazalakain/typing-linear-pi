@@ -487,9 +487,6 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   It has an element $\one$ that is used to count inputs and outputs.
   \autoref{fig:multiplicities} uses a terniary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
 
-  \todo{we haven't introduced the forall and implicit syntax}
-  \todo{introduce DEC and exists}
-
   \begin{figure}[h]
   \begin{equation*}
   \begin{aligned}
@@ -508,6 +505,8 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   \caption{Algebra $\Algebra_C$ algebra on a partial commutative monoid.}
   \label{fig:multiplicities}
   \end{figure}
+  \todo{we haven't introduced the forall and implicit syntax}
+  \todo{introduce DEC and exists}
 \end{nidefinition}
 
 \begin{note}
@@ -550,9 +549,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
-  An indexed set of usage algebras is a nonempty type $\Idx$ of indices together with an interpretation $\Usage_{idx}$ of indices into types, and an interpretation of indices into usage algebras.
-  $\Idx$ must be non-empty.
-  Refer to \autoref{fig:indexed-multiplicities} for a formal definition.
+  An indexed set of usage algebras is a nonempty type $\Idx$ of indices together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras (\autoref{fig:indexed-multiplicities}).
   \begin{figure}[h]
     \begin{equation}
       \begin{split}
@@ -574,8 +571,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
 \begin{nidefinition}
   \autoref{fig:prectx} defines types as either unit types (rule $\unit$), base types (rule $\base{n}$) or channel types (rule $\channel{t}{x}$).
   The unit type $\unit$ serves as a proof of inhabitance for types.
-  The base type $\base{n}$ uses natural numbers as placeholders for types, the host language can then interpret the former into the latter --- e.g. $0$ as booleans, $1$ as natural numbers.
-  This is for convenience, so that there is less universe polymorphism polluting specifications.
+  The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g. $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
   The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel.
   This notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
   We keep track of types in a length-indexed $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
@@ -656,7 +652,6 @@ The former are preserved throughout a typing derivation; the latter are transfor
   \end{figure}
 \end{nidefinition}
 
-\todo{Maybe fig 6 can go in appendix in order to make room for 12 and 13 to come back? This whole paragraph from def 6 below could be cut and brought to app? and only commented upon}
 
 \begin{note}
   We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have a common underlying context of indices.
@@ -812,10 +807,10 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 \begin{example}
   \label{example-derivations}
   Let us type a derivation of the process $\func{p}$ using linear and shared types. 
-  Let $\omega$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
+  Let $\func{\omega}$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
   Let $\epsilon$ be the empty usage context --- where all usage annotations are $(\zero \comma \zero)$.
   To type $\func{p}$, we need a channel over which we can transmit another channel.
-  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transiting data of type $\channel{\unit}{\omega}$, and declare (with $\li$) that we will only transmit its input capability.
+  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transiting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we will only transmit its input capability.
   The left-hand process is typed following its syntax.
   On the right-hand, we need the channel that is going to be sent.
   The type $\unit$ of this channel is entirely determined by the type of the channel over which it is going to be transmited.
@@ -827,10 +822,10 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
        $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
        ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
 
-  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \omega}{\func{p}}{\epsilon}$
-  $\func{\_}$ = $\constr{chan} \; \channel{\unit}{\omega} \; \li \; \one \; (\constr{comp}$
+  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\epsilon}$
+  $\func{\_}$ = $\constr{chan} \; \channel{\unit}{\func{\omega}} \; \li \; \one \; (\constr{comp}$
        $(\constr{recv} \; \constr{0} \; (\constr{recv} \; \constr{0} \; \constr{end}))$
-       $(\constr{chan} \; \unit \; \omega \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
+       $(\constr{chan} \; \unit \; \func{\omega} \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
        )$
   \end{lstlisting}
 \end{example}
@@ -861,7 +856,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
 \begin{nitheorem}
   \label{thm:weakening}
-  Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+  Weakening captures the idea that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 
   Let $\func{insert}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
@@ -873,7 +868,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
 \begin{nitheorem}
   \label{thm:strengthening}
-  Removing an unused variable preserves the well-typedness of a process.
+  Strengthening captures the idea that removing an unused variable preserves the well-typedness of a process.
 
   Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
