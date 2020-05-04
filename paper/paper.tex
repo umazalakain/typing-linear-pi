@@ -1126,53 +1126,39 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
 
-Considerable efforts in the mechanisation of resource-aware calculi have been made in recent years.
-
 Leftover typing as presented in this paper is based on work by Allais \cite{Allais2018a}.
 Allais uses leftover typing to mechanise in Agda a bidirectional type system for the linear \lambdacalc{}.
 This type system sits on top of an untyped but well-scoped syntax with de Bruijn indices.
 He proves type preservation and provides a decision procedure for type checking and type inference.
 In this paper, we apply his technique to the \picalc{}, but limit ourselves to type-checking (scope restriction needs usage annotations) terms, and focus on generalising the usage algebra.
+Drawing from quantitative type theory by McBride and Atkey \cite{McBride2016, Atkey2018}, it is crucial for us too to be able to talk about fully consumed resources.
+As a result, we are able to transmit fully exhausted channels over channels.
+
+Recent years have seen an increase in the efforts to mechanise resource-aware concurrency calculi, but the formalisation of the linear \picalc{} in Isabelle/HOL by Gay \cite{Gay2001} is perhaps one of the earliest works.
+Gay encodes the \picalc{} with linear and shared types into a more general framework.
+As we do, he uses de Bruijn indices, a reduction relation and a type system posterior to the syntax.
+However, in his work context splits are explicit, and the types of used multiplicities erased.
 
 Taking an intrinsic approach, Thiemann formalises in Agda the MicroSession (minimal GV \cite{}) calculus with support for recursion and subtyping \cite{Thiemann2019}.
 Context splits are given extrinsically, and exhausted elements are removed from typing contexts altogether.
 The semantics are given as an intrinsically typed CEK machine with a global context of session-typed channels.
 
-The work by Goto et al. \cite{Goto2016a} is likely the first contribution to session-types that comes along with a mechanised proof of type safety (in Coq). 
+The work by Goto et al. \cite{Goto2016a} is likely the first formal contribution to session-types that comes along with a mechanised proof of type safety (in Coq). 
 Their paper extends session types with polymorphism and pattern matching on session types.
 They use a locally-nameless encoding of variable references, a syntax prior to types, and a LTS semantics that encodes session-typed processes into the \picalc{}.
 Their type system uses reorering of contexts and extrinsic contex splits. 
 
 \cite{Rouvoet2020}
-\cite{Veltri2020}
-\cite{Gay2001}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Future Work}
+\section{Conclusions}
 
-Work that will be done time permitting:
+Mechanisation of the linear, gradual and shared \picalc{} in less than 1500 lines of code.
 
-Erika Kreuer: model usage algebra as a state machine?
-
-Adding bidirectionality would provide us with a decision procedure for type checking.
-
-\begin{description}
-
-\item [Proof of progress]
-
-\item [Product types]
-
-\item [Sum types]
-
-\item [Decidable typechecking]
-
-  Bidirectional typing rules needed.
-
-\item [Soundness and completeness with respect to an alternative formalization.]
-
-\item [Encoding of session types]
-
-\end{description}
+Adding product types and sum types.
+Proving that progress preserves the balancing of channels.
+Erika Kreuer has suggested modeling the usage algebra as a state machine.
+Adding bidirectionality would provide us with a decision procedure for type checking for a given context of algebras.
 
 \newpage
 \bibliography{paper}
