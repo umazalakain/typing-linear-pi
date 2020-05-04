@@ -1122,7 +1122,7 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
 
-Most of the work on mechanising resource-aware calculi is very recent.
+Considerable efforts in the mechanisation of resource-aware calculi have been made in recent years.
 
 Leftover typing as presented in this paper is based on work by Allais \cite{Allais2018a}.
 Allais uses leftover typing to mechanise in Agda a bidirectional type system for the linear \lambdacalc{}.
@@ -1134,18 +1134,14 @@ Taking an intrinsic approach, Thiemann formalises in Agda the MicroSession (mini
 Context splits are given extrinsically, and exhausted elements are removed from typing contexts altogether.
 The semantics are given as an intrinsically typed CEK machine with a global context of session-typed channels.
 
-\cite{Goto2016a}
-first session-type paper with a mechanised proof of type safety
-Session types
-Coq
-Extrinisically typed
-Session type polymorphism
+The work by Goto et al. \cite{Goto2016a} is likely the first contribution to session-types that comes along with a mechanised proof of type safety (in Coq). 
+Their paper extends session types with polymorphism and pattern matching on session types.
+They use a locally-nameless encoding of variable references, a syntax prior to types, and a LTS semantics that encodes session-typed processes into the \picalc{}.
+Their type system uses reorering of contexts and extrinsic contex splits. 
 
 \cite{Rouvoet2020}
 \cite{Veltri2020}
 \cite{Gay2001}
-
-\cite{previous-work} polymorphic tokens, HOAS
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Future Work}
