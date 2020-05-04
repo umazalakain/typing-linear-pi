@@ -142,15 +142,15 @@
 \begin{abstract}
   The \picalc{} is a computational model for communication and concurrency.
   The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
-  It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, including \emph{session types} \cite{H93,THK94,HVK98}.
+  It is an underlying theoretical and practical framework on top of which more advanced types and theories are built, including \emph{session types} \cite{H93,THK94,HVK98}.
   Linearity is key for type safety in session communication.
 
   We present the \emph{first} full mechanisation in Agda of a \picalc{} with \emph{linear}, \emph{gradual} and \emph{shared} types, all under the same unified framework.
   While linearity is key for type safety in communication-centric programming, gradual and shared types are needed to model real-world software systems.
   
-  We present syntax, semantics, type system and the corresponding type safety properties.
-  For the first time in \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
-  We generalise the algebras on multiplicities using indexed sets of \emph{partial commutative monoids}, allowing the user to choose a mix of linear, gradual and shared typing.
+  We present the syntax, semantics, type system and corresponding type safety properties.
+  For the first time in the \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
+  We generalise the algebras on multiplicities, allowing the developer to choose a mix of linear, gradual and shared typing.
   We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 %
@@ -181,9 +181,9 @@ Later on, linearity inspired unique types (as in Clean \cite{BarendsenS96}) and 
 The \picalc{} also benefited from the linearity wave of the early '90s.
 Kobayashi et al. \cite{KPT96} defined the {linear} \picalc{}, a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
 %
-In the meantime, with the rise of \emph{session types} \cite{H93,THK94,HVK98} linearity got a different flavour in the \picalc{}.
+In the meantime, with the rise of \emph{session types} \cite{H93,THK94,HVK98} linearity acquired a different flavour in the \picalc{}.
 Session types are a type formalism used in communication-centric programming.
-In session types, linearity ensures that a channel is owned by exactly one communicating participant, whilst the channel itself is used multiple times by following the structure of its session type.
+In session types, linearity ensures that a channel is owned by exactly one communicating participant, whilst the channel itself is used multiple times as per its session type.
 Linearity in session types is the key ingredient that guarantees type safety.
 
 Recent work has pushed the linear \picalc{} into the spotlight again \cite{KPT96}, thanks to an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17}.
@@ -195,7 +195,7 @@ Considering the relevance of the \picalc{} and of linearity in modelling concurr
 
 \emph{We present the first full mechanisation in Agda of a \picalc{} with linear, gradual and shared types, all under the same unified framework.}
 
-We do so by defining a specification for an algebra on \emph{multiplicities} (how many times a channel can be used) and use it to apply for the first time leftover typing (following Allais \cite{Allais2018a}) to the \picalc{}.
+We do so by defining a specification for an algebra on \emph{multiplicities} (how many times a channel can be used) and use it to apply leftover typing (following Allais \cite{Allais2018a}) to the \picalc{}.
 The developer is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
 Ultimately, we can exploit this formalisation as a unified framework for type safe distributed modelling and programming with a variety of type systems, and build on top of it more advanced types, theories and languages.
 In particular, while linearity is needed for type safety in communication-centric programming, gradual and shared types are needed to model real-world systems.
@@ -215,15 +215,15 @@ In particular, while linearity is needed for type safety in communication-centri
   \item \textbf{Leftover typing for the \picalc{}, with linear, gradual and shared types}:
   \autoref{type-system} provides the type system for a resource-aware \picalc{}.
   \begin{itemize}
-    \item \textbf{Algebras on multiplicities}: The type system is \emph{resource-aware} in that it allows the user to provide a resource-aware algebra that is then applied to the type-system.
-    Linear types, gradual types and shared types are all instances of such a resource-aware algebra (in \autoref{multiplicities}).
+    \item \textbf{Algebras on multiplicities}: The type system is \emph{resource-aware} in that it allows the user to provide resource-aware algebras that are then applied to the type-system (in \autoref{multiplicities}).
+    Linear types, gradual types and shared types are all instances of such a resource-aware algebra.
     Any \emph{partial commutative monoid} that is \emph{functional}, \emph{cancellative} and has a minimal element is a valid such algebra.
     Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (in \autoref{contexts}).
 
     \item \textbf{Leftover typing}: The typing judgments use \emph{leftover typing} to model the resource-aware \picalc{} (in \autoref{leftover-typing}).
     This approach adds a leftover usage context to the typing judgments.
     Typing derivations take the resources of their input usage context, consume some of them, and leave the rest as leftovers in the output usage context.
-    One of the benefits of this technique is that it removes the need for context splits, which is now not unnecessary.
+    One of the benefits of this technique is that it removes the need for extrinsic context splits, which are rendered unnecessary.
   \end{itemize}
   \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
   \autoref{type-safety} details the type safety properties of our \picalc{} with leftovers.
@@ -238,7 +238,7 @@ In particular, while linearity is needed for type safety in communication-centri
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-The notation used in this paper is given in \autoref{fig:notation}.
+\autoref{fig:notation} illustrates the notation used in this paper.
 \begin{figure}[h]
   \begin{mathpar}
     \datatype
@@ -258,10 +258,9 @@ The notation used in this paper is given in \autoref{fig:notation}.
   \label{fig:notation}
 \end{figure}
 
-Data type definitions use double lines and index-free synonyms as rule names (for ease of reference).
-For example ... \todo{complete the dots here, explain the rules above, in particular the 1+}
-We otherwise use the constructor name as the name of a typing rule. For example,...
-Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$. This means that ...
+Data type definitions ($\type{\N}$) use double lines and index-free synonyms (\textsc{Nat}) as rule names (for ease of reference).
+We otherwise use constructor names ($\constr{0}$ and $\suc$) to name our typing rules.
+Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned by type definitions but omitted in constructors.
 
 We use colours to further distinguish the different entities in this paper.
@@ -302,7 +301,7 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
                     |& \; \sendp{x}{y} P 
       \end{split}
     \end{equation*}
-    \caption{Ill-scoped grammar with channel names}
+    \caption{Ill-scoped grammar with names}
     \label{fig:syntax-names}
   \end{subfigure}
   \hspace{.05\textwidth}
@@ -322,14 +321,14 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
   \caption{}
 \end{figure}
 
-Let $x, y,\ldots$ range over \emph{channel names} or \emph{variables} and $P, Q,\ldots$ over processes.
+Let $x, y,\ldots$ range over \emph{variables} (including channel names) and $P, Q,\ldots$ over processes.
 The syntax of the \picalc{} \cite{Sangio01} is given by the grammar in \autoref{fig:syntax-names}.
 Process $\PO$ denotes the terminated process, where no operations can further occur.
 Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
 Processes $\recvp{x}{y} P$ and $\sendp{x}{y} P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
 
-Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y} \; P$ both introduce bound names, respectively, $x$ and $y$ in $P$.
+Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y} \; P$ both introduce bound names --- $x$ and $y$ in $P$, respectively.
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
 Furthermore, names do not guarantee that the syntax is well-scoped.
@@ -339,7 +338,7 @@ Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n
   \begin{equation*}
     \begin{split}
       & (\new{}x ) && (\comp {\recvp{x}{y} && \; \sendp{y}{a} \; \PO} {(\new{} y) && (\sendp{x}{y} \; \recvp{y}{z} && \; \PO)})
-      && \text{channel names}
+      && \text{names}
       \\
       & \new{} && (\comp {\recv{0} && \; \send{0}{a} \; \PO} {\new{} && (\send{1}{0} \; \recv{0} && \; \PO)})
       && \text{de Bruijn indices}
@@ -347,21 +346,21 @@ Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n
     \end{split}
   \end{equation*}
 \end{example}
-That is, terms at different \emph{depths} use different indices to refer to the same binding introduced either by a restriction $\constr{\nu}$ or input $\constr{()}$.
+That is, terms at different \emph{depths} use different indices to refer to the same binding.
 
 A variable occurring under $n$ abstractions has $n$ possible variables to refer to.
 References outside of that range are meaningless.
 It is useful to rule out these nonsensical terms syntactically.
-In \autoref{fig:syntax} (including the top), we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
-Every time we go under a binder, the number of binders a variable might refer to increments by one, in rules $\constr{0}$ and $\suc n$. \todo{check this is right what i just said}
-To propagate this information, we index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-We increase the \emph{depth} counter by 1 in channel restriction and input processes.
+In \autoref{fig:syntax}, we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
+We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
+Every time we go under a binder, we increase the index of the continuation process, allowing the variables within to refer to one more thing.
 \autoref{fig:syntax} showcases a \picalc{} syntax that is well-scoped by construction using type-level de Bruijn indices.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 \label{semantics}
-Due to a well-scoped grammar in \autoref{fig:syntax}, the semantics of our language can now be defined on the totality of the syntax. We start by defining the structural congruence.
+Thanks to our well-scoped grammar in \autoref{fig:syntax}, the semantics of our language can now be defined on the totality of the syntax.
+We start by defining the structural congruence.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Structural Congruence}
@@ -473,7 +472,8 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 \section{Resource-aware Typing System}
 \label{type-system}
 
-In \autoref{multiplicities} we characterise a usage algebra for our typing system. It defines how resources are \emph{split} in parallel composition and \emph{consumed} in input and output.
+In \autoref{multiplicities} we characterise a usage algebra for our typing system.
+It defines how resources are \emph{split} in parallel composition and \emph{consumed} in input and output.
 We define typing and usage contexts in \autoref{contexts}.
 We provide a typing system for a resource-aware \picalc{} in \autoref{leftover-typing}.
 
@@ -497,10 +497,12 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \times \type{C}$ tuple of input and output multiplicities, respectively.
   We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
 
-  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$ for a channel which cannot be used furether, $\li$ for the pair $(1 \comma 0)$ for a channel to be used in input only once, $\lo$ for $(0 \comma 1)$ for a channel to be used in output only once, and $\lio$ for $(1 \comma 1)$, for a channel to be used once in input and once in output. This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
+  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$ for a channel which cannot be used any further, $\li$ for the pair $(1 \comma 0)$ for a channel to be used in input exactly once, $\lo$ for $(0 \comma 1)$ for a channel to be used in output exactly once, and $\lio$ for $(1 \comma 1)$, for a channel to be used exactly once in input and exactly once in output.
+  This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{note}
 
 \todo{you cannot refer to IDX if it is in the appendix. Assume the reader will never look at the appendix. Maybe it is worth bringing back fig 12 or 13? Can only one be brought back?}
+
 Linear, gradual and shared types (identified by a value in $\Idx$) are all defined as an instance of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \todo{Explain what are Two and N. The whole sentence the carrier is a type Two is not clear...}
@@ -508,28 +510,30 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
   \item [Linear]
     The carrier is a type $\type{Two}$ with the trivial elements $\constr{zero}$ and $\constr{one}$.
     The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited in every other case.
-    All other properties are lifted element-wise.
-    For example, a linear channel must be used exactly once as specified by the pair and as detailed in \autoref{note:linearity}.
+    All the properties of the algebra follow trivially.
+    As an example, the multiplicity pair $\ell_i$ is represented as $(\constr{one} \comma \constr{zero})$.
 
     \item [Gradual]
     The carrier is the type of natural numbers $\N$.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
     The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
-    All other rules follow trivially from the algebraic rules for the addition of natural numbers.
-    For example, a gradual channel can be used $x$ times in total: $y$ times for an action (input or output) and $z$ times for the co-action (output or input).
+    All other properties of the algebra follow from the algebraic rules for the addition of natural numbers.
+    As an example, we use $(5 \comma 3)$ to represent the multiplicities of a channel that is able to input 5 times and output 3 times.
 
     \item [Shared]
     The carrier is a type $\type{One}$ with a single trivial constructor $\constr{\omega}$.
     Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
     The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
-    All other rules follow trivially.
-    For example, a shared channel can be used unrestrictedly many times in either input or output.
+    All the properties of the algebra follow trivially.
+    All shared channels have multiplicities $(\omega \comma \omega)$, which they will forever preserve.
 \end{description}
-\todo{Added a last for example sentence to all. check}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing Contexts}
 \label{contexts}
+
 \todo{unify typing system and type system. only use one terminology in the paper.}
+
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
   An indexed set of usage algebras is a set of indices $\Idx$ together with an interpretation $\Usage_{idx}$ of indices into types, and an interpretation of indices into usage algebras on that type.
@@ -538,17 +542,16 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \end{nidefinition}
 \todo{again, usage and idx occur here, but the formal defintion seems to be actually necessary. I'm thinking that both fig 12 and 13 are needed in the main text...}
 
-We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
+We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts ($\Ctx$ in \autoref{fig:ctx}) separate.
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
-\todo{where is the def of CTX?}
 
 \begin{nidefinition}
   \autoref{fig:prectx} defines types as either unit types (rule $\unit$), base types (rule $\base{n}$) or channel types (rule $\channel{t}{x}$).
-  %
   The unit type $\unit$ serves as a proof of inhabitance for types.
-  The base type $\base{n}$ uses natural numbers as placeholders for types --- the host language can interpret the former into the latter. \todo{I don't get this... give an example for int, and just talk about pi, rather than a host language.}
-  %This is for convenience, so that there is less universe polymorphism polluting specifications.
-  The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel. This notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
+  The base type $\base{n}$ uses natural numbers as placeholders for types, the host language can then interpret the former into the latter --- e.g. $0$ as booleans, $1$ as natural numbers.
+  This is for convenience, so that there is less universe polymorphism polluting specifications.
+  The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel.
+  This notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
   \todo{I don't really like the symbol between t and x. Why not a simple semicolon ; ?}
   We keep track of types in a length-indexed $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
   
@@ -627,7 +630,9 @@ The former are preserved throughout a typing derivation; the latter are transfor
   \label{fig:ctx}
   \end{figure}
 \end{nidefinition}
+
 \todo{Maybe fig 6 can go in appendix in order to make room for 12 and 13 to come back? This whole paragraph from def 6 below could be cut and brought to app? and only commented upon}
+
 \begin{note}
   We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have a common underlying context of indices.
   All the properties of the partial monoid are trivially lifted.
@@ -646,36 +651,28 @@ Leftover typing presents three main advantages:
     The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgment with both an input and an output usage context.
   \item
     No need for an extensional context splitting proof for parallel composition.
-    Alternatively, such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
+    Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
     This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
   \item
-    New theorems (\textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening})) can suddenly be stated. \todo{explain suddenly}
+    New theorems like \textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening}) can be stated thanks to the presence of a leftover context.
 \end{itemize}
   
 We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
-Both are indexed by a typing context ($\gamma$), an input usage context ($\Gamma$), and an output usage context or leftovers ($\Delta$).
-A typing context $\gamma$ keeps track of...  An input or output usage context $\Gamma,\Delta$ keeps track of...
+Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{idxs}$ (the leftovers).
 
 \begin{nidefinition}
   \label{def:varref}
 
   The \textsc{VarRef} relation is presented in \autoref{fig:variable-references}.
-  The judgment $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ reads as "..." 
-  The premise of \textsc{VarRef} means that...
-  \todo{use parts from the commented sentences to complete the dots; refer to the greek letters.}
+  The judgment $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ reads as ``$\gamma$ at position $i$ is of type $t$, and subtracting $y$ at position $i$ from $\Gamma$ results in $\Delta$''.
+
   \todo{Again, not sure I like the notation of this judgement...Instead of the square I would put $\triangleright$ If the relation is symmetric, then use a symmetric symbol, otherwise a symbol that conveys direction. Also, it seems as if the direction changes with that epsilon inverted.}
-  % keeps track of the index, type, and usage annotation of a variable within a particular typing and usage context.
-  % The leftover usage context is the result of subtracting the usage annotation from the input usage context.
 
-  The base case $\constr{here}$ splits the usage annotation $x$ into $y$ and $z$, which are the leftovers.
-  This splitting is as per the usage algebra defined on the index of the usage annotation in \autoref{}.
-  $\constr{there}$...
-
-  \todo{integrate the remark somewhere else, rather than in a remark?}
-  \begin{remark}
-    We use the functionality of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
-  \end{remark}
+  The base case $\constr{here}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$, which are the leftovers.
+  This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
+  We use the functionality of the monoidal relation to alleviate the user from this proof burden.
+  The inductive case $\constr{there}$ preserves the usage annotation $x'$ from input to output. 
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -711,19 +708,18 @@ A typing context $\gamma$ keeps track of...  An input or output usage context $\
 \begin{example}
   Let us illustrate the use of channels with an example.
   \begin{lstlisting}[label=lst:channels,mathescape,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
-  _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\constr{suc} \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
+  _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\constr{there} \; \constr{here}$
   \end{lstlisting}
-  \autoref{lst:channels} asserts that the input $\channel{\unit}{\li}$ type at index $\constr{suc} \; \constr{0}$ is capable of $\li$, and that consuming such $\li$ results in $\lo$.
-  The continuation means that...
-  Finally, $= \constr{there} \; \constr{here}$ means that...
+  In \autoref{lst:channels}, the constructor $\constr{there}$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
+  The constructor $\constr{here}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving leftovers $\lo$.
 \end{example}
 
 \begin{nidefinition}
   \label{def:types}
 
   The typing relation \textsc{Types} is presented in \autoref{fig:types}.
-  The typing judgement $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that "process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$".
+  The typing judgement $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -785,8 +781,8 @@ A typing context $\gamma$ keeps track of...  An input or output usage context $\
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
   
-  Parallel composition uses the leftovers of left-hand process to type the right-hand process.
-  \todo{explain the rationale here as most people would expect a combination/splitting of typing context, which for us is not needed anymore. just add a sentence}
+  Parallel composition uses the leftovers of the left-hand process to type the right-hand process.
+  By keeping track in the typing derivation of $P$ of the resources it uses, we save the user from having to provide an extrinsic proof of context split.
 \end{nidefinition}
 
 \begin{example}
