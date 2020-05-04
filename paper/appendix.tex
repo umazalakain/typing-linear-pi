@@ -151,14 +151,6 @@ We then encapsulate a set carriers and their algebras in \autoref{fig:indexed-mu
 \end{proof}
 
 \begin{nilemma}
-  \label{lm:types-op}
-  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, there exists some $\Delta$ such that $\opctx{\Gamma}{\Delta}{\Xi}$.
-\end{nilemma}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
   \label{lm:comm-capable}
   Every input usage context $\Gamma$ of a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces by communicating on a channel external to it (that is, $P \reduce{\constr{external} \; i} Q$ for some $Q$) has a multiplicity of at least $\lio$ at index $i$.
 \end{nilemma}

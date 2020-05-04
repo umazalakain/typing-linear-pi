@@ -227,7 +227,7 @@ In particular, while linearity is needed for type safety in communication-centri
   \end{itemize}
   \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
   \autoref{type-safety} details the type safety properties of our \picalc{} with leftovers.
-  Leftover typing allows \emph{framing} (\autoref{framing}), \emph{weakening} (\autoref{weakening}) and \emph{strengthening} (\autoref{strengthening}) theorems to be stated.
+  Leftover typing allows \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to be stated.
   We use these to prove \emph{subject congruence} (\autoref{subject-congruence}), and together with \emph{substitution} (\autoref{substitution}), to prove \emph{subject reduction} (\autoref{subject-reduction}).  
 
   \item \textbf{Fully mechanised formalisation available in Agda}:
@@ -646,7 +646,7 @@ Leftover typing presents three main advantages:
     This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
   \item
-    New theorems like \textbf{framing} (\autoref{framing}), \textbf{weakening} (\autoref{weakening}) and \textbf{strengthening} (\autoref{strengthening}) can be stated thanks to the presence of a leftover context.
+    New theorems like \textbf{framing} (\autoref{thm:framing}), \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) can be stated thanks to the presence of a leftover context.
 \end{itemize}
   
 We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
@@ -807,16 +807,16 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
 \todo{intro}
 \todo{I wonder if we can remove the proofs everywhere and comment on them in the intro and where they can be found.}
-\subsection{Framing}
-\label{framing}
+
+\subsection{Auxiliaty Results}
+\label{auxiliary-results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Framing captures the idea that the well-typedness of a process is independent of its leftover resources.
-\todo{Do not forward refer when it comes to results. Never refer to results in the appendix. Consider that, if the paper get publshed, it will get so without the appendix. It should be *completely* self contained}
 \begin{nitheorem}
   \label{thm:framing}
+  Framing captures the idea that the well-typedness of a process is independent of its leftover resources.
   Let $P$ be a well-typed process $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
-  Then, per \autoref{lm:types-op}, there exists some $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
+  Let there be a $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
@@ -824,14 +824,10 @@ Framing captures the idea that the well-typedness of a process is independent of
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\subsection{Weakening}
-\label{weakening}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
-
 \begin{nitheorem}
   \label{thm:weakening}
+  Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+
   Let $\func{insert}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then lifting every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{insert}_i \; t \; \gamma}{\func{insert}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{insert}_i \; x \; \Xi}$.
@@ -840,19 +836,10 @@ Inserting a new variable into the context preserves the well-typedness of a proc
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\subsection{Strengthening}
-\label{strengthening}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Removing an unused variable preserves the well-typedness of a process.
-We say a variable is \emph{unused} within a process if neither inputs nor outputs refer to it.
-
-\begin{remark}
-  It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned within $P$ --- $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
-\end{remark}
-
 \begin{nitheorem}
   \label{thm:strengthening}
+  Removing an unused variable preserves the well-typedness of a process.
+
   Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable index not mentioned by $P$, such that $\Unused_i \; P$.
@@ -862,20 +849,13 @@ We say a variable is \emph{unused} within a process if neither inputs nor output
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\subsection{Swapping}
-\label{swapping}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Swapping two variables preserves the well-typedness of a process.
-
 \begin{remark}
-  We limit ourselves to the swapping of adjacent variables $i$ and $\suc i$.
-  Doing so is enough to prove subject reduction.
-  More generally, any two variables can be swapped by performing a series of adjacent variable swappings.
+  It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned within $P$ --- $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
 \end{remark}
 
 \begin{nitheorem}
   \label{thm:swapping}
+  Swapping two variables preserves the well-typedness of a process.
   Let $\func{swap}_i$ be a function that swaps variables $i$ and $\suc i$.
   For simplicity, we overload $\func{swap}$ and use it to swap types in a typing context, multiplicities in a usage context, and variable references in a process.
   \todo{}
@@ -886,7 +866,12 @@ Swapping two variables preserves the well-typedness of a process.
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\todo{Maybe all previous subsections could be put into one "Auxiliary Results"}
+\begin{remark}
+  We limit ourselves to the swapping of adjacent variables $i$ and $\suc i$.
+  Doing so is enough to prove subject reduction.
+  More generally, any two variables can be swapped by performing a series of adjacent variable swappings.
+\end{remark}
+
 \todo{Replace the proofs with an intuition on the theorem}
 \subsection{Subject Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1083,7 +1068,6 @@ In the linear \picalc{} reduction affects the usage context: communicating over 
   Given $\types{\gamma}{\Gamma'}{P}{\Xi}$ then after reduction $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
-\todo{maybe only focus on the first case, internal and external and say the rest is by induction blah bla and details can be found in appenix/or github}
 \begin{proof}
   \hfill{}\\
   \begin{itemize}
