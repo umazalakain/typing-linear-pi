@@ -70,51 +70,6 @@ In the transitivity rule, we must show that if $P$ is structurally congruent to 
 To do so, we need to proceed by induction and first get a proof of the well-typedness of $Q$, then use that to reach $R$.
 To show the typechecker that the doubly recursive call terminates we index the equivalence relation $=$ by a type $\Rec$ that models the structure of the recursion.
 
-\section{Usage Algebra}
-\label{app:usage-algebra}
-
-\todo{we haven't introduced the forall and implicit syntax}
-\todo{introduce DEC and exists}
-
-Our usage algebra is a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancelative}, \emph{associtive}, and \emph{commutative}.
-It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
-It has an element $\one$ that is used to count inputs and outputs.
-These algebraic laws are defined as a record $\Quantifier_C$ on a carrier set $C$ in \autoref{fig:multiplicities}.
-We use a terniary relation to model the partial monoidal operation.
-We then encapsulate a set carriers and their algebras in \autoref{fig:indexed-multiplicities}.
-
-\begin{figure}[h]
-\begin{equation}
-\begin{aligned}
-  &\zero                  &:{} &                      &        & C \\
-  &\one                   &:{} &                      &        & C \\
-  &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
-  &\func{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
-  &\func{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-  &\func{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-  &\func{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-  &\func{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
-  &\func{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-  &\func{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
-\end{aligned}
-\end{equation}
-\caption{Quantifier algebra $\Quantifier_C$ algebra on a partial commutative monoid.}
-\label{fig:multiplicities}
-\end{figure}
-
-\begin{figure}[h]
-  \begin{equation}
-    \begin{split}
-      &\func{IDX}          &:{} &\Set \\
-      &\func{\exists IDX}  &:{} &\func{IDX} \\
-      &\func{USAGE}        &:{} &\func{IDX} \to \Set \\
-      &\func{QUANTIFIERS}  &:{} &(i : \func{IDX}) \to \Quantifier_{\func{USAGE}_i}
-    \end{split}
-  \end{equation}
-  \caption{Indexed set of usage algebras.}
-  \label{fig:indexed-multiplicities}
-\end{figure}
-
 \section{Lemmas}
 \label{app:lemmas}
 

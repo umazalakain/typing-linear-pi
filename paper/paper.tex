@@ -106,7 +106,7 @@
 \newcommand{\N}{\type{\mathbb{N}}}
 \newcommand{\Channel}{\type{CHANNEL}}
 \newcommand{\Rec}{\type{REC}}
-\newcommand{\Quantifier}{\type{QUANTIFIER}}
+\newcommand{\Algebra}{\type{ALGEBRA}}
 \newcommand{\eq}[1]{\; \type{=}_{#1} \;}
 \newcommand{\eqeq}{\; \type{\equiv} \;}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -479,13 +479,35 @@ We provide a type system for a resource-aware \picalc{} in \autoref{leftover-typ
 \label{multiplicities}
 
 In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
-We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types.
+We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types alike.
 
 \begin{nidefinition}
   We define our usage algebra to be a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
-  For a formal definition, refer to \autoref{fig:multiplicities} in \autoref{app:usage-algebra}.
+  \autoref{fig:multiplicities} uses a terniary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
+
+  \todo{we haven't introduced the forall and implicit syntax}
+  \todo{introduce DEC and exists}
+
+  \begin{figure}[h]
+  \begin{equation*}
+  \begin{aligned}
+    &\zero                  &:{} &                      &        & C \\
+    &\one                   &:{} &                      &        & C \\
+    &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
+    &\func{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
+    &\func{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+    &\func{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+    &\func{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
+    &\func{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
+    &\func{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
+    &\func{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
+  \end{aligned}
+  \end{equation*}
+  \caption{Algebra $\Algebra_C$ algebra on a partial commutative monoid.}
+  \label{fig:multiplicities}
+  \end{figure}
 \end{nidefinition}
 
 \begin{note}
@@ -528,11 +550,23 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
 \begin{nidefinition}
   We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
-  An indexed set of usage algebras is a type $\Idx$ of indices together with an interpretation $\Usage_{idx} : \Idx \to \Set$ of indices into types, and an interpretation of indices into usage algebras.
+  An indexed set of usage algebras is a nonempty type $\Idx$ of indices together with an interpretation $\Usage_{idx}$ of indices into types, and an interpretation of indices into usage algebras.
   $\Idx$ must be non-empty.
-  Refer to \autoref{fig:indexed-multiplicities} in \autoref{app:usage-algebra} for a formal definition.
+  Refer to \autoref{fig:indexed-multiplicities} for a formal definition.
+  \begin{figure}[h]
+    \begin{equation}
+      \begin{split}
+        &\Idx               &:{} &\Set \\
+        &\type{\exists IDX} &:{} &\Idx \\
+        &\Usage             &:{} &\Idx \to \Set \\
+        &\type{ALGEBRAS}    &:{} &(idx : \Idx) \to \Algebra_{\Usage_{idx}}
+      \end{split}
+    \end{equation}
+    \caption{Indexed set of usage algebras.}
+    \label{fig:indexed-multiplicities}
+  \end{figure}
+
 \end{nidefinition}
-\todo{again, usage and idx occur here, but the formal defintion seems to be actually necessary. I'm thinking that both fig 12 and 13 are needed in the main text...}
 
 We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts ($\Ctx$ in \autoref{fig:ctx}) separate.
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
@@ -754,6 +788,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   \end{figure}
 
   Some comments on the leftover type system follow.
+
   The inaction process does not change usage annotations.
 
   Scope restriction expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
@@ -788,8 +823,8 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   
   \begin{lstlisting}[mathescape]
   $\func{p}$ : $\Process_1$
-  $\func{p}$ = $\new{} \; ($
-       $\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
+  $\func{p}$ = $\new{}$
+       $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
        ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
 
   $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \omega}{\func{p}}{\epsilon}$
