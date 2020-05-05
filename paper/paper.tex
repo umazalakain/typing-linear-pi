@@ -361,14 +361,14 @@ Every time we go under a binder, we increase the index of the continuation proce
 \section{Semantics}
 \label{semantics}
 Thanks to our well-scoped grammar in \autoref{fig:syntax}, the semantics of our language can now be defined on the totality of the syntax.
-We start by defining structural congruence.
+We start by defining structural congruence in \autoref{structural-congruence} and then the reduction relation in \autoref{operational-semantics}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Structural Congruence}
 \label{structural-congruence}
 
-We define the base cases of a structural congruence relation \textsc{StructCong} in \autoref{fig:struct-cong-base}.
-Its congruent equivalence closure \textsc{Equals} is provided in \autoref{app:struct}.
+We define the base cases of a structural congruence relation \textsc{StructCong} $\eqeq$ in \autoref{fig:struct-cong-base}.
+Its congruent equivalence closure \textsc{Equals} $=$ is defined1 in \autoref{app:struct}.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -417,16 +417,19 @@ In all the above, $i$ is incremented every time we go under a binder.
 \subsection{Reduction Relation}
 \label{operational-semantics}
 
-The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} indexed by the channel $i$ on which communication occurs (\autoref{fig:reduction}).
-In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel ${i}$.
-As a result of that communication, the continuation of the input process $P$ gets all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
+The operational semantics of the \picalc{} is defined by a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs (\autoref{fig:reduction}).
+We keep track of channel $c$ so we can state subject reduction (\autoref{subject-reduction}).
+We identify two kinds of channels, $\constr{internal}$ and $\constr{external}\ i$, respectively standing for a channel which ... \todo{complete}
+
+In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
+As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
 After substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (to do so, we apply \autoref{lm:subst-unused} in \autoref{app:lemmas} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
-We keep track of the channel over which communication occurs so that we can state subject reduction (in \autoref{subject-reduction}).
-We use a $\func{dec}$ function to decrement the index of this channel every time we come out of a binder.
-This function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
+
+We use a $\func{dec}$ function to decrement the index of this channel every time we come out of a binder in rule $\constr{res}$. \todo{this seems more getting 'into' a binder than coming out...}
+This $\func{dec}$ function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
 
 
 \begin{figure}[h]
