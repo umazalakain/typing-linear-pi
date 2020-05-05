@@ -13,14 +13,6 @@
 \bibliographystyle{plainurl}
 
 \usepackage{hyperref}
-%%
-%% For section renaming in autoref
-\addto\extrasUKenglish{%
-\renewcommand{\sectionautorefname}{\S}%
-\renewcommand{\subsectionautorefname}{\S}%
-\def\exampleautorefname{Ex.}% 
-\renewcommand{\figureautorefname}{Fig.}%
-}
 
 % Two column itemize
 \usepackage{multicol}
@@ -48,6 +40,15 @@
 \newtheorem{nidefinition}{Definition}
 \newtheorem{nitheorem}{Theorem}
 \newtheorem{nilemma}{Lemma}
+\renewcommand{\nitheoremautorefname}{Thm.}%
+\renewcommand{\nidefinitionautorefname}{Def.}%
+\renewcommand{\nilemmaautorefname}{Lem.}%
+\renewcommand{\exampleautorefname}{Ex.}%
+\addto\extrasUKenglish{%
+  \renewcommand{\sectionautorefname}{\S}%
+  \renewcommand{\subsectionautorefname}{\S}%
+  \renewcommand{\figureautorefname}{Fig.}%
+}
 
 % No line numbers
 \nolinenumbers
@@ -163,7 +164,6 @@
 \todo{spellcheck}
 \todo{make sure all citations are there}
 \todo{rename gradual to something else...}
-\todo{Theorem to Thm. Definiton to Def. when referencing. UMA: it's currently set by the lipics class, should we change it?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -580,7 +580,7 @@ We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts 
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
 
 \begin{nidefinition}[Types and length-indexed typing contexts]
-  A \emph{Type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) defined in \autoref{fig:prectx}.
+  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) defined in \autoref{fig:prectx}.
   
   A \emph{length-indexed typing context} $\PreCtx_n$, is defined by the last row of rules in \autoref{fig:prectx}.
   A typing context is either empty $[]$ or the result of appending a type $t$ to an existing context$\gamma$.
