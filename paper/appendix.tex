@@ -113,3 +113,67 @@ To show the typechecker that the doubly recursive call terminates we index the e
 \begin{proof}
   By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
 \end{proof}
+
+\section{Substitution}
+\label{app:subst-generalization}
+
+\begin{nitheorem}
+  \label{thm:subst-generalization}
+  Let process $P$ be well-typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  The substituted variable $i$ has a usage $m$ in $\Gamma_i$, and a usage $n$ in $\Psi_i$.
+  Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
+  In other words, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
+  \begin{multicols}{2}
+  \begin{itemize}
+    \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
+    \item $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
+    \item $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
+    \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
+  \end{itemize}
+  \end{multicols}
+  Let $\Gamma$ and $\Psi$ be related such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
+  Let $\Delta$ have a usage annotation $\lz$ at position $i$.
+  Then substituting $i$ with $j$ in $P$ will be well-typed such that $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+  Refer to \autoref{fig:subst} for a diagramatic representation.
+\end{nitheorem}
+
+\begin{nidefinition}
+  For convenience, we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
+\end{nidefinition}
+  
+\begin{proof}
+  By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  \begin{itemize}
+    \item
+      For constructor $\constr{end}$ we get $\Gamma_i \equiv \Psi_i$.
+      From $\Delta_i \equiv \lz$ follows that $m \equiv n$.
+      Therefore $\Gamma_j \equiv \Psi_j$ and $\constr{end}$ can be applied.
+
+    \item
+      For constructor $\constr{chan}$ we proceed inductively, wrapping arrows $\ni_i m$, $\ni_j m$, $\ni_i n$ and $\ni_j n$ with $\suc$.
+      
+    \item
+      For constructor $\constr{recv}$ we must split $\Delta$ to proceed inductively on the continuation.
+      Observe that given the arrow from $\Gamma_i$ to $\Psi_i$ and given that $\Delta$ is $\lz$ at index $i$, there must exist some $\delta$ such that $\opsquared{m}{\delta}{n}$.
+ l     \begin{itemize}
+        \item
+          If the input is on the variable being substituted, we split $m$ such that $\opsquared{m}{\li}{l}$ for some $l$, and construct an arrow $\containsusage{\Xi_i}{i}{l}{\Gamma}$ for the inductive call.
+          Similarly, we construct for some $\Xi_j$ the arrows $\containsusage{\Gamma_j}{j}{\li}{\Xi_j}$ as the new input channel, and $\containsusage{\Xi_j}{j}{l}{\Gamma}$ for the inductive call.
+        \item
+          If the input is on a variable $x$ other than the one being substituted, we construct the arrows $\containsusage{\Xi_i}{i}{m}{\Theta}$ (for the inductive call) and $\containsusage{\Gamma}{x}{\li}{\Theta}$ for some $\Theta$.
+          We then construct for some $\Xi_j$ the arrows $\containsusage{\Gamma_j}{x}{\li}{\Xi_j}$ (the new output channel) and $\containsusage{Xi_j}{j}{m}{\Theta}$ (for the inductive call).
+          Given there exists a composition of arrows from $\Xi_i$ to $\Psi$, we conclude that $\Theta$ splits $\Delta$ such that $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
+          As $\lz$ is a minimal element, then $\Delta_1$ must be $\lz$ at index $i$, and so must $\Delta_2$.
+      \end{itemize}
+
+    \item
+      $\constr{send}$ applies the ideas outlined for the $\constr{recv}$ constructor to both the \textsc{VarRef} doing the output, and the \textsc{VarRef} for the sent data.
+
+    \item
+      For $\constr{comp}$ we first find a $\delta$, $\Theta$, $\Delta_1$ and $\Delta_2$ such that $\containsusage{\Xi_i}{i}{\delta}{\Theta}$ and $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
+      Given $\Delta$ is $\lz$ at index $i$, we conclude that $\Delta_1$ and $\Delta_2$ are too.
+      Observe that $\opsquared{m}{\delta}{\psi}$, where $\psi$ is the usage annotation at index $i$ consumed by the subprocess $P$.
+      We construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
+      We can now make two inductive calls (on the derivation of $P$ and $Q$) and compose their results.
+  \end{itemize}  
+\end{proof}

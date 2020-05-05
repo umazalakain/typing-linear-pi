@@ -22,6 +22,9 @@
 \renewcommand{\figureautorefname}{Fig.}%
 }
 
+% Two column itemize
+\usepackage{multicol}
+
 % Example code
 \usepackage{listings}
 
@@ -42,9 +45,9 @@
 
 % Do not use italics in definitions and theorems
 \theoremstyle{definition}
-\newtheorem{nidefinition}[theorem]{Definition}
-\newtheorem{nitheorem}[theorem]{Theorem}
-\newtheorem{nilemma}[theorem]{Lemma}
+\newtheorem{nidefinition}{Definition}
+\newtheorem{nitheorem}{Theorem}
+\newtheorem{nilemma}{Lemma}
 
 % No line numbers
 \nolinenumbers
@@ -846,48 +849,39 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 \label{auxiliary-results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{nitheorem}
+\begin{nitheorem}[Framing]
   \label{thm:framing}
-  Framing captures the idea that the well-typedness of a process is independent of its leftover resources.
+  The well-typedness of a process is independent of its leftover resources.
   Let $P$ be a well-typed process $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
   Let there be a $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
-\begin{nitheorem}
+\begin{nitheorem}[Weakening]
   \label{thm:weakening}
-  Weakening captures the idea that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+  Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 
   Let $\func{insert}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then lifting every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{insert}_i \; t \; \gamma}{\func{insert}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{insert}_i \; x \; \Xi}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
-\begin{nitheorem}
+\begin{nitheorem}[Strengthening]
   \label{thm:strengthening}
-  Strengthening captures the idea that removing an unused variable preserves the well-typedness of a process.
+  Removing an unused variable preserves the well-typedness of a process.
 
   Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable index not mentioned by $P$, such that $\Unused_i \; P$.
   Then lowering every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{delete}_i \; \gamma}{\func{delete}_i \; \Gamma}{\func{lower}_i \; P}{\func{delete}_i \; \Xi}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
 \begin{remark}
   It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned within $P$ --- $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
 \end{remark}
 
-\begin{nitheorem}
+\begin{nitheorem}[Swapping]
   \label{thm:swapping}
   Swapping two variables preserves the well-typedness of a process.
   Let $\func{swap}_i$ be a function that swaps variables $i$ and $\suc i$.
@@ -896,9 +890,6 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
 \begin{remark}
   We limit ourselves to the swapping of adjacent variables $i$ and $\suc i$.
@@ -906,12 +897,17 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   More generally, any two variables can be swapped by performing a series of adjacent variable swappings.
 \end{remark}
 
-\todo{Replace the proofs with an intuition on the theorem}
+\begin{proof}
+  All the above theorems are by induction on \textsc{Process} and \textsc{Var}.
+  For details, refer to the mechanisation in Agda \cite{Zalakain2020Agda}.
+\end{proof}
+
+
 \subsection{Subject Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
 
-\begin{nitheorem}
+\begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
   Applying structural congruence rules to a well-typed process preserves its well-typedness.
   That is, if $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
@@ -950,19 +946,6 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
 \autoref{thm:subst-generalization} proves a generalized version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalized version to the concrete case where $i$ is $\constr{0}$, as required by subject reduction.
-\todo{Structure the theorem (in general the long ones) a bit more. Use itemize or similar. It's a blob of text.}
-\begin{nitheorem}
-  \label{thm:subst-generalization}
-  Let process $P$ be well-typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$,
-  Let $\ni_i m$ be a \textsc{VarRef} $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$ for some $m$ and $\Gamma$.
-  Let $\ni_i n$ be a \textsc{VarRef} $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$ for some $m$ and $\Psi$.
-  Let $\Gamma$ and $\Psi$ be related such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
-  Let $\Delta$ have a usage annotation $\lz$ at position $i$.
-  Let $\ni_j m$ be a \textsc{VarRef} $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$ for some $\Gamma_j$.
-  Let $\ni_j n$ be a \textsc{VarRef} $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$ for some $\Psi_j$.
-  Then substituting $i$ with $j$ in $P$ will be well-typed such that $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
-  Refer to \autoref{fig:subst} for a diagramatic representation.
-\end{nitheorem}
 
 \begin{figure}[h]
   \begin{subfigure}{.5\textwidth}
@@ -1035,50 +1018,43 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   \caption{Substitution with and without the \emph{adjustment} arrows $\ni_i n$ and $\ni_j n$}
 \end{figure}
 
-\begin{nidefinition}
-  For convenience, we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
-\end{nidefinition}
-  
-\todo{I don't think a reviewer from CONCUR most likely will nto get the proof. Appendix! Replace it with a proof sketch where you comment on the diagram as well.}
+\begin{nitheorem}[Generalised substitution]
+  \label{thm:subst-generalization}
+  Let process $P$ be well-typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  The substituted variable $i$ has a usage $m$ in $\Gamma_i$, and a usage $n$ in $\Psi_i$.
+  Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
+  In other words, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
+  \begin{multicols}{2}
+  \begin{itemize}
+    \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
+    \item $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
+    \item $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
+    \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
+  \end{itemize}
+  \end{multicols}
+  Let $\Gamma$ and $\Psi$ be related such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
+  Let $\Delta$ have a usage annotation $\lz$ at position $i$.
+  Then substituting $i$ with $j$ in $P$ will be well-typed such that $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+  Refer to \autoref{fig:subst} for a diagramatic representation.
+\end{nitheorem}
+
 \begin{proof}
-  By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   \begin{itemize}
     \item
-      For constructor $\constr{end}$ we get $\Gamma_i \equiv \Psi_i$.
-      From $\Delta_i \equiv \lz$ follows that $m \equiv n$.
-      Therefore $\Gamma_j \equiv \Psi_j$ and $\constr{end}$ can be applied.
+      For constructor $\constr{end}$ observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
+      The details are found in \autoref{app:subst-generalization}.
 
     \item
-      For constructor $\constr{chan}$ we proceed inductively, wrapping arrows $\ni_i m$, $\ni_j m$, $\ni_i n$ and $\ni_j n$ with $\suc$.
+      For constructor $\constr{chan}$ we proceed inductively.
       
     \item
-      For constructor $\constr{recv}$ we must split $\Delta$ to proceed inductively on the continuation.
-      Observe that given the arrow from $\Gamma_i$ to $\Psi_i$ and given that $\Delta$ is $\lz$ at index $i$, there must exist some $\delta$ such that $\opsquared{m}{\delta}{n}$.
- l     \begin{itemize}
-        \item
-          If the input is on the variable being substituted, we split $m$ such that $\opsquared{m}{\li}{l}$ for some $l$, and construct an arrow $\containsusage{\Xi_i}{i}{l}{\Gamma}$ for the inductive call.
-          Similarly, we construct for some $\Xi_j$ the arrows $\containsusage{\Gamma_j}{j}{\li}{\Xi_j}$ as the new input channel, and $\containsusage{\Xi_j}{j}{l}{\Gamma}$ for the inductive call.
-        \item
-          If the input is on a variable $x$ other than the one being substituted, we construct the arrows $\containsusage{\Xi_i}{i}{m}{\Theta}$ (for the inductive call) and $\containsusage{\Gamma}{x}{\li}{\Theta}$ for some $\Theta$.
-          We then construct for some $\Xi_j$ the arrows $\containsusage{\Gamma_j}{x}{\li}{\Xi_j}$ (the new output channel) and $\containsusage{Xi_j}{j}{m}{\Theta}$ (for the inductive call).
-          Given there exists a composition of arrows from $\Xi_i$ to $\Psi$, we conclude that $\Theta$ splits $\Delta$ such that $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
-          As $\lz$ is a minimal element, then $\Delta_1$ must be $\lz$ at index $i$, and so must $\Delta_2$.
-      \end{itemize}
-
-    \item
-      $\constr{send}$ applies the ideas outlined for the $\constr{recv}$ constructor to both the \textsc{VarRef} doing the output, and the \textsc{VarRef} for the sent data.
-
-    \item
-      For $\constr{comp}$ we first find a $\delta$, $\Theta$, $\Delta_1$ and $\Delta_2$ such that $\containsusage{\Xi_i}{i}{\delta}{\Theta}$ and $\opctx{\Gamma}{\Delta_1}{\Theta}$ and $\opctx{\Theta}{\Delta_2}{\Psi}$.
-      Given $\Delta$ is $\lz$ at index $i$, we conclude that $\Delta_1$ and $\Delta_2$ are too.
-      Observe that $\opsquared{m}{\delta}{\psi}$, where $\psi$ is the usage annotation at index $i$ consumed by the subprocess $P$.
-      We construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
-      We can now make two inductive calls (on the derivation of $P$ and $Q$) and compose their results.
+      For constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$ we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction.
+      The details are found in \autoref{app:subst-generalization}.
   \end{itemize}  
 \end{proof}
 
-
-\begin{nitheorem}
+\begin{nitheorem}[Substitution]
   \label{thm:substitution}
   Let $P$ be a process typed under $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $\ni_j m$ be a \textsc{VarRef} $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
@@ -1095,7 +1071,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
 In the linear \picalc{} reduction affects the usage context: communicating over a channel takes away $\one$ input and $\one$ output multiplicity.
 
-\begin{nitheorem}
+\begin{nitheorem}[Subject reduction]
   Let $P \reduce{c} Q$.
   If $c$ is $\constr{internal}$, then $\Gamma' \equiv \Gamma$.
   If however $c$ is $\constr{external}\; i$, then $\containsusage{\Gamma'}{i}{\lio}{\Gamma}$.
