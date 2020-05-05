@@ -149,12 +149,12 @@
   It is an underlying theoretical and practical framework on top of which more advanced types and theories are built, including \emph{session types} \cite{H93,THK94,HVK98}.
   Linearity is key for type safety in session communication.
 
-  We present the \emph{first} full mechanisation in Agda of a \picalc{} with \emph{linear}, \emph{gradual} and \emph{shared} types, all under the same unified framework.
-  While linearity is key for type safety in communication-centric programming, gradual and shared types are needed to model real-world software systems.
+  We present the \emph{first} full mechanisation in Agda of a \picalc{} with \emph{linear}, \emph{graded} and \emph{shared} types, all under the same unified framework.
+  While linearity is key for type safety in communication-centric programming, graded and shared types are needed to model real-world software systems.
   
   We present the syntax, semantics, type system and corresponding type safety properties.
   For the first time in the \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
-  We generalise the algebras on multiplicities, allowing the developer to choose a mix of linear, gradual and shared typing.
+  We generalise the algebras on multiplicities, allowing the developer to choose a mix of linear, graded and shared typing.
   We provide framing, weakening and strengthening proofs that we then use to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 %
@@ -163,7 +163,6 @@
 
 \todo{spellcheck}
 \todo{make sure all citations are there}
-\todo{rename gradual to something else...}
 \todo{lemmas in appendix are referred to from here}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -198,12 +197,12 @@ This allows us to use the linear \picalc{} as an underlying theoretical and prac
 
 Considering the relevance of the \picalc{} and of linearity in modelling concurrent and distributed systems, in this paper we focus our research on both and go beyond.
 
-\emph{We present the first full mechanisation in Agda of a \picalc{} with linear, gradual and shared types, all under the same unified framework.}
+\emph{We present the first full mechanisation in Agda of a \picalc{} with linear, graded and shared types, all under the same unified framework.}
 
 We do so by defining a specification for an algebra on \emph{multiplicities} (how many times a channel can be used) and use it to apply leftover typing (following Allais \cite{Allais2018a}) to the \picalc{}.
 The developer is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
 Ultimately, we can exploit this formalisation as a unified framework for type safe distributed modelling and programming with a variety of type systems, and build on top of it more advanced types, theories and languages.
-In particular, while linearity is needed for type safety in communication-centric programming, gradual and shared types are needed to model real-world systems.
+In particular, while linearity is needed for type safety in communication-centric programming, graded and shared types are needed to model real-world systems.
 
 \subsection{Contributions}
 \begin{enumerate}
@@ -217,15 +216,15 @@ In particular, while linearity is needed for type safety in communication-centri
    The reduction relation is defined modulo structural congruence (\autoref{structural-congruence}) --- a relation that acts as a quotient type that removes unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
  \end{itemize}
   
-  \item \textbf{Leftover typing for the \picalc{} with linear, gradual and shared types}:
+  \item \textbf{Leftover typing for the \picalc{} with linear, graded and shared types}:
   \autoref{type-system} provides the type system for a resource-aware \picalc{}.
   \begin{itemize}
     \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
-    Linear types, gradual types and shared types are all instances of the same resource-aware algebra, giving rise to three different type systems under the same framework.
+    Linear types, graded types and shared types are all instances of the same resource-aware algebra, giving rise to three different type systems under the same framework.
     Any \emph{partial commutative monoid} that is \emph{functional}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra.
     
     Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
-    This allows for type systems combining linear, gradual and shared types.
+    This allows for type systems combining linear, graded and shared types.
     
     \item \textbf{\picalc{} with leftovers}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
     This approach adds a leftover usage context to the typing judgements.
@@ -489,7 +488,7 @@ We provide a type system for a resource-aware \picalc{} in \autoref{leftover-typ
 \label{multiplicities}
 
 In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
-We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types alike.
+We generalise over this notion by defining an algebra that is satisfied by linear, graded and shared types alike.
 
 \begin{nidefinition}[Usage algebra]
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
@@ -532,7 +531,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{note}
 
-Linear, gradual and shared types are all defined as an instance of our usage algebra.
+Linear, graded and shared types are all defined as an instance of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \begin{description}
   \item [Linear]
@@ -541,7 +540,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
     All the properties of the algebra follow trivially.
     As an example, the multiplicity pair $\ell_i$ is represented as $(\constr{one} \comma \constr{zero})$.
 
-    \item [Gradual]
+    \item [Graded]
     The carrier is the type of natural numbers.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
     The partial monoid $\op{x}{y}{z}$ is defined exactly when $x = y + z$.
@@ -1145,7 +1144,7 @@ They distill their typing rules even further by modelling the supply and demand 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, gradual and shared types, and show that reduction preserves the well-typedness of processes.
+In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types, and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}.
 Our work is mechanised in roughly 1500 lines of code.
 
