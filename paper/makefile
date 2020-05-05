@@ -1,7 +1,7 @@
 TMP=tmp
 REPORT=paper
 
-paper.pdf: $(REPORT).tex $(REPORT).bib
+paper.pdf: $(REPORT).tex $(REPORT).bib appendix.tex
 	mkdir -p $(TMP)
 	pdflatex -output-directory $(TMP) $(REPORT).tex
 	cp $(REPORT).bib $(TMP) && cd $(TMP) && bibtex $(REPORT).aux
