@@ -857,9 +857,6 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
@@ -869,9 +866,6 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then lifting every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{insert}_i \; t \; \gamma}{\func{insert}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{insert}_i \; x \; \Xi}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening}
@@ -882,9 +876,6 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   Let $i$ be a variable index not mentioned by $P$, such that $\Unused_i \; P$.
   Then lowering every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{delete}_i \; \gamma}{\func{delete}_i \; \Gamma}{\func{lower}_i \; P}{\func{delete}_i \; \Xi}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
 \begin{remark}
   It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned within $P$ --- $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
@@ -899,9 +890,6 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
 
 \begin{remark}
   We limit ourselves to the swapping of adjacent variables $i$ and $\suc i$.
@@ -909,7 +897,12 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   More generally, any two variables can be swapped by performing a series of adjacent variable swappings.
 \end{remark}
 
-\todo{Replace the proofs with an intuition on the theorem}
+\begin{proof}
+  All the above theorems are by induction on \textsc{Process} and \textsc{Var}.
+  For details, refer to the mechanisation in Agda \cite{Zalakain2020Agda}.
+\end{proof}
+
+
 \subsection{Subject Congruence}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
