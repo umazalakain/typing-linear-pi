@@ -524,7 +524,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
 \begin{note}
   \label{note:linearity}
   We will often work with pairs of input and output multiplicities.
-  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \times \type{C}$ tuple of input and output multiplicities, respectively.
+  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ tuple of input and output multiplicities, respectively.
   We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
 
   Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$ for a channel which cannot be used any further, $\li$ for the pair $(1 \comma 0)$ for a channel to be used in input exactly once, $\lo$ for $(0 \comma 1)$ for a channel to be used in output exactly once, and $\lio$ for $(1 \comma 1)$, for a channel to be used exactly once in input and exactly once in output.
@@ -552,7 +552,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
     Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
     The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
     All the properties of the algebra follow trivially.
-    All shared channels have multiplicities $(\omega \comma \omega)$, which they will forever preserve.
+    Shared channels have multiplicities $(\constr{\omega} \comma \constr{\omega})$, which they will forever preserve.
 \end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
