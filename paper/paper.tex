@@ -843,7 +843,6 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 \label{type-safety}
 
 \todo{intro}
-\todo{I wonder if we can remove the proofs everywhere and comment on them in the intro and where they can be found.}
 
 \subsection{Auxiliaty Results}
 \label{auxiliary-results}
@@ -1069,16 +1068,21 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 \label{subject-reduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-In the linear \picalc{} reduction affects the usage context: communicating over a channel takes away $\one$ input and $\one$ output multiplicity.
+\begin{nidefinition}
+  For convenience, we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
+\end{nidefinition}
 
 \begin{nitheorem}[Subject reduction]
-  Let $P \reduce{c} Q$.
-  If $c$ is $\constr{internal}$, then $\Gamma' \equiv \Gamma$.
-  If however $c$ is $\constr{external}\; i$, then $\containsusage{\Gamma'}{i}{\lio}{\Gamma}$.
-  Given $\types{\gamma}{\Gamma'}{P}{\Xi}$ then after reduction $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+  If $P$ reduces to $Q$ and $P$ is well-typed, then so is $Q$.
+  In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ by communication on a channel created within $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ by communication on a channel created outside of $P$.
+  \begin{itemize}
+    \item If the reduction is internal, we prove that if $\types{\gamma}{\Gamma}{P}{\Xi}$ then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+    \item If the reduction is external and on channel $i$, we prove that if $\types{\gamma}{\Gamma'}{P}{\Xi}$ and $\containsusage{\Gamma'}{i}{\lio}{\Gamma}$ , then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+  \end{itemize}
 \end{nitheorem}
 
 \begin{proof}
+  By induction on the typing derivation on $P$.
   \hfill{}\\
   \begin{itemize}
     \item
