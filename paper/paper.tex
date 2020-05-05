@@ -70,9 +70,9 @@
 \newcommand{\comp}[2]{#1 \; \constr{\parallel} \; #2}
 \newcommand{\new}{\constr{\boldsymbol{\nu}} \;}
 \newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
-\newcommand{\sendp}[2]{#1 \; \constr{\langle} \; #2 \; \constr{\rangle}. \;}
+\newcommand{\sendp}[2]{#1 \; \constr{\langle} \; #2 \; \constr{\rangle} \; . \;}
 \newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
-\newcommand{\recvp}[2]{#1 \; \constr{(} \; #2 \; \constr{)}.\; }
+\newcommand{\recvp}[2]{#1 \; \constr{(} \; #2 \; \constr{)} \; . \; }
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
@@ -327,7 +327,6 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
   \caption{}
 \end{figure}
 
-\todo{dots}
 Let $x, y,\ldots$ range over \emph{variables} (including channel names) and $P, Q,\ldots$ over processes.
 The syntax of the \picalc{} \cite{Sangio01} is given by the grammar in \autoref{fig:syntax-names}.
 Process $\PO$ denotes the terminated process, where no operations can further occur.
@@ -342,10 +341,10 @@ Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n
 \begin{example}
   \begin{equation*}
     \begin{split}
-      & (\new{}x ) && (\comp {\recvp{x}{y} && \; \sendp{y}{a} \; \PO} {(\new{} y) && (\sendp{x}{y} \; \recvp{y}{z} && \; \PO)})
+      & (\new{}x ) && (\comp {\recvp{x}{y} && \sendp{y}{a} && \PO} {(\new{} y) && (\sendp{x}{y} && \recvp{y}{z} && \PO)})
       && \text{names}
       \\
-      & \new{} && (\comp {\recv{0} && \; \send{0}{a} \; \PO} {\new{} && (\send{1}{0} \; \recv{0} && \; \PO)})
+      & \new{} && (\comp {\recv{0} && \send{0}{a} && \PO} {\new{} && (\send{1}{0} && \recv{0} && \PO)})
       && \text{de Bruijn indices}
       \\
     \end{split}
