@@ -170,6 +170,7 @@ We live in a concurrent world where any given state is often interactively compu
 As humans, we aim to model, predict, and build such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
 \todo{rename gradual to something else...}
 \todo{replace judgment with judgement everywhere!}
+\todo{Theorem to Thm. Definiton to Def. when referencing.}
 
 The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data over communication channels.
@@ -678,28 +679,27 @@ Notice that our notation of channel types is similar to Kobayashi's $[t]\mathbf{
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
 
-We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context $\PreCtx_n$ and (input) usage context $\Ctx_{idxs}$, adds an extra {output usage context} to the typing rules.
+We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context $\PreCtx_n$ and (input) usage context $\Ctx_{idxs}$, adds an extra \emph{output usage context} to the typing rules.
 
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
 Leftover typing presents three main advantages:
 \begin{itemize}
-  \item
+  \item \textbf{Encapsulation}:
     The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgement with both an input and an output usage context.
-  \item
+  \item \textbf{No context split}:
     No need for an extensional context splitting proof for parallel composition.
     Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
     This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
-  \item
-    New theorems like \textbf{framing} (\autoref{thm:framing}), \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) can be stated thanks to the presence of a leftover context.
+  \item \textbf{New theorems}:
+    For the first time, theorems like \textbf{framing} (\autoref{thm:framing}), \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) can now be stated within the linear \picalc{} --- as well as gradual and shared, thanks to the presence of a leftover context.
 \end{itemize}
-  \todo{I still don't get the last point above, as weakening and strengthening were already possible to state in \picalc{} before. What do you mean with can be stated here?}
 
 Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
-Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (containing the leftovers).
+Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
 
-The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ is of type $t$ in $\gamma$, and subtracting $y$ at position $i$ from $\Gamma$ results in $\Delta$''.
+The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ is of type $t$ in typing context $\gamma$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftover $\Delta$''.
 The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
 
@@ -802,36 +802,37 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   \label{fig:types}
   \end{figure}
 
-  The inaction process does not change usage annotations.
-  Scope restriction expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
+  The inaction process in rule $\constr{end}$ does not change usage annotations.
+  The scope restriction in rule $\constr{chan}$ expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
   This multiplicity $y$ is used for both input and output, so that these are balanced.
   The continuation process $P$ is provided with the new channel with usage annotation $(y \comma y)$, which it must completely exhaust.
 
-  Receiving needs a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  The input process in rule $\constr{recv}$ requires a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
   Note that the index $i$ is used in the syntax of the typed process.
   We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
 
-  Similar to input, sending needs a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  Similarly to input, the output processes in rule $\constr{send}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
   We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of channel $chan_i$.
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
   
-  Parallel composition uses the leftovers of the left-hand process to type the right-hand process.
-  By keeping track in the typing derivation of $P$ of the resources it uses, we save the user from having to provide an extrinsic proof of context split.
+  Parallel composition in rule $\constr{comp}$ uses the leftovers of the left-hand process to type the right-hand process.
+  By keeping track in the typing derivation of $P$ the resources it uses, we save the user from having to provide an extrinsic proof of context split.
 \end{nidefinition}
 
 \begin{example}[Typing derivation]
   \label{example-derivations}
-  Let us type a derivation of the process $\func{p}$ using linear and shared types. 
+  We will now illustrate a typing derivation of the process $\func{p}$ using linear and shared types, given in line ?? of Listing \autoref{}.
+
   Let $\func{\omega}$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
   Let $\epsilon$ be the empty usage context --- where all usage annotations are $(\zero \comma \zero)$.
   To type $\func{p}$, we need a channel over which we can transmit another channel.
-  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transiting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we will only transmit its input capability.
-  The left-hand process is typed following its syntax.
-  On the right-hand, we need the channel that is going to be sent.
-  The type $\unit$ of this channel is entirely determined by the type of the channel over which it is going to be transmited.
-  Its usage annotation is $(\one \comma \one)$: we will transmit $\li$ and save $\lo$ for the continuation.
+  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we will only transmit its input capability.
+  The left-hand process (line ??) is typed following its syntax.
+  On the right-hand (line ??), we need the channel that is going to be sent.
+  The type $\unit$ of this channel is entirely determined by the type of the channel over which it is going to be transmitted.
+  Its usage annotation is $(\one \comma \one)$: we will transmit $\li$ and save $\lo$ for the continuation process.
   
   \begin{lstlisting}[mathescape]
   $\func{p}$ : $\Process_1$
