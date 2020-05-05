@@ -499,21 +499,21 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   \begin{figure}[h]
   \begin{equation*}
   \begin{aligned}
-    &\zero                  &:{} &                      &        & C \\
-    &\one                   &:{} &                      &        & C \\
-    &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
-    &\func{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x  \; (\op{x}{y}{z})) \\
-    &\func{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-    &\func{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-    &\func{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-    &\func{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
-    &\func{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-    &\func{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
+    &\zero                  &:{} &                 &        & C \\
+    &\one                   &:{} &                 &        & C \\
+    &\op{\_}{\_}{\_}        &:{} &                 &        & C \to C \to C \to \Set \\
+    &\func{\cdot-compute}  &:{} &\forall y z       & \to \; & \type{DEC} \; (\type{\exists} x  \; (\op{x}{y}{z})) \\
+    &\func{\cdot-unique}   &:{} &\forall x x' y z  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+    &\func{\cdot-unique^l} &:{} &\forall x y y' z  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+    &\func{0\cdot-min^l}   &:{} &\forall y z       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
+    &\func{\cdot-id^l}     &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
+    &\func{\cdot-comm}     &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
+    &\func{\cdot-assoc}    &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
   \end{aligned}
   \end{equation*}
   \caption{
-    Algebra $\Algebra_C$ algebra on a partial commutative monoid.
-    In Agda $\forall$ introduces universal quantification, while $\{ \text{brackets} \}$ make the variables within them implicit.
+    Usage algebra $\Algebra_C$ on a carrier $C$.
+    We use $\forall$ for universal quantification.
     The dependent product $\type{\exists}$ uses the value of its first argument in the type of its second.
     The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.
   }
