@@ -853,52 +853,52 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 \section{Type Safety}
 \label{type-safety}
 
-\todo{intro}
+In \autoref{auxiliary-results} we present some auxiliary results: framing (\autoref{thm:framing}), weakening (\autoref{thm:weakening}), strengthening (\autoref{thm:strengthening}) and swapping of variables (\autoref{thm:swapping}).
+We present subject congruence in \autoref{subject-congruence} and substitution in \autoref{substitution}.
+Finally, we present subject reduction in \autoref{subject-reduction}.
 
 \subsection{Auxiliaty Results}
 \label{auxiliary-results}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Framing asserts that the well-typedness of a process is independent of its leftover resources.
 \begin{nitheorem}[Framing]
   \label{thm:framing}
-  The well-typedness of a process is independent of its leftover resources.
-  Let $P$ be a well-typed process $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
-  Let there be a $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
-  Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
+  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
+  Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
+  Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
+
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
 
+Weakening states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
-  Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
-
-  Let $\func{insert}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
-  Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then lifting every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{insert}_i \; t \; \gamma}{\func{insert}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{insert}_i \; x \; \Xi}$.
+  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Then, lifting every variable greater than or equal to $i$ in $P$ is well-typed in
+  $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
 \end{nitheorem}
 
+Removing an unused variable preserves the well-typedness of a process.
+Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
 \begin{nitheorem}[Strengthening]
-  \label{thm:strengthening}
-  Removing an unused variable preserves the well-typedness of a process.
-
-  Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
-  Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let $i$ be a variable index not mentioned by $P$, such that $\Unused_i \; P$.
-  Then lowering every variable greater than or equal to $i$ in $P$ is well-typed under $\types{\func{delete}_i \; \gamma}{\func{delete}_i \; \Gamma}{\func{lower}_i \; P}{\func{delete}_i \; \Xi}$.
+  \label{thm:strengthening} 
+  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let $i$ be a variable index not in $P$, such that $\Unused_i \; P$.
+  Then lowering every variable greater than or equal to $i$ in $P$ is well-typed in $\types{\func{delete}_i \; \gamma}{\func{delete}_i \; \Gamma}{\func{lower}_i \; P}{\func{delete}_i \; \Xi}$.
 \end{nitheorem}
 
 \begin{remark}
   It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned within $P$ --- $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
 \end{remark}
 
+Swapping two variables preserves the well-typedness of a process.
+Let $\func{swap}_i$ be a function that swaps variables $i$ and $\suc i$.
+For simplicity, we overload $\func{swap}$ and use it to swap types in a typing context, multiplicities in a usage context, and variable references in a process.
 \begin{nitheorem}[Swapping]
   \label{thm:swapping}
-  Swapping two variables preserves the well-typedness of a process.
-  Let $\func{swap}_i$ be a function that swaps variables $i$ and $\suc i$.
-  For simplicity, we overload $\func{swap}$ and use it to swap types in a typing context, multiplicities in a usage context, and variable references in a process.
-  \todo{}
-  Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
+  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
 
 \begin{remark}
@@ -908,7 +908,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 \end{remark}
 
 \begin{proof}
-  All the above theorems are by induction on \textsc{Process} and \textsc{Var}.
+  All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
   For details, refer to the mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
 
