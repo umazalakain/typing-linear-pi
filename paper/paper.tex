@@ -325,6 +325,7 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
   \caption{}
 \end{figure}
 
+\todo{dots}
 Let $x, y,\ldots$ range over \emph{variables} (including channel names) and $P, Q,\ldots$ over processes.
 The syntax of the \picalc{} \cite{Sangio01} is given by the grammar in \autoref{fig:syntax-names}.
 Process $\PO$ denotes the terminated process, where no operations can further occur.
@@ -368,7 +369,7 @@ We start by defining structural congruence in \autoref{structural-congruence} an
 \label{structural-congruence}
 
 We define the base cases of a structural congruence relation \textsc{StructCong} $\eqeq$ in \autoref{fig:struct-cong-base}.
-Its congruent equivalence closure \textsc{Equals} $=$ is defined1 in \autoref{app:struct}.
+Its congruent equivalence closure \textsc{Equals} $\eq{}$ is defined in \autoref{app:struct}.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -419,7 +420,7 @@ In all the above, $i$ is incremented every time we go under a binder.
 
 The operational semantics of the \picalc{} is defined by a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs (\autoref{fig:reduction}).
 We keep track of channel $c$ so we can state subject reduction (\autoref{subject-reduction}).
-We identify two kinds of channels, $\constr{internal}$ and $\constr{external}\ i$, respectively standing for a channel which ... \todo{complete}
+We distinguish between channels created inside a process ($\constr{internal}$) and channels created outside ($\constr{external}\ i$, where $i$ is the de Bruijn index of the variable).
 
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
@@ -428,7 +429,7 @@ Reduction is closed under parallel composition (rule $\constr{par}$), restrictio
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
 
-We use a $\func{dec}$ function to decrement the index of this channel every time we come out of a binder in rule $\constr{res}$. \todo{this seems more getting 'into' a binder than coming out...}
+In $\constr{res}$, we use a $\func{dec}$ function to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
 This $\func{dec}$ function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
 
 
@@ -489,7 +490,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types alike.
 
 \begin{nidefinition}[Usage algebra]
-  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, which is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
+  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
   \autoref{fig:multiplicities} uses a terniary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
@@ -541,7 +542,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
     \item [Gradual]
     The carrier is the type of natural numbers.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
-    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$. \todo{why isnt $\equiv$ here just =?}
+    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x = y + z$.
     All other properties of the algebra follow from the algebraic rules for the addition of natural numbers.
     As an example, we use $(5 \comma 3)$ to represent the multiplicities of a channel that is able to input 5 times and output 3 times.
 
@@ -558,7 +559,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \label{contexts}
 
 We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system with leftovers (\autoref{leftover-typing}).
-\begin{nidefinition}[IDX set of usage algebra]
+\begin{nidefinition}[Indexed set of usage algebras]
   An \emph{indexed set of usage algebras} is a nonempty type $\Idx$ of indices together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras (\autoref{fig:indexed-multiplicities}).
   \begin{figure}[h]
     \begin{equation}
@@ -581,8 +582,7 @@ The former are preserved throughout a typing derivation; the latter are transfor
   \emph{Types} are defined in \autoref{fig:prectx} as either unit types (rule $\unit$), base types (rule $\base{n}$) or channel types (rule $\channel{t}{x}$).
   
   We keep track of types in a \emph{length-indexed typing context} $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
-  A typing context is either empty $[]$ or building upon an existing typing context $\gamma$, it associates a type $t$ to an the next index in the context.
-  \todo{check the last sentence}
+  A typing context is either empty $[]$ or the result of appending a type $t$ to an existing context$\gamma$.
   \begin{figure}[h]
   \begin{mathpar}
     \datatype
@@ -628,11 +628,10 @@ The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and wh
 
 Notice that our notation of channel types is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
 
-\begin{nidefinition}[Usage context]
-  A \emph{usage context} in a context $\Ctx_{idxs}$ that is indexed by a length-indexed context of indices $\Idxs_n$, where we keep track of usage annotations (\autoref{fig:ctx}).
+\begin{nidefinition}[Usage contexts]
+  A \emph{usage context} is a context $\Ctx_{idxs}$ of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
 
-  A usage context is either empty $[]$ or building upon an existing context $\Gamma$, it associates a usage to the current index.
-  \todo{check the last sentence}
+  A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to the existing context $\Gamma$.
 
   \begin{figure}[h]
   \begin{mathpar}
