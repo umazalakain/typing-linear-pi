@@ -473,7 +473,7 @@ This $\func{dec}$ function saturates at $\constr{internal}$: wrapping an interna
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Resource-aware Typing System}
+\section{Resource-aware Type System}
 \label{type-system}
 
 In \autoref{multiplicities} we characterise a usage algebra for our type system.
@@ -488,8 +488,8 @@ We provide a type system for a resource-aware \picalc{} in \autoref{leftover-typ
 In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
 We generalise over this notion by defining an algebra that is satisfied by linear, gradual and shared types alike.
 
-\begin{nidefinition}
-  We define our usage algebra to be a ternary relation $\op{x}{y}{z}$ that is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
+\begin{nidefinition}[Usage algebra]
+  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, which is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
   \autoref{fig:multiplicities} uses a terniary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
@@ -534,14 +534,14 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \begin{description}
   \item [Linear]
     The carrier is a type with two trivial elements $\constr{zero}$ and $\constr{one}$.
-    The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited in every other case.
+    The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited otherwise.
     All the properties of the algebra follow trivially.
     As an example, the multiplicity pair $\ell_i$ is represented as $(\constr{one} \comma \constr{zero})$.
 
     \item [Gradual]
     The carrier is the type of natural numbers.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
-    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$.
+    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x \equiv y + z$. \todo{why isnt $\equiv$ here just =?}
     All other properties of the algebra follow from the algebraic rules for the addition of natural numbers.
     As an example, we use $(5 \comma 3)$ to represent the multiplicities of a channel that is able to input 5 times and output 3 times.
 
@@ -557,9 +557,9 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 \subsection{Typing Contexts}
 \label{contexts}
 
-\begin{nidefinition}
-  We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system.
-  An indexed set of usage algebras is a nonempty type $\Idx$ of indices together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras (\autoref{fig:indexed-multiplicities}).
+We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system with leftovers (\autoref{leftover-typing}).
+\begin{nidefinition}[IDX set of usage algebra]
+  An \emph{indexed set of usage algebras} is a nonempty type $\Idx$ of indices together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras (\autoref{fig:indexed-multiplicities}).
   \begin{figure}[h]
     \begin{equation}
       \begin{split}
@@ -572,20 +572,17 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
     \caption{Indexed set of usage algebras.}
     \label{fig:indexed-multiplicities}
   \end{figure}
-
 \end{nidefinition}
 
 We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts ($\Ctx$ in \autoref{fig:ctx}) separate.
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
 
-\begin{nidefinition}
-  \autoref{fig:prectx} defines types as either unit types (rule $\unit$), base types (rule $\base{n}$) or channel types (rule $\channel{t}{x}$).
-  The unit type $\unit$ serves as a proof of inhabitance for types.
-  The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g. $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
-  The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel.
-  This notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
-  We keep track of types in a length-indexed $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
+\begin{nidefinition}[Types and length-indexed typing contexts]
+  \emph{Types} are defined in \autoref{fig:prectx} as either unit types (rule $\unit$), base types (rule $\base{n}$) or channel types (rule $\channel{t}{x}$).
   
+  We keep track of types in a \emph{length-indexed typing context} $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
+  A typing context is either empty $[]$ or building upon an existing typing context $\gamma$, it associates a type $t$ to an the next index in the context.
+  \todo{check the last sentence}
   \begin{figure}[h]
   \begin{mathpar}
     \datatype
@@ -625,8 +622,17 @@ The former are preserved throughout a typing derivation; the latter are transfor
   \end{figure}
 \end{nidefinition}
 
-\begin{nidefinition}
-  We keep track of usages annotations in a context $\Ctx_{idxs}$ that is indexed by a length-indexed context of indices $\Idxs_n$, as shown in \autoref{fig:ctx}.
+The unit type $\unit$ serves as a proof of inhabitance for types.
+The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g. $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
+The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel.
+
+Notice that our notation of channel types is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
+
+\begin{nidefinition}[Usage context]
+  A \emph{usage context} in a context $\Ctx_{idxs}$ that is indexed by a length-indexed context of indices $\Idxs_n$, where we keep track of usage annotations (\autoref{fig:ctx}).
+
+  A usage context is either empty $[]$ or building upon an existing context $\Gamma$, it associates a usage to the current index.
+  \todo{check the last sentence}
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -788,7 +794,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
      r : \types{\gamma}{\Delta}{Q}{\Xi}}
     {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
   \end{mathpar}
-  \caption{Leftover typing for a resource-aware typing system.}
+  \caption{Leftover typing for a resource-aware type system.}
   \label{fig:types}
   \end{figure}
 
