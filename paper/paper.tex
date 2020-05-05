@@ -15,7 +15,7 @@
 \usepackage{hyperref}
 %%
 %% For section renaming in autoref
-\addto\extrasenglish{%
+\addto\extrasUKenglish{%
 \renewcommand{\sectionautorefname}{\S}%
 \renewcommand{\subsectionautorefname}{\S}%
 \def\exampleautorefname{Ex.}% 
@@ -128,7 +128,7 @@
 </ccs2012>
 \end{CCSXML}
 \ccsdesc[300]{Theory of computation~Process calculi}
-\keywords{pi-calculus, linear types, leftover typing, concurrency, mechanization, Agda}
+\keywords{pi-calculus, linear types, leftover typing, concurrency, mechanisation, Agda}
 \supplement{\url{https://github/umazalakain/typing-linear-pi}}
 \acknowledgements{We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 \funding{Supported by the UK EPSRC grant EP/K034413/1, ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233
@@ -157,13 +157,12 @@
   Our formalisation is fully mechanised in Agda \cite{Zalakain2020Agda}.
 \end{abstract}
 
+\todo{spellcheck}
 \todo{make sure all citations are there}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \todo{highlight that we can talk about a resource even if it has been exhausted (e.g. we can send 0 multiplicities of a channel over another channel}
-\todo{check 'z' are replaced with 's' in formaliz*, mechaniz*; check modelling is modelling}
-\todo{rename section and subsections in reference to \S (not sure why the commands above are not doing it so check later)}
 We live in a concurrent world where any given state is often interactively computed by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and build such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
 
@@ -493,20 +492,23 @@ We generalise over this notion by defining an algebra that is satisfied by linea
     &\zero                  &:{} &                      &        & C \\
     &\one                   &:{} &                      &        & C \\
     &\op{\_}{\_}{\_}        &:{} &                      &        & C \to C \to C \to \Set \\
-    &\func{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x . \; (\op{x}{y}{z})) \\
+    &\func{\cdot-compute}  &:{} &\forall y z           & \to \; & \type{DEC} \; (\type{\exists} x  \; (\op{x}{y}{z})) \\
     &\func{\cdot-unique}   &:{} &\forall \{x x' y z\}  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
     &\func{\cdot-unique^l} &:{} &\forall \{x y y' z\}  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
     &\func{0\cdot-min^l}   &:{} &\forall \{y z\}       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
     &\func{\cdot-id^l}     &:{} &\forall \{x\}         & \to \; & \op{x}{\zero}{x} \\
     &\func{\cdot-comm}     &:{} &\forall \{x y z\}     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-    &\func{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w . \; (\op{x}{u}{w} \times \op{w}{v}{z})
+    &\func{\cdot-assoc}    &:{} &\forall \{x y z u v\} & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
   \end{aligned}
   \end{equation*}
-  \caption{Algebra $\Algebra_C$ algebra on a partial commutative monoid.}
+  \caption{
+    Algebra $\Algebra_C$ algebra on a partial commutative monoid.
+    In Agda $\forall$ introduces universal quantification, while $\{ \text{brackets} \}$ make the variables within them implicit.
+    The dependent product $\type{\exists}$ uses the value of its first argument in the type of its second.
+    The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.
+  }
   \label{fig:multiplicities}
   \end{figure}
-  \todo{we haven't introduced the forall and implicit syntax}
-  \todo{introduce DEC and exists}
 \end{nidefinition}
 
 \begin{note}
@@ -1127,7 +1129,7 @@ This type system sits on top of an untyped but well-scoped syntax with de Bruijn
 He proves type preservation and provides a decision procedure for type checking and type inference.
 In this paper, we apply his technique to the \picalc{}, but limit ourselves to type-checking (scope restriction needs usage annotations) terms, and focus on generalising the usage algebra.
 Drawing from quantitative type theory by McBride and Atkey \cite{McBride2016, Atkey2018}, it is crucial for us too to be able to talk about fully consumed resources.
-As a result, we are able to transmit fully exhausted channels over channels.
+As a by-product, we are able to transmit over a channel all none multiplicities of a fully exhausted channel over.
 
 Recent years have seen an increase in the efforts to mechanise resource-aware concurrency calculi, but the formalisation of the linear \picalc{} in Isabelle/HOL by Gay \cite{Gay2001} is perhaps one of the earliest works.
 Gay encodes the \picalc{} with linear and shared types into a more general framework.
