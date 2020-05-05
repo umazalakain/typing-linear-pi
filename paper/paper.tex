@@ -162,15 +162,14 @@
 
 \todo{spellcheck}
 \todo{make sure all citations are there}
+\todo{rename gradual to something else...}
+\todo{Theorem to Thm. Definiton to Def. when referencing. UMA: it's currently set by the lipics class, should we change it?}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\todo{highlight that we can talk about a resource even if it has been exhausted (e.g. we can send 0 multiplicities of a channel over another channel}
+
 We live in a concurrent world where any given state is often interactively computed by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and build such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
-\todo{rename gradual to something else...}
-\todo{replace judgment with judgement everywhere!}
-\todo{Theorem to Thm. Definiton to Def. when referencing.}
 
 The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data over communication channels.
@@ -228,7 +227,7 @@ In particular, while linearity is needed for type safety in communication-centri
     This allows for type systems combining linear, gradual and shared types.
     
     \item \textbf{\picalc{} with leftovers}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
-    This approach adds a leftover usage context to the typing judgments.
+    This approach adds a leftover usage context to the typing judgements.
     Typing derivations take the resources of their input usage context, consume some of them, and leave the rest as leftovers in the output usage context.
     One of the benefits of this technique is that it removes the need for extrinsic context splits, which are rendered unnecessary.
   \end{itemize}
@@ -693,7 +692,7 @@ Leftover typing presents three main advantages:
     This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
   \item \textbf{New theorems}:
-    For the first time, theorems like \textbf{framing} (\autoref{thm:framing}), \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) can now be stated within the linear \picalc{} --- as well as gradual and shared, thanks to the presence of a leftover context.
+    For the first time, theorems like \textbf{framing} (\autoref{thm:framing}), \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) can be stated within the linear \picalc{} thanks to the presence of a leftover context.
 \end{itemize}
 
 Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
@@ -746,7 +745,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 
 \begin{example}[Channels]
   Let us illustrate the use of channels with an example.
-  \begin{lstlisting}[label=lst:channels,mathescape,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
+  \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\suc \; \constr{0}$
   \end{lstlisting}
@@ -812,7 +811,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
 
-  Similarly to input, the output processes in rule $\constr{send}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  Similarly to input, the output process in rule $\constr{send}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
   We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of channel $chan_i$.
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
@@ -823,18 +822,18 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 
 \begin{example}[Typing derivation]
   \label{example-derivations}
-  We will now illustrate a typing derivation of the process $\func{p}$ using linear and shared types, given in line ?? of Listing \autoref{}.
+  We will now illustrate a typing derivation of the process $\func{p}$ using linear and shared types (Listing \autoref{lst:derivation}).
 
   Let $\func{\omega}$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
   Let $\epsilon$ be the empty usage context --- where all usage annotations are $(\zero \comma \zero)$.
   To type $\func{p}$, we need a channel over which we can transmit another channel.
-  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we will only transmit its input capability.
-  The left-hand process (line ??) is typed following its syntax.
-  On the right-hand (line ??), we need the channel that is going to be sent.
+  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we will only transmit its input capability (line 7).
+  The left-hand process is typed following its syntax (line 8).
+  On the right-hand we need the channel that is going to be sent (line 9).
   The type $\unit$ of this channel is entirely determined by the type of the channel over which it is going to be transmitted.
   Its usage annotation is $(\one \comma \one)$: we will transmit $\li$ and save $\lo$ for the continuation process.
   
-  \begin{lstlisting}[mathescape]
+  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left]
   $\func{p}$ : $\Process_1$
   $\func{p}$ = $\new{}$
        $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
@@ -880,12 +879,12 @@ Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simp
 \end{nitheorem}
 
 Removing an unused variable preserves the well-typedness of a process.
-Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
+Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
   Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable index not in $P$, such that $\Unused_i \; P$.
-  Then lowering every variable greater than or equal to $i$ in $P$ is well-typed in $\types{\func{delete}_i \; \gamma}{\func{delete}_i \; \Gamma}{\func{lower}_i \; P}{\func{delete}_i \; \Xi}$.
+  Then lowering every variable greater than or equal to $i$ in $P$ is well-typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
 
 \begin{remark}
@@ -893,12 +892,12 @@ Let $\func{delete}_i$ delete the element at position $i$ from a context --- for 
 \end{remark}
 
 Swapping two variables preserves the well-typedness of a process.
-Let $\func{swap}_i$ be a function that swaps variables $i$ and $\suc i$.
-For simplicity, we overload $\func{swap}$ and use it to swap types in a typing context, multiplicities in a usage context, and variable references in a process.
+Let $\func{sw}_i$ be a function that swaps variables $i$ and $\suc i$.
+For simplicity, we overload $\func{sw}$ and use it to swap types in a typing context --- we swap variable references in a process with $swap_i \; P$, as first used in structural congruence (\autoref{structural-congruence}).
 \begin{nitheorem}[Swapping]
   \label{thm:swapping}
   Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
+  Then, $\types{\func{sw}_i \; \gamma}{\func{sw}_i \; \Gamma}{\func{swap}_i \; P}{\func{sw}_i \; \Xi}$.
 \end{nitheorem}
 
 \begin{remark}
