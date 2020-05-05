@@ -67,9 +67,9 @@
 \newcommand{\comp}[2]{#1 \; \constr{\parallel} \; #2}
 \newcommand{\new}{\constr{\boldsymbol{\nu}} \;}
 \newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
-\newcommand{\sendp}[2]{#1 \; \constr{\langle} \; #2 \; \constr{\rangle} \;}
+\newcommand{\sendp}[2]{#1 \; \constr{\langle} \; #2 \; \constr{\rangle}. \;}
 \newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
-\newcommand{\recvp}[2]{#1 \; \constr{(} \; #2 \; \constr{)} \;}
+\newcommand{\recvp}[2]{#1 \; \constr{(} \; #2 \; \constr{)}.\; }
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
@@ -329,7 +329,7 @@ Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
 Processes $\recvp{x}{y} P$ and $\sendp{x}{y} P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
 
-Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y} \; P$ both introduce bound names --- $x$ and $y$ in $P$, respectively.
+Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y} \; P$ are \emph{binders}, they are the only constructs which introduce bound names --- $x$ and $y$ in $P$, respectively.
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
 Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
@@ -347,7 +347,7 @@ Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
 
-A variable occurring under $n$ abstractions has $n$ possible variables to refer to.
+A variable occurring under $n$ binders can refer to other $n$ possible variables.
 References outside of that range are meaningless.
 It is useful to rule out these ill-scoped nonsensical terms syntactically.
 In \autoref{fig:syntax}, we do so by introducing the indexed family of types $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
