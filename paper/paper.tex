@@ -169,6 +169,8 @@
 We live in a concurrent world where any given state is often interactively computed by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, predict, and build such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
 \todo{rename gradual to something else...}
+\todo{replace judgment with judgement everywhere!}
+
 The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data over communication channels.
 Notably, it features channel mobility: channels themselves are first order values, and can therefore be transmitted.
@@ -677,13 +679,14 @@ Notice that our notation of channel types is similar to Kobayashi's $[t]\mathbf{
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
 
-We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context and usage context, adds an extra output usage context to the typing rules.
+We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context $\PreCtx_n$ and (input) usage context $\Ctx_{idxs}$, adds an extra {output usage context} to the typing rules.
+
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
 Leftover typing presents three main advantages:
 \begin{itemize}
   \item
-    The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgment with both an input and an output usage context.
+    The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgement with both an input and an output usage context.
   \item
     No need for an extensional context splitting proof for parallel composition.
     Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
@@ -692,21 +695,20 @@ Leftover typing presents three main advantages:
   \item
     New theorems like \textbf{framing} (\autoref{thm:framing}), \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) can be stated thanks to the presence of a leftover context.
 \end{itemize}
-  
-We introduce two judgments: one on variable references (\autoref{def:varref}), one on processes (\autoref{def:types}).
-Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{idxs}$ (the leftovers).
+  \todo{I still don't get the last point above, as weakening and strengthening were already possible to state in \picalc{} before. What do you mean with can be stated here?}
 
-\begin{nidefinition}
+Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
+Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (containing the leftovers).
+
+The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ is of type $t$ in $\gamma$, and subtracting $y$ at position $i$ from $\Gamma$ results in $\Delta$''.
+The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
+
+
+
+\begin{nidefinition}[\textsc{VarRef}: typing variable references]
   \label{def:varref}
 
-  The \textsc{VarRef} relation is presented in \autoref{fig:variable-references}.
-  The judgment $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ reads as ``$\gamma$ at position $i$ is of type $t$, and subtracting $y$ at position $i$ from $\Gamma$ results in $\Delta$''.
-
-  The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$, which are the leftovers.
-  This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
-  We use the \emph{functionality} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
-  The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
-
+  The \textsc{VarRef} typing relation for variable references is presented in \autoref{fig:variable-references}.
   \begin{figure}[h]
   \begin{mathpar}
     \mprset{sep=0.5em}
@@ -733,12 +735,17 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
     {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
     {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
   \end{mathpar}
-  \caption{Variable reference judgments.}
+  \caption{Typing rules for variable references.}
   \label{fig:variable-references}
   \end{figure}
+
+  The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$, which are the leftovers.
+  This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
+  We use the \emph{functionality} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
+  The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
 \end{nidefinition}
 
-\begin{example}
+\begin{example}[Channels]
   Let us illustrate the use of channels with an example.
   \begin{lstlisting}[label=lst:channels,mathescape,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
@@ -748,12 +755,11 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving leftovers $\lo$.
 \end{example}
 
-\begin{nidefinition}
+\begin{nidefinition}[\textsc{Types}: typing processes]
   \label{def:types}
 
-  The typing relation \textsc{Types} is presented in \autoref{fig:types}.
-  The typing judgement $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
-
+  The \textsc{Types} typing relation for \picalc{} processes is presented in \autoref{fig:types}.
+  
   \begin{figure}[h]
   \begin{mathpar}
     \datatype{
@@ -797,10 +803,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   \label{fig:types}
   \end{figure}
 
-  Some comments on the leftover type system follow.
-
   The inaction process does not change usage annotations.
-
   Scope restriction expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ that is being transmitted; and the multiplicity $y$ given to the channel itself.
   This multiplicity $y$ is used for both input and output, so that these are balanced.
   The continuation process $P$ is provided with the new channel with usage annotation $(y \comma y)$, which it must completely exhaust.
@@ -819,7 +822,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   By keeping track in the typing derivation of $P$ of the resources it uses, we save the user from having to provide an extrinsic proof of context split.
 \end{nidefinition}
 
-\begin{example}
+\begin{example}[Typing derivation]
   \label{example-derivations}
   Let us type a derivation of the process $\func{p}$ using linear and shared types. 
   Let $\func{\omega}$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
