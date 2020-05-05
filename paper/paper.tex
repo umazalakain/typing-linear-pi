@@ -1145,14 +1145,14 @@ They distill their typing rules even further by modelling the supply and demand 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To conclude, in this paper...
-Mechanisation of the linear, gradual and shared \picalc{} in less than 1500 lines of code.
+In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, define on top of the syntax a type system capable of handling linear, gradual and shared types, and show that reduction preserves the well-typedness of a process.
+We avoid the need for extrinsic context splits by defining a type system with leftovers \cite{Allais2018a}.
+All this is mechanised in less than 1500 lines of code.
 
-As future work we intend to...
-Adding product types and sum types.
-Proving that progress preserves the balancing of channels.
-Erika Kreuer has suggested modelling the usage algebra as a state machine.
-Adding bidirectionality would provide us with a decision procedure for type checking for a given context of algebras.
+We consider proving that progress preserves the balancing of channels long-hanging fruit for the future.
+More involved, we intend to add support for products and sum types to both the syntax and the type system.
+Orthogonally, making our typing rules bidirectional would allows us to provide a decision procedure for type checking processes for a given set of algebras.
+Following Erika Kreuer's suggestion, it might also be worth identifying an equivalence between our usage algebra and particular state machines.
 
 \newpage
 \bibliography{paper}
