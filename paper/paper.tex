@@ -579,9 +579,9 @@ We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts 
 The former are preserved throughout a typing derivation; the latter are transformed as a result of input, output, and context splits.
 
 \begin{nidefinition}[Types and length-indexed typing contexts]
-  \emph{Types} are defined in \autoref{fig:prectx} as either unit types (rule $\unit$), base types (rule $\base{n}$) or channel types (rule $\channel{t}{x}$).
+  A \emph{Type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) defined in \autoref{fig:prectx}.
   
-  We keep track of types in a \emph{length-indexed typing context} $\PreCtx_n$, defined by the last row of rules in \autoref{fig:prectx}.
+  A \emph{length-indexed typing context} $\PreCtx_n$, is defined by the last row of rules in \autoref{fig:prectx}.
   A typing context is either empty $[]$ or the result of appending a type $t$ to an existing context$\gamma$.
   \begin{figure}[h]
   \begin{mathpar}
@@ -626,7 +626,7 @@ The unit type $\unit$ serves as a proof of inhabitance for types.
 The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g. $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
 The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel.
 
-Notice that our notation of channel types is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output \cite{K07}.
+Notice that our notation of channel types is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output, respectively \cite{K07}.
 
 \begin{nidefinition}[Usage contexts]
   A \emph{usage context} is a context $\Ctx_{idxs}$ of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
