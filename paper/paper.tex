@@ -849,9 +849,9 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 \label{auxiliary-results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{nitheorem}
+\begin{nitheorem}[Framing]
   \label{thm:framing}
-  Framing captures the idea that the well-typedness of a process is independent of its leftover resources.
+  The well-typedness of a process is independent of its leftover resources.
   Let $P$ be a well-typed process $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
   Let there be a $\Delta$ such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Take arbitrary contexts $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
@@ -861,9 +861,9 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\begin{nitheorem}
+\begin{nitheorem}[Weakening]
   \label{thm:weakening}
-  Weakening captures the idea that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+  Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 
   Let $\func{insert}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
@@ -873,9 +873,9 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\begin{nitheorem}
+\begin{nitheorem}[Strengthening]
   \label{thm:strengthening}
-  Strengthening captures the idea that removing an unused variable preserves the well-typedness of a process.
+  Removing an unused variable preserves the well-typedness of a process.
 
   Let $\func{delete}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
   Let $P$ be a well-typed process such that $\types{\gamma}{\Gamma}{P}{\Xi}$.
@@ -890,7 +890,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned within $P$ --- $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
 \end{remark}
 
-\begin{nitheorem}
+\begin{nitheorem}[Swapping]
   \label{thm:swapping}
   Swapping two variables preserves the well-typedness of a process.
   Let $\func{swap}_i$ be a function that swaps variables $i$ and $\suc i$.
@@ -914,7 +914,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
 
-\begin{nitheorem}
+\begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
   Applying structural congruence rules to a well-typed process preserves its well-typedness.
   That is, if $P \eq{r} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
@@ -1025,7 +1025,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   \caption{Substitution with and without the \emph{adjustment} arrows $\ni_i n$ and $\ni_j n$}
 \end{figure}
 
-\begin{nitheorem}
+\begin{nitheorem}[Generalised substitution]
   \label{thm:subst-generalization}
   Let process $P$ be well-typed such that $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   The substituted variable $i$ has a usage $m$ in $\Gamma_i$, and a usage $n$ in $\Psi_i$.
@@ -1061,9 +1061,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
   \end{itemize}  
 \end{proof}
 
-
-
-\begin{nitheorem}
+\begin{nitheorem}[Substitution]
   \label{thm:substitution}
   Let $P$ be a process typed under $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $\ni_j m$ be a \textsc{VarRef} $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
@@ -1080,7 +1078,7 @@ Both are indexed by a $\PreCtx_n$, an input $\Ctx_{idxs}$, and an output $\Ctx_{
 
 In the linear \picalc{} reduction affects the usage context: communicating over a channel takes away $\one$ input and $\one$ output multiplicity.
 
-\begin{nitheorem}
+\begin{nitheorem}[Subject reduction]
   Let $P \reduce{c} Q$.
   If $c$ is $\constr{internal}$, then $\Gamma' \equiv \Gamma$.
   If however $c$ is $\constr{external}\; i$, then $\containsusage{\Gamma'}{i}{\lio}{\Gamma}$.
