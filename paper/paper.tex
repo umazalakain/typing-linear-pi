@@ -162,11 +162,6 @@
   Our formalisation is fully mechanised in Agda \cite{Zalakain2020Agda}.
 \end{abstract}
 
-\todo{spellcheck}
-\todo{make sure all citations are there}
-\todo{lemmas in appendix are referred to from here}
-\todo{shorten: we are slightly over the limit}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
@@ -1085,22 +1080,23 @@ In our paper, we apply leftover typing from Allais \cite{Allais2018a} to the \pi
 Drawing from quantitative type theory (by McBride and Atkey \cite{McBride2016, Atkey2018}), in our work we are also able to talk about fully consumed resources.
 As such, we can transmit over a channel all none multiplicities of a fully exhausted channel, namely a channel of multiplicity $\lz$. 
 
-Recent years have seen an increase in effort to mechanise resource-aware concurrency calculi.
+Recent years have seen an increase in the efforts to mechanise resource-aware concurrency calculi.
 One of the earliest works is the mechanisation of the linear \picalc{} in Isabelle/HOL by Gay \cite{Gay2001}.
 Gay encodes the \picalc{} with linear and shared types using de Bruijn indices, a reduction relation and a type system posterior to the syntax.
-However, in his work context splits are extrinsic, and the types of used multiplicities erased, while we adopt a more general usage algebra.
-Our framework integrates three different type systems and their combination in one and our linear \picalc{} uses leftover typing for the first time.
+However, in his work context splits are extrinsic, and the types of used multiplicities erased.
+We make context splits intrinsic, preserve the ability to talk about used resources, and adopt a more general usage algebra: our framework integrates three different type systems into one.
+
 %
-The work by Goto et al. \cite{Goto2016a} is, to the best of our knowledge, the first mechanisation of session types and their type safety proof (in Coq). 
+The work by Goto et al. \cite{Goto2016a} is, to the best of our knowledge, the first formalisation of session types that includes a type safety proof (in Coq). 
 The authors extend session types with polymorphism and pattern matching.
 They use a locally-nameless encoding for variable references, a syntax prior to types, and an LTS semantics that encodes session-typed processes into the \picalc{}.
 Their type system uses reordering of contexts and extrinsic context splits. 
 %
-Castro et al. provide tooling for locally-nameless representations of process calculi in Coq \cite{Castro2020} --- while de Bruijn indices are not as popular as dependent pattern matching, the latter is not as straightforward to handle.
+Castro et al. provide tooling for locally-nameless representations of process calculi in Coq \cite{Castro2020} --- in Coq de Bruijn indices are not as popular as in Agda or Idris because dependent pattern matching is far from straightforward.
 As a use-case, they use their tool to help automate proofs of subject reduction for a type system with session types.
 %
 Taking an intrinsic approach to typing, Thiemann formalises in Agda the MicroSession (minimal GV \cite{Gay2010}) calculus with support for recursion and subtyping \cite{Thiemann2019}.
-Context splits are still given extrinsically, and exhausted elements are removed from typing contexts altogether.
+Context splits are still given extrinsically, and exhausted resources are removed from typing contexts altogether.
 The semantics are given as an intrinsically typed CEK machine with a global context of session-typed channels.
 %
 Most recently, Rouvoet et al. provide an intrinsic type system for a \lambdacalc{} with session types \cite{Rouvoet2020}.
@@ -1108,24 +1104,18 @@ They use proof relevant separation logic and a notion of a supply and demand \em
 Their separation logic is based on a partial commutative monoid that need not be functional nor cancellative.
 Their typing rules preserve the balance between supply and demand, and are extremely elegant.
 They distill their typing rules even further by modelling the supply and demand market as a state monad.
-\todo{related work above is so thoroughly presented. well done!
-more to be added. Check what Cinzia di Giusto, Kirsten Peters, Antonio Ravara, Jorge Perez if they have any work published on mecahnisation (I know they are working on it).
-Check Jesper, and Ivan Scagneto who has worked on mechanisiation of pi.
-Check Brigite Pienta and her work on Beluga.
-Next, check theories on linear pi or other languages and what is the world saying on linearity.
-}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To conclude, in this paper we provide a well scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types, under the same unified framework and show that reduction preserves the well typedness of processes.
+To conclude, in this paper we provide a well scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
-As a result, theorems like weakening and strengthening can now we stated for the linear \picalc{}.
+As a result, theorems like framing, weakening and strengthening can now we stated for the linear \picalc{}.
 Our work is fully mechanised in around 1500 lines of code in Agda \cite{Zalakain2020Agda}.
 
-As future work, we intend to prove further properties of our type system, such as reduction preserves the balancing of channels.
+As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
 We intend to add support for products, sum types and recursion to both our syntax and our type system.
-Orthogonally, making our typing rules bidirectional would allows us to provide a decision procedure for type checking processes in a given set of algebras.
+Orthogonally, making our typing rules bidirectional would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
-Finally, we will use this our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
+Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
 
 \newpage
 \bibliography{paper}
