@@ -488,7 +488,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
-  \autoref{fig:multiplicities} uses a terniary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
+  \autoref{fig:multiplicities} uses a ternary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
 
   \begin{figure}[h]
   \begin{equation*}
@@ -833,7 +833,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
        $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
        ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
 
-  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\func{epsilon}}$
+  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\func{\epsilon}}$
   $\func{\_}$ = $\constr{chan} \; \channel{\unit}{\func{\omega}} \; \li \; \one \; (\constr{comp}$
        $(\constr{recv} \; \constr{0} \; (\constr{recv} \; \constr{0} \; \constr{end}))$
        $(\constr{chan} \; \unit \; \func{\omega} \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
@@ -1073,7 +1073,7 @@ Allais \cite{Allais2018a} uses leftover typing to mechanise in Agda a bidirectio
 He proves type preservation and provides a decision procedure for type checking and type inference.
 In our paper, we apply leftover typing from Allais \cite{Allais2018a} to the \picalc{} and focus on type checking. We give a more general usage algebra, leading to linear, graded and shared type systems.
 Drawing from quantitative type theory (by McBride and Atkey \cite{McBride2016, Atkey2018}), in our work we are also able to talk about fully consumed resources.
-As such, we can transmit over a channel all none multiplicities of a fully exhausted channel, namely a channel of multiplicity $\lz$. 
+As such, we can transmit over a channel $\lz$ multiplicities of a fully exhausted channel.
 
 Recent years have seen an increase in the efforts to mechanise resource-aware concurrency calculi.
 One of the earliest works is the mechanisation of the linear \picalc{} in Isabelle/HOL by Gay \cite{Gay2001}.
