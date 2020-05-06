@@ -1080,17 +1080,19 @@ Subject congruence states that applying structural congruence rules to a well-ty
 \label{subject-reduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-\begin{nidefinition}
-  For convenience, we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
-\end{nidefinition}
-
+\begin{note}
+  We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
+\end{note}
+\todo{use of well-typed:
+is well-typed replace with is well typed.
+A well-typed P is ok.}
+Subject reduction states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
+In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
 \begin{nitheorem}[Subject reduction]
-  If $P$ reduces to $Q$ and $P$ is well-typed, then so is $Q$.
-  In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$.
-  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$
   \begin{itemize}
-    \item If the reduction is internal, we prove $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-    \item If the reduction is external and on channel $i$, we prove that if $\containsusage{\Gamma}{i}{\lio}{\Delta}$ , then $\types{\gamma}{\Delta}{Q}{\Xi}$.
+    \item If $P \reduce{\constr{internal}} Q$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+    \item If $P \reduce{\constr{external} \; i} Q$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
   \end{itemize}
 \end{nitheorem}
 
@@ -1099,19 +1101,19 @@ Subject congruence states that applying structural congruence rules to a well-ty
   \hfill{}\\
   \begin{itemize}
     \item
-    In the $\constr{comm}$ case we apply framing (\autoref{thm:framing}) to rearrange the assumptions and then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
+    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) to rearrange the assumptions and then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
   
     \item
-    Reduction under $\constr{par}$ proceeds by induction on the process that is being reduced.
+    Case $\constr{par}$: by induction on the process that is being reduced.
 
     \item
-    Reduction under scope restriction case splits on the channel $c$ on which communication occurs.
+    Case $\constr{res}$: reduction under scope restriction case splits on the channel $c$ on which communication occurs.
     If $c$ is $\constr{internal}$ we proceed inductively.
     If $c$ is $\constr{external}\; \constr{0}$ -- i.e. the channel that is being introduced by the scope restriction -- we use \autoref{lm:comm-capable} to subtract $\lio$ from the channel's usage annotation and proceed inductively.
     If $c$ is $\constr{external}\; (\suc i)$ we proceed inductively.
 
     \item
-    In the $\constr{struct}$ case, we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively.
+    Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively.
   \end{itemize}
 \end{proof}
 
