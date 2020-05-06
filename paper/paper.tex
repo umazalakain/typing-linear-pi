@@ -508,7 +508,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
     &\func{\cdot-compute}  &:{} &\forall y z       & \to \; & \type{DEC} \; (\type{\exists} x  \; (\op{x}{y}{z})) \\
     &\func{\cdot-unique}   &:{} &\forall x x' y z  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
     &\func{\cdot-unique^l} &:{} &\forall x y y' z  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-    &\func{0\cdot-min^l}   &:{} &\forall y z       & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
+    &\func{\cdot-min^l}   &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
     &\func{\cdot-id^l}     &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
     &\func{\cdot-comm}     &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
     &\func{\cdot-assoc}    &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
