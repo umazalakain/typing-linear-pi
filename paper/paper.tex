@@ -1096,7 +1096,7 @@ In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}
     If $c$ is $\constr{external}\; (\suc i)$ we proceed inductively.
 
     \item
-    Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively.
+    Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively. \qedhere
   \end{itemize}
 \end{proof}
 
@@ -1121,6 +1121,9 @@ Their paper extends session types with polymorphism and pattern matching on sess
 They use a locally-nameless encoding for variable references, a syntax prior to types, and a LTS semantics that encodes session-typed processes into the \picalc{}.
 Their type system uses reordering of contexts and extrinsic contex splits. 
 
+Castro et al. provide tooling for locally-nameless representations of process calculi in Coq \cite{Castro2020} --- where de Bruijn indices are not as popular as dependent patter matching is not as straightforward to handle.
+As an example use-case, they use their tool to help automate proofs of subject reduction for a type system with session types.
+
 Taking an intrinsic approach to typing, Thiemann formalises in Agda the MicroSession (minimal GV \cite{Gay2010}) calculus with support for recursion and subtyping \cite{Thiemann2019}.
 Context splits are still given extrinsically, and exhausted elements are removed from typing contexts altogether.
 The semantics are given as an intrinsically typed CEK machine with a global context of session-typed channels.
@@ -1130,7 +1133,6 @@ They use proof relevant separation logic and a notion of a supply and demand \em
 Their separation logic is based on a partial commutative monoid that need not be functional nor cancellative.
 Their typing rules preserve the balance between supply and demand, and are extremely elegant.
 They distill their typing rules even further by modelling the supply and demand market as a state monad.
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types, and show that reduction preserves the well-typedness of processes.
