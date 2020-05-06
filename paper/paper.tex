@@ -1084,16 +1084,16 @@ In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}
   \hfill{}\\
   \begin{itemize}
     \item
-    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) to rearrange the assumptions and then apply substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
+    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
   
     \item
     Case $\constr{par}$: by induction on the process that is being reduced.
 
     \item
-    Case $\constr{res}$: reduction under scope restriction case splits on the channel $c$ on which communication occurs.
-    If $c$ is $\constr{internal}$ we proceed inductively.
-    If $c$ is $\constr{external}\; \constr{0}$ -- i.e. the channel that is being introduced by the scope restriction -- we use \autoref{lm:comm-capable} to subtract $\lio$ from the channel's usage annotation and proceed inductively.
-    If $c$ is $\constr{external}\; (\suc i)$ we proceed inductively.
+    Case $\constr{res}$: case split on channel $c$:
+    if $\constr{internal}$ proceed inductively;
+    if $\constr{external}\; \constr{0}$ (i.e. the channel introduced by scope restriction) use \autoref{lm:comm-capable} to subtract $\lio$ from the channel's usage annotation and proceed inductively;
+    if $\constr{external}\; (\suc i)$ proceed inductively.
 
     \item
     Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively. \qedhere
