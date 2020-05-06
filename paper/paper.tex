@@ -855,9 +855,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 \section{Type Safety}
 \label{type-safety}
 
-In \autoref{auxiliary-results} we present some auxiliary results: framing (\autoref{thm:framing}), weakening (\autoref{thm:weakening}), strengthening (\autoref{thm:strengthening}) and swapping of variables (\autoref{thm:swapping}).
-We present subject congruence in \autoref{subject-congruence} and substitution in \autoref{substitution}.
-Finally, we present subject reduction in \autoref{subject-reduction}.
+We now discuss the type safety of our type system, starting with auxiliary results.
 
 \subsection{Auxiliaty Results}
 \label{auxiliary-results}
@@ -906,9 +904,14 @@ All the above theorems are proved by induction on \textsc{Process} and \textsc{V
 For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 
 
-\subsection{Subject Congruence}
+\subsection{Subject Reduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
+\label{substitution}
+\label{subject-reduction}
+
+In this section we move towards subject reduction.
+We start with two important results: subject congruence (\autoref{thm:subject-congruence}) and substitution (\autoref{thm:subst-generalization} and \autoref{thm:substitution}).
 
 Subject congruence states that applying structural congruence rules to a well typed process preserves its well-typedness.
 \begin{nitheorem}[Subject congruence]
@@ -919,28 +922,8 @@ Subject congruence states that applying structural congruence rules to a well ty
 \begin{proof}[Proof (Sketch)]
   The proof is by induction on \textsc{Equals} $\eq{}$.
   Here we only consider the nontrivial base cases for $\constr{struct}$ and their symmetric variants.
-  Full proof in \cite{Zalakain2020Agda}.
-  We proceed by induction on \textsc{StructCong} $\eqeq$:
-  \begin{itemize}
-    \item
-      Case $\constr{comp-assoc}$: trivial, as leftover typing is naturally associative.
-    \item
-      Case $\constr{comp-sym}$ for $\comp{P}{Q}$: we use framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of $Q$ to the one of $P$.
-    \item
-      Case $\constr{comp-end}$: trivial, as the typing rule for $\PO$ has the same input and output contexts.
-    \item
-      Case $\constr{scope-end}$: we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
-      In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$..
-    \item
-      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
-      In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
-    \item
-      Case $\constr{scope-comm}$:
-      we use swapping (\autoref{thm:swapping}), and for the reverse direction swapping and \autoref{lm:swap-swap} to show that swapping two elements in $P$ twice leaves $P$ unchanged. \qedhere
-  \end{itemize}
+  Further details can be found in \autoref{app:struct} and the full proof in \cite{Zalakain2020Agda}.
 \end{proof}
-\subsection{Substitution}
-\label{substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \autoref{thm:subst-generalization} proves a generalised version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
@@ -1019,9 +1002,7 @@ Subject congruence states that applying structural congruence rules to a well ty
 \begin{nitheorem}[Generalised substitution]
   \label{thm:subst-generalization}
   Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  The substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
-  Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
-  In other words, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
+  Then, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
   \begin{multicols}{2}
   \begin{itemize}
     \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
@@ -1030,26 +1011,19 @@ Subject congruence states that applying structural congruence rules to a well ty
     \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
   \end{itemize}
   \end{multicols}
+\end{nitheorem}
+
+\begin{proof}[Proof (Sketch)]
+  By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$. Full details are found in \autoref{app:subst-generalization}.
+\end{proof}
+
+The above theorem means that the substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
+  Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
+
   Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
   Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
   Then substituting $i$ with $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
   \autoref{fig:subst} gives a diagramatic representation.
-\end{nitheorem}
-
-\begin{proof}[Proof (Sketch)]
-  By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  \begin{itemize}
-    \item
-      Constructor $\constr{end}$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
-
-    \item
-      Constructor $\constr{chan}$: we proceed inductively.
-      
-    \item
-      Constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction.
-      Full details are found in \autoref{app:subst-generalization}. \qedhere
-  \end{itemize}
-\end{proof}
 
 \begin{nitheorem}[Substitution]
   \label{thm:substitution}
@@ -1062,10 +1036,7 @@ Subject congruence states that applying structural congruence rules to a well ty
   Then, we use these to apply \autoref{thm:subst-generalization}.
 \end{proof}
 
-\subsection{Subject Reduction}
-\label{subject-reduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
 \begin{note}
   We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
 \end{note}
