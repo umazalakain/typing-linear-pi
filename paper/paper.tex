@@ -48,6 +48,7 @@
   \renewcommand{\sectionautorefname}{\S}%
   \renewcommand{\subsectionautorefname}{\S}%
   \renewcommand{\figureautorefname}{Fig.}%
+  \renewcommand{\appendixautorefname}{App.}%
 }
 
 % No line numbers
@@ -1043,26 +1044,25 @@ Subject congruence states that applying structural congruence rules to a well-ty
     \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
   \end{itemize}
   \end{multicols}
-  Let $\Gamma$ and $\Psi$ be related such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
-  Let $\Delta$ have a usage annotation $\lz$ at position $i$, so that all consumption from $m$ to $n$ must happen in $P$.
+  Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
+  Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
   Then substituting $i$ with $j$ in $P$ will be well-typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
-  Refer to \autoref{fig:subst} for a diagramatic representation.
+  \autoref{fig:subst} gives a diagramatic representation.
 \end{nitheorem}
 
 \begin{proof}[Proof (Sketch)]
   By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   \begin{itemize}
     \item
-      For constructor $\constr{end}$ observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
-      The details are found in \autoref{app:subst-generalization}.
+      Constructor $\constr{end}$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
 
     \item
-      For constructor $\constr{chan}$ we proceed inductively.
+      Constructor $\constr{chan}$: we proceed inductively.
       
     \item
-      For constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$ we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction.
-      The details are found in \autoref{app:subst-generalization}.
-  \end{itemize}  
+      Constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction.
+      Full details are found in \autoref{app:subst-generalization}.
+  \end{itemize}
 \end{proof}
 
 \begin{nitheorem}[Substitution]
@@ -1072,8 +1072,8 @@ Subject congruence states that applying structural congruence rules to a well-ty
   Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well-typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
 \end{nitheorem}
 \begin{proof}[Proof (Sketch)]
-  Use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
-  Use these to apply \autoref{thm:subst-generalization}.
+  W use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
+  Then, we use these to apply \autoref{thm:subst-generalization}.
 \end{proof}
 
 \subsection{Subject Reduction}
