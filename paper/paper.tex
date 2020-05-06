@@ -1060,7 +1060,7 @@ Subject congruence states that applying structural congruence rules to a well-ty
   Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well-typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
 \end{nitheorem}
 \begin{proof}[Proof (Sketch)]
-  W use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
+  We use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
   Then, we use these to apply \autoref{thm:subst-generalization}.
 \end{proof}
 
