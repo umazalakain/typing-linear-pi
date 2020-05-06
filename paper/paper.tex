@@ -1072,15 +1072,15 @@ Subject congruence states that applying structural congruence rules to a well ty
 Subject reduction states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
 \begin{nitheorem}[Subject reduction]
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
   \begin{itemize}
-    \item If $P \reduce{\constr{internal}} Q$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-    \item If $P \reduce{\constr{external} \; i} Q$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
+    \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+    \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
   \end{itemize}
 \end{nitheorem}
 
 \begin{proof}
-  By induction on $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  By induction on $P \reduce{c} Q$.
   \hfill{}\\
   \begin{itemize}
     \item
