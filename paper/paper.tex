@@ -247,7 +247,6 @@ In particular, while linearity is needed for type safety in communication-centri
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\autoref{fig:notation} illustrates the notation used in this paper.
 \begin{figure}[h]
   \begin{mathpar}
     \datatype
@@ -267,6 +266,7 @@ In particular, while linearity is needed for type safety in communication-centri
   \label{fig:notation}
 \end{figure}
 
+\autoref{fig:notation} illustrates the notation used in this paper.
 Data type definitions ($\type{\N}$) use double lines and index-free synonyms (\textsc{Nat}) as rule names (for ease of reference).
 We otherwise use constructor names ($\constr{0}$ and $\suc$) to name our typing rules.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
@@ -891,25 +891,16 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
 \end{nitheorem}
 
 \begin{remark}
-  It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned by $P$: $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
+  Usage annotations of a variable $i$ within a process $P$ can be preserved as leftovers, yet the variable $i$ be mentioned by $P$: $P$ may send $\lz$ usage annotations of $i$ over a channel.
 \end{remark}
 
-\todo{sw and swap? Just use one}
-
 Swapping two variables preserves the well-typedness of a process.
-Let $\func{sw}_i$ be a function that swaps variables $i$ and $\suc i$.
-For simplicity, we overload $\func{sw}$ and use it to swap types in typing contexts and usage annotations in usage contexts. We use $\func{swap}_i \; P$ to swap variables $i$ and $\suc i$ within a process $P$, as introduced in structural congruence (\autoref{structural-congruence}).
+For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-congruence} to swap types in typing contexts and usage annotations in usage contexts.
 \begin{nitheorem}[Swapping]
   \label{thm:swapping}
   Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, $\types{\func{sw}_i \; \gamma}{\func{sw}_i \; \Gamma}{\func{swap}_i \; P}{\func{sw}_i \; \Xi}$.
+  Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
-
-\begin{remark}
-  We limit ourselves to the swapping of adjacent variables $i$ and $\suc i$.
-  Doing so is enough to prove subject reduction.
-  More generally, any two variables can be swapped by a series of adjacent variable swappings.
-\end{remark}
 
 All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
 For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
@@ -927,30 +918,29 @@ Subject congruence states that applying structural congruence rules to a well-ty
 
 \begin{proof}[Proof (Sketch)]
   The proof is by induction on \textsc{Equals} $\eq{}$.
-  Here we will only consider the base cases for $\constr{struct}$ (and their symmetric variants under $\constr{sym}$), which are nontrivial. Full proof in \cite{Zalakain2020Agda}.
+  Here we only consider the nontrivial base cases for $\constr{struct}$ and their symmetric variants.
+  Full proof in \cite{Zalakain2020Agda}.
   We proceed by induction on \textsc{StructCong} $\eqeq$:
   \begin{itemize}
     \item
       Case $\constr{comp-assoc}$: trivial, as leftover typing is naturally associative.
     \item
       Case $\constr{comp-sym}$ for $\comp{P}{Q}$: we use framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of $Q$ to the one of $P$.
-      %The point at which $Q$ and $P$ join in $\comp{Q}{P}$ will no longer be the same.
     \item
       Case $\constr{comp-end}$: trivial, as the typing rule for $\PO$ has the same input and output contexts.
     \item
       Case $\constr{scope-end}$: we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
       In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$..
     \item
-      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we use \autoref{lm:types-unused} to show that $P$ preserves the usage annotations of the unused variable.
-      We then use strengthening (\autoref{thm:strengthening}) to delete the unused variable from $P$, and compose the result with the typing derivation on $Q$ wrapped in $\constr{chan}$.
-      In the reverse direction, we weaken (\autoref{thm:weakening}) $P$ so that it accepts the additional variable.
-      We then use \autoref{lm:lower-lift} to show that lowering and then lifting $P$ results in $P$.
+      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
+      In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
     \item
       Case $\constr{scope-comm}$:
-      we use swapping (\autoref{thm:swapping}) (and \autoref{lm:swap-swap} for the reverse direction) to show that swapping two elements in $P$ twice leaves $P$ unchanged.
+      we use swapping (\autoref{thm:swapping}), and for the reverse direction swapping and \autoref{lm:swap-swap} to show that swapping two elements in $P$ twice leaves $P$ unchanged.
   \end{itemize}
 \end{proof}
 \todo{remove the space between the itemize and the qed at the end}
+
 \subsection{Substitution}
 \label{substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
