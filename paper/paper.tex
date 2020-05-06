@@ -753,7 +753,6 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   The underscore \_ introduces an anonymous declaration immediately followed by its definition.
   The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
   The constructor $\constr{0}$ asserts that the next variable is of a channel type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving $\lo$ as the leftover, to be used later on.
-  \todo{use the caption to give a name to the example, not to comment much. Complete/change the incomplete name that I gave}
 \end{example}
 
 \begin{nidefinition}[\textsc{Types}: typing processes]
@@ -848,7 +847,6 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
        $(\constr{chan} \; \unit \; \func{\omega} \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
        )$
   \end{lstlisting}
-  \todo{a better caption}
 \end{example}
 
 
@@ -895,6 +893,8 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
   It is possible for the usage annotations of a variable $i$ within a process $P$ to be preserved as leftovers, yet for the variable $i$ to be mentioned by $P$: $P$ can choose to send $\lz$ usage annotations of $i$ over a channel.
 \end{remark}
 
+\todo{sw and swap? Just use one}
+
 Swapping two variables preserves the well-typedness of a process.
 Let $\func{sw}_i$ be a function that swaps variables $i$ and $\suc i$.
 For simplicity, we overload $\func{sw}$ and use it to swap types in typing contexts and usage annotations in usage contexts. We use $\func{swap}_i \; P$ to swap variables $i$ and $\suc i$ within a process $P$, as introduced in structural congruence (\autoref{structural-congruence}).
@@ -910,10 +910,8 @@ For simplicity, we overload $\func{sw}$ and use it to swap types in typing conte
   More generally, any two variables can be swapped by a series of adjacent variable swappings.
 \end{remark}
 
-\begin{proof}[Proof (Sketch)]
-  All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
-  For details, refer to the mechanisation in Agda \cite{Zalakain2020Agda}.
-\end{proof}
+All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
+For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 
 
 \subsection{Subject Congruence}
@@ -935,7 +933,7 @@ Subject congruence states that applying structural congruence rules to a well-ty
       Case $\constr{comp-assoc}$: trivial, as leftover typing is naturally associative.
     \item
       Case $\constr{comp-sym}$ for $\comp{P}{Q}$: we use framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of $Q$ to the one of $P$.
-      The point at which $Q$ and $P$ join in $\comp{Q}{P}$ will no longer be the same.
+      %The point at which $Q$ and $P$ join in $\comp{Q}{P}$ will no longer be the same.
     \item
       Case $\constr{comp-end}$: trivial, as the typing rule for $\PO$ has the same input and output contexts.
     \item
@@ -947,17 +945,18 @@ Subject congruence states that applying structural congruence rules to a well-ty
       In the reverse direction, we weaken (\autoref{thm:weakening}) $P$ so that it accepts the additional variable.
       We then use \autoref{lm:lower-lift} to show that lowering and then lifting $P$ results in $P$.
     \item
-      Case $\constr{scope-comm}$: in one direction we use swapping (\autoref{thm:swapping}).
-      In the reverse direction, we use swapping and then \autoref{lm:swap-swap} to show that swapping two elements in $P$ twice leaves $P$ unchanged.
+      Case $\constr{scope-comm}$:
+      we use swapping (\autoref{thm:swapping}) (and \autoref{lm:swap-swap} for the reverse direction) to show that swapping two elements in $P$ twice leaves $P$ unchanged.
   \end{itemize}
 \end{proof}
-
+\todo{remove the space between the itemize and the qed at the end}
 \subsection{Substitution}
 \label{substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\todo{generaliz* to generalis* everywhere}
 \autoref{thm:subst-generalization} proves a generalized version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalized version to the concrete case where $i$ is $\constr{0}$, as required by subject reduction.
+\todo{explain what i is 0 mean}
 
 \begin{figure}[h]
   \begin{subfigure}{.5\textwidth}
