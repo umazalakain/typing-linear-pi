@@ -828,7 +828,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   We will now illustrate a typing derivation of the process $\func{p}$ using linear and shared types (\autoref{lst:derivation}).
 
   Let $\func{\omega}$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
-  Let $\epsilon$ be the empty usage context --- where all usage annotations are $(\zero \comma \zero)$.
+  Let $\func{\epsilon}$ be the empty usage context --- where all usage annotations are $(\zero \comma \zero)$.
   To type $\func{p}$, we need a channel over which we can transmit another channel.
   We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we only transmit input capabilities over it (line 7).
   The left-hand process is typed following its syntax (line 8).
@@ -837,12 +837,12 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   Its usage annotation is $(\one \comma \one)$: we will transmit $(\one \comma \zero)$ and save $(\zero \comma \one)$ for the continuation process.
   
   \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing a process that sends part of one channel over another.]
-  $\func{p}$ : $\Process_1$
+  $\func{p}$ : $\Process_{\suc \constr{zero}}$
   $\func{p}$ = $\new{}$
        $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
        ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
 
-  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\epsilon}$
+  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\func{epsilon}}$
   $\func{\_}$ = $\constr{chan} \; \channel{\unit}{\func{\omega}} \; \li \; \one \; (\constr{comp}$
        $(\constr{recv} \; \constr{0} \; (\constr{recv} \; \constr{0} \; \constr{end}))$
        $(\constr{chan} \; \unit \; \func{\omega} \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
