@@ -886,12 +886,12 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let $i$ be a variable index not in $P$, such that $\Unused_i \; P$.
+  Let $i$ be a variable not in $P$, such that $\Unused_i \; P$.
   Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
 
 \begin{remark}
-  Usage annotations of a variable $i$ within a process $P$ can be preserved as leftovers, yet the variable $i$ be mentioned by $P$: $P$ may send $\lz$ usage annotations of $i$ over a channel.
+  The \emph{unusedness} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
 \end{remark}
 
 Swapping two variables preserves the well-typedness of a process.
@@ -899,7 +899,7 @@ For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-cong
 \begin{nitheorem}[Swapping]
   \label{thm:swapping}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
+  Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\allowbreak \func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
 
 All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
