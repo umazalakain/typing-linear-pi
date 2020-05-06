@@ -700,7 +700,7 @@ Leftover typing presents three main advantages:
 Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
 Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
 
-The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ is of type $t$ in typing context $\gamma$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftovers $\Delta$''.
+The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ in typing context $\gamma$ is of type $t$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftovers $\Delta$''.
 The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
 
