@@ -176,10 +176,10 @@ As humans, we aim to model, predict, and build such interactive systems; as math
 The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data over communication channels.
 Notably, it features channel mobility: channels themselves are first order values, and can therefore be transmitted.
-The \picalc{} has been a foundation for the design and implementation of programming languages for concurrency, such as Pict \cite{Pierce} and (more recently) Go \cite{Golang}.
+The \picalc{} has been a foundation for the design and implementation of programming languages for concurrency, such as Pict \cite{PierceT00} and (more recently) Go \footnote{https://golang.org}.
 At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types. This makes the \picalc{} a fully-fledged tool for modelling and verification of concurrent and distributed systems.
 
-In a parallel track, J.-Y. Girard's development of linear logic \cite{Girard87} in the early '90s opened new avenues in computing science by introducing \emph{linear types} for (functional) programming languages \cite{Curry-Howard,Wadler90,Bernardy2018}.
+In a parallel track, J.-Y. Girard's development of linear logic \cite{Girard87} in the early '90s opened new avenues in computing science by introducing \emph{linear types} for (functional) programming languages \cite{Wadler90,Bernardy2018}.
 Linear type systems guarantee that resources are used \emph{exactly once}.
 Enforcing ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
 Later on, linearity inspired unique types (as in Clean \cite{BarendsenS96}) and ownership types (as in Rust \cite{MatsakisK14}).
