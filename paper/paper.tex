@@ -582,7 +582,7 @@ We use indexed sets of usage algebras to allow several usage algebras to coexist
 We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts ($\Ctx$ in \autoref{fig:ctx}) separate.
 The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
 
-\begin{nidefinition}[Types and typing contexts]
+\begin{nidefinition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
   A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) (\autoref{fig:prectx}).
   
   \begin{figure}[h]
@@ -631,7 +631,7 @@ Notice that this notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^
 
 A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
 
-\begin{nidefinition}[Usage contexts]
+\begin{nidefinition}[\textsc{Ctx}: usage contexts]
   A \emph{usage context} is a context $\Ctx_{idxs}$ of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
 
   A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to the existing context $\Gamma$.
