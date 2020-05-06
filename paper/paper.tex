@@ -230,7 +230,8 @@ In particular, while linearity is needed for type safety in communication-centri
     \item \textbf{\picalc{} with leftovers}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
     This approach adds a leftover usage context to the typing judgements.
     Typing derivations take the resources of their input usage context, consume some of them, and leave the rest as leftovers in the output usage context.
-    One of the benefits of this technique is that it removes the need for extrinsic context splits, which are rendered unnecessary.
+
+    Benefits of typing with leftovers include: removing the need for extrinsic context splits, which are rendered unnecessary; and for the first time we can state theorems like \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) in the linear \picalc{}.    
   \end{itemize}
   \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
   \autoref{type-safety} details the type safety properties of our \picalc{} with leftovers.
