@@ -214,7 +214,7 @@ In particular, while linearity is needed for type safety in communication-centri
    
    \item \textbf{Semantics}: \autoref{semantics} provides an operational semantics for the \picalc{}, prior to any typing.
    This operational semantics is given as a reduction relation on processes (\autoref{operational-semantics}).
-   The reduction relation tracks at the type level the channel the communication occurs on, so that this information can then be used to state subject reduction --- aka type preservation (\autoref{subject-reduction}).
+   The reduction relation tracks at the type level the channel the communication occurs on, so that this information can then be used to state subject reduction --- aka type preservation (\autoref{thm:subject-reduction}).
    The reduction relation is defined modulo structural congruence (\autoref{structural-congruence}) --- a relation that acts as a quotient type that removes unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
  \end{itemize}
   
@@ -237,7 +237,7 @@ In particular, while linearity is needed for type safety in communication-centri
   \item \textbf{Machine verified proofs of subject reduction and auxiliary theorems}:
   \autoref{type-safety} details the type safety properties of our \picalc{} with leftovers.
   Leftover typing allows \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to be stated.
-  We use these to prove \emph{subject congruence} (\autoref{subject-congruence}), and together with \emph{substitution} (\autoref{substitution}), to prove \emph{subject reduction} (\autoref{subject-reduction}).  
+  We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
 
   \item \textbf{Fully mechanised formalisation available in Agda}:
   This work has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}.
@@ -423,7 +423,7 @@ In all the above, $i$ is incremented every time we go under a binder.
 \label{operational-semantics}
 
 The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs (\autoref{fig:reduction}).
-We keep track of channel $c$ so we can state subject reduction (\autoref{subject-reduction}).
+We keep track of channel $c$ so we can state subject reduction (\autoref{thm:subject-reduction}).
 We distinguish between channels that are created inside of the process ($\constr{internal}$) and channels that are created outside ($\constr{external}\ i$, where $i$ is the index of the channel variable).
 
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
@@ -1047,6 +1047,7 @@ states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
 
 \begin{nitheorem}[Subject reduction]
+  \label{thm:subject-reduction}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
   \begin{itemize}
     \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
