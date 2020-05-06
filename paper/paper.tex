@@ -856,7 +856,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 \label{type-safety}
 
 \subparagraph*{Framing}
-Framing asserts that the well-typedness of a process is independent of its leftover resources.
+asserts that the well-typedness of a process is independent of its leftover resources.
 
 \begin{nitheorem}[Framing]
   \label{thm:framing}
@@ -868,7 +868,7 @@ Framing asserts that the well-typedness of a process is independent of its lefto
 \end{nitheorem}
 
 \subparagraph*{Weakening}
-Weakening states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
@@ -878,7 +878,7 @@ Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simp
 \end{nitheorem}
 
 \subparagraph*{Strengthening}
-Removing an unused variable preserves the well-typedness of a process.
+states that removing an unused variable preserves the well-typedness of a process.
 Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
@@ -892,7 +892,7 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
 \end{remark}
 
 \subparagraph*{Swapping}
-Swapping two variables preserves the well-typedness of a process.
+two variables preserves the well-typedness of a process.
 For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-congruence} to swap types in typing contexts and usage annotations in usage contexts.
 \begin{nitheorem}[Swapping]
   \label{thm:swapping}
@@ -906,7 +906,7 @@ For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-cong
 \end{proof}
 
 \subparagraph*{Subject Congruence}
-Subject congruence states that applying structural congruence rules to a well typed process preserves its well-typedness.
+states that applying structural congruence rules to a well typed process preserves its well-typedness.
 
 \begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
@@ -920,6 +920,7 @@ Subject congruence states that applying structural congruence rules to a well ty
 \end{proof}
 
 \subparagraph*{Substitution}
+\todo{intro}
 \autoref{thm:subst-generalization} proves a generalised version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
@@ -949,11 +950,9 @@ Subject congruence states that applying structural congruence rules to a well ty
    \item
      Constructor $\constr{chan}$: we proceed inductively.
    \item
-     Constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction.
+     Constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction. \qedhere
  \end{itemize}
 \end{proof}
-
-
 
 \begin{figure}[h]
   \begin{subfigure}{.5\textwidth}
@@ -1044,7 +1043,7 @@ Subject congruence states that applying structural congruence rules to a well ty
 \end{note}
 
 \subparagraph*{Subject Reduction}
-Subject reduction states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
+states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
 
 \begin{nitheorem}[Subject reduction]
