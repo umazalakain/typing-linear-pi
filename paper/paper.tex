@@ -855,12 +855,9 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 \section{Type Safety}
 \label{type-safety}
 
-We now discuss the type safety of our type system, starting with auxiliary results.
-
-\subsection{Auxiliaty Results}
-\label{auxiliary-results}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subparagraph*{Framing}
 Framing asserts that the well-typedness of a process is independent of its leftover resources.
+
 \begin{nitheorem}[Framing]
   \label{thm:framing}
   Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
@@ -870,6 +867,7 @@ Framing asserts that the well-typedness of a process is independent of its lefto
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
 
+\subparagraph*{Weakening}
 Weakening states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
 \begin{nitheorem}[Weakening]
@@ -879,6 +877,7 @@ Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simp
   $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
 \end{nitheorem}
 
+\subparagraph*{Strengthening}
 Removing an unused variable preserves the well-typedness of a process.
 Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
 \begin{nitheorem}[Strengthening]
@@ -892,6 +891,7 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
   The \emph{unusedness} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
 \end{remark}
 
+\subparagraph*{Swapping}
 Swapping two variables preserves the well-typedness of a process.
 For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-congruence} to swap types in typing contexts and usage annotations in usage contexts.
 \begin{nitheorem}[Swapping]
@@ -900,20 +900,14 @@ For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-cong
   Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\allowbreak \func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
 
-All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
-For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
+\begin{proof}[Proof (Sketch)]
+  All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
+  For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
+\end{proof}
 
-
-\subsection{Subject Reduction}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\label{subject-congruence}
-\label{substitution}
-\label{subject-reduction}
-
-In this section we move towards subject reduction.
-We start with two important results: subject congruence (\autoref{thm:subject-congruence}) and substitution (\autoref{thm:subst-generalization} and \autoref{thm:substitution}).
-
+\subparagraph*{Subject Congruence}
 Subject congruence states that applying structural congruence rules to a well typed process preserves its well-typedness.
+
 \begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
   If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
@@ -921,12 +915,45 @@ Subject congruence states that applying structural congruence rules to a well ty
 
 \begin{proof}[Proof (Sketch)]
   The proof is by induction on \textsc{Equals} $\eq{}$.
-  Here we only consider the nontrivial base cases for $\constr{struct}$ and their symmetric variants.
+  For the nontrivial base cases and their symmetric variants, we apply a combination of \autoref{thm:framing}, \autoref{thm:strengthening}, \autoref{thm:weakening} and \autoref{thm:swapping}.
   Further details can be found in \autoref{app:struct} and the full proof in \cite{Zalakain2020Agda}.
 \end{proof}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subparagraph*{Substitution}
 \autoref{thm:subst-generalization} proves a generalised version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
+
+\begin{nitheorem}[Generalised substitution]
+  \label{thm:subst-generalization}
+  Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  Then, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
+  \begin{multicols}{2}
+  \begin{itemize}
+    \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
+    \item $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
+    \item $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
+    \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
+  \end{itemize}
+  \end{multicols}
+  Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
+  Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
+  Then substituting $i$ with $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+\end{nitheorem}
+
+\begin{proof}[Proof (Sketch)]
+  By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  Full details are found in \autoref{app:subst-generalization}.
+  \begin{itemize}
+   \item
+     Constructor $\constr{end}$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
+   \item
+     Constructor $\constr{chan}$: we proceed inductively.
+   \item
+     Constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction.
+ \end{itemize}
+\end{proof}
+
+
 
 \begin{figure}[h]
   \begin{subfigure}{.5\textwidth}
@@ -999,32 +1026,6 @@ Subject congruence states that applying structural congruence rules to a well ty
   \caption{Substitution with and without the \emph{adjustment} arrows $\ni_i n$ and $\ni_j n$}
 \end{figure}
 
-\begin{nitheorem}[Generalised substitution]
-  \label{thm:subst-generalization}
-  Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  Then, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
-  \begin{multicols}{2}
-  \begin{itemize}
-    \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
-    \item $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
-    \item $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
-    \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
-  \end{itemize}
-  \end{multicols}
-\end{nitheorem}
-
-\begin{proof}[Proof (Sketch)]
-  By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$. Full details are found in \autoref{app:subst-generalization}.
-\end{proof}
-
-The above theorem means that the substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
-  Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
-
-  Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
-  Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
-  Then substituting $i$ with $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
-  \autoref{fig:subst} gives a diagramatic representation.
-
 \begin{nitheorem}[Substitution]
   \label{thm:substitution}
   Let $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
@@ -1037,11 +1038,15 @@ The above theorem means that the substituted variable $i$ is capable of $m$ in $
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
 \begin{note}
   We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
 \end{note}
+
+\subparagraph*{Subject Reduction}
 Subject reduction states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
+
 \begin{nitheorem}[Subject reduction]
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
   \begin{itemize}
