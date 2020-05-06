@@ -530,7 +530,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ tuple of input and output multiplicities, respectively.
   We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
 
-  Henceforth, we use $\lz$ to denote the pair $(0 \comma 0)$ for a channel which cannot be used any further, $\li$ for the pair $(1 \comma 0)$ for a channel to be used in input exactly once, $\lo$ for $(0 \comma 1)$ for a channel to be used in output exactly once, and $\lio$ for $(1 \comma 1)$, for a channel to be used exactly once in input and exactly once in output.
+  Henceforth, we use $\lz$ to denote the pair $0 \comma 0$ for a channel which cannot be used any further, $\li$ for the pair $1 \comma 0$ for a channel to be used in input exactly once, $\lo$ for $0 \comma 1$ for a channel to be used in output exactly once, and $\lio$ for $1 \comma 1$, for a channel to be used exactly once in input and exactly once in output.
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{note}
 
@@ -541,21 +541,21 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
     The carrier is a type with two trivial constructors $\constr{zero}$ and $\constr{one}$.
     The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited otherwise.
     All the properties of the algebra follow trivially.
-    As an example, the multiplicity pair $\ell_i$ is represented as $(\constr{one} \comma \constr{zero})$.
+    As an example, the multiplicity pair $\ell_i$ is represented as $\constr{one} \comma \constr{zero}$.
 
     \item [Graded]
     The carrier is the type of natural numbers.
     The element $\zero$ corresponds to 0, and $\one$ to 1.
     The partial monoid $\op{x}{y}{z}$ is defined exactly when $x = y + z$.
     All other properties of the algebra follow from the algebraic rules for the addition of natural numbers.
-    As an example, we use $(5 \comma 3)$ to represent the multiplicities of a channel that is able to input 5 times and output 3 times.
+    As an example, we use $5 \comma 3$ to represent the multiplicities of a channel that is able to input 5 times and output 3 times.
 
     \item [Shared]
     The carrier is a type with a single trivial constructor $\constr{\omega}$.
     Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
     The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
     All the properties of the algebra follow trivially.
-    Shared channels have multiplicities $(\constr{\omega} \comma \constr{\omega})$, which they will forever preserve.
+    Shared channels have multiplicities $\constr{\omega} \comma \constr{\omega}$, which they will forever preserve.
 \end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -807,7 +807,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   The inaction process in rule $\constr{end}$ does not change usage annotations.
   The scope restriction in rule $\constr{chan}$ expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ of what is being transmitted; and the multiplicity $y$ given to the channel itself.
   This multiplicity $y$ is used for both input and output, so that they are balanced.
-  The continuation process $P$ is provided with the new channel with usage annotation $(y \comma y)$, which it must completely exhaust.
+  The continuation process $P$ is provided with the new channel with usage annotation $y \comma y$, which it must completely exhaust.
 
   The input process in rule $\constr{recv}$ requires a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
   Note that the index $i$ is used in the syntax of the typed process.
@@ -827,14 +827,14 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   \label{example-derivations}
   We will now illustrate a typing derivation of the process $\func{p}$ using linear and shared types (\autoref{lst:derivation}).
 
-  Let $\func{\omega}$ be a shortcut for $(\one \comma \one)$ in an algebra of shared types.
-  Let $\func{\epsilon}$ be the empty usage context --- where all usage annotations are $(\zero \comma \zero)$.
+  Let $\func{\omega}$ be a shortcut for $\one \comma \one$ in an algebra of shared types.
+  Let $\func{\epsilon}$ be the empty usage context --- where all usage annotations are $\zero \comma \zero$.
   To type $\func{p}$, we need a channel over which we can transmit another channel.
-  We therefore create a new channel with usage annotations $(\one \comma \one)$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we only transmit input capabilities over it (line 7).
+  We therefore create a new channel with usage annotations $\one \comma \one$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we only transmit input capabilities over it (line 7).
   The left-hand process is typed following its syntax (line 8).
   On the right-hand we need the channel that is going to be sent (line 9).
   The type $\unit$ of this channel is entirely determined by the type $\channel{\unit}{\func{\omega}}$ of the channel over which it is going to be transmitted.
-  Its usage annotation is $(\one \comma \one)$: we will transmit $(\one \comma \zero)$ and save $(\zero \comma \one)$ for the continuation process.
+  Its usage annotation is $\one \comma \one$: we will transmit $\one \comma \zero$ and save $\zero \comma \one$ for the continuation process.
   
   \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing a process that sends part of one channel over another.]
   $\func{p}$ : $\Process_{\suc \constr{zero}}$
