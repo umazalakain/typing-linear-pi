@@ -746,7 +746,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 
 \begin{example}[Variable reference]
   Let us illustrate the use of variable reference relations with an example in \autoref{lst:channels}.
-  \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=Variable referece]
+  \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=Typing variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\suc \; \constr{0}$
   \end{lstlisting}
@@ -836,7 +836,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   The type $\unit$ of this channel is entirely determined by the type $\channel{\unit}{\func{\omega}}$ of the channel over which it is going to be transmitted.
   Its usage annotation is $(\one \comma \one)$: we will transmit $(\one \comma \zero)$ and save $(\zero \comma \one)$ for the continuation process.
   
-  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption= A typing derivation]
+  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing a process that sends part of one channel over another.]
   $\func{p}$ : $\Process_1$
   $\func{p}$ = $\new{}$
        $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
