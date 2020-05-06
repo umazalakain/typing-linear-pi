@@ -566,14 +566,14 @@ We use indexed sets of usage algebras to allow several usage algebras to coexist
 \begin{nidefinition}[Indexed set of usage algebras]
   An \emph{indexed set of usage algebras} is a nonempty type $\Idx$ of indices together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras (\autoref{fig:indexed-multiplicities}).
   \begin{figure}[h]
-    \begin{equation}
+    \begin{equation*}
       \begin{split}
         &\Idx               &:{} &\Set \\
         &\type{\exists IDX} &:{} &\Idx \\
         &\Usage             &:{} &\Idx \to \Set \\
         &\type{ALGEBRAS}    &:{} &(idx : \Idx) \to \Algebra_{\Usage_{idx}}
       \end{split}
-    \end{equation}
+    \end{equation*}
     \caption{Indexed set of usage algebras.}
     \label{fig:indexed-multiplicities}
   \end{figure}
