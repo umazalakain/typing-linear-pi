@@ -701,7 +701,7 @@ Our type system with leftovers is composed of two typing relations: one for vari
 Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
 
 The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ is of type $t$ in typing context $\gamma$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftovers $\Delta$''.
-The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well-typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
+The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
 
 
@@ -865,7 +865,7 @@ Finally, we present subject reduction in \autoref{subject-reduction}.
 Framing asserts that the well-typedness of a process is independent of its leftover resources.
 \begin{nitheorem}[Framing]
   \label{thm:framing}
-  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
+  Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
   Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
 
@@ -876,8 +876,8 @@ Weakening states that inserting a new variable into the context preserves the we
 Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
-  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, lifting every variable greater than or equal to $i$ in $P$ is well-typed in
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
   $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
 \end{nitheorem}
 
@@ -885,9 +885,9 @@ Removing an unused variable preserves the well-typedness of a process.
 Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
-  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable index not in $P$, such that $\Unused_i \; P$.
-  Then lowering every variable greater than $i$ in $P$ is well-typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P}{\func{del}_i \; \Xi}$.
+  Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
 
 \begin{remark}
@@ -898,7 +898,7 @@ Swapping two variables preserves the well-typedness of a process.
 For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-congruence} to swap types in typing contexts and usage annotations in usage contexts.
 \begin{nitheorem}[Swapping]
   \label{thm:swapping}
-  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
 \end{nitheorem}
 
@@ -910,7 +910,7 @@ For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{subject-congruence}
 
-Subject congruence states that applying structural congruence rules to a well-typed process preserves its well-typedness.
+Subject congruence states that applying structural congruence rules to a well typed process preserves its well-typedness.
 \begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
   If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
@@ -1020,7 +1020,7 @@ Subject congruence states that applying structural congruence rules to a well-ty
 
 \begin{nitheorem}[Generalised substitution]
   \label{thm:subst-generalization}
-  Let process $P$ be well-typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+  Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   The substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
   Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
   In other words, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
@@ -1034,7 +1034,7 @@ Subject congruence states that applying structural congruence rules to a well-ty
   \end{multicols}
   Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
   Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
-  Then substituting $i$ with $j$ in $P$ will be well-typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+  Then substituting $i$ with $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
   \autoref{fig:subst} gives a diagramatic representation.
 \end{nitheorem}
 
@@ -1055,9 +1055,9 @@ Subject congruence states that applying structural congruence rules to a well-ty
 
 \begin{nitheorem}[Substitution]
   \label{thm:substitution}
-  Let $P$ be a well-typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
+  Let $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
-  Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well-typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
+  Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
 \end{nitheorem}
 \begin{proof}[Proof (Sketch)]
   We use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
@@ -1071,13 +1071,10 @@ Subject congruence states that applying structural congruence rules to a well-ty
 \begin{note}
   We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
 \end{note}
-\todo{use of well-typed:
-is well-typed replace with is well typed.
-A well-typed P is ok.}
 Subject reduction states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
 \begin{nitheorem}[Subject reduction]
-  Let $P$ be a well-typed process in $\types{\gamma}{\Gamma}{P}{\Xi}$
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$
   \begin{itemize}
     \item If $P \reduce{\constr{internal}} Q$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
     \item If $P \reduce{\constr{external} \; i} Q$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
