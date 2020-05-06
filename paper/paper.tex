@@ -3,7 +3,6 @@
 \usepackage[dvipsnames]{xcolor}
 \usepackage[utf8]{inputenc}
 \usepackage{url}
-\usepackage{todonotes}
 \usepackage{amssymb}
 \usepackage[fleqn]{amsmath}
 \usepackage{amsbsy}
@@ -31,9 +30,6 @@
 
 % Inference rules
 \usepackage{mathpartir}
-
-% TODO notes -- TODO: remove
-\usepackage{todonotes}
 
 % Do not use italics in definitions and theorems
 \theoremstyle{definition}
@@ -915,7 +911,6 @@ states that applying structural congruence rules to a well typed process preserv
 \end{proof}
 
 \subparagraph*{Substitution}
-\todo{intro}
 \autoref{thm:subst-generalization} proves a generalised version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
