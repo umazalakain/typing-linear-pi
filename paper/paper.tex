@@ -745,13 +745,15 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 \end{nidefinition}
 
 \begin{example}[Variable reference]
-  Let us illustrate the use of variable reference relations with an example.
-  \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=The underscore \_ introduces an anonymous declaration immediately followed by its definition.]
+  Let us illustrate the use of variable reference relations with an example in \autoref{lst:channels}.
+  \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=Variable referece]
   _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
   _ = $\suc \; \constr{0}$
   \end{lstlisting}
-  In \autoref{lst:channels}, the constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
-  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving $\lo$ as the leftover.
+  The underscore \_ introduces an anonymous declaration immediately followed by its definition.
+  The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
+  The constructor $\constr{0}$ asserts that the next variable is of a channel type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving $\lo$ as the leftover, to be used later on.
+  \todo{use the caption to give a name to the example, not to comment much. Complete/change the incomplete name that I gave}
 \end{example}
 
 \begin{nidefinition}[\textsc{Types}: typing processes]
@@ -834,7 +836,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   The type $\unit$ of this channel is entirely determined by the type $\channel{\unit}{\func{\omega}}$ of the channel over which it is going to be transmitted.
   Its usage annotation is $(\one \comma \one)$: we will transmit $(\one \comma \zero)$ and save $(\zero \comma \one)$ for the continuation process.
   
-  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left]
+  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption= A typing derivation]
   $\func{p}$ : $\Process_1$
   $\func{p}$ = $\new{}$
        $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
@@ -846,6 +848,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
        $(\constr{chan} \; \unit \; \func{\omega} \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
        )$
   \end{lstlisting}
+  \todo{a better caption}
 \end{example}
 
 
