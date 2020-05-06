@@ -936,11 +936,9 @@ Subject congruence states that applying structural congruence rules to a well-ty
       In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
     \item
       Case $\constr{scope-comm}$:
-      we use swapping (\autoref{thm:swapping}), and for the reverse direction swapping and \autoref{lm:swap-swap} to show that swapping two elements in $P$ twice leaves $P$ unchanged.
+      we use swapping (\autoref{thm:swapping}), and for the reverse direction swapping and \autoref{lm:swap-swap} to show that swapping two elements in $P$ twice leaves $P$ unchanged. \qedhere
   \end{itemize}
 \end{proof}
-\todo{remove the space between the itemize and the qed at the end}
-
 \subsection{Substitution}
 \label{substitution}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1051,7 +1049,7 @@ Subject congruence states that applying structural congruence rules to a well-ty
       
     \item
       Constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction.
-      Full details are found in \autoref{app:subst-generalization}.
+      Full details are found in \autoref{app:subst-generalization}. \qedhere
   \end{itemize}
 \end{proof}
 
@@ -1101,7 +1099,7 @@ Subject congruence states that applying structural congruence rules to a well-ty
     If $c$ is $\constr{external}\; (\suc i)$ we proceed inductively.
 
     \item
-    In the $\constr{struct}$ case, we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively.
+    In the $\constr{struct}$ case, we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively. \qedhere
   \end{itemize}
 \end{proof}
 
