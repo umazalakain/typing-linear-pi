@@ -845,6 +845,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type Safety}
 \label{type-safety}
+\subsection{Auxiliary Results}
 
 \subparagraph*{Framing}
 asserts that the well-typedness of a process is independent of its leftover resources.
@@ -896,6 +897,7 @@ For simplicity, we extend $\func{swap}_i$ introduced in \autoref{structural-cong
   For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
 
+\subsection{Towards Subject Reduction}
 \subparagraph*{Subject Congruence}
 states that applying structural congruence rules to a well typed process preserves its well-typedness.
 
@@ -1105,7 +1107,7 @@ To conclude, in this paper we provide a well scoped syntax and a semantics for t
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
 As a result, theorems like framing, weakening and strengthening can now we stated for the linear \picalc{}.
 Our work is fully mechanised in around 1500 lines of code in Agda \cite{Zalakain2020Agda}.
-
+%
 As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
 We intend to add support for products, sum types and recursion to both our syntax and our type system.
 Orthogonally, making our typing rules bidirectional would allow us to provide a decision procedure for type checking processes in a given set of algebras.
