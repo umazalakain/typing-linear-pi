@@ -520,7 +520,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   We will often work with pairs of input and output multiplicities.
   We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ tuple of input and output multiplicities, respectively.
   We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
-
+%
   Henceforth, we use $\lz$ to denote the pair $0 \comma 0$ for a channel which cannot be used any further, $\li$ for the pair $1 \comma 0$ for a channel to be used in input exactly once, $\lo$ for $0 \comma 1$ for a channel to be used in output exactly once, and $\lio$ for $1 \comma 1$, for a channel to be used exactly once in input and exactly once in output.
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{note}
@@ -616,16 +616,16 @@ The former are preserved throughout typing derivations; the latter are transform
 \end{nidefinition}
 
 The unit type $\unit$ serves as a proof of inhabitance for types.
-The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g. $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
-The type $\channel{t}{x}$ of a channel determines what type of data ${t}$ and what usage annotations ${x}$ are sent over that channel.
-Notice that this notation is similar to Kobayashi's $[t]\mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output, respectively \cite{K07}.
+The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
+The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
+This notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output, respectively \cite{K07}.
 
 A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
 
 \begin{nidefinition}[\textsc{Ctx}: usage contexts]
   A \emph{usage context} is a context $\Ctx_{idxs}$ of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
 
-  A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to the existing context $\Gamma$.
+  A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to an existing context $\Gamma$.
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -681,11 +681,11 @@ Leftover typing presents three main advantages:
     The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgement with both an input and an output usage context.
   \item \textbf{No extensional context split}:
     No need for an extensional context splitting proof for parallel composition.
-    Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
-    This could be obtained through automated search --- but it is better yet not to need it.
+    % Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
+    % This could be obtained through automated search --- but it is better yet not to need it.
     Leftover typing uses the leftovers of $P$ to type $Q$.
   \item \textbf{New theorems}:
-    For the first time, theorems like \textbf{framing} (\autoref{thm:framing}), \textbf{weakening} (\autoref{thm:weakening}) and \textbf{strengthening} (\autoref{thm:strengthening}) can be stated within the linear \picalc{} thanks to the presence of a leftover context.
+    For the first time, theorems like \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) can be stated within the linear \picalc{} thanks to the presence of a leftover context.
 \end{itemize}
 
 Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
@@ -816,14 +816,14 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 
 \begin{example}[Typing derivation]
   \label{example-derivations}
-  We will now illustrate a typing derivation of the process $\func{p}$ using linear and shared types (\autoref{lst:derivation}).
+  In \autoref{lst:derivation} we illustrate a typing derivation of the process $\func{p}$ (lines 1-4) using linear and shared types.
 
   Let $\func{\omega}$ be a shortcut for $\one \comma \one$ in an algebra of shared types.
   Let $\func{\epsilon}$ be the empty usage context --- where all usage annotations are $\zero \comma \zero$.
   To type $\func{p}$, we need a channel over which we can transmit another channel.
   We therefore create a new channel with usage annotations $\one \comma \one$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we only transmit input capabilities over it (line 7).
-  The left-hand process is typed following its syntax (line 8).
-  On the right-hand we need the channel that is going to be sent (line 9).
+  The left-hand process (line 3) is typed following its syntax (line 8).
+  For the right-hand (line 4) we need the channel that is going to be sent (line 9).
   The type $\unit$ of this channel is entirely determined by the type $\channel{\unit}{\func{\omega}}$ of the channel over which it is going to be transmitted.
   Its usage annotation is $\one \comma \one$: we will transmit $\one \comma \zero$ and save $\zero \comma \one$ for the continuation process.
   
