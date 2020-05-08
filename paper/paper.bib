@@ -1,15 +1,19 @@
 
-@article{Allais2018a,
-  title = {Typing with {{Leftovers}} - {{A}} Mechanization of {{Intuitionistic Multiplicative}}-{{Additive Linear Logic}}},
-  author = {Allais, Guillaume},
-  year = {2018},
-  pages = {22 pages},
-  doi = {10.4230/lipics.types.2017.1},
-  collaborator = {Wagner, Michael},
-  copyright = {Creative Commons Attribution 3.0 Unported license (CC-BY 3.0)},
-  file = {/home/uma/.zotero/data/storage/WZB3ZAMX/Allais_2018_Typing with Leftovers - A mechanization of Intuitionistic.pdf},
-  keywords = {000 Computer science,Computer Science,general works,knowledge},
-  language = {English}
+
+@inproceedings{Allais2018a,
+  author    = {Guillaume Allais},
+  title     = {Typing with Leftovers - {A} mechanization of Intuitionistic Multiplicative-Additive
+               Linear Logic},
+  booktitle = {{TYPES}},
+  series    = {LIPIcs},
+  volume    = {104},
+  pages     = {1:1--1:22},
+  publisher = {Schloss Dagstuhl - Leibniz-Zentrum f{\"{u}}r Informatik},
+  year      = {2017},
+  doi       = {10.4230/LIPIcs.TYPES.2017.1},
+  timestamp = {Tue, 11 Feb 2020 15:52:14 +0100},
+  biburl    = {https://dblp.org/rec/conf/types/Allais17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
 @article{BarendsenS96,
@@ -383,7 +387,7 @@
 
 @inproceedings{Atkey2018,
   title = {Syntax and {{Semantics}} of {{Quantitative Type Theory}}},
-  booktitle = {Proceedings of the 33rd {{Annual ACM}}/{{IEEE Symposium}} on {{Logic}} in {{Computer Science}}},
+  booktitle = {{LICS}},
   author = {Atkey, Robert},
   year = {2018},
   month = jul,
@@ -391,8 +395,6 @@
   publisher = {{ACM}},
   address = {{Oxford United Kingdom}},
   doi = {10.1145/3209108.3209189},
-  abstract = {We present Quantitative Type Theory, a Type Theory that records usage information for each variable in a judgement, based on a previous system by McBride. The usage information is used to give a realizability semantics using a variant of Linear Combinatory Algebras, refining the usual realizability semantics of Type Theory by accurately tracking resource behaviour. We define the semantics in terms of Quantitative Categories with Families, a novel extension of Categories with Families for modelling resource sensitive type theories.},
-  file = {/home/uma/.zotero/data/storage/LZSZ65RF/Atkey - 2018 - Syntax and Semantics of Quantitative Type Theory.pdf},
   isbn = {978-1-4503-5583-4},
   language = {en},
   note = {\url{https://dl.acm.org/doi/10.1145/3209108.3209189}}
@@ -517,27 +519,29 @@ The resulting theory is a flexible and powerful language for programming and con
   title = {A {{Coq Library}} for {{Verification}} of {{Concurrent Programs}}},
   author = {Affeldt, Reynald and Kobayashi, Naoki},
   year = {2008},
-  month = feb,
   volume = {199},
   pages = {17--32},
   issn = {1571-0661},
   doi = {10.1016/j.entcs.2007.11.010},
-  abstract = {Thanks to recent advances, modern proof assistants now enable verification of realistic sequential programs. However, regarding the concurrency paradigm, previous work essentially focused on formalization of abstract systems, such as pure concurrent calculi, which are too minimal to be realistic. In this paper, we propose a library that enables verification of realistic concurrent programs in the Coq proof assistant. Our approach is based on an extension of the {$\pi$}-calculus whose encoding enables such programs to be modeled conveniently. This encoding is coupled with a specification language akin to spatial logics, including in particular a notion of fairness, which is important to write satisfactory specifications for realistic concurrent programs. In order to facilitate formal proof, we propose a collection of lemmas that can be reused in the context of different verifications. Among these lemmas, the most effective for simplifying the proof task take advantage of confluence properties. In order to evaluate feasibility of verification of concurrent programs using this library, we perform verification for a non-trivial application.},
-  file = {/home/uma/.zotero/data/storage/EL75KDDA/S1571066108000765.html},
-  journal = {Electronic Notes in Theoretical Computer Science},
-  keywords = {concurrent programs,Coq,pi-calculus,Proof assistant},
-  note = {\url{http://www.sciencedirect.com/science/article/pii/S1571066108000765}},
-  series = {Proceedings of the {{Fourth International Workshop}} on {{Logical Frameworks}} and {{Meta}}-{{Languages}} ({{LFM}} 2004)}
+  journal = {Electronic Notes in Theoretical Computer Science}
 }
 
 @article{Orchard,
-  title = {Quantitative {{Program Reasoning}} with {{Graded Modal Types}}},
-  author = {Orchard, Dominic and Liepelt, Vilem-Benjamin and Iii, Harley Eades},
-  volume = {3},
-  pages = {30},
-  abstract = {DOMINIC ORCHARD, University of Kent, UK VILEM-BENJAMIN LIEPELT, University of Kent, UK HARLEY EADES III, Augusta University, USA In programming, some data acts as a resource (e.g., file handles, channels) subject to usage constraints. This poses a challenge to software correctness as most languages are agnostic to constraints on data. The approach of linear types provides a partial remedy, delineating data into resources to be used but never copied or discarded, and unconstrained values. Bounded Linear Logic provides a more fine-grained approach, quantifying non-linear use via an indexed-family of modalities. Recent work on coeffect types generalises this idea to graded comonads, providing type systems which can capture various program properties. Here, we propose the umbrella notion of graded modal types, encompassing coeffect types and dual notions of type-based effect reasoning via graded monads. In combination with linear and indexed types, we show that graded modal types provide an expressive type theory for quantitative program reasoning, advancing the reach of type systems to capture and verify a broader set of program properties. We demonstrate this approach via a type system embodied in a fully-fledged functional language called Granule, exploring various examples. CCS Concepts: \textbullet{} Theory of computation \textrightarrow{} Modal and temporal logics; Program specifications; Program verification; Linear logic; Type theory.},
-  language = {en}
+  author    = {Dominic Orchard and
+               Vilem{-}Benjamin Liepelt and
+               Harley Eades III},
+  title     = {Quantitative program reasoning with graded modal types},
+  journal   = {Proc. {ACM} Program. Lang.},
+  volume    = {3},
+  number    = {{ICFP}},
+  pages     = {110:1--110:30},
+  year      = {2019},
+  doi       = {10.1145/3341714},
+  timestamp = {Thu, 16 Apr 2020 13:51:45 +0200},
+  biburl    = {https://dblp.org/rec/journals/pacmpl/OrchardLE19.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+
 
 @incollection{Georges2017,
   title = {{{LINCX}}: {{A Linear Logical Framework}} with {{First}}-{{Class Contexts}}},
