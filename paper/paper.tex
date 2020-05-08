@@ -1102,6 +1102,15 @@ Their separation logic is based on a partial commutative monoid that need not be
 Their typing rules preserve the balance between supply and demand, and are extremely elegant.
 They distill their typing rules even further by modelling the supply and demand market as a state monad.
 
+Based on contextual type theory \cite{Pientkaa, Pientka}, LINCX \cite{Georges2017} extends the linear logical framework LLF \cite{Cervesato1996} by internalising the notion of bindings and contexts.
+The result is a meta-theory in which HOAS encodings with both linear and dependent types can be described.
+The developer obtains for free an equational theory of substitution and decidable typechecking without having to encode context splits within the object language.
+
+% Orchard
+\cite{Orchard}
+
+Further work on the mechanisation of the \picalc{} include \cite{Henry-Gerard1999, Honsell2001a, Bengtson2013, Despeyroux2000, Affeldt2008}, where the authors mechanise non-linear variations of the \picalc{}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 To conclude, in this paper we provide a well scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.

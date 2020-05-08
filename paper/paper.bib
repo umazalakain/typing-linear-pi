@@ -477,3 +477,112 @@ The resulting theory is a flexible and powerful language for programming and con
   biburl    = {https://dblp.org/rec/conf/birthday/PierceT00.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+
+@book{Henry-Gerard1999,
+  title = {Proof of the Subject Reduction Property for a {$\pi$}-Calculus in {{COQ}}},
+  author = {{Henry-G{\'e}rard}, Lo{\"i}c and Meije, Projet},
+  year = {1999},
+  abstract = {This paper presents a method for coding pi-calculus in the COQ proof assistant, in order to use this environment to formalize properties of the pi-calculus. This method consists in making a syntactic discrimination between free names (then called parameters) and bound names (then called variables) of the processes, so that implicit renamings of bound names are avoided in the substitution operation. This technique has been used by J.McKinna and R.Pollack in an extensive study of PTS [5]. We use this coding here to prove subject reduction property for a type system of a monadic pi-calculus.},
+  file = {/home/uma/.zotero/data/storage/FVFRE453/summary.html}
+}
+
+@article{Honsell2001a,
+  title = {Pi-Calculus in ({{Co}}){{Inductive Type Theory}}},
+  author = {Honsell, Furio and Miculan, Marino and Scagnetto, Ivan},
+  year = {2001},
+  volume = {253},
+  pages = {2001},
+  abstract = {We present a large and we think also significant case-study in computer  assisted formal reasoning. We start by giving a higher order abstract syntax   encoding of \#-calculus in the higher-order inductive/coinductive type  theories CIC and CC  (Co)Ind  . This encoding gives rise to a full-fledged  proof editor/proof assistant for the \#-calculus, once we embed it in Coq,  an interactive proof-development environment for CC  (Co)Ind  . Using this  computerized assistant we prove formally a substantial chapter of the  theory of strong late bisimilarity, which amounts essentially to Section 2  of A calculus of mobile processes by Milner, Parrow, and Walker. This  task is greatly simplified by the use of higher order syntax. In fact, not  only we can delegate conveniently to the metalanguage \#-conversion and  substitution, but, introducing a suitable axiomatization of the theory of  contexts, we can accommodate also the machinery for generating new  names. The axiomatization we introduce is quite general and should be  easily portable to other formalizations based on higher order syntax. The  use of coinductive types and corresponding tactics allows to give alternative,  and possibly more natural, proofs of many properties of strong late  bisimilarity, w.r.t. those originally given by Milner, Parrow, and Walker.  Keywords: higher-order abstract syntax, \#-calculus, proof checking,  Logical Frameworks, typed \#-calculus.},
+  file = {/home/uma/projects/references/papers/Honsell et al_2001_pi-calculus in (Co)Inductive Type Theory.pdf;/home/uma/.zotero/data/storage/RE54NCL4/summary.html},
+  journal = {Theoretical Computer Science}
+}
+
+@book{Bengtson2013,
+  title = {The Pi-Calculus},
+  author = {Bengtson, Jesper},
+  year = {2013},
+  abstract = {We formalise the pi-calculus using the nominal datatype package, based on ideas from the nominal logic by Pitts et al., and demonstrate an implementation in Isabelle/HOL. The purpose is to derive powerful induction rules for the semantics in order to conduct machine checkable proofs, closely following the intuitive arguments found in manual proofs. In this way we have covered many of the standard theorems of bisimulation equivalence and congruence, both late and early, and both strong and weak in a uniform manner. We thus provide one of the most extensive formalisations of a the pi-calculus ever done inside a theorem prover. A significant gain in our formulation is that agents are identified up to alpha-equivalence, thereby greatly reducing the arguments about bound names. This is a normal strategy for manual proofs about the picalculus, but that kind of hand waving has previously been difficult to incorporate smoothly in an interactive theorem prover. We show how the nominal logic formalism and its support in Isabelle accomplishes this and thus significantly reduces the tedium of conducting completely formal proofs. This improves on previous work using weak higher order abstract syntax since we do not need extra assumptions to filter out exotic terms and can keep all arguments within a familiar first-order logic.},
+  file = {/home/uma/projects/references/papers/Bengtson_2013_The pi-calculus.pdf;/home/uma/.zotero/data/storage/GXM93YGF/summary.html}
+}
+
+@book{Despeyroux2000,
+  title = {A {{Higher}}-{{Order Specification}} of the {$\pi$}-{{Calculus}}},
+  author = {Despeyroux, Jo{\"e}lle},
+  year = {2000},
+  abstract = {We present a formalization of a typed pi-calculus in the Calculus of Inductive Constructions. We give the rules for type-checking and for evaluation and formalize a proof of type preservation in the Coq system. The encoding of the pi-calculus in Coq uses Coq fonctions to represent bindings of variables. This kind of encoding is called a higher-order specication. It provides a concise description of the calculus, leading to simple proofs. The specification we propose for the pi-calculus formalizes communication by means of function application.},
+  file = {/home/uma/.zotero/data/storage/P2ZN3T47/summary.html}
+}
+
+@article{Affeldt2008,
+  title = {A {{Coq Library}} for {{Verification}} of {{Concurrent Programs}}},
+  author = {Affeldt, Reynald and Kobayashi, Naoki},
+  year = {2008},
+  month = feb,
+  volume = {199},
+  pages = {17--32},
+  issn = {1571-0661},
+  doi = {10.1016/j.entcs.2007.11.010},
+  abstract = {Thanks to recent advances, modern proof assistants now enable verification of realistic sequential programs. However, regarding the concurrency paradigm, previous work essentially focused on formalization of abstract systems, such as pure concurrent calculi, which are too minimal to be realistic. In this paper, we propose a library that enables verification of realistic concurrent programs in the Coq proof assistant. Our approach is based on an extension of the {$\pi$}-calculus whose encoding enables such programs to be modeled conveniently. This encoding is coupled with a specification language akin to spatial logics, including in particular a notion of fairness, which is important to write satisfactory specifications for realistic concurrent programs. In order to facilitate formal proof, we propose a collection of lemmas that can be reused in the context of different verifications. Among these lemmas, the most effective for simplifying the proof task take advantage of confluence properties. In order to evaluate feasibility of verification of concurrent programs using this library, we perform verification for a non-trivial application.},
+  file = {/home/uma/.zotero/data/storage/EL75KDDA/S1571066108000765.html},
+  journal = {Electronic Notes in Theoretical Computer Science},
+  keywords = {concurrent programs,Coq,pi-calculus,Proof assistant},
+  note = {\url{http://www.sciencedirect.com/science/article/pii/S1571066108000765}},
+  series = {Proceedings of the {{Fourth International Workshop}} on {{Logical Frameworks}} and {{Meta}}-{{Languages}} ({{LFM}} 2004)}
+}
+
+@article{Orchard,
+  title = {Quantitative {{Program Reasoning}} with {{Graded Modal Types}}},
+  author = {Orchard, Dominic and Liepelt, Vilem-Benjamin and Iii, Harley Eades},
+  volume = {3},
+  pages = {30},
+  abstract = {DOMINIC ORCHARD, University of Kent, UK VILEM-BENJAMIN LIEPELT, University of Kent, UK HARLEY EADES III, Augusta University, USA In programming, some data acts as a resource (e.g., file handles, channels) subject to usage constraints. This poses a challenge to software correctness as most languages are agnostic to constraints on data. The approach of linear types provides a partial remedy, delineating data into resources to be used but never copied or discarded, and unconstrained values. Bounded Linear Logic provides a more fine-grained approach, quantifying non-linear use via an indexed-family of modalities. Recent work on coeffect types generalises this idea to graded comonads, providing type systems which can capture various program properties. Here, we propose the umbrella notion of graded modal types, encompassing coeffect types and dual notions of type-based effect reasoning via graded monads. In combination with linear and indexed types, we show that graded modal types provide an expressive type theory for quantitative program reasoning, advancing the reach of type systems to capture and verify a broader set of program properties. We demonstrate this approach via a type system embodied in a fully-fledged functional language called Granule, exploring various examples. CCS Concepts: \textbullet{} Theory of computation \textrightarrow{} Modal and temporal logics; Program specifications; Program verification; Linear logic; Type theory.},
+  language = {en}
+}
+
+@incollection{Georges2017,
+  title = {{{LINCX}}: {{A Linear Logical Framework}} with {{First}}-{{Class Contexts}}},
+  shorttitle = {{{LINCX}}},
+  booktitle = {Programming {{Languages}} and {{Systems}}},
+  author = {Georges, Aina Linn and Murawska, Agata and Otis, Shawn and Pientka, Brigitte},
+  editor = {Yang, Hongseok},
+  year = {2017},
+  volume = {10201},
+  pages = {530--555},
+  publisher = {{Springer Berlin Heidelberg}},
+  address = {{Berlin, Heidelberg}},
+  doi = {10.1007/978-3-662-54434-1_20},
+  abstract = {Linear logic provides an elegant framework for modelling stateful, imperative and concurrent systems by viewing a context of assumptions as a set of resources. However, mechanizing the meta-theory of such systems remains a challenge, as we need to manage and reason about mixed contexts of linear and intuitionistic assumptions.},
+  file = {/home/uma/.zotero/data/storage/AF75BRT7/Georges et al. - 2017 - LINCX A Linear Logical Framework with First-Class.pdf},
+  isbn = {978-3-662-54433-4 978-3-662-54434-1},
+  language = {en},
+  note = {\url{http://link.springer.com/10.1007/978-3-662-54434-1_20}}
+}
+
+@inproceedings{Cervesato1996,
+  title = {A {{Linear Logical Framework}}},
+  author = {Cervesato, Iliano and Pfenning, Frank},
+  year = {1996},
+  pages = {264--275},
+  publisher = {{IEEE Computer Society Press}},
+  abstract = {We present the linear type theory LLF as the forAppeared in the proceedings of the Eleventh Annual IEEE Symposium on Logic in Computer Science --- LICS'96 (E. Clarke editor), pp. 264--275, New Brunswick, NJ, July 27--30 1996.  mal basis for a conservative extension of the LF logical framework. LLF combines the expressive power of dependent types with linear logic to permit the natural and concise representation of a whole new class of deductive systems, namely those dealing with state. As an example we encode a version of Mini-ML with references including its type system, its operational semantics, and a proof of type preservation. Another example is the encoding of a sequent calculus for classical linear logic and its cut elimination theorem. LLF can also be given an operational interpretation as a logic programming language under which the representations above can be used for type inference, evaluation and cut-elimination. 1 Introduction  A logical framework is a formal system desig...},
+  file = {/home/uma/projects/references/papers/Cervesato_Pfenning_1996_A Linear Logical Framework.pdf;/home/uma/.zotero/data/storage/CGHAGI96/summary.html}
+}
+
+@article{Pientka,
+  title = {Cocon: {{Computation}} in {{Contextual Type Theory}}},
+  author = {Pientka, Brigitte and Abel, Andreas and Ferreira, Francisco and Thibodeau, David and Zucchini, Rebecca},
+  pages = {69},
+  abstract = {We describe a Martin-L{\"o}f-style dependent type theory, called Cocon, that allows us to mix the intensional function space that is used to represent higher-order abstract syntax (HOAS) trees with the extensional function space that describes (recursive) computations. We mediate between HOAS representations and computations using contextual modal types. Our type theory also supports an infinite hierarchy of universes and hence supports type-level computation\textemdash{}thereby providing metaprogramming and (small-scale) reflection. Our main contribution is the development of a Kripke-style model for Cocon that allows us to prove normalization. From the normalization proof, we derive subject reduction and consistency. Our work lays the foundation to incorporate the methodology of logical frameworks into systems such as Agda and bridges the longstanding gap between these two worlds.},
+  file = {/home/uma/.zotero/data/storage/K5TXLX9V/Pientka et al. - Cocon Computation in Contextual Type Theory.pdf},
+  language = {en}
+}
+
+@article{Pientkaa,
+  title = {A {{Type}}-Theoretic {{Foundation}} for {{Programming}} with {{Higher}}-Order {{Abstract Syntax}} and {{First}}-Class {{Substitutions}}},
+  author = {Pientka, Brigitte},
+  pages = {12},
+  abstract = {Higher-order abstract syntax (HOAS) is a simple, powerful technique for implementing object languages, since it directly supports common and tricky routines dealing with variables, such as capture-avoiding substitution and renaming. This is achieved by representing binders in the object-language via binders in the metalanguage. However, enriching functional programming languages with direct support for HOAS has been a major challenge, because recursion over HOAS encodings requires one to traverse {$\lambda$}abstractions and necessitates programming with open objects.},
+  file = {/home/uma/.zotero/data/storage/43TZJCU6/Pientka - A Type-theoretic Foundation for Programming with H.pdf},
+  language = {en}
+}
+
