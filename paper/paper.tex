@@ -215,7 +215,7 @@ In particular, while linearity is needed for type safety in communication-centri
   \begin{itemize}
     \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
     Linear types, graded types and shared types are all instances of the same resource-aware algebra, giving rise to three different type systems under the same framework.
-    Any \emph{partial commutative monoid} that is \emph{functional}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra.
+    Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra.
     
     Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
     This allows for type systems combining linear, graded and shared types.
@@ -485,7 +485,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra that is satisfied by linear, graded and shared types alike.
 
 \begin{nidefinition}[Usage algebra]
-  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{functional}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
+  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{decidable}, \emph{deterministic}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
   \autoref{fig:multiplicities} uses a ternary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
@@ -732,7 +732,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
-  We use the \emph{functionality} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
+  We use the \emph{decidability} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
 \end{nidefinition}
 
@@ -1098,7 +1098,7 @@ The semantics are given as an intrinsically typed CEK machine with a global cont
 %
 Most recently, Rouvoet et al. provide an intrinsic type system for a \lambdacalc{} with session types \cite{Rouvoet2020}.
 They use proof relevant separation logic and a notion of a supply and demand \emph{market} to make context splits transparent to the user.
-Their separation logic is based on a partial commutative monoid that need not be functional nor cancellative.
+Their separation logic is based on a partial commutative monoid that need not be deterministic nor cancellative.
 Their typing rules preserve the balance between supply and demand, and are extremely elegant.
 They distill their typing rules even further by modelling the supply and demand market as a state monad.
 
