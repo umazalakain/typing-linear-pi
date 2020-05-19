@@ -28,7 +28,7 @@
 % Less margins around figures
 \usepackage{changepage}
 
-% Inference rules
+% inference rules
 \usepackage{mathpartir}
 
 % Do not use italics in definitions and theorems
@@ -108,8 +108,8 @@
 \newcommand{\Channel}{\type{CHANNEL}}
 \newcommand{\Rec}{\type{REC}}
 \newcommand{\Algebra}{\type{ALGEBRA}}
-\newcommand{\eq}[1]{\; \type{=}_{#1} \;}
-\newcommand{\eqeq}{\; \type{\equiv} \;}
+\newcommand{\eq}[1]{\; \type{\simeq}_{#1} \;}
+\newcommand{\eqeq}{\; \type{\cong} \;}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{$\pi$ with leftovers: \\ a mechanisation in Agda}
 \titlerunning{$\pi$ with leftovers: all mechanisation in Agda}
@@ -390,7 +390,7 @@ Its congruent equivalence closure \textsc{Equals} $\eq{}$ is defined in \autoref
   {\constr{scope-end} : \new \PO_{\suc n} \eqeq \PO_n}
   
   \inferrule
-  {uQ : \Unused_0 \; Q}
+  {uQ : \Unused_{\constr{0} \; Q}
   {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{\func{lower}_{\constr{0}} \; \; Q \; uQ}}
 
   \inferrule
@@ -461,7 +461,7 @@ This $\func{dec}$ function saturates at $\constr{internal}$: wrapping an interna
   {\constr{res} \; red : \new P \reduce{\func{dec}\; c} \new Q}
 
   \inferrule
-  {eq : P \eq{r} P' \\ red : P' \reduce{c} Q}
+  {eq : P \eq{} P' \\ red : P' \reduce{c} Q}
   {\constr{struct} \; eq \; red : P \reduce{c} Q}
 \end{mathpar}
 \caption{Operational semantics indexed by the channel over which reduction occurs.}
