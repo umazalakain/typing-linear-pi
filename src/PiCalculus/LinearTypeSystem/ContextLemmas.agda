@@ -80,7 +80,7 @@ data _≔_⊠_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
 ⊠-assoc (Γₘ≔ , xₘ≔) (Γₗ≔ , xₗ≔) with ⊠-assoc Γₘ≔ Γₗ≔ | ∙²-assoc xₘ≔ xₗ≔
 ... | (_ , Γₘ'≔ , Γᵣ'≔)  | (_ , xₘ'≔ , xᵣ'≔) = _ , ((Γₘ'≔ , xₘ'≔) , (Γᵣ'≔ , xᵣ'≔))
 
-⊠-assoc⁻¹ : ∀ {x y z u v : Ctx idxs} → x ≔ y ⊠ z → z ≔ u ⊠ v → ∃[ ∝ ] (x ≔ ∝ ⊠ v × ∝ ≔ y ⊠ u)
+⊠-assoc⁻¹ : ∀ {x y z u v : Ctx idxs} → x ≔ y ⊠ z → z ≔ u ⊠ v → ∃[ ； ] (x ≔ ； ⊠ v × ； ≔ y ⊠ u)
 ⊠-assoc⁻¹ a b = let _ , a' , b' = ⊠-assoc (⊠-comm a) (⊠-comm b) in _ , ⊠-comm a' , ⊠-comm b'
 
 ⊠-comp : {Γ Δₗ Δᵣ Δ Ξ Θ : Ctx idxs}
@@ -221,7 +221,7 @@ split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl rewrite ∙²-unique x ∙�
 split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl | refl = ∙²-uniqueˡ y ∙²-idˡ , ∙²-uniqueˡ z ∙²-idˡ
 split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
 
-⊢-⊠ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ∝ Γ ⊢ P ⊠ Ξ → Σ[ Δ ∈ Ctx idxs ] (Γ ≔ Δ ⊠ Ξ)
+⊢-⊠ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ； Γ ⊢ P ⊠ Ξ → Σ[ Δ ∈ Ctx idxs ] (Γ ≔ Δ ⊠ Ξ)
 ⊢-⊠ end = ε , ⊠-idˡ
 ⊢-⊠ (chan t m μ ⊢P) with ⊢-⊠ ⊢P
 ⊢-⊠ (chan t m μ ⊢P) | (_ -, _) , (P≔ , _) = _ , P≔

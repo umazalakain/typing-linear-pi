@@ -59,8 +59,8 @@ private
 
 ⊢-frame : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ Θ Ξ Ψ : Ctx idxs}
         → Γ ≔ Δ ⊠ Θ → Ξ ≔ Δ ⊠ Ψ
-        → γ ∝ Γ ⊢ P ⊠ Θ
-        → γ ∝ Ξ ⊢ P ⊠ Ψ
+        → γ ； Γ ⊢ P ⊠ Θ
+        → γ ； Ξ ⊢ P ⊠ Ψ
 
 ⊢-frame Γ≔ Ξ≔ end rewrite ⊠-uniqueˡ Γ≔ ⊠-idˡ | ⊠-unique Ξ≔ ⊠-idˡ = end
 ⊢-frame Γ≔ Ξ≔ (chan t m μ ⊢P)

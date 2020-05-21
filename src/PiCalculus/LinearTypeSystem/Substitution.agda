@@ -95,13 +95,13 @@ cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
         → Ψⱼ ∋[ j ] n ⊠ Ψ
         → Γ ≔ Δ ⊠ Ψ
         → All.lookup i Δ ≡ ℓ∅
-        → γ ∝ Γᵢ ∋[ x ] t ∝ mx ⊠ Ξᵢ
+        → γ ； Γᵢ ∋[ x ] t ； mx ⊠ Ξᵢ
         → Ξᵢ ≔ CONT ⊠ Ψᵢ
         → Σ[ Ξⱼ ∈ Ctx idxs ]
           Σ[ Θ ∈ Ctx idxs ]
           Σ[ Δ' ∈ Ctx idxs ]
           Σ[ m' ∈ Usage idx ² ]
-         (γ ∝ Γⱼ ∋[ x [ i ↦ j ]' ] t ∝ mx ⊠ Ξⱼ
+         (γ ； Γⱼ ∋[ x [ i ↦ j ]' ] t ； mx ⊠ Ξⱼ
         × Ξᵢ ∋[ i ] m' ⊠ Θ
         × Ξⱼ ∋[ j ] m' ⊠ Θ
         × Θ ≔ Δ' ⊠ Ψ
@@ -138,8 +138,8 @@ cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
            → Ψⱼ ∋[ j ] n ⊠ Ψ
            → Γ ≔ Δ ⊠ Ψ
            → All.lookup i Δ ≡ ℓ∅
-           → γ ∝ Γᵢ ⊢ P ⊠ Ψᵢ
-           → γ ∝ Γⱼ ⊢ P [ i ↦ j ] ⊠ Ψⱼ
+           → γ ； Γᵢ ⊢ P ⊠ Ψᵢ
+           → γ ； Γⱼ ⊢ P [ i ↦ j ] ⊠ Ψⱼ
 
 ⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end with ⊠-get i Γ≔Δ∙Ψ | ∋-≡Idx ∈i | ∋-≡Idx ∋i
 ⊢-subst-ih {i = i} eq ∋i ∋j ∈i ∈j Γ≔Δ∙Ψ Δ∋iℓ∅ end | Γi≔Δi∙Ψi | refl | refl with ∋-lookup-≡ ∈i | ∋-lookup-≡ ∋i
@@ -173,10 +173,10 @@ cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
 
 
 switch : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Usage idx ²}
-       → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
+       → γ -, t ； Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
        → Ψ ∋[ j ] m ⊠ Ξ
        → ∃[ Θ ] (Γ      ∋[ j ] m ⊠ Θ
-      × γ -, t ∝ Θ -, m ⊢ P      ⊠ Ξ -, ℓ∅)
+      × γ -, t ； Θ -, m ⊢ P      ⊠ Ξ -, ℓ∅)
 switch ⊢P ∋j with ⊢-⊠ ⊢P | ∋-⊠ ∋j
 switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | _ , Ψ≔ , _ =
   let W , Γ≔Δj∙W , W≔Δ⊢P∙Ξ = ⊠-assoc (⊠-comm Γ≔) Ψ≔ in
@@ -184,9 +184,9 @@ switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | _ , Ψ≔ , _ =
 
 
 ⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Usage idx ²}
-        → γ ∝ Ψ ∋[ j ] t ∝ m ⊠ Ξ
-        → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
-        → γ -, t ∝ Γ -, m ⊢ P [ zero ↦ suc j ] ⊠ Ξ -, m
+        → γ ； Ψ ∋[ j ] t ； m ⊠ Ξ
+        → γ -, t ； Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
+        → γ -, t ； Γ -, m ⊢ P [ zero ↦ suc j ] ⊠ Ξ -, m
 ⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P with switch ⊢P y
 ⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P | Θ , y' , ⊢P' with ⊢-⊠ ⊢P'
 ⊢-subst {Γ = Γ} {Ξ} (t , y) ⊢P | Θ , y' , ⊢P' | (_ -, _) , (⊢P'≔ , _) =

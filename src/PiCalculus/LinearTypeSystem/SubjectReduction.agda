@@ -42,8 +42,8 @@ SubjectReduction = {n : ℕ} {γ : PreCtx n} {idxs : Idxs n} {idx : Idx} {Γ Γ'
                    {c : Channel n} {P Q : Scoped n}
                  → maybe (Γ' ≡ Γ) (λ i → Γ' ∋[ i ] ℓ# {idx} ⊠ Γ) c
                  → P =[ c ]⇒ Q
-                 → γ ∝ Γ'  ⊢ P ⊠ Ξ
-                 → γ ∝ Γ   ⊢ Q ⊠ Ξ
+                 → γ ； Γ'  ⊢ P ⊠ Ξ
+                 → γ ； Γ   ⊢ Q ⊠ Ξ
 
 private
   variable
@@ -71,8 +71,8 @@ align : ∀ {i : Fin n} {γ : PreCtx n} {idxs : Idxs n} {Γ' Γ Ξ Θ Ψ : Ctx i
     → Γ' ∋[ i ] ℓᵢ {idx'} ⊠ Θ
     → Ξ  ∋[ i ] ℓₒ {idx''} ⊠ Ψ
     → Γ' ∋[ i ] ℓ# {idx'''} ⊠ Γ
-    → γ ∝ Θ ⊢ P ⊠ Ξ
-    → γ ∝ Γ ⊢ P ⊠ Ψ
+    → γ ； Θ ⊢ P ⊠ Ξ
+    → γ ； Γ ⊢ P ⊠ Ψ
 align i o io ⊢P with ∋-≡Idx io | ∋-≡Idx i | ∋-≡Idx o
 align i o io ⊢P | refl | refl | refl =
   let
@@ -90,7 +90,7 @@ align i o io ⊢P | refl | refl | refl =
   in ⊢-frame Θ≔Δ⊢P∙Ξ (⊠-comm Γ≔Ψ∙Δ⊢P) ⊢P
 
 comm-≥ℓ# : {γ : PreCtx n} {Γ Δ : Ctx idxs} {c : Channel n}
-      → P =[ c ]⇒ Q → γ ∝ Γ ⊢ P ⊠ Δ → c ≡ external i → ∃[ y ] (All.lookup i Γ ≔ ℓ# ∙² y)
+      → P =[ c ]⇒ Q → γ ； Γ ⊢ P ⊠ Δ → c ≡ external i → ∃[ y ] (All.lookup i Γ ≔ ℓ# ∙² y)
 comm-≥ℓ# {i = i} comm (comp (recv (_ , x) ⊢P) (send (_ , x') _ ⊢Q)) refl with ⊢-⊠ ⊢P
 comm-≥ℓ# {i = i} comm (comp (recv (_ , x) ⊢P) (send (_ , x') _ ⊢Q)) refl | (_ -, _) , (Ξ≔ , _) = extract-ℓ# x x' Ξ≔
 comm-≥ℓ# (par P→P') (comp ⊢P ⊢Q) refl = comm-≥ℓ# P→P' ⊢P refl

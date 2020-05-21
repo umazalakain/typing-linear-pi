@@ -35,16 +35,16 @@ private
 
 ∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t t' : Type} {xs : Usage idx ²} {xs' : Usage idx' ²}
          → (j : Fin (suc n))
-         → γ                ∝ Γ                 ∋[ i               ] t' ∝ xs' ⊠ Θ
-         → Vec.insert γ j t ∝ ctx-insert j xs Γ ∋[ Fin.punchIn j i ] t' ∝ xs' ⊠ ctx-insert j xs Θ
+         → γ                ； Γ                 ∋[ i               ] t' ； xs' ⊠ Θ
+         → Vec.insert γ j t ； ctx-insert j xs Γ ∋[ Fin.punchIn j i ] t' ； xs' ⊠ ctx-insert j xs Θ
 ∋-weaken zero x = there x
 ∋-weaken (suc i) (zero , zero xyz) = zero , zero xyz
 ∋-weaken (suc i) (suc t , suc x) = there (∋-weaken i (t , x))
 
 ⊢-weaken : {P : Scoped n} {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Usage idx ²}
          → (j : Fin (suc n))
-         → γ ∝ Γ ⊢ P ⊠ Θ
-         → Vec.insert γ j t ∝ ctx-insert j xs Γ ⊢ lift j P ⊠ ctx-insert j xs Θ
+         → γ ； Γ ⊢ P ⊠ Θ
+         → Vec.insert γ j t ； ctx-insert j xs Γ ⊢ lift j P ⊠ ctx-insert j xs Θ
 ⊢-weaken j end = end
 ⊢-weaken j (chan t m μ ⊢P) = chan t m μ (⊢-weaken (suc j) ⊢P)
 ⊢-weaken j (comp ⊢P ⊢Q) = comp (⊢-weaken j ⊢P) (⊢-weaken j ⊢Q)

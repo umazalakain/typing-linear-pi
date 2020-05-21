@@ -71,7 +71,7 @@ record Algebra (Q : Set) : Set₁ where
   ∙-idʳ : ∀ {x} → x ≔ x ∙ 0∙
   ∙-idʳ = ∙-comm ∙-idˡ
 
-  ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ ∝ ] (x ≔ ∝ ∙ v × ∝ ≔ y ∙ u)
+  ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ ； ] (x ≔ ； ∙ v × ； ≔ y ∙ u)
   ∙-assoc⁻¹ a b = let _ , a' , b' = ∙-assoc (∙-comm a) (∙-comm b) in _ , ∙-comm a' , ∙-comm b'
 
   ∙-compute-unique : ∀ {x y z} (p : x ≔ y ∙ z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙-compute _ _} (_ , p)))
@@ -110,7 +110,7 @@ record Algebra (Q : Set) : Set₁ where
   ∙²-assoc (lx , rx) (ly , ry) with ∙-assoc lx ly | ∙-assoc rx ry
   ∙²-assoc (lx , rx) (ly , ry) | _ , ll , rl | _ , lr , rr = _ , ((ll , lr) , (rl , rr))
 
-  ∙²-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙² z → z ≔ u ∙² v → ∃[ ∝ ] (x ≔ ∝ ∙² v × ∝ ≔ y ∙² u)
+  ∙²-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙² z → z ≔ u ∙² v → ∃[ ； ] (x ≔ ； ∙² v × ； ≔ y ∙² u)
   ∙²-assoc⁻¹ a b = let _ , a' , b' = ∙²-assoc (∙²-comm a) (∙²-comm b) in _ , ∙²-comm a' , ∙²-comm b'
 
   ∙²-compute-unique : ∀ {x y z} (p : x ≔ y ∙² z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙²-compute _ _} (_ , p)))
