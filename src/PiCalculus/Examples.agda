@@ -134,7 +134,7 @@ module Shared-Linear where
   ℓ∅ : Bool ²
   ℓ∅ = false , false
 
-  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ υ ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ⊠ ε
+  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ υ ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ▹ ε
   _ = chan 𝟙 ω∙ {LINEAR} 1∙
       (comp (send here (there here) end)
       (recv here end))
@@ -142,7 +142,7 @@ module Shared-Linear where
   p : Scoped 1
   p = υ ((zero ⦅⦆ (zero ⦅⦆ 𝟘)) ∥ (υ (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘)))
 
-  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ p ⊠ ε
+  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ p ▹ ε
   _ = chan C[ 𝟙 ； ω∙ ] {LINEAR} ℓᵢ {LINEAR} 1∙ (comp
            (recv here (recv here end))
            (chan 𝟙 ω∙ 1∙
@@ -159,6 +159,6 @@ module Linear where
   open Algebras QUANTIFIERS
   open import PiCalculus.LinearTypeSystem QUANTIFIERS
 
-  _ : [] -, C[ 𝟙 ； ℓᵢ ] -, 𝟙 ； [] -, ℓ# -, ℓ# ∋[ suc zero ] C[ 𝟙 ； ℓᵢ ] ； ℓᵢ ⊠ [] -, ℓₒ -, ℓ#
+  _ : [] -, C[ 𝟙 ； ℓᵢ ] -, 𝟙 ； [] -, ℓ# -, ℓ# ∋[ suc zero ] C[ 𝟙 ； ℓᵢ ] ； ℓᵢ ▹ [] -, ℓₒ -, ℓ#
   _ = there here
 

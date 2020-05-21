@@ -25,8 +25,8 @@ open import PiCalculus.LinearTypeSystem.Algebras
 module PiCalculus.LinearTypeSystem (Ω : Algebras) where
 open Algebras Ω
 
-infixr 4 _；_⊢_⊠_
-infixr 4 _；_∋[_]_；_⊠_ _∋[_]_⊠_ _∋[_]_
+infixr 4 _；_⊢_▹_
+infixr 4 _；_∋[_]_；_▹_ _∋[_]_▹_ _∋[_]_
 infixr 10 chan recv send
 
 private
@@ -68,62 +68,61 @@ data _∋[_]_ : PreCtx n → Fin n → Type → Set where
   zero : γ -, t ∋[ zero ] t
   suc : γ ∋[ i ] t → γ -,  t' ∋[ suc i ] t
 
--- Γ ∋[ i ] x ⊠ Δ is a proof that subtracting x from variable in in Γ results in Δ
-data _∋[_]_⊠_ : {idxs : Idxs n} → Ctx idxs → Fin n → (Usage idx) ² → Ctx idxs → Set where
+-- Γ ∋[ i ] x ▹ Δ is a proof that subtracting x from variable in in Γ results in Δ
+data _∋[_]_▹_ : {idxs : Idxs n} → Ctx idxs → Fin n → (Usage idx) ² → Ctx idxs → Set where
 
   zero : {idxs : Idxs n} {Γ : Ctx idxs} {x y z : Usage idx ²}
        → x ≔ y ∙² z
-       → Γ -, x ∋[ zero {n} ] y ⊠ Γ -, z
+       → Γ -, x ∋[ zero {n} ] y ▹ Γ -, z
 
   suc : {Γ Δ : Ctx idxs} {x : (Usage idx) ² } {x' : (Usage idx') ²}
-      → Γ ∋[ i ] x ⊠ Δ
-      → Γ -, x' ∋[ suc i ] x ⊠ Δ -, x'
+      → Γ ∋[ i ] x ▹ Δ
+      → Γ -, x' ∋[ suc i ] x ▹ Δ -, x'
 
--- For convenience, merge together γ ∋[ i ] t and Γ ∋[ i ] x ⊠ Δ
-_；_∋[_]_；_⊠_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Fin n → Type → (Usage idx) ² → Ctx idxs → Set
-γ ； Γ ∋[ i ] t ； x ⊠ Δ = (γ ∋[ i ] t) × (Γ ∋[ i ] x ⊠ Δ)
+-- For convenience, merge together γ ∋[ i ] t and Γ ∋[ i ] x ▹ Δ
+_；_∋[_]_；_▹_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Fin n → Type → (Usage idx) ² → Ctx idxs → Set
+γ ； Γ ∋[ i ] t ； x ▹ Δ = (γ ∋[ i ] t) × (Γ ∋[ i ] x ▹ Δ)
 
 -- Constructor for (zero , zero xyz) that computes x from y and z
 here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {y z : Usage idx ²} ⦃ check : True (∙²-compute y z) ⦄
-     → γ -, t ； Γ -, proj₁ (toWitness check) ∋[ zero ] t ； y ⊠ Γ -, z
+     → γ -, t ； Γ -, proj₁ (toWitness check) ∋[ zero ] t ； y ▹ Γ -, z
 here ⦃ check ⦄ = let _ , x≔y∙²z = toWitness check in zero , zero x≔y∙²z
 
 infixr 20 there_
-
 there_ : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs} {x : Usage idx ²} {x' : Usage idx' ²}
-       → γ       ； Γ       ∋[     i ] t ； x ⊠ Δ
-       → γ -, t' ； Γ -, x' ∋[ suc i ] t ； x ⊠ Δ -, x'
+       → γ       ； Γ       ∋[     i ] t ； x ▹ Δ
+       → γ -, t' ； Γ -, x' ∋[ suc i ] t ； x ▹ Δ -, x'
 there_ (i , j) = suc i , suc j
 
--- Typing judgment γ ； Γ ⊢ P ⊠ Δ where P is a well-typed process
+-- Typing judgment γ ； Γ ⊢ P ▹ Δ where P is a well-typed process
 -- under typing context γ and input and output usage contexts Γ and Δ
-data _；_⊢_⊠_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set where
+data _；_⊢_▹_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set where
 
-  end : γ ； Γ ⊢ 𝟘 ⊠ Γ
+  end : γ ； Γ ⊢ 𝟘 ▹ Γ
 
   -- Note (μ , μ): the created channel is balanced
   chan : (t : Type) {idx' : Idx} (m : Usage idx' ²) {idx : Idx} (μ : Usage idx)
-       → γ -, C[ t ； m ] ； Γ -, (μ , μ) ⊢ P     ⊠ Δ -, ℓ∅
+       → γ -, C[ t ； m ] ； Γ -, (μ , μ) ⊢ P  ▹ Δ -, ℓ∅
        -----------------------------------------------------
-       → γ               ； Γ            ⊢ υ P ⊠ Δ
+       → γ               ； Γ            ⊢ υ P ▹ Δ
 
   recv : {t : Type} {m : (Usage idx') ²}
-       → (x : γ      ； Γ       ∋[ i ] C[ t ； m ] ； ℓᵢ {idx} ⊠ Ξ)
-       →      γ -, t ； Ξ -, m  ⊢      P                     ⊠ Θ -, ℓ∅
-       --------------------------------------------------------------
-       →      γ      ； Γ       ⊢ i ⦅⦆ P        ⊠ Θ
+       → γ      ； Γ       ∋[ i ] C[ t ； m ] ； ℓᵢ {idx} ▹ Ξ
+       → γ -, t ； Ξ -, m  ⊢      P                      ▹ Θ -, ℓ∅
+       -----------------------------------------------------------
+       → γ      ； Γ       ⊢ i ⦅⦆ P                      ▹ Θ
 
   send : {t : Type} {m : (Usage idx') ²}
-       → (x : γ ； Γ ∋[ i ] C[ t ； m ] ； ℓₒ {idx} ⊠ Δ)
-       → (y : γ ； Δ ∋[ j ] t          ； m        ⊠ Ξ)
-       →      γ ； Ξ ⊢      P                     ⊠ Θ
-       -------------------------------------------
-       →      γ ； Γ ⊢ i ⟨ j ⟩ P ⊠ Θ
+       → γ ； Γ ∋[ i ] C[ t ； m ] ； ℓₒ {idx} ▹ Δ
+       → γ ； Δ ∋[ j ] t           ； m        ▹ Ξ
+       → γ ； Ξ ⊢      P                       ▹ Θ
+       -----------------------------------------
+       → γ ； Γ ⊢      i ⟨ j ⟩ P               ▹ Θ
 
-  comp : γ ； Γ ⊢ P     ⊠ Δ
-       → γ ； Δ ⊢ Q     ⊠ Ξ
+  comp : γ ； Γ ⊢ P     ▹ Δ
+       → γ ； Δ ⊢ Q     ▹ Ξ
        -------------------
-       → γ ； Γ ⊢ P ∥ Q ⊠ Ξ
+       → γ ； Γ ⊢ P ∥ Q ▹ Ξ
 
-_；[_]_⊢_⊠_ : PreCtx n → (idxs : Idxs n) → Ctx idxs → Scoped n → Ctx idxs → Set
-γ ；[ idxs ] Γ ⊢ P ⊠ Δ = _；_⊢_⊠_ {idxs = idxs} γ Γ P Δ
+_；[_]_⊢_▹_ : PreCtx n → (idxs : Idxs n) → Ctx idxs → Scoped n → Ctx idxs → Set
+γ ；[ idxs ] Γ ⊢ P ▹ Δ = _；_⊢_▹_ {idxs = idxs} γ Γ P Δ

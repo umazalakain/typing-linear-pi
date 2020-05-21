@@ -40,10 +40,10 @@ open import PiCalculus.LinearTypeSystem.SubjectCongruence Ω
 SubjectReduction : Set
 SubjectReduction = {n : ℕ} {γ : PreCtx n} {idxs : Idxs n} {idx : Idx} {Γ Γ' Ξ : Ctx idxs}
                    {c : Channel n} {P Q : Scoped n}
-                 → maybe (Γ' ≡ Γ) (λ i → Γ' ∋[ i ] ℓ# {idx} ⊠ Γ) c
+                 → maybe (Γ' ≡ Γ) (λ i → Γ' ∋[ i ] ℓ# {idx} ▹ Γ) c
                  → P =[ c ]⇒ Q
-                 → γ ； Γ'  ⊢ P ⊠ Ξ
-                 → γ ； Γ   ⊢ Q ⊠ Ξ
+                 → γ ； Γ'  ⊢ P ▹ Ξ
+                 → γ ； Γ   ⊢ Q ▹ Ξ
 
 private
   variable
@@ -53,9 +53,9 @@ private
     P Q : Scoped n
 
 extract-ℓ# : {Γ Ξ Δ Ψ Θ : Ctx idxs} {idx idx' : Idx}
-           → Γ ∋[ i ] ℓᵢ {idx} ⊠ Ξ
-           → Ψ ∋[ i ] ℓₒ {idx'} ⊠ Θ
-           → Ξ ≔ Δ ⊠ Ψ
+           → Γ ∋[ i ] ℓᵢ {idx} ▹ Ξ
+           → Ψ ∋[ i ] ℓₒ {idx'} ▹ Θ
+           → Ξ ≔ Δ ⊗ Ψ
            → ∃[ z ] (All.lookup i Γ ≔ ℓ# ∙² z)
 extract-ℓ# (zero x) (zero y) (_ , s) =
   let
@@ -68,30 +68,30 @@ extract-ℓ# (suc i) (suc o) (s , _) = extract-ℓ# i o s
 -- What we have: Γ' ---ℓᵢ--> Θ ---P--> Ξ ---ℓₒ--> Ψ
 -- What we need: Γ' ---ℓ#--> Γ ---P--> Ψ
 align : ∀ {i : Fin n} {γ : PreCtx n} {idxs : Idxs n} {Γ' Γ Ξ Θ Ψ : Ctx idxs} {idx' idx'' idx'''}
-    → Γ' ∋[ i ] ℓᵢ {idx'} ⊠ Θ
-    → Ξ  ∋[ i ] ℓₒ {idx''} ⊠ Ψ
-    → Γ' ∋[ i ] ℓ# {idx'''} ⊠ Γ
-    → γ ； Θ ⊢ P ⊠ Ξ
-    → γ ； Γ ⊢ P ⊠ Ψ
+    → Γ' ∋[ i ] ℓᵢ {idx'} ▹ Θ
+    → Ξ  ∋[ i ] ℓₒ {idx''} ▹ Ψ
+    → Γ' ∋[ i ] ℓ# {idx'''} ▹ Γ
+    → γ ； Θ ⊢ P ▹ Ξ
+    → γ ； Γ ⊢ P ▹ Ψ
 align i o io ⊢P with ∋-≡Idx io | ∋-≡Idx i | ∋-≡Idx o
 align i o io ⊢P | refl | refl | refl =
   let
-  Δi , Γ'≔Δi∙Θ , Δi≔ℓᵢ = ∋-⊠ i
-  Δo , Ξ≔Δo∙Ψ , Δo≔ℓₒ = ∋-⊠ o
-  Δio , Γ'≔Δio∙Γ , Δio≔ℓ# = ∋-⊠ io
-  Δ⊢P , Θ≔Δ⊢P∙Ξ = ⊢-⊠ ⊢P
-  ΨΔ⊢P , Θ≔Δo∙[ΨΔ⊢P] , ΨΔ⊢P≔Ψ∙Δ⊢P = ⊠-assoc (⊠-comm Θ≔Δ⊢P∙Ξ) Ξ≔Δo∙Ψ
-  ΔiΔo , Γ'≔[ΔiΔo]∙[ΨΔ⊢P] , ΔiΔo≔ℓᵢℓₒ = ⊠-assoc⁻¹ Γ'≔Δi∙Θ Θ≔Δo∙[ΨΔ⊢P]
-  Δio≔Δi∙Δo = ∙²-⊠ Δio≔ℓ# Δi≔ℓᵢ Δo≔ℓₒ (∙-idʳ , ∙-idˡ)
-  ΔiΔo≡Δio = ⊠-unique ΔiΔo≔ℓᵢℓₒ Δio≔Δi∙Δo
-  Γ'≔Δio∙[ΨΔ⊢P] = subst (λ ● → _ ≔ ● ⊠ _) ΔiΔo≡Δio Γ'≔[ΔiΔo]∙[ΨΔ⊢P]
-  ΨΔ⊢P≡Γ = ⊠-uniqueˡ (⊠-comm Γ'≔Δio∙[ΨΔ⊢P]) (⊠-comm Γ'≔Δio∙Γ)
-  Γ≔Ψ∙Δ⊢P = subst (λ ● → ● ≔ _ ⊠ _) ΨΔ⊢P≡Γ ΨΔ⊢P≔Ψ∙Δ⊢P
-  in ⊢-frame Θ≔Δ⊢P∙Ξ (⊠-comm Γ≔Ψ∙Δ⊢P) ⊢P
+  Δi , Γ'≔Δi∙Θ , Δi≔ℓᵢ = ∋-⊗ i
+  Δo , Ξ≔Δo∙Ψ , Δo≔ℓₒ = ∋-⊗ o
+  Δio , Γ'≔Δio∙Γ , Δio≔ℓ# = ∋-⊗ io
+  Δ⊢P , Θ≔Δ⊢P∙Ξ = ⊢-⊗ ⊢P
+  ΨΔ⊢P , Θ≔Δo∙[ΨΔ⊢P] , ΨΔ⊢P≔Ψ∙Δ⊢P = ⊗-assoc (⊗-comm Θ≔Δ⊢P∙Ξ) Ξ≔Δo∙Ψ
+  ΔiΔo , Γ'≔[ΔiΔo]∙[ΨΔ⊢P] , ΔiΔo≔ℓᵢℓₒ = ⊗-assoc⁻¹ Γ'≔Δi∙Θ Θ≔Δo∙[ΨΔ⊢P]
+  Δio≔Δi∙Δo = ∙²-⊗ Δio≔ℓ# Δi≔ℓᵢ Δo≔ℓₒ (∙-idʳ , ∙-idˡ)
+  ΔiΔo≡Δio = ⊗-unique ΔiΔo≔ℓᵢℓₒ Δio≔Δi∙Δo
+  Γ'≔Δio∙[ΨΔ⊢P] = subst (λ ● → _ ≔ ● ⊗ _) ΔiΔo≡Δio Γ'≔[ΔiΔo]∙[ΨΔ⊢P]
+  ΨΔ⊢P≡Γ = ⊗-uniqueˡ (⊗-comm Γ'≔Δio∙[ΨΔ⊢P]) (⊗-comm Γ'≔Δio∙Γ)
+  Γ≔Ψ∙Δ⊢P = subst (λ ● → ● ≔ _ ⊗ _) ΨΔ⊢P≡Γ ΨΔ⊢P≔Ψ∙Δ⊢P
+  in ⊢-frame Θ≔Δ⊢P∙Ξ (⊗-comm Γ≔Ψ∙Δ⊢P) ⊢P
 
 comm-≥ℓ# : {γ : PreCtx n} {Γ Δ : Ctx idxs} {c : Channel n}
-      → P =[ c ]⇒ Q → γ ； Γ ⊢ P ⊠ Δ → c ≡ external i → ∃[ y ] (All.lookup i Γ ≔ ℓ# ∙² y)
-comm-≥ℓ# {i = i} comm (comp (recv (_ , x) ⊢P) (send (_ , x') _ ⊢Q)) refl with ⊢-⊠ ⊢P
+      → P =[ c ]⇒ Q → γ ； Γ ⊢ P ▹ Δ → c ≡ external i → ∃[ y ] (All.lookup i Γ ≔ ℓ# ∙² y)
+comm-≥ℓ# {i = i} comm (comp (recv (_ , x) ⊢P) (send (_ , x') _ ⊢Q)) refl with ⊢-⊗ ⊢P
 comm-≥ℓ# {i = i} comm (comp (recv (_ , x) ⊢P) (send (_ , x') _ ⊢Q)) refl | (_ -, _) , (Ξ≔ , _) = extract-ℓ# x x' Ξ≔
 comm-≥ℓ# (par P→P') (comp ⊢P ⊢Q) refl = comm-≥ℓ# P→P' ⊢P refl
 comm-≥ℓ# (res_ {c = internal} P→Q) (chan t m μ ⊢P) ()

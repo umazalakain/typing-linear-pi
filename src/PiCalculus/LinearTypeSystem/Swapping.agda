@@ -44,7 +44,7 @@ private
 ⊢-unused : {γ : PreCtx n} {Γ Θ : Ctx idxs}
          → (i : Fin n)
          → Unused i P
-         → γ ； Γ ⊢ P ⊠ Θ
+         → γ ； Γ ⊢ P ▹ Θ
          → All.lookup i Γ ≡ All.lookup i Θ
 ⊢-unused i uP end = refl
 ⊢-unused i uP (chan t m μ ⊢P) = ⊢-unused (suc i) uP ⊢P
@@ -71,8 +71,8 @@ module _ {a} {A : Set a} where
 -- TODO: rewrite this crap
 ∋-swap : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {t : Type} {x : Usage idx ²}
        → (i : Fin n)
-       → γ ； Γ ∋[ j ] t ； x ⊠ Θ
-       → swapᵥ i γ ； swapₐ i Γ ∋[ swapFin i j ] t ； x ⊠ swapₐ i Θ
+       → γ ； Γ ∋[ j ] t ； x ▹ Θ
+       → swapᵥ i γ ； swapₐ i Γ ∋[ swapFin i j ] t ； x ▹ swapₐ i Θ
 ∋-swap {γ = _ -, _ -, _} {idxs = _ -, _ -, _} {Γ = _ -, _ -, _} zero (zero , zero xyz) = (suc zero , suc (zero xyz))
 ∋-swap {γ = _ -, _ -, _} zero (suc zero , suc (zero xyz)) = zero , zero xyz
 ∋-swap {γ = _ -, _ -, _} zero (suc (suc t) , suc (suc x)) = suc (suc t) , suc (suc x)
@@ -82,7 +82,7 @@ module _ {a} {A : Set a} where
 ∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc i) (suc (suc t) , suc (suc x)) with Fin.inject₁ i Finₚ.≟ suc j
 ∋-swap {j = suc (suc j)} {γ = γ -, _} {Γ = Γ -, _} (suc zero) (suc (suc t) , suc (suc x)) | yes ()
 ∋-swap {j = suc (suc ._)} {γ = γ -, _} {Γ = Γ -, _} {Θ = Θ -, _} (suc (suc i)) (suc st@(suc t) , suc sx@(suc x)) | yes refl =
-  let s' = subst (λ ● → swapᵥ (suc i) γ ； swapₐ (suc i) Γ ∋[ ● ] _ ； _ ⊠ swapₐ (suc i) Θ)
+  let s' = subst (λ ● → swapᵥ (suc i) γ ； swapₐ (suc i) Γ ∋[ ● ] _ ； _ ▹ swapₐ (suc i) Θ)
                  (sym (trans (cong suc (sym (trans (swapFin-injectˡ i) (cong suc (sym (Finₚ.lower₁-inject₁′ i _))))))
                  (swapFin-suc i (Fin.inject₁ i)))) (∋-swap (suc i) (st , sx))
   in there s'
@@ -92,8 +92,8 @@ module _ {a} {A : Set a} where
 
 ⊢-swap : {γ : PreCtx (suc n)} {Γ Θ : Ctx idxs}
        → (i : Fin n)
-       → γ ； Γ ⊢ P ⊠ Θ
-       → swapᵥ i γ ； swapₐ i Γ ⊢ swap i P ⊠ swapₐ i Θ
+       → γ ； Γ ⊢ P ▹ Θ
+       → swapᵥ i γ ； swapₐ i Γ ⊢ swap i P ▹ swapₐ i Θ
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i end = end
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (chan t m μ ⊢P) = chan t m μ (⊢-swap (suc i) ⊢P)
 ⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (recv {Ξ = _ -, _ -, _} x ⊢P) = recv (∋-swap i x) (⊢-swap (suc i) ⊢P)
