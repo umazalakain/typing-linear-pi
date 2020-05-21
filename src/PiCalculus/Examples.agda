@@ -1,3 +1,5 @@
+{-# OPTIONS --safe --without-K #-}
+
 open import Data.Nat using (ℕ)
 open import Data.String.Base using (String)
 open import Data.Bool using (Bool; true; false)

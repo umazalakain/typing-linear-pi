@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-} -- --without-K #-}
+
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Decidable using (toWitness; fromWitness)

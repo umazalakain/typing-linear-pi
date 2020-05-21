@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-} -- --without-K #-}
+
 open import Relation.Nullary.Decidable using (toWitness; fromWitness)
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)

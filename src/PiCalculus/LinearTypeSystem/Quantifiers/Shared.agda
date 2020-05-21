@@ -1,3 +1,5 @@
+{-# OPTIONS --safe --without-K #-}
+
 open import Relation.Binary.PropositionalEquality using (refl)
 open import Relation.Nullary using (yes)
 

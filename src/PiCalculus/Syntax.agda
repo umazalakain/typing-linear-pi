@@ -1,3 +1,5 @@
+{-# OPTIONS --safe --without-K #-}
+
 open import Data.Unit
 open import Data.Maybe
 

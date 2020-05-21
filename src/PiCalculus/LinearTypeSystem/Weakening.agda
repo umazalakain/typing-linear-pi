@@ -1,3 +1,5 @@
+{-# OPTIONS --safe #-} --without-K #-}
+
 import Data.Product as Product
 import Data.Product.Properties as Productₚ
 import Data.Nat as Nat
