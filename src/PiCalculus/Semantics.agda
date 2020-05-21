@@ -106,35 +106,32 @@ module PiCalculus.Semantics where
     input-cong_  : P ≅⟨ r ⟩ P' → x ⦅⦆ P    ≅⟨ one r ⟩ x ⦅⦆ P'
     output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P ≅⟨ one r ⟩ x ⟨ y ⟩ P'
 
-  substFin : Fin n → Fin n → Fin n → Fin n
-  substFin i j x with j Finₚ.≟ x
-  substFin i j x | true because _ = i
-  substFin i j x | false because _ = x
+  _[_↦_]' : Fin n → Fin n → Fin n → Fin n
+  x [ i ↦ j ]' with i Finₚ.≟ x
+  x [ i ↦ j ]' | true because _ = j
+  x [ i ↦ j ]' | false because _ = x
 
-  substProc : (i j : Fin n) → Scoped n → Scoped n
-  substProc i j 𝟘 = 𝟘
-  substProc i j (υ P) = υ (substProc (suc i) (suc j) P)
-  substProc i j (P ∥ Q) = (substProc i j P) ∥ (substProc i j Q)
-  substProc i j (x ⦅⦆ P) = substFin i j x ⦅⦆ (substProc (suc i) (suc j) P)
-  substProc i j (x ⟨ y ⟩ P) = substFin i j x ⟨ substFin i j y ⟩ (substProc i j P)
+  _[_↦_] : Scoped n → (i j : Fin n) → Scoped n
+  𝟘           [ i ↦ j ] = 𝟘
+  (υ P)       [ i ↦ j ] = υ (P [ suc i ↦ suc j ])
+  (P ∥ Q)     [ i ↦ j ] = (P [ i ↦ j ]) ∥ (Q [ i ↦ j ])
+  (x ⦅⦆ P)    [ i ↦ j ] = (x [ i ↦ j ]') ⦅⦆ (P [ suc i ↦ suc j ])
+  (x ⟨ y ⟩ P) [ i ↦ j ] = (x [ i ↦ j ]') ⟨ y [ i ↦ j ]' ⟩ (P [ i ↦ j ])
 
-  substFin-unused : ∀ {i j} (x : Fin (suc n)) → j ≢ i → j ≢ substFin i j x
-  substFin-unused {j = j} x j≢suci  with j Finₚ.≟ x
-  substFin-unused {j = j} x j≢suci | true because _ = j≢suci
-  substFin-unused {j = j} x j≢suci | false because ofⁿ ¬p = ¬p
+  substFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
+  substFin-unused {i = i} x i≢j  with i Finₚ.≟ x
+  substFin-unused {i = i} x i≢j | true because _ = i≢j
+  substFin-unused {i = i} x i≢j | false because ofⁿ ¬p = ¬p
 
   subst-unused : {i j : Fin (suc n)}
-               → j ≢ i
+               → i ≢ j
                → (P : Scoped (suc n))
-               → Unused j (substProc i j P)
-  subst-unused j≢suci 𝟘 = tt
-  subst-unused j≢suci (υ P) = subst-unused (λ j≡suci → j≢suci (Finₚ.suc-injective j≡suci)) P
-  subst-unused j≢suci (P ∥ Q) = subst-unused j≢suci P , subst-unused j≢suci Q
-  subst-unused j≢suci (x ⦅⦆ P) = substFin-unused x j≢suci , subst-unused (λ j≡suci → j≢suci (Finₚ.suc-injective j≡suci)) P
-  subst-unused j≢suci (x ⟨ y ⟩ P) = substFin-unused x j≢suci , substFin-unused y j≢suci , subst-unused j≢suci P
-
-  _[_/_]_ : Scoped (suc n) → (i j : Fin (suc n)) → (j≢i : j ≢ i) → Scoped n
-  P [ i / j ] j≢i = lower j (substProc i j P) (subst-unused j≢i P)
+               → Unused i (P [ i ↦ j ])
+  subst-unused i≢j 𝟘 = tt
+  subst-unused i≢j (υ P) = subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
+  subst-unused i≢j (P ∥ Q) = subst-unused i≢j P , subst-unused i≢j Q
+  subst-unused i≢j (x ⦅⦆ P) = substFin-unused x i≢j , subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
+  subst-unused i≢j (x ⟨ y ⟩ P) = substFin-unused x i≢j , substFin-unused y i≢j , subst-unused i≢j P
 
   data Channel : ℕ → Set where
     internal : ∀ {n}         → Channel n
@@ -153,7 +150,8 @@ module PiCalculus.Semantics where
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
 
     comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
-         → (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ (P [ suc j / zero ] (λ ())) ∥ Q
+         → let uP' = subst-unused (λ ()) P
+         in (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'

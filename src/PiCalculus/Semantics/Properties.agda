@@ -44,8 +44,8 @@ lift-lower i (x ⟨ y ⟩ P) (i≢x , i≢y , uP)
   | Finₚ.punchIn-punchOut i≢x
   | Finₚ.punchIn-punchOut i≢y = refl
 
-substFin-suc : (i j x : Fin n) → substFin (suc i) (suc j) (suc x) ≡ suc (substFin i j x)
-substFin-suc i j x with j Finₚ.≟ x
+substFin-suc : (i j x : Fin n) → (suc x) [ suc i ↦ suc j ]' ≡ suc (x [ i ↦ j ]')
+substFin-suc i j x with i Finₚ.≟ x
 substFin-suc i j x | yes p = refl
 substFin-suc i j x | no ¬p = refl
 
