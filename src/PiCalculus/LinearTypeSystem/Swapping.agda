@@ -26,10 +26,10 @@ open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.Swapping (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem.Swapping (Ω : Algebras) where
+open Algebras Ω
 open import PiCalculus.LinearTypeSystem Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 
@@ -69,7 +69,7 @@ module _ {a} {A : Set a} where
   swapₐ (suc i) (xs -, y -, x) = swapₐ i (xs -, y) -, x
 
 -- TODO: rewrite this crap
-∋-swap : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {t : Type} {x : Carrier idx ²}
+∋-swap : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {t : Type} {x : Usage idx ²}
        → (i : Fin n)
        → γ ∝ Γ ∋[ j ] t ∝ x ⊠ Θ
        → swapᵥ i γ ∝ swapₐ i Γ ∋[ swapFin i j ] t ∝ x ⊠ swapₐ i Θ

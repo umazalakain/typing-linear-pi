@@ -20,7 +20,7 @@ open Product using (Σ-syntax; ∃-syntax; _,_; _×_; proj₁; proj₂)
 open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 
-module PiCalculus.LinearTypeSystem.Quantifiers where
+module PiCalculus.LinearTypeSystem.Algebras where
 
 private
   variable
@@ -32,7 +32,7 @@ infixr 100 _²
 _² : ∀ {a} → Set a → Set a
 A ² = A × A
 
-record Quantifier (Q : Set) : Set₁ where
+record Algebra (Q : Set) : Set₁ where
   field
     0∙ 1∙       : Q
 
@@ -121,15 +121,15 @@ record Quantifier (Q : Set) : Set₁ where
   ∙²-mut-cancel : ∀ {x y y' z} → x ≔ y ∙² z → z ≔ y' ∙² x → x ≡ z
   ∙²-mut-cancel {_ , _} (lx , rx) (ly , ry) rewrite ∙-mut-cancel lx ly | ∙-mut-cancel rx ry = refl
 
-record Quantifiers : Set₁ where
+record Algebras : Set₁ where
   field
-    Idx     : Set
-    ∃Idx   : Idx
-    Carrier : Idx → Set
-    Algebra : ∀ idx → Quantifier (Carrier idx)
+    Idx          : Set
+    ∃Idx         : Idx
+    Usage        : Idx → Set
+    UsageAlgebra : ∀ idx → Algebra (Usage idx)
 
   infixl 40 _-,_
   pattern _-,_ xs x = _∷_ x xs
 
   module _ {idx : Idx} where
-    open Quantifier (Algebra idx) public
+    open Algebra (UsageAlgebra idx) public

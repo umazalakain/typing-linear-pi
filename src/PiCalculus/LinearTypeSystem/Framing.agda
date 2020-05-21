@@ -26,10 +26,10 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.Framing (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem.Framing (Ω : Algebras) where
+open Algebras Ω
 open import PiCalculus.LinearTypeSystem Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 
@@ -41,11 +41,11 @@ private
     idxs : Idxs n
     γ : PreCtx n
     t : Type
-    x y z : Carrier idx
+    x y z : Usage idx
     Γ Θ Δ Ξ : Ctx idxs
     P Q : Scoped n
 
-∋-frame : {idxs : Idxs n} {Γ Θ Δ Ξ Ψ : Ctx idxs} {x : Carrier idx ²}
+∋-frame : {idxs : Idxs n} {Γ Θ Δ Ξ Ψ : Ctx idxs} {x : Usage idx ²}
         → Γ ≔ Δ ⊠ Θ → Ξ ≔ Δ ⊠ Ψ
         → Γ ∋[ i ] x ⊠ Θ
         → Ξ ∋[ i ] x ⊠ Ψ

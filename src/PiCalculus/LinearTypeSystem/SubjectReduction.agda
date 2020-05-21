@@ -25,10 +25,10 @@ open Scoped
 open Syntax
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.SubjectReduction (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem.SubjectReduction (Ω : Algebras) where
+open Algebras Ω
 open import PiCalculus.LinearTypeSystem Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 open import PiCalculus.LinearTypeSystem.Framing Ω

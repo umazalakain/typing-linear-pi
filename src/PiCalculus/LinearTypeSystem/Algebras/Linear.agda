@@ -17,9 +17,9 @@ open Sum using (inj₁; inj₂)
 open Product using (∃-syntax; _×_; _,_)
 open ℕ using (ℕ)
 
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.Quantifiers.Linear where
+module PiCalculus.LinearTypeSystem.Algebras.Linear where
 
 open Bool using (Bool; true; false) public
 pattern zero = false
@@ -67,14 +67,14 @@ data _≔_∙_ : Bool → Bool → Bool → Set where
 ∙-assoc left right = one , right , left
 ∙-assoc left left = zero , left , skip
 
-Linear : Quantifier Bool
-Quantifier.1∙ Linear = true
-Quantifier.0∙ Linear = false
-Quantifier._≔_∙_ Linear = _≔_∙_
-Quantifier.∙-compute Linear = ∙-compute
-Quantifier.∙-unique Linear = ∙-unique
-Quantifier.∙-uniqueˡ Linear = ∙-uniqueˡ
-Quantifier.0∙-minˡ Linear skip = refl
-Quantifier.∙-idˡ Linear = ∙-idˡ
-Quantifier.∙-comm Linear = ∙-comm
-Quantifier.∙-assoc Linear = ∙-assoc
+Linear : Algebra Bool
+Algebra.1∙ Linear = true
+Algebra.0∙ Linear = false
+Algebra._≔_∙_ Linear = _≔_∙_
+Algebra.∙-compute Linear = ∙-compute
+Algebra.∙-unique Linear = ∙-unique
+Algebra.∙-uniqueˡ Linear = ∙-uniqueˡ
+Algebra.0∙-minˡ Linear skip = refl
+Algebra.∙-idˡ Linear = ∙-idˡ
+Algebra.∙-comm Linear = ∙-comm
+Algebra.∙-assoc Linear = ∙-assoc

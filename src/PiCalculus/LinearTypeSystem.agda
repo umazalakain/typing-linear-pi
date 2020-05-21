@@ -20,10 +20,10 @@ open All using (All; []; _∷_)
 open import PiCalculus.Syntax
 open Syntax
 open Scoped
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem (Ω : Algebras) where
+open Algebras Ω
 
 infixr 4 _∝_⊢_⊠_
 infixr 4 _∝_∋[_]_∝_⊠_ _∋[_]_⊠_ _∋[_]_
@@ -38,7 +38,7 @@ private
 data Type : Set where
   𝟙      : Type
   B[_]   : ℕ → Type
-  C[_∝_] : Type → (Carrier idx) ² → Type
+  C[_∝_] : Type → (Usage idx) ² → Type
   -- P[_&_] : Type → Type → Type
 
 -- Context of types
@@ -51,7 +51,7 @@ Idxs = Vec Idx
 
 -- Indexed context of usages
 Ctx : ∀ {n} → Idxs n → Set
-Ctx = All λ idx → (Carrier idx) ²
+Ctx = All λ idx → (Usage idx) ²
 
 private
   variable
@@ -60,7 +60,7 @@ private
     Γ Δ Ξ Θ : Ctx idxs
     b : ℕ
     t t' : Type
-    x y z : Carrier idx
+    x y z : Usage idx
     P Q : Scoped n
 
 -- γ ∋[ i ] t is a proof that variable i in Γ has type t
@@ -69,28 +69,28 @@ data _∋[_]_ : PreCtx n → Fin n → Type → Set where
   suc : γ ∋[ i ] t → γ -,  t' ∋[ suc i ] t
 
 -- Γ ∋[ i ] x ⊠ Δ is a proof that subtracting x from variable in in Γ results in Δ
-data _∋[_]_⊠_ : {idxs : Idxs n} → Ctx idxs → Fin n → (Carrier idx) ² → Ctx idxs → Set where
+data _∋[_]_⊠_ : {idxs : Idxs n} → Ctx idxs → Fin n → (Usage idx) ² → Ctx idxs → Set where
 
-  zero : {idxs : Idxs n} {Γ : Ctx idxs} {x y z : Carrier idx ²}
+  zero : {idxs : Idxs n} {Γ : Ctx idxs} {x y z : Usage idx ²}
        → x ≔ y ∙² z
        → Γ -, x ∋[ zero {n} ] y ⊠ Γ -, z
 
-  suc : {Γ Δ : Ctx idxs} {x : (Carrier idx) ² } {x' : (Carrier idx') ²}
+  suc : {Γ Δ : Ctx idxs} {x : (Usage idx) ² } {x' : (Usage idx') ²}
       → Γ ∋[ i ] x ⊠ Δ
       → Γ -, x' ∋[ suc i ] x ⊠ Δ -, x'
 
 -- For convenience, merge together γ ∋[ i ] t and Γ ∋[ i ] x ⊠ Δ
-_∝_∋[_]_∝_⊠_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Fin n → Type → (Carrier idx) ² → Ctx idxs → Set
+_∝_∋[_]_∝_⊠_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Fin n → Type → (Usage idx) ² → Ctx idxs → Set
 γ ∝ Γ ∋[ i ] t ∝ x ⊠ Δ = (γ ∋[ i ] t) × (Γ ∋[ i ] x ⊠ Δ)
 
 -- Constructor for (zero , zero xyz) that computes x from y and z
-here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {y z : Carrier idx ²} ⦃ check : True (∙²-compute y z) ⦄
+here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {y z : Usage idx ²} ⦃ check : True (∙²-compute y z) ⦄
      → γ -, t ∝ Γ -, proj₁ (toWitness check) ∋[ zero ] t ∝ y ⊠ Γ -, z
 here ⦃ check ⦄ = let _ , x≔y∙²z = toWitness check in zero , zero x≔y∙²z
 
 infixr 20 there_
 
-there_ : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs} {x : Carrier idx ²} {x' : Carrier idx' ²}
+there_ : {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs} {x : Usage idx ²} {x' : Usage idx' ²}
        → γ       ∝ Γ       ∋[     i ] t ∝ x ⊠ Δ
        → γ -, t' ∝ Γ -, x' ∋[ suc i ] t ∝ x ⊠ Δ -, x'
 there_ (i , j) = suc i , suc j
@@ -102,18 +102,18 @@ data _∝_⊢_⊠_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → 
   end : γ ∝ Γ ⊢ 𝟘 ⊠ Γ
 
   -- Note (μ , μ): the created channel is balanced
-  chan : (t : Type) {idx' : Idx} (m : Carrier idx' ²) {idx : Idx} (μ : Carrier idx)
+  chan : (t : Type) {idx' : Idx} (m : Usage idx' ²) {idx : Idx} (μ : Usage idx)
        → γ -, C[ t ∝ m ] ∝ Γ -, (μ , μ) ⊢ P     ⊠ Δ -, ℓ∅
        -----------------------------------------------------
        → γ               ∝ Γ            ⊢ υ P ⊠ Δ
 
-  recv : {t : Type} {m : (Carrier idx') ²}
+  recv : {t : Type} {m : (Usage idx') ²}
        → (x : γ      ∝ Γ       ∋[ i ] C[ t ∝ m ] ∝ ℓᵢ {idx} ⊠ Ξ)
        →      γ -, t ∝ Ξ -, m  ⊢      P                     ⊠ Θ -, ℓ∅
        --------------------------------------------------------------
        →      γ      ∝ Γ       ⊢ i ⦅⦆ P        ⊠ Θ
 
-  send : {t : Type} {m : (Carrier idx') ²}
+  send : {t : Type} {m : (Usage idx') ²}
        → (x : γ ∝ Γ ∋[ i ] C[ t ∝ m ] ∝ ℓₒ {idx} ⊠ Δ)
        → (y : γ ∝ Δ ∋[ j ] t          ∝ m        ⊠ Ξ)
        →      γ ∝ Ξ ⊢      P                     ⊠ Θ

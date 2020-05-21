@@ -28,10 +28,10 @@ open Relation.Binary.PropositionalEquality.≡-Reasoning
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.ContextLemmas (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem.ContextLemmas (Ω : Algebras) where
+open Algebras Ω
 open import PiCalculus.LinearTypeSystem Ω
 
 private
@@ -44,7 +44,7 @@ private
     P Q : Scoped n
     i j : Fin n
     Γ Δ Ξ Θ : Ctx idxs
-    x x' y z : Carrier idx ²
+    x x' y z : Usage idx ²
 
 data _≔_⊠_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
   []  : [] ≔ [] ⊠ []
@@ -96,7 +96,7 @@ data _≔_⊠_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
 ⊠-mut-cancel [] [] = refl
 ⊠-mut-cancel (Γ≔ , x≔) (Ξ≔ , z≔) rewrite ⊠-mut-cancel Γ≔ Ξ≔ | ∙²-mut-cancel x≔ z≔ = refl
 
-∋-≡Idx : {idxs : Idxs n} {i : Fin n} {Γ Δ : Ctx idxs} {x : Carrier idx ²}
+∋-≡Idx : {idxs : Idxs n} {i : Fin n} {Γ Δ : Ctx idxs} {x : Usage idx ²}
        → Γ ∋[ i ] x ⊠ Δ → Vec.lookup idxs i ≡ idx
 ∋-≡Idx (zero x) = refl
 ∋-≡Idx (suc s) rewrite ∋-≡Idx s = refl
@@ -243,7 +243,7 @@ split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
       _ , PQ≔ , _ = ⊠-assoc⁻¹ P≔ Q≔
    in _ , PQ≔
 
-ctx-insert : (i : Fin (suc n)) → Carrier idx ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
+ctx-insert : (i : Fin (suc n)) → Usage idx ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
 ctx-insert zero xs' Γ = Γ -, xs'
 ctx-insert (suc i) xs' (Γ -, xs) = ctx-insert i xs' Γ -, xs
 
@@ -251,6 +251,6 @@ ctx-remove : Ctx idxs → (i : Fin (suc n)) → Ctx (Vec.remove idxs i)
 ctx-remove (Γ -, _) zero = Γ
 ctx-remove (Γ -, ys -, xs) (suc i) = ctx-remove (Γ -, ys) i -, xs
 
-ctx-update : (i : Fin n) → Carrier (Vec.lookup idxs i) ² → Ctx idxs → Ctx idxs
+ctx-update : (i : Fin n) → Usage (Vec.lookup idxs i) ² → Ctx idxs → Ctx idxs
 ctx-update zero m' (ms -, m) = ms -, m'
 ctx-update (suc i) m' (ms -, m) = ctx-update i m' ms -, m

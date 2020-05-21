@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe #-} -- --without-K #-}
 
 open import Data.Nat using (ℕ)
 open import Data.String.Base using (String)
@@ -18,9 +18,9 @@ open Syntax
 open Scoped
 open Conversion
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem.Quantifiers
-open import PiCalculus.LinearTypeSystem.Quantifiers.Linear using (Linear)
-open import PiCalculus.LinearTypeSystem.Quantifiers.Shared using (Shared)
+open import PiCalculus.LinearTypeSystem.Algebras
+open import PiCalculus.LinearTypeSystem.Algebras.Linear using (Linear)
+open import PiCalculus.LinearTypeSystem.Algebras.Shared using (Shared)
 
 module PiCalculus.Examples where
 open Raw
@@ -107,15 +107,15 @@ module Shared-Linear where
   pattern 0∙ = false
   pattern 1∙ = true
 
-  QUANTIFIERS : Quantifiers
-  Quantifiers.Idx QUANTIFIERS = Bool
-  Quantifiers.∃Idx QUANTIFIERS = SHARED
-  Quantifiers.Carrier QUANTIFIERS SHARED = ⊤
-  Quantifiers.Carrier QUANTIFIERS LINEAR = Bool
-  Quantifiers.Algebra QUANTIFIERS SHARED = Shared
-  Quantifiers.Algebra QUANTIFIERS LINEAR = Linear
+  QUANTIFIERS : Algebras
+  Algebras.Idx QUANTIFIERS = Bool
+  Algebras.∃Idx QUANTIFIERS = SHARED
+  Algebras.Usage QUANTIFIERS SHARED = ⊤
+  Algebras.Usage QUANTIFIERS LINEAR = Bool
+  Algebras.UsageAlgebra QUANTIFIERS SHARED = Shared
+  Algebras.UsageAlgebra QUANTIFIERS LINEAR = Linear
 
-  open Quantifiers QUANTIFIERS hiding (ℓᵢ;ℓₒ;ℓ∅;ℓ#;0∙;1∙)
+  open Algebras QUANTIFIERS hiding (ℓᵢ;ℓₒ;ℓ∅;ℓ#;0∙;1∙)
   open import PiCalculus.LinearTypeSystem QUANTIFIERS
   open import PiCalculus.LinearTypeSystem.ContextLemmas QUANTIFIERS
 
@@ -150,13 +150,13 @@ module Shared-Linear where
 
 
 module Linear where
-  QUANTIFIERS : Quantifiers
-  Quantifiers.Idx QUANTIFIERS = ⊤
-  Quantifiers.∃Idx QUANTIFIERS = tt
-  Quantifiers.Carrier QUANTIFIERS _ = Bool
-  Quantifiers.Algebra QUANTIFIERS _ = Linear
+  QUANTIFIERS : Algebras
+  Algebras.Idx QUANTIFIERS = ⊤
+  Algebras.∃Idx QUANTIFIERS = tt
+  Algebras.Usage QUANTIFIERS _ = Bool
+  Algebras.UsageAlgebra QUANTIFIERS _ = Linear
 
-  open Quantifiers QUANTIFIERS
+  open Algebras QUANTIFIERS
   open import PiCalculus.LinearTypeSystem QUANTIFIERS
 
   _ : [] -, C[ 𝟙 ∝ ℓᵢ ] -, 𝟙 ∝ [] -, ℓ# -, ℓ# ∋[ suc zero ] C[ 𝟙 ∝ ℓᵢ ] ∝ ℓᵢ ⊠ [] -, ℓₒ -, ℓ#

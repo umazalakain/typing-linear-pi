@@ -25,10 +25,10 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.Strengthening (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem.Strengthening (Ω : Algebras) where
+open Algebras Ω
 open import PiCalculus.LinearTypeSystem Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 
@@ -41,7 +41,7 @@ private
     i j : Fin n
     P Q : Scoped n
 
-∋-strengthen : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {m' : Carrier idx' ²}
+∋-strengthen : {γ : PreCtx (suc n)} {idxs : Idxs (suc n)} {Γ Θ : Ctx idxs} {m' : Usage idx' ²}
              → (i : Fin (suc n))
              → (i≢j : i ≢ j)
              → γ              ∝ Γ              ∋[ j ] t' ∝ m' ⊠ Θ

@@ -31,10 +31,10 @@ open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.Substitution (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem.Substitution (Ω : Algebras) where
+open Algebras Ω
 open import PiCalculus.LinearTypeSystem Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 open import PiCalculus.LinearTypeSystem.Framing Ω
@@ -47,18 +47,18 @@ private
     γ : PreCtx n
     idx idx' : Idx
     idxs : Idxs n
-    x y z m m' l δ : Carrier idx ²
+    x y z m m' l δ : Usage idx ²
     Γ Γₗ Γᵣ Ξₗ Ξᵣ Δ Δ' Ξ' Θ Ψ Ξ Ψ' Θ' Δₗ Δᵣ Β : Ctx idxs
     P : Scoped n
 
-midpoint : {Γᵢ Γ Δ Ψ ΔP Ξᵢ ΔQ Ψᵢ : Ctx idxs} {m n : Carrier idx ²}
+midpoint : {Γᵢ Γ Δ Ψ ΔP Ξᵢ ΔQ Ψᵢ : Ctx idxs} {m n : Usage idx ²}
          → Γᵢ ∋[ i ] m ⊠ Γ
          → Γ ≔ Δ ⊠ Ψ
          → All.lookup i Δ ≡ ℓ∅
          → Γᵢ ≔ ΔP ⊠ Ξᵢ
          → Ξᵢ ≔ ΔQ ⊠ Ψᵢ
          → Ψᵢ ∋[ i ] n ⊠ Ψ
-         → Σ[ δ ∈ Carrier idx ² ]
+         → Σ[ δ ∈ Usage idx ² ]
            Σ[ Θ ∈ Ctx idxs ]
            Σ[ Δ₁ ∈ Ctx idxs ]
            Σ[ Δ₂ ∈ Ctx idxs ] (
@@ -74,7 +74,7 @@ midpoint {i = suc i} (suc Γᵢ≔m∙Γ) (Γ≔Δ∙Ψ , _) Δ[i]≡ℓ∅ (Γ�
   let _ , _ , _ , _ , Ξᵢ≔δ∙Θ , Γ≔Δ₁∙Θ , Θ≔Δ₂∙Ψ = midpoint Γᵢ≔m∙Γ Γ≔Δ∙Ψ Δ[i]≡ℓ∅ Γᵢ≔ΔP∙Ξᵢ Ξᵢ≔ΔQ∙Ψᵢ ψᵢ≔n∙ψ in
   _ , _ , (_ -, _) , _ , suc Ξᵢ≔δ∙Θ , (Γ≔Δ₁∙Θ , γᵢ≔δp∙ξᵢ) , (Θ≔Δ₂∙Ψ , ξᵢ≔δq∙ψᵢ)
 
-cutpoint : {Γ Δ Θ Γⱼ : Ctx idxs} {m n l : Carrier idx ²}
+cutpoint : {Γ Δ Θ Γⱼ : Ctx idxs} {m n l : Usage idx ²}
        → Γ ≔ Δ ⊠ Θ
        → Γⱼ ∋[ j ] m ⊠ Γ
        → m ≔ n ∙² l
@@ -87,7 +87,7 @@ cutpoint (_ , γ≔) (zero x) m≔ =
 cutpoint (Γ≔ , _) (suc ∋j) m≔ with cutpoint Γ≔ ∋j m≔
 cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
 
-∋-subst : {Γ Γᵢ Γⱼ Δ Ψ Ψᵢ Ψⱼ Ξᵢ CONT : Ctx idxs} {i j x : Fin n} {mx : Carrier idx' ²} {m n : Carrier idx ²}
+∋-subst : {Γ Γᵢ Γⱼ Δ Ψ Ψᵢ Ψⱼ Ξᵢ CONT : Ctx idxs} {i j x : Fin n} {mx : Usage idx' ²} {m n : Usage idx ²}
         → Vec.lookup γ i ≡ Vec.lookup γ j
         → Γᵢ ∋[ i ] m ⊠ Γ
         → Γⱼ ∋[ j ] m ⊠ Γ
@@ -100,7 +100,7 @@ cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
         → Σ[ Ξⱼ ∈ Ctx idxs ]
           Σ[ Θ ∈ Ctx idxs ]
           Σ[ Δ' ∈ Ctx idxs ]
-          Σ[ m' ∈ Carrier idx ² ]
+          Σ[ m' ∈ Usage idx ² ]
          (γ ∝ Γⱼ ∋[ substFin j i x ] t ∝ mx ⊠ Ξⱼ
         × Ξᵢ ∋[ i ] m' ⊠ Θ
         × Ξⱼ ∋[ j ] m' ⊠ Θ
@@ -130,7 +130,7 @@ cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
     _ , Δ'∋iℓ∅ = split-ℓ∅ Γ≔Δ∙Ψ (proj₁ (proj₂ (∋-⊠ Γ≔ℓ∙Θ))) Θ≔Δ'∙Ψ Δ∋iℓ∅
   in _ , _ , _ , _ , (∋t , ⊠-∋ Γⱼ≔ℓ'∙Ξⱼ ℓ'≔ℓ∙ε) , Ξᵢ≔m∙Θ , ⊠-∋ Ξⱼ≔m'∙Θ m'≔m∙ε , Θ≔Δ'∙Ψ , Δ'∋iℓ∅
 
-⊢-subst-ih : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Γᵢ Γⱼ Δ Ψ Ψᵢ Ψⱼ : Ctx idxs} {i j : Fin n} {m n : Carrier idx ²}
+⊢-subst-ih : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Γᵢ Γⱼ Δ Ψ Ψᵢ Ψⱼ : Ctx idxs} {i j : Fin n} {m n : Usage idx ²}
            → Vec.lookup γ i ≡ Vec.lookup γ j
            → Γᵢ ∋[ i ] m ⊠ Γ
            → Γⱼ ∋[ j ] m ⊠ Γ
@@ -172,7 +172,7 @@ cutpoint (Γ≔ , _) (suc ∋j) m≔ | _ , r = _ , suc r
   in comp (⊢-subst-ih eq ∋i ∋j Ξᵢ≔δ∙Θ Ξⱼ≔δ∙Θ Γ≔Δ₁∙Θ Δ₁∋iℓ∅ ⊢P) (⊢-subst-ih eq Ξᵢ≔δ∙Θ Ξⱼ≔δ∙Θ ∈i ∈j Θ≔Δ₂∙Ψ Δ₂∋iℓ∅ ⊢Q)
 
 
-switch : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
+switch : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Usage idx ²}
        → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
        → Ψ ∋[ j ] m ⊠ Ξ
        → ∃[ Θ ] (Γ      ∋[ j ] m ⊠ Θ
@@ -183,7 +183,7 @@ switch ⊢P ∋j | (Δ⊢P -, _) , (Γ≔ , _) | _ , Ψ≔ , _ =
   _ , ∋-frame Ψ≔ Γ≔Δj∙W  ∋j , ⊢-frame (Γ≔ , ∙²-idʳ) (⊠-comm W≔Δ⊢P∙Ξ , ∙²-idʳ) ⊢P
 
 
-⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Carrier idx ²}
+⊢-subst : ∀ {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ Ψ : Ctx idxs} {t  idx}  {m : Usage idx ²}
         → γ ∝ Ψ ∋[ j ] t ∝ m ⊠ Ξ
         → γ -, t ∝ Γ -, m ⊢ P ⊠ Ψ -, ℓ∅
         → γ -, t ∝ Γ -, m ⊢ substProc (suc j) zero P ⊠ Ξ -, m

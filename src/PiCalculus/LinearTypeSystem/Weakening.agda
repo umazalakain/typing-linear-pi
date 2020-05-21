@@ -18,10 +18,10 @@ import PiCalculus.Syntax
 open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
-open import PiCalculus.LinearTypeSystem.Quantifiers
+open import PiCalculus.LinearTypeSystem.Algebras
 
-module PiCalculus.LinearTypeSystem.Weakening (Ω : Quantifiers) where
-open Quantifiers Ω
+module PiCalculus.LinearTypeSystem.Weakening (Ω : Algebras) where
+open Algebras Ω
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 open import PiCalculus.LinearTypeSystem Ω
 
@@ -33,7 +33,7 @@ private
     idxs : Idxs n
     P Q : Scoped n
 
-∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t t' : Type} {xs : Carrier idx ²} {xs' : Carrier idx' ²}
+∋-weaken : {γ : PreCtx n} {Γ Θ : Ctx idxs} {t t' : Type} {xs : Usage idx ²} {xs' : Usage idx' ²}
          → (j : Fin (suc n))
          → γ                ∝ Γ                 ∋[ i               ] t' ∝ xs' ⊠ Θ
          → Vec.insert γ j t ∝ ctx-insert j xs Γ ∋[ Fin.punchIn j i ] t' ∝ xs' ⊠ ctx-insert j xs Θ
@@ -41,7 +41,7 @@ private
 ∋-weaken (suc i) (zero , zero xyz) = zero , zero xyz
 ∋-weaken (suc i) (suc t , suc x) = there (∋-weaken i (t , x))
 
-⊢-weaken : {P : Scoped n} {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Carrier idx ²}
+⊢-weaken : {P : Scoped n} {γ : PreCtx n} {Γ Θ : Ctx idxs} {t : Type} {xs : Usage idx ²}
          → (j : Fin (suc n))
          → γ ∝ Γ ⊢ P ⊠ Θ
          → Vec.insert γ j t ∝ ctx-insert j xs Γ ⊢ lift j P ⊠ ctx-insert j xs Θ
