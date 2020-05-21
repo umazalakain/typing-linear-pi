@@ -46,7 +46,7 @@ private
     Γ Δ Ξ Θ : Ctx idxs
     x x' y z : Carrier idx ²
 
-data _≔_⊠_ : Ctx idxs → Ctx idxsₗ → Ctx idxsᵣ → Set where
+data _≔_⊠_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
   []  : [] ≔ [] ⊠ []
   _,_ : Γ ≔ Δ ⊠ Ξ → x ≔ y ∙² z → (Γ -, x) ≔ (Δ -, y) ⊠ (Ξ -, z)
 
@@ -54,16 +54,9 @@ data _≔_⊠_ : Ctx idxs → Ctx idxsₗ → Ctx idxsᵣ → Set where
 ε {idxs = []} = []
 ε {idxs = _ -, _} = ε -, (0∙ , 0∙)
 
-⊠-get : {Γ Δ Ξ : Ctx idxs} (i : Fin n) → Γ ≔ Δ ⊠ Ξ → All.lookup i Γ ≔ All.lookup i Δ ∙² All.lookup i Ξ
+⊠-get : {idxs : Idxs n} {Γ Δ Ξ : Ctx idxs} (i : Fin n) → Γ ≔ Δ ⊠ Ξ → All.lookup i Γ ≔ All.lookup i Δ ∙² All.lookup i Ξ
 ⊠-get zero (Γ≔ , x≔) = x≔
-⊠-get (suc i) (Γ≔ , x≔) = ⊠-get i Γ≔
-
-⊠-compute : (Δ Ξ : Ctx idxs) → Dec (Σ[ Γ ∈ Ctx idxs ] (Γ ≔ Δ ⊠ Ξ))
-⊠-compute [] [] = yes ([] , [])
-⊠-compute (Δ -, y) (Ξ -, z) with ⊠-compute Δ Ξ | ∙²-compute y z
-... | yes (_ , ps)     | yes (_ , p) = yes ((_ -, _) , (ps , p))
-... | yes (_ , ps)     | no ¬p       = no λ {((_ -, _) , (_ , p)) → ¬p (_ , p)}
-... | no ¬ps           | _           = no λ {((_ -, _) , (ps , _)) → ¬ps (_ , ps)}
+⊠-get (suc i) (Γ≔ , x) = ⊠-get i Γ≔
 
 ⊠-idˡ : {idxs : Idxs n} {Γ : Ctx idxs} → Γ ≔ ε {idxs = idxs} ⊠ Γ
 ⊠-idˡ {Γ = []} = []
@@ -103,7 +96,8 @@ data _≔_⊠_ : Ctx idxs → Ctx idxsₗ → Ctx idxsᵣ → Set where
 ⊠-mut-cancel [] [] = refl
 ⊠-mut-cancel (Γ≔ , x≔) (Ξ≔ , z≔) rewrite ⊠-mut-cancel Γ≔ Ξ≔ | ∙²-mut-cancel x≔ z≔ = refl
 
-∋-≡Idx : {Γ : Ctx idxs} {x : Carrier idx ²} → Γ ∋[ i ] x ⊠ Δ → Vec.lookup idxs i ≡ idx
+∋-≡Idx : {idxs : Idxs n} {i : Fin n} {Γ Δ : Ctx idxs} {x : Carrier idx ²}
+       → Γ ∋[ i ] x ⊠ Δ → Vec.lookup idxs i ≡ idx
 ∋-≡Idx (zero x) = refl
 ∋-≡Idx (suc s) rewrite ∋-≡Idx s = refl
 
@@ -135,7 +129,8 @@ data _≔_⊠_ : Ctx idxs → Ctx idxsₗ → Ctx idxsᵣ → Set where
 ∋-ℓ∅ {Γ = _ -, _} {i = suc i} eq = suc (∋-ℓ∅ eq)
 
 -- TODO: deprecate, convert to context first
-∋-uniqueʳ : Γ ∋[ i ] x ⊠ Δ → Γ ∋[ i ] x ⊠ Ξ → Δ ≡ Ξ
+∋-uniqueʳ : {i : Fin n} {idxs : Idxs n} {Γ Δ Ξ : Ctx idxs}
+          → Γ ∋[ i ] x ⊠ Δ → Γ ∋[ i ] x ⊠ Ξ → Δ ≡ Ξ
 ∋-uniqueʳ (zero a) (zero b) rewrite ∙²-uniqueˡ (∙²-comm a) (∙²-comm b) = refl
 ∋-uniqueʳ (suc a) (suc b) rewrite ∋-uniqueʳ a b = refl
 
@@ -160,7 +155,6 @@ data _≔_⊠_ : Ctx idxs → Ctx idxsₗ → Ctx idxsᵣ → Set where
 ∙²-⊠ (zero x) (zero y) (zero z) sp
   rewrite ∙²-unique x ∙²-idʳ | ∙²-unique y ∙²-idʳ | ∙²-unique z ∙²-idʳ = ⊠-idˡ , sp
 ∙²-⊠ (suc Γ≔) (suc Δ≔) (suc Ξ≔) sp = ∙²-⊠ Γ≔ Δ≔ Ξ≔ sp , ∙²-idˡ
-
 
 diamond : {Γ Ξ Ψ : Ctx idxs}
         → i ≢ j

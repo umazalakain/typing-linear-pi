@@ -69,7 +69,7 @@ data _∋[_]_ : PreCtx n → Fin n → Type → Set where
   suc : γ ∋[ i ] t → γ -,  t' ∋[ suc i ] t
 
 -- Γ ∋[ i ] x ⊠ Δ is a proof that subtracting x from variable in in Γ results in Δ
-data _∋[_]_⊠_ : Ctx idxs → Fin n → (Carrier idx) ² → Ctx idxs → Set where
+data _∋[_]_⊠_ : {idxs : Idxs n} → Ctx idxs → Fin n → (Carrier idx) ² → Ctx idxs → Set where
 
   zero : {idxs : Idxs n} {Γ : Ctx idxs} {x y z : Carrier idx ²}
        → x ≔ y ∙² z
@@ -80,7 +80,7 @@ data _∋[_]_⊠_ : Ctx idxs → Fin n → (Carrier idx) ² → Ctx idxs → Set
       → Γ -, x' ∋[ suc i ] x ⊠ Δ -, x'
 
 -- For convenience, merge together γ ∋[ i ] t and Γ ∋[ i ] x ⊠ Δ
-_∝_∋[_]_∝_⊠_ : PreCtx n → Ctx idxs → Fin n → Type → (Carrier idx) ² → Ctx idxs → Set
+_∝_∋[_]_∝_⊠_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Fin n → Type → (Carrier idx) ² → Ctx idxs → Set
 γ ∝ Γ ∋[ i ] t ∝ x ⊠ Δ = (γ ∋[ i ] t) × (Γ ∋[ i ] x ⊠ Δ)
 
 -- Constructor for (zero , zero xyz) that computes x from y and z
@@ -97,7 +97,7 @@ there_ (i , j) = suc i , suc j
 
 -- Typing judgment γ ∝ Γ ⊢ P ⊠ Δ where P is a well-typed process
 -- under typing context γ and input and output usage contexts Γ and Δ
-data _∝_⊢_⊠_ : PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set where
+data _∝_⊢_⊠_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → Ctx idxs → Set where
 
   end : γ ∝ Γ ⊢ 𝟘 ⊠ Γ
 
