@@ -155,7 +155,9 @@
 
   \note[itemize]{
     \item Parallel composition is associative, commutative and has $\PO$ as neutral element
-    \item Keep a proof $uQ$ alongside
+    \item Garbage collection
+    \item Scope extrusion (keep a proof $uQ$ alongside)
+    \item Commutativity of scopes
   }
 
   \begin{frame}{Reduction Relation}
@@ -195,16 +197,43 @@
     \item $\func{dec}$ saturates on $\constr{internal}$
   }
 
+  \begin{frame}{Type System: initial pitfalls}
+    \begin{itemize}
+    \item Transforming contexts using functions
+      \begin{mathpar}
+      \inferrule
+      {\stacked{
+          \gamma \; \type{;} \; \Gamma \; \type{\ni}_i \; \channel{t}{u} \; \type{;} \; x\\
+          \opsquared{x}{\li}{z} \\\\
+          \gamma \comma t \; \type{;} \; (\func{update}_i \; z \; \Gamma) \comma u \vdash P}}
+      {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \recv{i}{P}}
+      \end{mathpar}
+    \item Extrinsic context splits
+      \begin{mathpar}
+        \inferrule
+        {\stacked{
+            \opctx{\Gamma}{\Delta}{\Xi} \\\\
+            \gamma \; \type{;} \; \Delta \; \type{\vdash} P \\\\
+            \gamma \; \type{;} \; \Xi \; \type{\vdash} Q}}
+        {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \comp{P}{Q}}
+      \end{mathpar}
+    \end{itemize}
+  \end{frame}
+
   \begin{frame}{Type System}
     \begin{itemize}
       \item Syntax directed
-      \item Unidirectional -- scope restriction requires types as input
-      \item Uses leftover typing
-      \item Based on an indexed set of usage algebras
+      \item Intrinsic context splits
+      \item Based on a set of usage algebras
     \end{itemize}
   \end{frame}
   
-  \begin{frame}{Multiplicities and Capabilities}
+  \note[itemize]{
+  \item Top down
+  \item Only choice is in the types and usage annotations on scope restriction
+  }
+
+  \begin{frame}{Usage Algebra}
     \begin{equation*}
     \begin{aligned}
       &\zero                 &:{} &                 &        & C \\
@@ -227,6 +256,19 @@
     \item Decidable, deterministic, cancellative and has a minimal element
   }
 
+  \begin{frame}{Notation}
+    \begin{equation*}
+      \begin{aligned}
+        &C^{\func{2}} &&= C \type{\times} C \\
+        &\lz          &&= \zero \comma \zero \\
+        &\li          &&= \one \comma \zero \\
+        &\lo          &&= \zero \comma \one \\
+        &\lio         &&= \one \comma \one \\
+        &\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)} &&= (\op{x_l}{y_l}{z_l}) \times (\op{x_r}{y_r}{z_r}) \\
+      \end{aligned}
+    \end{equation*}
+  \end{frame}
+  
   \begin{frame}{Indexed Usage Algebras}
     \begin{equation*}
       \begin{aligned}
@@ -234,13 +276,6 @@
         &\type{\exists IDX} &:{} &\Idx \\
         &\Usage             &:{} &\Idx \to \Set \\
         &\type{ALGEBRAS}    &:{} &(idx : \Idx) \to \Algebra_{\Usage_{idx}} \\
-      \end{aligned}
-    \end{equation*}
-    Notation
-    \begin{equation*}
-      \begin{aligned}
-        &C^{\func{2}} = C \type{\times} C \\
-        &\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)} = (\op{x_l}{y_l}{z_l}) \times (\op{x_r}{y_r}{z_r}) \\
       \end{aligned}
     \end{equation*}
   \end{frame}
@@ -273,7 +308,7 @@
     \end{mathpar}
   \end{frame}
 
-  \begin{frame}{Usage contexts}
+  \begin{frame}{Usage Contexts}
     \begin{mathpar}
       \inferrule
       { }
@@ -292,6 +327,10 @@
       {\Gamma \comma x : \Ctx_{idxs \comma idx}}
     \end{mathpar}
   \end{frame}
+
+  \note[itemize]{
+  \item Usage context independent of typing contexts
+  }
 
   \begin{frame}{Type System}
     \tiny
@@ -397,5 +436,13 @@
   \end{frame}
 
   \begin{frame}{Future Work}
+    \begin{itemize}
+    \item Prove preservation of balancedness
+    \item Product and sum types
+    \item Recursion
+    \item Bidirectional type system
+    \item Decidable type checking
+    \item Encoding session types into it
+    \end{itemize}
   \end{frame}
 \end{document}
