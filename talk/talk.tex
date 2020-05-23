@@ -14,8 +14,11 @@
 % Mathbb doesn't support digits
 \usepackage{bbm}
 
-% inference rules
+% Inference rules
 \usepackage{mathpartir}
+
+% Multiple columns
+\usepackage{multicol}
 
 % Do not use italics in definitions and theorems
 \theoremstyle{definition}
@@ -430,6 +433,7 @@
   
   \note[itemize]{
   \item Newly introduced channels are balanced
+  \item The multiplicities of new variables must be exhausted
   }
 
   \begin{frame}{Typing Rules}
@@ -481,11 +485,70 @@
   \end{frame}
 
   \begin{frame}{Type Safety: Substitution}
-    STATE
+    \begin{nitheorem}[Substitution with accumulator]
+      Let $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
+      Let there be some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
+      \setlength{\linewidth}{.8\linewidth}
+      \begin{multicols}{2}
+        \begin{itemize}
+        \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
+        \item $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
+        \item $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
+        \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
+        \end{itemize}
+        \vfill\null
+        \columnbreak
+        \scriptsize
+        \begin{tikzpicture}
+          \node (gamma-i) at (0,3)   {$\Gamma_i$};
+          \node (gamma-m) at (0,1.5)   {$\Gamma$};
+          \node (gamma-j) at (0,0)   {$\Gamma_j$};
+          \node (xi-i)    at (2.5,2.75) {$\Xi_i$};
+          \node (theta)   at (2.5,1.75) {$\Theta$};
+          \node (delta-m) at (2.5,1.25) {};
+          \node (xi-j)    at (2.5,0.25) {$\Xi_j$};
+          \node (psi-i)   at (5,2.5)   {$\Psi_i$};
+          \node (psi-m)   at (5,1.5)   {$\Psi$};
+          \node (psi-j)   at (5,0.5)   {$\Psi_j$};
+
+          \draw[-]  (gamma-m) -- (delta-m.center);
+          \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \lz$}(psi-m);
+
+          \draw[->,densely dotted] (gamma-m) -- (theta);
+          \draw[->,densely dotted] (theta) -- (psi-m);
+          
+          \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
+          \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
+          \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
+          \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
+
+          \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
+          \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
+          \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
+          \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
+          \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
+          \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
+        \end{tikzpicture}
+      \end{multicols}
+      Let there be some $\Delta$ such that $\opctx{\Gamma}{\Delta}{\Psi}$.
+      Let $\Delta$ have usage $\lz$ at position $i$.
+      Then $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+    \end{nitheorem}
   \end{frame}
 
-  \begin{frame}{Type Safety: subject reduction}
-    STATE
+  \note[itemize]{
+  \item We got rid of the types in the judgments
+  }
+
+  \begin{frame}{Type Safety: Subject Reduction}
+    \begin{nitheorem}[Subject reduction]
+      \label{thm:subject-reduction}
+      Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
+      \begin{itemize}
+      \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+      \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
+      \end{itemize}
+    \end{nitheorem}
   \end{frame}
 
   \begin{frame}{Future Work}
