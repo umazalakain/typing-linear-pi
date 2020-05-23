@@ -88,31 +88,45 @@
 \begin{document}
   \maketitle
 
-  \begin{frame}{Motivation}
-    from the intro
-  \end{frame}
-  
-  \begin{frame}{Pi calculus}
-    give the pi syntax
-  \end{frame}
+  \note[itemize]{
+  \item Please interrupt at any time
+  }
 
-  \begin{frame}{Linear, Graded and Shared Types}
+  \begin{frame}{Motivation and Constraints}
+    \centering
+    \begin{tikzpicture}
+      \node[draw, rounded corners] (st) at (0,0) {session-typed \picalc{}};
+      \node[draw=red, thick, rounded corners, label={[red]below:\textasciicircum this\textasciicircum}] (sh) at (5,0) {linear \picalc{}};
+      \draw[->, thick] (st) -- (sh);
+    \end{tikzpicture}
+    \vspace{2em}
+
     \begin{itemize}
-      \item Linear types are
-      \item Graded types are
-      \item Shared types are
+      \item Syntax and semantics must be untyped
+      \item Must also support shared channels
+      \item Goal: to prove subject reduction
     \end{itemize}
   \end{frame}
 
-  \begin{frame}{Constraints}
-    \begin{itemize}
-      \item Untyped \picalc{} syntax and semantics.
-      \item Mix shared, graded, and linear channels.
-      \item Goal: to prove subject reduction.
-    \end{itemize}
+  \begin{frame}{Notation}
+    \begin{equation*}
+      \begin{aligned}
+        & \type{TYPES}          && \text{blue violet, uppercased, indices as subscripts} \\
+        & \constr{constructors} && \text{burnt orange} \\
+        & \func{functions}      && \text{olive green} \\
+        & variables             && \text{black, in italics} \\
+      \end{aligned}
+    \end{equation*}
   \end{frame}
+
+  \note[itemize]{
+  \item We want to encode the session-typed \picalc{} into the linear \picalc{}
+  \item and prove some properties of the encoding
+  \item We first need our target language: the linear \picalc{}
+  \item Common syntax and semantics for linear and session-typed
+  }
   
-  \begin{frame}{Well-Scoped Syntax}
+  \begin{frame}{\Picalc{}: Well-Scoped Syntax}
     \begin{mathpar}
       \inferrule
       {n : \N}
@@ -124,21 +138,22 @@
     \end{mathpar}
 
     \begin{equation*}
-      \begin{split}
-        \Process_n ::=& \; \PO_n              \\ 
-        |& \; \new{} \Process_{\suc n}                  \\ 
-        |& \; \comp{\Process_n}{\Process_n}   \\ 
-        |& \; \recv{\Var_n}{}\Process_{\suc n}          \\ 
-        |& \; \send{\Var_n}{\Var_n}\Process_n   \\           
-      \end{split}
+      \begin{aligned}
+        \Process_n ::=& \; \PO_n               &&\text{(inaction)}    \\ 
+        |& \; \new{} \Process_{\suc n}         &&\text{(restriction)} \\ 
+        |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)}     \\ 
+        |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}       \\ 
+        |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}       \\           
+      \end{aligned}
     \end{equation*}
   \end{frame}
 
   \note[itemize]{
-    \item Type level de Bruijn syntax
+    \item \picalc{} syntax, well-scoped by construction through de Bruijn indices
+    \item go over the constructors
   }
 
-  \begin{frame}{Structural Congruence}
+  \begin{frame}{\Picalc{}: Structural Congruence}
     \begin{mathpar}
       \inferrule
       { }
@@ -176,7 +191,7 @@
     \item Commutativity of scopes
   }
 
-  \begin{frame}{Reduction Relation}
+  \begin{frame}{\Picalc{}: Reduction Relation}
     \begin{mathpar}
       \inferrule
       { }
@@ -213,7 +228,7 @@
     \item $\func{dec}$ saturates on $\constr{internal}$
   }
 
-  \begin{frame}{Type System: initial pitfalls}
+  \begin{frame}{Type System: Initial Pitfalls}
     \begin{itemize}
     \item Transforming contexts using functions
       \begin{mathpar}
