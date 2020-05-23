@@ -17,6 +17,12 @@
 % inference rules
 \usepackage{mathpartir}
 
+% Do not use italics in definitions and theorems
+\theoremstyle{definition}
+\newtheorem{nidefinition}{Definition}
+\newtheorem{nitheorem}{Theorem}
+\newtheorem{nilemma}{Lemma}
+
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
 \newcommand{\picalc}{$\pi$-calculus}
@@ -422,6 +428,10 @@
     \end{mathpar}
   \end{frame}
   
+  \note[itemize]{
+  \item Newly introduced channels are balanced
+  }
+
   \begin{frame}{Typing Rules}
     \begin{mathpar}
     \inferrule
@@ -444,36 +454,49 @@
     \end{mathpar}
   \end{frame}
 
-  \note[itemize]{
-  \item Newly introduced channels are balanced
-  }
+  \begin{frame}{Type Safety: Subject Congruence}
+    \begin{nitheorem}[Framing]
+      Let $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$ and $\opctx{\Gamma_l}{\Delta}{\Xi_l}$ for some $\Delta$.
+      Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$ for any $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
+    \end{nitheorem}
 
-  \begin{frame}{Type Safety: auxiliary lemmas}
-    \begin{itemize}
-      \item Framing
-      \item Weakening
-      \item Strengthening
-      \item Swapping
-    \end{itemize}
+    \begin{nitheorem}[Weakening]
+      Let $\types{\gamma}{\Gamma}{P}{\Xi}$.
+      Then $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
+    \end{nitheorem}
+
+    \begin{nitheorem}[Strengthening]
+      Let $\types{\gamma}{\Gamma}{P}{\Xi}$ and $uP \; : \; \Unused_i \; P$.
+      Then $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
+    \end{nitheorem}
+
+    \begin{nitheorem}[Swapping]
+      Let $\types{\gamma}{\Gamma}{P}{\Xi}$.
+      Then $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\allowbreak \func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
+    \end{nitheorem}
+
+    \begin{nitheorem}[Subject congruence]
+      If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+    \end{nitheorem}
   \end{frame}
 
-  \begin{frame}{Type Safety: subject congruence}
-  \end{frame}
-
-  \begin{frame}{Type Safety: substitution}
+  \begin{frame}{Type Safety: Substitution}
+    STATE
   \end{frame}
 
   \begin{frame}{Type Safety: subject reduction}
+    STATE
   \end{frame}
 
   \begin{frame}{Future Work}
     \begin{itemize}
-    \item Prove preservation of balancedness
-    \item Product and sum types
+    \item Prove preservation of well-balancedness
+    \item Product types
+    \item Sum types
     \item Recursion
     \item Bidirectional type system
     \item Decidable type checking
-    \item Encoding session types into it
+    \item Use as target language for the session-typed \picalc{}
     \end{itemize}
   \end{frame}
 \end{document}
