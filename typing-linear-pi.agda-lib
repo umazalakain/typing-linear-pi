@@ -1,0 +1,3 @@
+name: typing-linear-pi
+include: src/
+depend: standard-library
