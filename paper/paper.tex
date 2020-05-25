@@ -390,7 +390,7 @@ Its congruent equivalence closure \textsc{Equals} $\eq{}$ is defined in \autoref
   {\constr{scope-end} : \new \PO_{\suc n} \eqeq \PO_n}
   
   \inferrule
-  {uQ : \Unused_{\constr{0} \; Q}
+  {uQ : \Unused_{\constr{0} \; Q}}
   {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{\func{lower}_{\constr{0}} \; \; Q \; uQ}}
 
   \inferrule
@@ -493,16 +493,16 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   \begin{figure}[h]
   \begin{equation*}
   \begin{aligned}
-    &\zero                  &:{} &                 &        & C \\
-    &\one                   &:{} &                 &        & C \\
-    &\op{\_}{\_}{\_}        &:{} &                 &        & C \to C \to C \to \Set \\
-    &\func{\cdot-compute}  &:{} &\forall y z       & \to \; & \type{DEC} \; (\type{\exists} x  \; (\op{x}{y}{z})) \\
-    &\func{\cdot-unique}   &:{} &\forall x x' y z  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-    &\func{\cdot-unique^l} &:{} &\forall x y y' z  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-    &\func{\cdot-min^l}   &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-    &\func{\cdot-id^l}     &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
-    &\func{\cdot-comm}     &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-    &\func{\cdot-assoc}    &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
+    &\zero                   &:{} &                 &        & C \\
+    &\one                    &:{} &                 &        & C \\
+    &\op{\_}{\_}{\_}         &:{} &                 &        & C \to C \to C \to \Set \\
+    &\func{\cdot-compute^r}  &:{} &\forall x y       & \to \; & \type{DEC} \; (\type{\exists} z  \; (\op{x}{y}{z})) \\
+    &\func{\cdot-unique}     &:{} &\forall x x' y z  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
+    &\func{\cdot-unique^l}   &:{} &\forall x y y' z  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
+    &\func{\cdot-min^l}      &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
+    &\func{\cdot-id^l}       &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
+    &\func{\cdot-comm}       &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
+    &\func{\cdot-assoc}      &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
   \end{aligned}
   \end{equation*}
   \caption{

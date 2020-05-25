@@ -39,7 +39,7 @@ record Algebra (Q : Set) : Set₁ where
     _≔_∙_       : Q → Q → Q → Set
 
     -- Given two operands, we can decide whether a third one exists
-    ∙-compute   : ∀ y z         → Dec (∃[ x ] (x ≔ y ∙ z))
+    ∙-computeʳ  : ∀ x y         → Dec (∃[ z ] (x ≔ y ∙ z))
 
     -- If a third operand exists, it must be unique
     ∙-unique    : ∀ {x x' y z}  → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
@@ -74,20 +74,15 @@ record Algebra (Q : Set) : Set₁ where
   ∙-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙ z → z ≔ u ∙ v → ∃[ ； ] (x ≔ ； ∙ v × ； ≔ y ∙ u)
   ∙-assoc⁻¹ a b = let _ , a' , b' = ∙-assoc (∙-comm a) (∙-comm b) in _ , ∙-comm a' , ∙-comm b'
 
-  ∙-compute-unique : ∀ {x y z} (p : x ≔ y ∙ z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙-compute _ _} (_ , p)))
-  ∙-compute-unique {y = y} {z} p with ∙-compute y z
-  ∙-compute-unique {y = y} {z} p | yes (x' , p') = ∙-unique p p'
-  ∙-compute-unique {y = y} {z} p | no ¬q = ⊥-elim (¬q (_ , p))
-
   ∙-mut-cancel : ∀ {x y y' z} → x ≔ y ∙ z → z ≔ y' ∙ x → x ≡ z
   ∙-mut-cancel x≔y∙z z≔y'∙x with ∙-assoc⁻¹ x≔y∙z z≔y'∙x
   ∙-mut-cancel x≔y∙z z≔y'∙x | e , x≔e∙x , e≔y∙y' rewrite ∙-uniqueˡ x≔e∙x ∙-idˡ | 0∙-minˡ e≔y∙y' = ∙-unique x≔y∙z ∙-idˡ
 
-  ∙²-compute : ∀ y z → Dec (∃[ x ] (x ≔ y ∙² z))
-  ∙²-compute (ly , ry) (lz , rz) with ∙-compute ly lz | ∙-compute ry rz
-  ∙²-compute (ly , ry) (lz , rz) | yes (_ , p) | yes (_ , q) = yes (_ , (p , q))
-  ∙²-compute (ly , ry) (lz , rz) | yes p | no ¬q = no λ {(_ , _ , r) → ¬q (_ , r)}
-  ∙²-compute (ly , ry) (lz , rz) | no ¬p | _     = no λ {(_ , l , _) → ¬p (_ , l)}
+  ∙²-computeʳ : ∀ x y → Dec (∃[ z ] (x ≔ y ∙² z))
+  ∙²-computeʳ (lx , rx) (ly , ry) with ∙-computeʳ lx ly | ∙-computeʳ rx ry
+  ∙²-computeʳ (lx , rx) (ly , ry) | yes (_ , p) | yes (_ , q) = yes (_ , p , q)
+  ∙²-computeʳ (lx , rx) (ly , ry) | yes p | no ¬q = no λ {(_ , _ , r) → ¬q (_ , r)}
+  ∙²-computeʳ (lx , rx) (ly , ry) | no ¬p | _     = no λ {(_ , l , _) → ¬p (_ , l)}
 
   ∙²-unique : ∀ {x x' y z} → x' ≔ y ∙² z → x ≔ y ∙² z → x' ≡ x
   ∙²-unique {x = _ , _} {x' = _ , _} (ll , rl) (lr , rr)
@@ -112,11 +107,6 @@ record Algebra (Q : Set) : Set₁ where
 
   ∙²-assoc⁻¹ : ∀ {x y z u v} → x ≔ y ∙² z → z ≔ u ∙² v → ∃[ ； ] (x ≔ ； ∙² v × ； ≔ y ∙² u)
   ∙²-assoc⁻¹ a b = let _ , a' , b' = ∙²-assoc (∙²-comm a) (∙²-comm b) in _ , ∙²-comm a' , ∙²-comm b'
-
-  ∙²-compute-unique : ∀ {x y z} (p : x ≔ y ∙² z) → x ≡ proj₁ (toWitness (fromWitness {Q = ∙²-compute _ _} (_ , p)))
-  ∙²-compute-unique {y = y} {z} p with ∙²-compute y z
-  ∙²-compute-unique {y = y} {z} p | yes (x' , p') = ∙²-unique p p'
-  ∙²-compute-unique {y = y} {z} p | no ¬q = ⊥-elim (¬q (_ , p))
 
   ∙²-mut-cancel : ∀ {x y y' z} → x ≔ y ∙² z → z ≔ y' ∙² x → x ≡ z
   ∙²-mut-cancel {_ , _} (lx , rx) (ly , ry) rewrite ∙-mut-cancel lx ly | ∙-mut-cancel rx ry = refl

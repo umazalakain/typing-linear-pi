@@ -17,7 +17,7 @@ Shared : Algebra ⊤
 Algebra.0∙ Shared = ω
 Algebra.1∙ Shared = ω
 Algebra._≔_∙_ Shared _ _ _ = ⊤
-Algebra.∙-compute Shared _ _ = yes (ω , tt)
+Algebra.∙-computeʳ Shared _ _ = yes (ω , tt)
 Algebra.∙-unique Shared _ _ = refl
 Algebra.∙-uniqueˡ Shared _ _ = refl
 Algebra.0∙-minˡ Shared _ = refl

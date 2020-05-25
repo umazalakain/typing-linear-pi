@@ -30,17 +30,11 @@ data _≔_∙_ : Bool → Bool → Bool → Set where
   right : one  ≔ zero ∙ one
   left  : one  ≔ one  ∙ zero
 
-∙-compute : ∀ y z → Dec (∃[ x ] (x ≔ y ∙ z))
-∙-compute zero zero = yes (zero , skip)
-∙-compute zero one = yes (one , right)
-∙-compute one zero = yes (one , left)
-∙-compute one one = no λ { (zero , ()) ; (one , ())}
-
-∙-computeˡ : ∀ x z → Dec (∃[ y ] (x ≔ y ∙ z))
-∙-computeˡ zero zero = yes (zero , skip)
-∙-computeˡ zero one = no λ { (zero , ()) ; (one , ())}
-∙-computeˡ one zero = yes (one , left)
-∙-computeˡ one one = yes (zero , right)
+∙-computeʳ : ∀ x y → Dec (∃[ z ] (x ≔ y ∙ z))
+∙-computeʳ zero zero = yes (zero , skip)
+∙-computeʳ zero one = no λ ()
+∙-computeʳ one zero = yes (one , right)
+∙-computeʳ one one = yes (zero , left)
 
 ∙-unique : ∀ {x' x y z} → x' ≔ y ∙ z → x ≔ y ∙ z → x' ≡ x
 ∙-unique skip skip = refl
@@ -71,7 +65,7 @@ Linear : Algebra Bool
 Algebra.1∙ Linear = true
 Algebra.0∙ Linear = false
 Algebra._≔_∙_ Linear = _≔_∙_
-Algebra.∙-compute Linear = ∙-compute
+Algebra.∙-computeʳ Linear = ∙-computeʳ
 Algebra.∙-unique Linear = ∙-unique
 Algebra.∙-uniqueˡ Linear = ∙-uniqueˡ
 Algebra.0∙-minˡ Linear skip = refl

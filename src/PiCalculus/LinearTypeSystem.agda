@@ -83,9 +83,9 @@ data _∋[_]_▹_ : {idxs : Idxs n} → Ctx idxs → Fin n → (Usage idx) ² �
 _；_∋[_]_；_▹_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Fin n → Type → (Usage idx) ² → Ctx idxs → Set
 γ ； Γ ∋[ i ] t ； x ▹ Δ = (γ ∋[ i ] t) × (Γ ∋[ i ] x ▹ Δ)
 
--- Constructor for (zero , zero xyz) that computes x from y and z
-here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {y z : Usage idx ²} ⦃ check : True (∙²-compute y z) ⦄
-     → γ -, t ； Γ -, proj₁ (toWitness check) ∋[ zero ] t ； y ▹ Γ -, z
+-- Constructor for (zero , zero xyz) that computes z from x and y
+here : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {x y : Usage idx ²} ⦃ check : True (∙²-computeʳ x y) ⦄
+     → γ -, t ； Γ -, x ∋[ zero ] t ； y ▹ Γ -, proj₁ (toWitness check)
 here ⦃ check ⦄ = let _ , x≔y∙²z = toWitness check in zero , zero x≔y∙²z
 
 infixr 20 there_
