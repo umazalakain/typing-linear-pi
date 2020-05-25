@@ -117,6 +117,13 @@
     \end{itemize}
   \end{frame}
 
+  \note[itemize]{
+  \item We want to encode the session-typed \picalc{} into the linear \picalc{}
+  \item and prove some properties of the encoding
+  \item We first need our target language: the linear \picalc{}
+  \item Common syntax and semantics for linear and session-typed
+  }
+  
   \begin{frame}{Notation}
     \begin{equation*}
       \begin{aligned}
@@ -128,13 +135,6 @@
     \end{equation*}
   \end{frame}
 
-  \note[itemize]{
-  \item We want to encode the session-typed \picalc{} into the linear \picalc{}
-  \item and prove some properties of the encoding
-  \item We first need our target language: the linear \picalc{}
-  \item Common syntax and semantics for linear and session-typed
-  }
-  
   \begin{frame}{\Picalc{}: Well-Scoped Syntax}
     \begin{mathpar}
       \inferrule
@@ -239,7 +239,7 @@
 
   \begin{frame}{Type System: Initial Pitfalls}
     \begin{itemize}
-    \item Transforming contexts using functions
+    \item Using functions on usage contexts
       \begin{mathpar}
       \inferrule
       {\stacked{
@@ -263,13 +263,14 @@
   \begin{frame}{Type System}
     \begin{itemize}
       \item Syntax directed
+      \item Type and usage contexts are independent
+      \item Leftover usage context
       \item Intrinsic context splits
       \item Based on a set of usage algebras
     \end{itemize}
   \end{frame}
   
   \note[itemize]{
-  \item Top down
   \item Only choice is in the types and usage annotations on scope restriction
   }
 
@@ -308,6 +309,10 @@
       \end{aligned}
     \end{equation*}
   \end{frame}
+
+  \note[itemize]{
+  \item We use two carriers per channel: one for input, one for output
+  }
   
   \begin{frame}{Indexed Usage Algebras}
     \begin{equation*}
@@ -420,24 +425,29 @@
   
   \begin{frame}{Typing Rules}
     \begin{mathpar}
+      \inferrule
+    {l \hspace{0.2em} : \types{\gamma}{\Gamma \hspace{0.3em}}{P}{\Delta} \\\\
+      r : \types{\gamma}{\Delta}{Q}{\Xi}}
+    {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
+
     \inferrule
     { }
     {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
   
-    \inferrule
-    {t : \Type \\ x : \Usage_{idx}^{\func{2}} \\ y : \Usage_{idx'} \\\\
-     cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
-    {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
     \end{mathpar}
   \end{frame}
   
   \note[itemize]{
-  \item Newly introduced channels are balanced
-  \item The multiplicities of new variables must be exhausted
+  \item Instead of one authoritative context split, give decision power to P
   }
 
   \begin{frame}{Typing Rules}
     \begin{mathpar}
+    \inferrule
+    {t : \Type \\ x : \Usage_{idx}^{\func{2}} \\ y : \Usage_{idx'} \\\\
+      cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
+    {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
+
     \inferrule
         {\stacked{
             chan_i : \contains{\gamma \hspace{1.2em}}{\Gamma \hspace{1.5em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
@@ -451,12 +461,13 @@
             cont \hspace{0.3em} : \types{\gamma}{\Xi \hspace{0.3em}}{P\hspace{4.8em}}{\Theta}}}
         {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
   
-    \inferrule
-    {l \hspace{0.2em} : \types{\gamma}{\Gamma \hspace{0.3em}}{P}{\Delta} \\\\
-     r : \types{\gamma}{\Delta}{Q}{\Xi}}
-    {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
     \end{mathpar}
   \end{frame}
+
+  \note[itemize]{
+  \item Newly introduced channels are balanced
+  \item The multiplicities of new variables must be exhausted
+  }
 
   \begin{frame}{Type Safety: Subject Congruence}
     \begin{nitheorem}[Framing]
@@ -483,6 +494,10 @@
       If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
     \end{nitheorem}
   \end{frame}
+
+  \note[itemize]{
+  \item First four by induction on \textsc{Types} and \textsc{VarRef}
+  }
 
   \begin{frame}{Type Safety: Substitution}
     \begin{nitheorem}[Substitution with accumulator]
@@ -522,10 +537,10 @@
           \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
           \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
 
-          \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
-          \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
-          \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
-          \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
+          \draw[->] (gamma-i) -- node[above] {$\vdash L$} (xi-i);
+          \draw[->] (xi-i) -- node[above] {$\vdash R$} (psi-i);
+          \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{L}{j}{i}$} (xi-j);
+          \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{R}{j}{i}$} (psi-j);
           \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
           \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
         \end{tikzpicture}
@@ -538,6 +553,7 @@
 
   \note[itemize]{
   \item We got rid of the types in the judgments
+  \item Comment on parallel composition case, similar to input and output
   }
 
   \begin{frame}{Type Safety: Subject Reduction}
