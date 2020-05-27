@@ -1,4 +1,4 @@
-\documentclass[dvipsnames, notes]{beamer}
+\documentclass[dvipsnames]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage{url}
@@ -13,6 +13,9 @@
 
 % Mathbb doesn't support digits
 \usepackage{bbm}
+
+% Example code
+\usepackage{listings}
 
 % Inference rules
 \usepackage{mathpartir}
@@ -101,7 +104,16 @@
   \item Please interrupt at any time
   }
 
-  \begin{frame}{Motivation and Constraints}
+  \begin{frame}{Motivation}
+    \begin{itemize}
+    \item \picalc{} as a computational model for communication and concurrency
+    \item Linear type systems guarantee that resources are used exactly once
+    \item Combining them both gives raise to session types
+    \item Underlying framework
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}{Constraints}
     \centering
     \begin{tikzpicture}
       \node[draw, rounded corners] (st) at (0,0) {session-typed \picalc{}};
@@ -155,6 +167,8 @@
         |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}       \\           
       \end{aligned}
     \end{equation*}
+
+    TODO: example named, example de Bruijn
   \end{frame}
 
   \note[itemize]{
@@ -237,34 +251,30 @@
     \item $\func{dec}$ saturates on $\constr{internal}$
   }
 
-  \begin{frame}{Type System: Initial Pitfalls}
-    \begin{itemize}
-    \item Using functions on usage contexts
-      \begin{mathpar}
-      \inferrule
-      {\stacked{
-          \gamma \; \type{;} \; \Gamma \; \type{\ni}_i \; \channel{t}{u} \; \type{;} \; x\\
-          \opsquared{x}{\li}{z} \\\\
-          \gamma \comma t \; \type{;} \; (\func{update}_i \; z \; \Gamma) \comma u \vdash P}}
-      {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \recv{i}{P}}
-      \end{mathpar}
-    \item Extrinsic context splits
-      \begin{mathpar}
-        \inferrule
-        {\stacked{
-            \opctx{\Gamma}{\Delta}{\Xi} \\\\
-            \gamma \; \type{;} \; \Delta \; \type{\vdash} P \\\\
-            \gamma \; \type{;} \; \Xi \; \type{\vdash} Q}}
-        {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \comp{P}{Q}}
-      \end{mathpar}
-    \end{itemize}
+  \begin{frame}[t]
+    \begin{columns}[T]
+      \begin{column}{0.5\textwidth}
+        \centering
+        \vspace*{10em}
+        Untyped syntax \\
+        Operational semantics
+        \vspace*{10em}
+      \end{column}
+      \vrule width 2pt
+      \begin{column}{0.5\textwidth}
+        \centering
+        \vspace*{10em}
+        Type system
+        \vspace*{10em}
+      \end{column}
+    \end{columns}
   \end{frame}
-
+    
   \begin{frame}{Type System}
     \begin{itemize}
       \item Syntax directed
-      \item Type and usage contexts are independent
-      \item Leftover usage context
+      \item Independent type and usage contexts
+      \item Extra leftover usage context
       \item Intrinsic context splits
       \item Based on a set of usage algebras
     \end{itemize}
@@ -272,6 +282,9 @@
   
   \note[itemize]{
   \item Only choice is in the types and usage annotations on scope restriction
+  \item A syntax directed type system allows for inversion lemmas
+  \item More on intrinsic/extrinsic later
+  \item Linear, graded and shared types are all instances of an usage algebra
   }
 
   \begin{frame}{Usage Algebra}
@@ -280,14 +293,14 @@
       &\zero                  &:{} &                 &        & C \\
       &\one                   &:{} &                 &        & C \\
       &\op{\_}{\_}{\_}        &:{} &                 &        & C \to C \to C \to \Set \\
-      &\func{\cdot-compute^r} &:{} &\forall x y       & \to \; & \type{DEC} \; (\type{\exists} z  \; (\op{x}{y}{z})) \\
+      &\func{\cdot-id^l}      &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
+      &\func{\cdot-assoc}     &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \\
+      &                       &    &                  &        & \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z}) \\
+      &\func{\cdot-comm}      &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
+      &\func{\cdot-min^l}     &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
       &\func{\cdot-unique}    &:{} &\forall x x' y z  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
       &\func{\cdot-unique^l}  &:{} &\forall x y y' z  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-      &\func{\cdot-min^l}     &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-      &\func{\cdot-id^l}      &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
-      &\func{\cdot-comm}      &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-      &\func{\cdot-assoc}     &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \\
-      &                       &    &                  &        & \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
+      &\func{\cdot-compute^r} &:{} &\forall x y       & \to \; & \type{DEC} \; (\type{\exists} z  \; (\op{x}{y}{z})) \\
     \end{aligned}
     \end{equation*}
   \end{frame}
@@ -298,6 +311,10 @@
   }
 
   \begin{frame}{Notation}
+    \textbf{Capability} input / output
+    \hspace{2em}
+    \textbf{Multiplicity} $\zero$, $\one$, \ldots
+
     \begin{equation*}
       \begin{aligned}
         &C^{\func{2}} &&= C \type{\times} C \\
@@ -311,25 +328,28 @@
   \end{frame}
 
   \note[itemize]{
+  \item Notation borrowed from linear \picalc{}
   \item We use two carriers per channel: one for input, one for output
   }
   
   \begin{frame}{Indexed Usage Algebras}
     \begin{equation*}
       \begin{aligned}
-        &\Idx               &:{} &\Set \\
-        &\type{\exists IDX} &:{} &\Idx \\
-        &\Usage             &:{} &\Idx \to \Set \\
-        &\type{ALGEBRAS}    &:{} &(idx : \Idx) \to \Algebra_{\Usage_{idx}} \\
+        &\Idx               &: &\Set \\
+        &\type{\exists IDX} &: &\Idx \\
+        &\Usage             &: &\Idx \to \Set \\
+        &\type{ALGEBRAS}    &: &(idx : \Idx) \to \Algebra_{\Usage_{idx}} \\
       \end{aligned}
     \end{equation*}
+
+    TODO
   \end{frame}
 
   \note[itemize]{
     \item Lump multiple algebras together
   }
   
-  \begin{frame}{Typing Contexts}
+  \begin{frame}{Types}
     \begin{mathpar}
       \inferrule
       { }
@@ -342,58 +362,22 @@
       \inferrule
       {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Usage_{idx}^{\func{2}}}}
       {\channel{t}{x} : \Type}
-      
-      \inferrule
-      { }
-      {[] : \PreCtx_{\constr{0}}}
-      
-      \inferrule
-      {\gamma : \PreCtx_n \\ t : \Type}
-      {\gamma \comma t : \PreCtx_{\suc n}}
     \end{mathpar}
-  \end{frame}
 
-  \begin{frame}{Usage Contexts}
-    \begin{mathpar}
-      \inferrule
-      { }
-      {[] : \Idxs_{\constr{0}}}
-      
-      \inferrule
-      {idxs : \Idxs_n \\ idx : \Idx}
-      {idxs \comma idx : \Idxs_{\suc n}} \\
-      
-      \inferrule
-      { }
-      {[] : \Ctx_{[]}}
-      
-      \inferrule
-      {\Gamma : \Ctx_{idxs} \\ x : \Usage_{idx} ^{\func{2}}}
-      {\Gamma \comma x : \Ctx_{idxs \comma idx}}
-    \end{mathpar}
+    \centering
+    \vfill{}
+    \textit{e.g.} $\channel{\channel{\unit}{\omega}}{\li}$
   \end{frame}
-
-  \note[itemize]{
-  \item Usage context independent of typing contexts
-  }
 
   \begin{frame}{Type System}
-    \tiny
+    \begin{description}
+    \item [$\PreCtx_n$] list of $\Type$s of length $n$
+    \item [$\Idxs_n$] list of $\Idx$s of length $n$
+    \item [$\Ctx_{idxs}$] list of $\Usage^{\func{2}}$s indexed over $idxs  \; : \Idxs_n$
+    \end{description}
+    
+    \small
     \begin{mathpar}
-    \datatype{
-      \gamma : \PreCtx_n \\
-      \stacked{
-        idxs : \Idxs_n \\\\
-        \Gamma : \Ctx_{idxs}} \\
-      i : \Var_n \\
-      t : \Type \\
-      \stacked{
-        idx : \Idx \\\\
-        y : \Usage_{idx}^{\func{2}}} \\
-      \Delta : \Ctx_{idxs}}
-    {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}
-    \; \textsc{VarRef}
-
     \datatype{
       \gamma : \PreCtx_n \\
       \stacked{
@@ -402,25 +386,13 @@
       P : \Process_n \\
       \Delta : \Ctx_{idxs}}
     {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
-    \; \textsc{Types}
-    \end{mathpar}
-  \end{frame}
-  
-  \begin{frame}{Variable References}
-    \begin{mathpar}
-      \inferrule
-      {\opsquared{x}{y}{z}}
-      {\constr{0} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
-      
-      \inferrule
-      {\hspace{-0.1em} loc_i : \contains{\gamma \hspace{1.4em}}{\Gamma \hspace{1.7em}}{\hspace{1em} i}{t}{x}{\Delta}}
-      {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
     \end{mathpar}
   \end{frame}
 
   \note[itemize]{
-  \item Constructor completely determined by $i$
-  \item User alleviated from proof burden $\opsquared{x}{y}{z}$, which can be computed given $x$ and $y$
+  \item Typing judgment through typing relations
+  \item One relation on processes, one relation on variable references (omitted for brevety)
+  \item Relation on variable references uses the monoid to split multiplicities
   }
   
   \begin{frame}{Typing Rules}
@@ -455,11 +427,8 @@
         {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
   
     \inferrule
-        {\stacked{
-            chan_i : \contains{\gamma}{\Gamma \hspace{0.2em}}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
-            loc_j \hspace{0.7em} : \contains{\gamma}{\Delta}{j}{t \hspace{3.1em}}{x \hspace{0.3em}}{\Xi} \\\\
-            cont \hspace{0.3em} : \types{\gamma}{\Xi \hspace{0.3em}}{P\hspace{4.8em}}{\Theta}}}
-        {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
+        {\ldots}
+        {\constr{send} \; \ldots}
   
     \end{mathpar}
   \end{frame}
@@ -469,36 +438,117 @@
   \item The multiplicities of new variables must be exhausted
   }
 
-  \begin{frame}{Type Safety: Subject Congruence}
-    \begin{nitheorem}[Framing]
-      Let $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$ and $\opctx{\Gamma_l}{\Delta}{\Xi_l}$ for some $\Delta$.
-      Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$ for any $\Gamma_r$ and $\Xi_r$ such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
-    \end{nitheorem}
-
-    \begin{nitheorem}[Weakening]
-      Let $\types{\gamma}{\Gamma}{P}{\Xi}$.
-      Then $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
-    \end{nitheorem}
-
-    \begin{nitheorem}[Strengthening]
-      Let $\types{\gamma}{\Gamma}{P}{\Xi}$ and $uP \; : \; \Unused_i \; P$.
-      Then $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
-    \end{nitheorem}
-
-    \begin{nitheorem}[Swapping]
-      Let $\types{\gamma}{\Gamma}{P}{\Xi}$.
-      Then $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\allowbreak \func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
-    \end{nitheorem}
-
-    \begin{nitheorem}[Subject congruence]
-      If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-    \end{nitheorem}
+  \begin{frame}{Type System: Initial Pitfalls}
+    TODO: alternatives detour
+    
+    \begin{itemize}
+    \item Using functions to update usage contexts
+      \begin{mathpar}
+        \inferrule
+        {\stacked{
+            \gamma \; \type{;} \; \Gamma \; \type{\ni}_i \; \channel{t}{u} \; \type{;} \; x\\
+            \opsquared{x}{\li}{z} \\\\
+            \gamma \comma t \; \type{;} \; (\func{update}_i \; z \; \Gamma) \comma u \vdash P}}
+        {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \recv{i}{P}}
+      \end{mathpar}
+    \item Extrinsic context splits
+      \begin{mathpar}
+        \inferrule
+        {\stacked{
+            \opctx{\Gamma}{\Delta}{\Xi} \\\\
+            \gamma \; \type{;} \; \Delta \; \type{\vdash} P \\\\
+            \gamma \; \type{;} \; \Xi \; \type{\vdash} Q}}
+        {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \comp{P}{Q}}
+      \end{mathpar}
+    \end{itemize}
   \end{frame}
 
   \note[itemize]{
-  \item First four by induction on \textsc{Types} and \textsc{VarRef}
+  \item The extrinsic context split is authoritative, P already knows what it needs
   }
 
+  \begin{frame}
+    MEME
+  \end{frame}
+  
+  \begin{frame}{Type Safety: Subject Congruence}
+    \begin{description}
+      \item [Framing] The well-typedness of a process is independent of its leftover resources.
+
+      \item [Weakening] Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+
+      \item [Strengthening] Removing an unused variable preserves the well-typedness of a process.
+
+      \item [Subject congruence] Applying structural congruence rules to a well typed process preserves its well-typedness.
+    \end{description}
+  \end{frame}
+
+  \note[itemize]{
+  \item First three by induction on \textsc{Types} and \textsc{VarRef}
+  \item First three state for the first time for the \picalc{}
+  }
+
+  \begin{frame}{Type Safety: Substitution}
+    TODO: dumbed down
+    TODO: emphasis on easy paper, tricky mechanise
+  \end{frame}
+
+  \note[itemize]{
+  \item We got rid of the types in the judgments
+  \item Comment on parallel composition case, similar to input and output
+  }
+
+  \begin{frame}{Type Safety: Subject Reduction}
+    \begin{nitheorem}[Subject reduction]
+      \label{thm:subject-reduction}
+      Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
+      \begin{itemize}
+      \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+      \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
+      \end{itemize}
+    \end{nitheorem}
+  \end{frame}
+
+  \begin{frame}{Future Work}
+    \begin{itemize}
+    \item Prove preservation of well-balancedness
+    \item Product types
+    \item Sum types
+    \item Recursion
+    \item Bidirectional type system
+    \item Decidable type checking
+    \item Use as target language for the session-typed \picalc{}
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \centering
+    \Huge{Thank you!} \\
+    \Huge{\textasciicircum \_\textasciicircum} \\
+    \Huge{Questions?}
+  \end{frame}
+    
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+
+  \begin{frame}{Variable References}
+    \begin{mathpar}
+      \inferrule
+      {\opsquared{x}{y}{z}}
+      {\constr{0} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
+      
+      \inferrule
+      {\hspace{-0.1em} loc_i : \contains{\gamma \hspace{1.4em}}{\Gamma \hspace{1.7em}}{\hspace{1em} i}{t}{x}{\Delta}}
+      {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
+    \end{mathpar}
+  \end{frame}
+
+  \note[itemize]{
+  \item Constructor completely determined by $i$
+  \item User alleviated from proof burden $\opsquared{x}{y}{z}$, which can be computed given $x$ and $y$
+  }
+  
   \begin{frame}{Type Safety: Substitution}
     \begin{nitheorem}[Substitution with accumulator]
       Let $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
@@ -549,33 +599,5 @@
       Let $\Delta$ have usage $\lz$ at position $i$.
       Then $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
     \end{nitheorem}
-  \end{frame}
-
-  \note[itemize]{
-  \item We got rid of the types in the judgments
-  \item Comment on parallel composition case, similar to input and output
-  }
-
-  \begin{frame}{Type Safety: Subject Reduction}
-    \begin{nitheorem}[Subject reduction]
-      \label{thm:subject-reduction}
-      Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
-      \begin{itemize}
-      \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-      \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
-      \end{itemize}
-    \end{nitheorem}
-  \end{frame}
-
-  \begin{frame}{Future Work}
-    \begin{itemize}
-    \item Prove preservation of well-balancedness
-    \item Product types
-    \item Sum types
-    \item Recursion
-    \item Bidirectional type system
-    \item Decidable type checking
-    \item Use as target language for the session-typed \picalc{}
-    \end{itemize}
   \end{frame}
 \end{document}
