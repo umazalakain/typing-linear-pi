@@ -23,11 +23,8 @@
 % Multiple columns
 \usepackage{multicol}
 
-% Do not use italics in definitions and theorems
-\theoremstyle{definition}
-\newtheorem{nidefinition}{Definition}
-\newtheorem{nitheorem}{Theorem}
-\newtheorem{nilemma}{Lemma}
+% Square bullet points
+\newcommand{\sitem}{\item[\raisebox{.45ex}{\rule{.6ex}{.6ex}}]}
 
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
@@ -101,16 +98,26 @@
   \maketitle
 
   \note[itemize]{
-  \item Please interrupt at any time
+  \sitem Please interrupt at any time
   }
 
   \begin{frame}{Motivation}
-    \begin{itemize}
-    \item \picalc{} as a computational model for communication and concurrency
-    \item Linear type systems guarantee that resources are used exactly once
-    \item Combining them both gives raise to session types
-    \item Underlying framework
-    \end{itemize}
+    \begin{block}{\picalc{}?}
+      \hfill\\
+      computational foundation for communication and concurrency \\
+      like the \lambdacalc{}, but with $\beta$-reduction at a distance
+    \end{block}
+    \hfill\\
+    \begin{block}{linear \picalc{}?}
+      \hfill\\
+      communication channels must be used exactly once \\
+      serves as a target encoding for session types
+    \end{block}
+    \hfill\\
+    \begin{block}{goal}
+      \hfill\\
+      common underlying framework for type systems for the \picalc{}
+    \end{block}
   \end{frame}
 
   \begin{frame}{Constraints}
@@ -120,20 +127,20 @@
       \node[draw=red, thick, rounded corners, label={[red]below:\textasciicircum this\textasciicircum}] (sh) at (5,0) {linear \picalc{}};
       \draw[->, thick] (st) -- (sh);
     \end{tikzpicture}
-    \vspace{2em}
+    \vspace{1em}
 
     \begin{itemize}
-      \item Syntax and semantics must be untyped
-      \item Must also support shared channels
-      \item Goal: to prove subject reduction
+      \sitem untyped syntax and semantics
+      \sitem must support shared channels
+      \sitem goal: to prove type safety
     \end{itemize}
   \end{frame}
 
   \note[itemize]{
-  \item We want to encode the session-typed \picalc{} into the linear \picalc{}
-  \item and prove some properties of the encoding
-  \item We first need our target language: the linear \picalc{}
-  \item Common syntax and semantics for linear and session-typed
+  \sitem We want to encode the session-typed \picalc{} into the linear \picalc{}
+  \sitem and prove some properties of the encoding
+  \sitem We first need our target language: the linear \picalc{}
+  \sitem Common syntax and semantics for linear and session-typed
   }
   
   \begin{frame}{Notation}
@@ -147,7 +154,7 @@
     \end{equation*}
   \end{frame}
 
-  \begin{frame}{\Picalc{}: Well-Scoped Syntax}
+  \begin{frame}{Well-Scoped Syntax}
     \begin{mathpar}
       \inferrule
       {n : \N}
@@ -172,11 +179,11 @@
   \end{frame}
 
   \note[itemize]{
-    \item \picalc{} syntax, well-scoped by construction through de Bruijn indices
-    \item go over the constructors
+    \sitem \picalc{} syntax, well-scoped by construction through de Bruijn indices
+    \sitem go over the constructors
   }
 
-  \begin{frame}{\Picalc{}: Structural Congruence}
+  \begin{frame}{Structural Congruence}
     \begin{mathpar}
       \inferrule
       { }
@@ -208,13 +215,13 @@
   \end{frame}
 
   \note[itemize]{
-    \item Parallel composition is associative, commutative and has $\PO$ as neutral element
-    \item Garbage collection
-    \item Scope extrusion (keep a proof $uQ$ alongside)
-    \item Commutativity of scopes
+    \sitem Parallel composition is associative, commutative and has $\PO$ as neutral element
+    \sitem Garbage collection
+    \sitem Scope extrusion (keep a proof $uQ$ alongside)
+    \sitem Commutativity of scopes
   }
 
-  \begin{frame}{\Picalc{}: Reduction Relation}
+  \begin{frame}{Reduction Relation}
     \begin{mathpar}
       \inferrule
       { }
@@ -243,12 +250,12 @@
   \end{frame}
 
   \note[itemize]{
-    \item Same scope before and after reduction
-    \item Scope restriction is preserved (can be eliminated in strictly linear systems)
-    \item Common channel $i$
-    \item We keep track of $i$ at the type level
-    \item Goes under parallel composition and scope restriction
-    \item $\func{dec}$ saturates on $\constr{internal}$
+    \sitem Same scope before and after reduction
+    \sitem Scope restriction is preserved (can be eliminated in strictly linear systems)
+    \sitem Common channel $i$
+    \sitem We keep track of $i$ at the type level
+    \sitem Goes under parallel composition and scope restriction
+    \sitem $\func{dec}$ saturates on $\constr{internal}$
   }
 
   \begin{frame}[t]
@@ -256,15 +263,15 @@
       \begin{column}{0.5\textwidth}
         \centering
         \vspace*{10em}
-        Untyped syntax \\
-        Operational semantics
+        untyped syntax \\
+        operational semantics
         \vspace*{10em}
       \end{column}
       \vrule width 2pt
       \begin{column}{0.5\textwidth}
         \centering
         \vspace*{10em}
-        Type system
+        \framebox{type system}
         \vspace*{10em}
       \end{column}
     \end{columns}
@@ -272,19 +279,19 @@
     
   \begin{frame}{Type System}
     \begin{itemize}
-      \item Syntax directed
-      \item Independent type and usage contexts
-      \item Extra leftover usage context
-      \item Intrinsic context splits
-      \item Based on a set of usage algebras
+      \sitem syntax directed
+      \sitem independent type and usage contexts
+      \sitem extra leftover usage context
+      \sitem intrinsic context splits
+      \sitem based on a set of usage algebras
     \end{itemize}
   \end{frame}
   
   \note[itemize]{
-  \item Only choice is in the types and usage annotations on scope restriction
-  \item A syntax directed type system allows for inversion lemmas
-  \item More on intrinsic/extrinsic later
-  \item Linear, graded and shared types are all instances of an usage algebra
+  \sitem Only choice is in the types and usage annotations on scope restriction
+  \sitem A syntax directed type system allows for inversion lemmas
+  \sitem More on intrinsic/extrinsic later
+  \sitem Linear, graded and shared types are all instances of an usage algebra
   }
 
   \begin{frame}{Usage Algebra}
@@ -306,14 +313,14 @@
   \end{frame}
 
   \note[itemize]{
-    \item Model as a ternary relation
-    \item Decidable, deterministic, cancellative and has a minimal element
+    \sitem Model as a ternary relation
+    \sitem Decidable, deterministic, cancellative and has a minimal element
   }
 
-  \begin{frame}{Notation}
-    \textbf{Capability} input / output
-    \hspace{2em}
-    \textbf{Multiplicity} $\zero$, $\one$, \ldots
+  \begin{frame}{Capability Notation}
+    \textbf{capability} input / output
+    \hspace{1em}
+    \textbf{multiplicity} $\zero$, $\one$, \ldots
 
     \begin{equation*}
       \begin{aligned}
@@ -328,8 +335,8 @@
   \end{frame}
 
   \note[itemize]{
-  \item Notation borrowed from linear \picalc{}
-  \item We use two carriers per channel: one for input, one for output
+  \sitem Notation borrowed from linear \picalc{}
+  \sitem We use two carriers per channel: one for input, one for output
   }
   
   \begin{frame}{Indexed Usage Algebras}
@@ -346,7 +353,7 @@
   \end{frame}
 
   \note[itemize]{
-    \item Lump multiple algebras together
+    \sitem Lump multiple algebras together
   }
   
   \begin{frame}{Types}
@@ -369,7 +376,7 @@
     \textit{e.g.} $\channel{\channel{\unit}{\omega}}{\li}$
   \end{frame}
 
-  \begin{frame}{Type System}
+  \begin{frame}{Typing Relation}
     \begin{description}
     \item [$\PreCtx_n$] list of $\Type$s of length $n$
     \item [$\Idxs_n$] list of $\Idx$s of length $n$
@@ -390,15 +397,15 @@
   \end{frame}
 
   \note[itemize]{
-  \item Typing judgment through typing relations
-  \item One relation on processes, one relation on variable references (omitted for brevety)
-  \item Relation on variable references uses the monoid to split multiplicities
+  \sitem Typing judgment through typing relations
+  \sitem One relation on processes, one relation on variable references (omitted for brevety)
+  \sitem Relation on variable references uses the monoid to split multiplicities
   }
   
   \begin{frame}{Typing Rules}
     \begin{mathpar}
       \inferrule
-    {l \hspace{0.2em} : \types{\gamma}{\Gamma \hspace{0.3em}}{P}{\Delta} \\\\
+    {l \hspace{0.1em} : \types{\gamma}{\Gamma \hspace{0.3em}}{P}{\Delta} \\\\
       r : \types{\gamma}{\Delta}{Q}{\Xi}}
     {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
 
@@ -410,7 +417,7 @@
   \end{frame}
   
   \note[itemize]{
-  \item Instead of one authoritative context split, give decision power to P
+  \sitem Instead of one authoritative context split, give decision power to P
   }
 
   \begin{frame}{Typing Rules}
@@ -422,7 +429,7 @@
 
     \inferrule
         {\stacked{
-            chan_i : \contains{\gamma \hspace{1.2em}}{\Gamma \hspace{1.5em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
+            chan_i : \contains{\gamma \hspace{1.1em}}{\Gamma \hspace{1.5em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
             cont \hspace{0.4em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{4.6em}}{\Theta \comma \lz}}}
         {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
   
@@ -434,98 +441,104 @@
   \end{frame}
 
   \note[itemize]{
-  \item Newly introduced channels are balanced
-  \item The multiplicities of new variables must be exhausted
+  \sitem Newly introduced channels are balanced
+  \sitem The multiplicities of new variables must be exhausted
   }
 
-  \begin{frame}{Type System: Initial Pitfalls}
+  \begin{frame}{Initial Pitfalls}
     TODO: alternatives detour
     
     \begin{itemize}
-    \item Using functions to update usage contexts
+    \sitem using functions to update usage contexts
       \begin{mathpar}
         \inferrule
-        {\stacked{
-            \gamma \; \type{;} \; \Gamma \; \type{\ni}_i \; \channel{t}{u} \; \type{;} \; x\\
-            \opsquared{x}{\li}{z} \\\\
-            \gamma \comma t \; \type{;} \; (\func{update}_i \; z \; \Gamma) \comma u \vdash P}}
+        {\ldots \\ \gamma \; \type{;} \; (\func{update}_i \; \ldots \; \Gamma) \vdash P \\ \ldots}
         {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \recv{i}{P}}
       \end{mathpar}
-    \item Extrinsic context splits
+    \sitem extrinsic context splits
       \begin{mathpar}
         \inferrule
-        {\stacked{
-            \opctx{\Gamma}{\Delta}{\Xi} \\\\
-            \gamma \; \type{;} \; \Delta \; \type{\vdash} P \\\\
-            \gamma \; \type{;} \; \Xi \; \type{\vdash} Q}}
-        {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \comp{P}{Q}}
+        {\opctx{\Gamma}{\Delta}{\Xi} \\\\
+         \Delta \; \type{\vdash} P \\\\
+         \Xi \; \type{\vdash} Q}
+        {\Gamma \; \type{\vdash} \; \comp{P}{Q}}
       \end{mathpar}
     \end{itemize}
   \end{frame}
 
   \note[itemize]{
-  \item The extrinsic context split is authoritative, P already knows what it needs
+  \sitem The extrinsic context split is authoritative, P already knows what it needs
   }
 
-  \begin{frame}
-    MEME
+  \begin{frame}[t]
+    \begin{columns}[T]
+      \begin{column}{0.5\textwidth}
+        \centering
+        \vspace*{10.5em}
+        type system
+        \vspace*{10em}
+      \end{column}
+      \vrule width 2pt
+      \begin{column}{0.5\textwidth}
+        \centering
+        \vspace*{10em}
+        \framebox{type safety}
+        \vspace*{10em}
+      \end{column}
+    \end{columns}
   \end{frame}
   
-  \begin{frame}{Type Safety: Subject Congruence}
-    \begin{description}
-      \item [Framing] The well-typedness of a process is independent of its leftover resources.
+  \begin{frame}{Subject Congruence}
+    \begin{itemize}
+      \setlength\itemsep{1em}
+      \sitem \textbf{framing} the only resources the well-typedness of a process depends on are the ones used by it.
 
-      \item [Weakening] Inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+      \sitem \textbf{weakening} inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 
-      \item [Strengthening] Removing an unused variable preserves the well-typedness of a process.
+      \sitem \textbf{strengthening} removing an unused variable preserves the well-typedness of a process.
 
-      \item [Subject congruence] Applying structural congruence rules to a well typed process preserves its well-typedness.
-    \end{description}
+      \sitem \textbf{subject congruence} applying structural congruence rules to a well typed process preserves its well-typedness.
+    \end{itemize}
   \end{frame}
 
   \note[itemize]{
-  \item First three by induction on \textsc{Types} and \textsc{VarRef}
-  \item First three state for the first time for the \picalc{}
+  \sitem First three by induction on \textsc{Types} and \textsc{VarRef}
+  \sitem First three state for the first time for the \picalc{}
   }
 
-  \begin{frame}{Type Safety: Substitution}
-    TODO: dumbed down
-    TODO: emphasis on easy paper, tricky mechanise
-  \end{frame}
+  \begin{frame}{Subject Reduction}
+    \begin{itemize}
+      \setlength\itemsep{2em}
+      \sitem \textbf{substitution} \\
+      TODO: substitution, dumbed down
+      TODO: substitution, emphasis on easy paper, tricky mechanise
 
-  \note[itemize]{
-  \item We got rid of the types in the judgments
-  \item Comment on parallel composition case, similar to input and output
-  }
-
-  \begin{frame}{Type Safety: Subject Reduction}
-    \begin{nitheorem}[Subject reduction]
-      \label{thm:subject-reduction}
-      Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
+      \sitem \textbf{subject reduction} \\
+      let $\types{\gamma}{\Gamma}{P}{\Xi}$ and $P \reduce{c} Q$,
       \begin{itemize}
-      \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-      \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
+        \sitem if $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+        \sitem if $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
       \end{itemize}
-    \end{nitheorem}
+    \end{itemize}
   \end{frame}
 
   \begin{frame}{Future Work}
     \begin{itemize}
-    \item Prove preservation of well-balancedness
-    \item Product types
-    \item Sum types
-    \item Recursion
-    \item Bidirectional type system
-    \item Decidable type checking
-    \item Use as target language for the session-typed \picalc{}
+    \sitem prove preservation of well-balancedness
+    \sitem product types
+    \sitem sum types
+    \sitem recursion
+    \sitem bidirectional type system
+    \sitem decidable type checking
+    \sitem use as target language for the session-typed \picalc{}
     \end{itemize}
   \end{frame}
 
   \begin{frame}
     \centering
-    \Huge{Thank you!} \\
-    \Huge{\textasciicircum \_\textasciicircum} \\
-    \Huge{Questions?}
+    \Huge{thank you!} \\
+    \Huge{\textasciicircum{}\_\textasciicircum{}} \\
+    \Huge{questions?}
   \end{frame}
     
 
@@ -534,6 +547,20 @@
 
   \begin{frame}{Variable References}
     \begin{mathpar}
+      {\tiny
+      \datatype{
+        \gamma : \PreCtx_n \\
+        \stacked{
+          idxs : \Idxs_n \\\\
+          \Gamma : \Ctx_{idxs}} \\
+        i : \Var_n \\
+        t : \Type \\
+        \stacked{
+          idx : \Idx \\\\
+          y : \Usage_{idx}^{\func{2}}} \\
+        \Delta : \Ctx_{idxs}}
+      {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}}
+
       \inferrule
       {\opsquared{x}{y}{z}}
       {\constr{0} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
@@ -545,21 +572,21 @@
   \end{frame}
 
   \note[itemize]{
-  \item Constructor completely determined by $i$
-  \item User alleviated from proof burden $\opsquared{x}{y}{z}$, which can be computed given $x$ and $y$
+  \sitem Constructor completely determined by $i$
+  \sitem User alleviated from proof burden $\opsquared{x}{y}{z}$, which can be computed given $x$ and $y$
   }
   
   \begin{frame}{Type Safety: Substitution}
-    \begin{nitheorem}[Substitution with accumulator]
+    \textbf{Substitution with accumulator} \\
       Let $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
       Let there be some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
       \setlength{\linewidth}{.8\linewidth}
       \begin{multicols}{2}
         \begin{itemize}
-        \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
-        \item $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
-        \item $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
-        \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
+        \sitem $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
+        \sitem $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
+        \sitem $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
+        \sitem $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
         \end{itemize}
         \vfill\null
         \columnbreak
@@ -598,6 +625,5 @@
       Let there be some $\Delta$ such that $\opctx{\Gamma}{\Delta}{\Psi}$.
       Let $\Delta$ have usage $\lz$ at position $i$.
       Then $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
-    \end{nitheorem}
   \end{frame}
 \end{document}
