@@ -452,8 +452,8 @@
     \sitem using functions to update usage contexts
       \begin{mathpar}
         \inferrule
-        {\ldots \\ \gamma \; \type{;} \; (\func{update}_i \; \ldots \; \Gamma) \vdash P \\ \ldots}
-        {\gamma \; \type{;} \; \Gamma \; \type{\vdash} \; \recv{i}{P}}
+        {\ldots \\ (\func{update}_i \; \ldots \; \Gamma) \vdash P \\ \ldots}
+        {\Gamma \; \type{\vdash} \; \recv{i}{P}}
       \end{mathpar}
     \sitem extrinsic context splits
       \begin{mathpar}
