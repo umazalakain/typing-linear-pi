@@ -23,6 +23,9 @@
 % Multiple columns
 \usepackage{multicol}
 
+% Newline inside table
+\usepackage{makecell}
+
 % Square bullet points
 \newcommand{\sitem}{\item[\raisebox{.45ex}{\rule{.6ex}{.6ex}}]}
 
@@ -359,7 +362,16 @@
       \end{aligned}
     \end{equation*}
 
-    TODO
+  \centering
+  \begin{tabular}{l | l | l}
+    & carrier & operation \\
+    \hline
+    \textbf{linear} & \makecell[cl]{$\constr{0} \, : \, \type{Lin}$ \\ $\constr{1} \, : \, \type{Lin}$} & \makecell[cl]{$\op{\constr{0}}{\constr{0}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{1}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{0}}{\constr{1}}$} \\
+    \hline
+    \textbf{graded} & \makecell[cl]{$\constr{0} \, : \type{Gra}$ \\ $\suc \, : \type{Gra} \to \type{Gra}$} & \makecell[cl]{$\forall \, x \, y \, z$ \\ $\to x \, \type{\equiv} \, y \, \func{+} \, z$ \\ $\to \op{x}{y}{z}$} \\
+    \hline
+    \textbf{shared} & $\constr{\omega} \, : \, \type{Sha}$ & $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ \\
+  \end{tabular}
   \end{frame}
 
   \note[itemize]{
@@ -455,9 +467,7 @@
   \sitem The multiplicities of new variables must be exhausted
   }
 
-  \begin{frame}{Initial Pitfalls}
-    TODO: alternatives detour
-    
+  \begin{frame}{Failed Efforts}
     \begin{itemize}
     \sitem using functions to update usage contexts
       \begin{mathpar}
@@ -520,8 +530,7 @@
     \begin{itemize}
       \setlength\itemsep{2em}
       \sitem \textbf{substitution} \\
-      TODO: substitution, dumbed down
-      TODO: substitution, emphasis on easy paper, tricky mechanise
+      substituting a variable $i$ for a variable $j$ in a well-typed process $P$ results in a well-typed process as long as the leftovers at index $j$ after $P$ are at least the consumption made by $P$ at index $i$.
 
       \sitem \textbf{subject reduction} \\
       let $\types{\gamma}{\Gamma}{P}{\Xi}$ and $P \reduce{c} Q$,
