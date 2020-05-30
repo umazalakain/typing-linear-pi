@@ -100,15 +100,17 @@
 \begin{document}
   \maketitle
 
-  \note[itemize]{
-  \sitem Please interrupt at any time
+  \note{
+    Hello everyone! I am Uma, and this talk is about my first formalisation of a type system (in this case a resource-aware \picalc{}) in Agda.
+    This is joint work with my PhD supervisor Ornela Dardha.
+    If you have any questions or comments please interrupt me at any time.
   }
 
   \begin{frame}{Motivation}
     \begin{block}{\picalc{}?}
       \hfill\\
       computational foundation for communication and concurrency \\
-      like the \lambdacalc{}, but with $\beta$-reduction at a distance
+      like the \lambdacalc{}, but with $\beta$-reduction \emph{at a distance}
     \end{block}
     \hfill\\
     \begin{block}{linear \picalc{}?}
@@ -122,6 +124,21 @@
       common underlying framework for type systems for the \picalc{}
     \end{block}
   \end{frame}
+
+  \note{
+    A little introduction to the \picalc{}, for those of you that are less familiar with it.
+    The \picalc{} is a foundational model for communication, sort of like the \lambdacalc{} is for computation.
+    The \picalc{} models processes communicating with one another over communication channels.
+    It features channel mobility: channels can be sent over channels. 
+    Process doing the sending and process doing the receiving can be syntactically far from each other.
+    More on this later, when we introduce the syntax.
+
+    In the linear \picalc{} channels must be used exactly once: they can't be discarded, they can't be duplicated.
+    Why is this interesting? It provides us more fine-grained control over communication and allows us to state more interesting type safety properties.
+    They are sufficient as a target for encoding the session-typed \picalc{}.
+
+    This project comes from the idea of creating a common base framework that can be used to mechanise a bunch of type systems that are built on top of the \picalc{}, and so it's our first baby step.
+  }
 
   \begin{frame}{Constraints}
     \centering
@@ -308,21 +325,39 @@
   }
 
   \begin{frame}{Usage Algebra}
-    \begin{equation*}
-    \begin{aligned}
-      &\zero                  &:{} &                 &        & C \\
-      &\one                   &:{} &                 &        & C \\
-      &\op{\_}{\_}{\_}        &:{} &                 &        & C \to C \to C \to \Set \\
-      &\func{\cdot-id^l}      &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
-      &\func{\cdot-assoc}     &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \\
-      &                       &    &                  &        & \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z}) \\
-      &\func{\cdot-comm}      &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-      &\func{\cdot-min^l}     &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-      &\func{\cdot-unique}    &:{} &\forall x x' y z  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
-      &\func{\cdot-unique^l}  &:{} &\forall x y y' z  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-      &\func{\cdot-compute^r} &:{} &\forall x y       & \to \; & \type{DEC} \; (\type{\exists} z  \; (\op{x}{y}{z})) \\
-    \end{aligned}
-    \end{equation*}
+    \begin{columns}
+      \begin{column}{0.3\textwidth}
+        \begin{itemize}
+          \item partial
+          \item neutral element $\zero$
+          \item minimal element $\zero$
+          \item associative
+          \item commutative
+          \item deterministic
+          \item cancellative
+          \item decidable
+        \end{itemize}
+      \end{column}
+      \begin{column}{0.7\textwidth}
+        \begin{equation*}
+          \begin{aligned}
+            &\zero                  &:{} &                 &        & C \\
+            &\one                   &:{} &                 &        & C \\
+            &\op{\_}{\_}{\_}        &:{} &                 &        & C \to C \to C \to \Set \\
+          \end{aligned}
+        \end{equation*}
+        \centering
+        \begin{tabular}{l | l | l}
+          & carrier & operation \\
+          \hline
+          \textbf{linear} & \makecell[cl]{$\constr{0} \, : \, \type{Lin}$ \\ $\constr{1} \, : \, \type{Lin}$} & \makecell[cl]{$\op{\constr{0}}{\constr{0}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{1}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{0}}{\constr{1}}$} \\
+          \hline
+          \textbf{graded} & \makecell[cl]{$\constr{0} \, : \type{Gra}$ \\ $\suc \, : \type{Gra} \to \type{Gra}$} & \makecell[cl]{$\forall \, x \, y \, z$ \\ $\to x \, \type{\equiv} \, y \, \func{+} \, z$ \\ $\to \op{x}{y}{z}$} \\
+          \hline
+          \textbf{shared} & $\constr{\omega} \, : \, \type{Sha}$ & $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ \\
+        \end{tabular}
+      \end{column}
+    \end{columns}
   \end{frame}
 
   \note[itemize]{
@@ -330,6 +365,22 @@
     \sitem Decidable, deterministic, cancellative and has a minimal element
   }
 
+  \begin{frame}{Indexed Usage Algebras}
+    \begin{equation*}
+      \begin{aligned}
+        &\Idx               &: &\Set \\
+        &\type{\exists IDX} &: &\Idx \\
+        &\Usage             &: &\Idx \to \Set \\
+        &\type{ALGEBRAS}    &: &(idx : \Idx) \to \Algebra_{\Usage_{idx}} \\
+      \end{aligned}
+    \end{equation*}
+
+  \end{frame}
+
+  \note[itemize]{
+    \sitem Lump multiple algebras together
+  }
+  
   \begin{frame}{Capability Notation}
     \textbf{capability} input / output
     \hspace{1em}
@@ -348,34 +399,8 @@
   \end{frame}
 
   \note[itemize]{
-  \sitem Notation borrowed from linear \picalc{}
-  \sitem We use two carriers per channel: one for input, one for output
-  }
-  
-  \begin{frame}{Indexed Usage Algebras}
-    \begin{equation*}
-      \begin{aligned}
-        &\Idx               &: &\Set \\
-        &\type{\exists IDX} &: &\Idx \\
-        &\Usage             &: &\Idx \to \Set \\
-        &\type{ALGEBRAS}    &: &(idx : \Idx) \to \Algebra_{\Usage_{idx}} \\
-      \end{aligned}
-    \end{equation*}
-
-  \centering
-  \begin{tabular}{l | l | l}
-    & carrier & operation \\
-    \hline
-    \textbf{linear} & \makecell[cl]{$\constr{0} \, : \, \type{Lin}$ \\ $\constr{1} \, : \, \type{Lin}$} & \makecell[cl]{$\op{\constr{0}}{\constr{0}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{1}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{0}}{\constr{1}}$} \\
-    \hline
-    \textbf{graded} & \makecell[cl]{$\constr{0} \, : \type{Gra}$ \\ $\suc \, : \type{Gra} \to \type{Gra}$} & \makecell[cl]{$\forall \, x \, y \, z$ \\ $\to x \, \type{\equiv} \, y \, \func{+} \, z$ \\ $\to \op{x}{y}{z}$} \\
-    \hline
-    \textbf{shared} & $\constr{\omega} \, : \, \type{Sha}$ & $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ \\
-  \end{tabular}
-  \end{frame}
-
-  \note[itemize]{
-    \sitem Lump multiple algebras together
+    \sitem Notation borrowed from linear \picalc{}
+    \sitem We use two carriers per channel: one for input, one for output
   }
   
   \begin{frame}{Types}
