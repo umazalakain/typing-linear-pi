@@ -101,7 +101,7 @@
   \maketitle
 
   \note{
-    Hello everyone! I am Uma, and this talk is about my first formalisation of a type system (in this case a resource-aware \picalc{}) in Agda.
+    Hello everyone! I am Uma, and this talk is about my first experience formalising a type system (in this case a resource-aware \picalc{}) in Agda.
     This is joint work with my PhD supervisor Ornela Dardha.
     If you have any questions or comments please interrupt me at any time.
   }
@@ -163,6 +163,17 @@
   \sitem Common syntax and semantics for linear and session-typed
   }
   
+  \begin{frame}{Overview}
+    \begin{itemize}
+    \setlength\itemsep{1em}
+    \item syntax
+    \item semantics
+    \item type system
+    \item type safety
+    \item future work
+    \end{itemize}
+  \end{frame}
+
   \begin{frame}{Notation}
     \begin{equation*}
       \begin{aligned}
@@ -313,7 +324,7 @@
       \sitem independent type and usage contexts
       \sitem extra leftover usage context
       \sitem intrinsic context splits
-      \sitem based on a set of usage algebras
+      \sitem parametrised by a set of usage algebras
     \end{itemize}
   \end{frame}
   
@@ -368,10 +379,10 @@
   \begin{frame}{Indexed Usage Algebras}
     \begin{equation*}
       \begin{aligned}
-        &\Idx               &: &\Set \\
-        &\type{\exists IDX} &: &\Idx \\
-        &\Usage             &: &\Idx \to \Set \\
-        &\type{ALGEBRAS}    &: &(idx : \Idx) \to \Algebra_{\Usage_{idx}} \\
+        &\Idx               &: \; &\Set \\
+        &\type{\exists IDX} &: \; &\Idx \\
+        &\Usage             &: \; &\Idx \to \Set \\
+        &\type{ALGEBRAS}    &: \; &(idx : \Idx) \to \Algebra_{\Usage_{idx}} \\
       \end{aligned}
     \end{equation*}
 
@@ -492,7 +503,7 @@
   \sitem The multiplicities of new variables must be exhausted
   }
 
-  \begin{frame}{Failed Efforts}
+  \begin{frame}{Before Leftover Typing}
     \begin{itemize}
     \sitem using functions to update usage contexts
       \begin{mathpar}
