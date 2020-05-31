@@ -463,14 +463,13 @@
   \begin{frame}{Typing Rules}
     \begin{mathpar}
       \inferrule
+      { }
+      {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
+
+      \inferrule
     {l \hspace{0.1em} : \types{\gamma}{\Gamma \hspace{0.3em}}{P}{\Delta} \\\\
       r : \types{\gamma}{\Delta}{Q}{\Xi}}
     {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
-
-    \inferrule
-    { }
-    {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
-  
     \end{mathpar}
   \end{frame}
   
@@ -523,7 +522,7 @@
   \end{frame}
 
   \note[itemize]{
-  \sitem The extrinsic context split is authoritative, P already knows what it needs
+  \sitem The extrinsic context split is top-down, P already knows what it needs
   }
 
   \begin{frame}[t]
