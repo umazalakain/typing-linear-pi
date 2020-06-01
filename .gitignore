@@ -3,6 +3,7 @@
 *.aux
 *.auxlock
 *.bcf
+*.vrb
 *.bbl
 !*.bib
 *-blx.bib

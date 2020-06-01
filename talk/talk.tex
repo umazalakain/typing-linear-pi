@@ -110,7 +110,7 @@
     \begin{block}{\picalc{}?}
       \hfill\\
       computational foundation for communication and concurrency \\
-      like the \lambdacalc{}, but with $\beta$-reduction \emph{at a distance}
+      like the \lambdacalc{}, but with communication instead of $\beta$-reduction
     \end{block}
     \hfill\\
     \begin{block}{linear \picalc{}?}
@@ -123,6 +123,14 @@
       \hfill\\
       common underlying framework for type systems for the \picalc{}
     \end{block}
+    \centering
+    \begin{tikzpicture}
+      \node[draw, rounded corners] (st) at (0,0) {session-typed \picalc{}};
+      \node[draw=red, thick, rounded corners, label={[red]below:\textasciicircum this\textasciicircum}] (sh) at (5,0) {linear \picalc{}};
+      \draw[->, thick] (st) -- (sh);
+    \end{tikzpicture}
+    \vspace{1em}
+
   \end{frame}
 
   \note{
@@ -141,15 +149,8 @@
   }
 
   \begin{frame}{Constraints}
-    \centering
-    \begin{tikzpicture}
-      \node[draw, rounded corners] (st) at (0,0) {session-typed \picalc{}};
-      \node[draw=red, thick, rounded corners, label={[red]below:\textasciicircum this\textasciicircum}] (sh) at (5,0) {linear \picalc{}};
-      \draw[->, thick] (st) -- (sh);
-    \end{tikzpicture}
-    \vspace{1em}
-
     \begin{itemize}
+      \setlength\itemsep{1em}
       \sitem untyped syntax and semantics
       \sitem must support shared channels
       \sitem goal: to prove type safety
@@ -166,11 +167,11 @@
   \begin{frame}{Overview}
     \begin{itemize}
     \setlength\itemsep{1em}
-    \item syntax
-    \item semantics
-    \item type system
-    \item type safety
-    \item future work
+    \sitem syntax
+    \sitem semantics
+    \sitem type system
+    \sitem type safety
+    \sitem future work
     \end{itemize}
   \end{frame}
 
