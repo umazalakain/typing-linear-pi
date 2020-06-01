@@ -502,6 +502,21 @@
   \sitem The multiplicities of new variables must be exhausted
   }
 
+  \begin{frame}[fragile]{Example Derivation}
+    \begin{lstlisting}[mathescape]
+      $\func{p}$ : $\Process_{\suc \constr{zero}}$
+      $\func{p}$ = $\new{}$
+          $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
+          ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
+
+      $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\func{\epsilon}}$
+      $\func{\_}$ = $\constr{chan} \; \channel{\unit}{\func{\omega}} \; \li \; \one \; (\constr{comp}$
+          $(\constr{recv} \; \constr{0} \; (\constr{recv} \; \constr{0} \; \constr{end}))$
+          $(\constr{chan} \; \unit \; \func{\omega} \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
+          )$
+    \end{lstlisting}
+  \end{frame}
+
   \begin{frame}{Before Leftover Typing}
     \begin{itemize}
     \sitem using functions to update usage contexts
@@ -582,7 +597,6 @@
     \sitem product types
     \sitem sum types
     \sitem recursion
-    \sitem bidirectional type system
     \sitem decidable type checking
     \sitem use as target language for the session-typed \picalc{}
     \end{itemize}
