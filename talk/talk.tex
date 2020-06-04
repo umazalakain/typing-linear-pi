@@ -126,7 +126,7 @@
     \centering
     \begin{tikzpicture}
       \node[draw, rounded corners] (st) at (0,0) {session-typed \picalc{}};
-      \node[draw=red, thick, rounded corners, label={[red]below:\textasciicircum this\textasciicircum}] (sh) at (5,0) {linear \picalc{}};
+      \node[draw=red, thick, rounded corners, label={[red]below:\textasciicircum this}] (sh) at (5,0) {linear \picalc{}};
       \draw[->, thick] (st) -- (sh);
     \end{tikzpicture}
     \vspace{1em}
@@ -339,14 +339,14 @@
     \begin{columns}
       \begin{column}{0.3\textwidth}
         \begin{itemize}
-          \item partial
-          \item neutral element $\zero$
-          \item minimal element $\zero$
-          \item associative
-          \item commutative
-          \item deterministic
-          \item cancellative
-          \item decidable
+          \sitem partial
+          \sitem neutral element $\zero$
+          \sitem minimal element $\zero$
+          \sitem associative
+          \sitem commutative
+          \sitem deterministic
+          \sitem cancellative
+          \sitem decidable
         \end{itemize}
       \end{column}
       \begin{column}{0.7\textwidth}
