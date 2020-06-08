@@ -8,6 +8,9 @@
 \usepackage{mathbbol}
 \usepackage{mathtools}
 
+% For a wider page
+\usepackage{changepage}
+
 % Diagrams
 \usepackage{tikz}
 
@@ -435,14 +438,15 @@
   \end{frame}
 
   \begin{frame}{Typing Relation}
+    \begin{adjustwidth}{-1.5em}{-1.5em}
     \begin{description}
     \item [$\PreCtx_n$] list of $\Type$s of length $n$
     \item [$\Idxs_n$] list of $\Idx$s of length $n$
     \item [$\Ctx_{idxs}$] list of $\Usage^{\func{2}}$s indexed over $idxs  \; : \Idxs_n$
     \end{description}
     
-    \small
     \begin{mathpar}
+    {\small
     \datatype{
       \gamma : \PreCtx_n \\
       \stacked{
@@ -450,14 +454,47 @@
         \Gamma : \Ctx_{idxs}} \\
       P : \Process_n \\
       \Delta : \Ctx_{idxs}}
-    {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
+    {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}}
+
+    {\small
+    \mprset {sep=.8em}
+    \datatype{
+      \gamma : \PreCtx_n \\
+      \stacked{
+        idxs : \Idxs_n \\\\
+        \Gamma : \Ctx_{idxs}} \\
+      i : \Var_n \\
+      t : \Type \\
+      \stacked{
+        idx : \Idx \\\\
+        y : \Usage_{idx}^{\func{2}}} \\
+      \Delta : \Ctx_{idxs}}
+    {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}}
     \end{mathpar}
+    \end{adjustwidth}
   \end{frame}
 
   \note[itemize]{
   \sitem Typing judgment through typing relations
   \sitem One relation on processes, one relation on variable references (omitted for brevety)
   \sitem Relation on variable references uses the monoid to split multiplicities
+  }
+  
+  \begin{frame}{Variable Typing Rules}
+    \begin{mathpar}
+      \inferrule
+      {\opsquared{x}{y}{z}}
+      {\constr{0} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
+      
+      \inferrule
+      {\hspace{-0.1em} loc_i : \contains{\gamma \hspace{1.4em}}{\Gamma \hspace{1.7em}}{\hspace{1em} i}{t}{x}{\Delta}}
+      {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
+    \end{mathpar}
+  \end{frame}
+
+  \note[itemize]{
+    \sitem Constructor completely determined by $i$
+    \sitem User alleviated from proof burden $\opsquared{x}{y}{z}$, which can be computed given $x$ and $y$
   }
   
   \begin{frame}{Typing Rules}
@@ -579,7 +616,7 @@
   \begin{frame}{Subject Reduction}
     \begin{itemize}
       \setlength\itemsep{2em}
-      \sitem \textbf{substitution} \\
+      \sitem \textbf{renaming} \\
       substituting a variable $i$ for a variable $j$ in a well-typed process $P$ results in a well-typed process as long as the leftovers at index $j$ after $P$ are at least the consumption made by $P$ at index $i$.
 
       \sitem \textbf{subject reduction} \\
@@ -610,39 +647,8 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
 
-  \begin{frame}{Variable References}
-    \begin{mathpar}
-      {\tiny
-      \datatype{
-        \gamma : \PreCtx_n \\
-        \stacked{
-          idxs : \Idxs_n \\\\
-          \Gamma : \Ctx_{idxs}} \\
-        i : \Var_n \\
-        t : \Type \\
-        \stacked{
-          idx : \Idx \\\\
-          y : \Usage_{idx}^{\func{2}}} \\
-        \Delta : \Ctx_{idxs}}
-      {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}}
-
-      \inferrule
-      {\opsquared{x}{y}{z}}
-      {\constr{0} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
-      
-      \inferrule
-      {\hspace{-0.1em} loc_i : \contains{\gamma \hspace{1.4em}}{\Gamma \hspace{1.7em}}{\hspace{1em} i}{t}{x}{\Delta}}
-      {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
-    \end{mathpar}
-  \end{frame}
-
-  \note[itemize]{
-  \sitem Constructor completely determined by $i$
-  \sitem User alleviated from proof burden $\opsquared{x}{y}{z}$, which can be computed given $x$ and $y$
-  }
-  
-  \begin{frame}{Type Safety: Substitution}
-    \textbf{Substitution with accumulator} \\
+  \begin{frame}{Type Safety: Renaming}
+    \textbf{Renaming with accumulator} \\
       Let $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
       Let there be some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
       \setlength{\linewidth}{.8\linewidth}
