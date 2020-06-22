@@ -1077,6 +1077,13 @@ In our paper, we apply leftover typing to the \picalc{} following Allais \cite{A
 Drawing from quantitative type theory (by McBride and Atkey \cite{McBride2016, Atkey2018}), in our work, we too are able to talk about fully consumed resources.
 As such, we can transmit over a channel the $\lz$ multiplicities of a fully exhausted channel.
 %
+In their recent paper (unpublished at the time of writing), Ciccone and Padovani mechanise a dependently-typed linear \picalc{} in Agda \cite{Ciccone}.
+They do so by defining an intrinsicly-typed calculus, which allows them to leverage Agda to provide a dependently-typed interpretation of messages.
+Contexts contain not only types, but also the messages that inhabit their corresponding interpretation in Agda.
+To avoid linearity violations, channel types as interpreted as unit types --- and therefore only present in the context in the object language.
+This approach allows them to encode message predicates, branching, and variable-length conversations, as message input is modelled as dependent function abstraction in Agda.
+They use the concrete set of multiplicities $0$, $1$, $\omega$, define a partial algebra on contexts and require extrinsic proofs of context split.
+%
 Orchard et al. introduce Granule \cite{Orchard}, a fully-fledged functional language with graded modal types, linear types, indexed types and polymorphism.
 Modalities include exact usages, security levels and intervals; resource algebras are pre-ordered semirings with partial addition.
 They provide bidirectional typing rules, and show the type safety of their semantics.
@@ -1084,7 +1091,7 @@ They provide bidirectional typing rules, and show the type safety of their seman
 Recent years have seen an increase in the efforts to mechanise resource-aware process algebras.
 One of the earliest works is the mechanisation of the linear \picalc{} in Isabelle/HOL by Gay \cite{Gay2001}.
 Gay encodes the \picalc{} with linear and shared types using de Bruijn indices, a reduction relation and a type system posterior to the syntax.
-However, in his work context splits are extrinsic, and the types of used multiplicities erased.
+However, in his work context splits are extrinsic, and used multiplicities erased from context.
 We make context splits intrinsic, preserve the ability to talk about used resources, and adopt a more general usage algebra: our framework integrates three different type systems into one.
 %
 The work by Goto et al. \cite{Goto2016a} is, to the best of our knowledge, the first formalisation of session types that includes a type safety proof (in Coq). 
