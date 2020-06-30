@@ -1,16 +1,11 @@
-\documentclass[a4paper,UKenglish,cleveref,autoref,thm-restate,authorcolumns]{lipics-v2019}
+\documentclass[sigplan,10pt,anonymous,review]{acmart}
+\settopmatter{printfolios=true,printccs=false,printacmref=false}
 
-\usepackage[dvipsnames]{xcolor}
 \usepackage[utf8]{inputenc}
 \usepackage{url}
-\usepackage{amssymb}
-\usepackage[fleqn]{amsmath}
-\usepackage{amsbsy}
+\usepackage{amsmath}
 \usepackage{mathbbol}
 \usepackage{mathtools}
-\usepackage[many]{tcolorbox}
-\bibliographystyle{plainurl}
-
 \usepackage{hyperref}
 
 % Two column itemize
@@ -25,9 +20,6 @@
 % Mathbb doesn't support digits
 \usepackage{bbm}
 
-% Less margins around figures
-\usepackage{changepage}
-
 % inference rules
 \usepackage{mathpartir}
 
@@ -36,19 +28,8 @@
 \newtheorem{nidefinition}{Definition}
 \newtheorem{nitheorem}{Theorem}
 \newtheorem{nilemma}{Lemma}
-% \renewcommand{\nitheoremautorefname}{Thm.}%
-% \renewcommand{\nidefinitionautorefname}{Def.}%
-% \renewcommand{\nilemmaautorefname}{Lem.}%
-% \renewcommand{\exampleautorefname}{Ex.}%
-\addto\extrasUKenglish{%
-  \renewcommand{\sectionautorefname}{\S}%
-  \renewcommand{\subsectionautorefname}{\S}%
-  % \renewcommand{\figureautorefname}{Fig.}%
-  % \renewcommand{\appendixautorefname}{App.}%
-}
-
-% No line numbers
-\nolinenumbers
+\renewcommand{\sectionautorefname}{\S}%
+\renewcommand{\subsectionautorefname}{\S}%
 
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
@@ -59,27 +40,27 @@
 \newcommand{\stacked}[1]{\mprset{flushleft} \inferrule*{}{#1}}
 \newcommand{\datatype}[2]{{\mprset{fraction={===}} \inferrule{#1}{#2}}}
 
-\newcommand{\type}[1]{\textcolor{BlueViolet}{\operatorname{#1}}}
-\newcommand{\constr}[1]{\textcolor{BurntOrange}{\operatorname{#1}}}
-\newcommand{\func}[1]{\textcolor{OliveGreen}{\operatorname{#1}}}
+\newcommand{\type}[1]{\textcolor{blue}{\operatorname{#1}}}
+\newcommand{\constr}[1]{\textcolor{orange}{\operatorname{#1}}}
+\newcommand{\func}[1]{\textcolor{olive}{\operatorname{#1}}}
 
 % Constructors
 \newcommand{\PO}{\constr{\mathbb{0}}}
-\newcommand{\comp}[2]{#1 \; \constr{\parallel} \; #2}
-\newcommand{\new}{\constr{\boldsymbol{\nu}} \;}
-\newcommand{\send}[2]{#1 \; \constr{\langle} \; #2 \;\constr{\rangle} \;}
-\newcommand{\sendp}[2]{#1 \; \constr{\langle} \; #2 \; \constr{\rangle} \; . \;}
-\newcommand{\recv}[1]{#1 \; \constr{\mathbb{()}} \;}
-\newcommand{\recvp}[2]{#1 \; \constr{(} \; #2 \; \constr{)} \; . \; }
+\newcommand{\comp}[2]{#1 \, \constr{\parallel} \, #2}
+\newcommand{\new}{\constr{\boldsymbol{\nu}} \,}
+\newcommand{\send}[2]{#1 \, \constr{\langle} \, #2 \,\constr{\rangle} \,}
+\newcommand{\sendp}[2]{#1 \, \constr{\langle} \, #2 \, \constr{\rangle} \, . \,}
+\newcommand{\recv}[1]{#1 \, \constr{\mathbb{()}} \,}
+\newcommand{\recvp}[2]{#1 \, \constr{(} \, #2 \, \constr{)} \, . \, }
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
-\newcommand{\base}[1]{\constr{B[} \; #1 \; \constr{]}}
-\newcommand{\channel}[2]{\constr{C[} \; #1 \; \constr{;} \; #2 \; \constr{]}}
-\newcommand{\comma}{\; \constr{,} \;}
+\newcommand{\base}[1]{\constr{B[} \, #1 \, \constr{]}}
+\newcommand{\channel}[2]{\constr{C[} \, #1 \, \constr{,} \, #2 \, \constr{]}}
+\newcommand{\comma}{\, \constr{,} \,}
 
 % Functions
-\newcommand{\subst}[3]{#1 \; \func{[} \; #3 \; \func{\mapsto} \;#2 \; \func{]}}
-\newcommand{\op}[3]{#1 \; \func{\coloneqq} \; #2 \; \func{\cdot} \; #3}
+\newcommand{\subst}[3]{#1 \, \func{[} \, #3 \, \func{\mapsto} \,#2 \, \func{]}}
+\newcommand{\op}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\cdot} \, #3}
 \newcommand{\opsquared}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\cdot^2} \, #3}
 \newcommand{\opctx}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\otimes} \, #3}
 \newcommand{\zero}{\func{0\cdot}}
@@ -91,34 +72,40 @@
 
 % Types
 \newcommand{\Set}{\type{SET}}
-\newcommand{\reduce}[1]{\; \type{\longrightarrow}_{#1} \;}
-\newcommand{\types}[4]{#1 \; \type{;} \; #2 \; \type{\vdash} \; #3 \; \type{\triangleright} \; #4}
-\newcommand{\contains}[6]{#1 \; \type{;} \; #2 \; \type{\ni}_{#3} \; #4 \; \type{;} \; #5 \; \type{\triangleright} \; #6}
-\newcommand{\containsusage}[4]{#1 \; \type{\ni}_{#2} \; #3 \; \type{\triangleright} \; #4}
+\newcommand{\reduce}[1]{\, \type{\longrightarrow}_{#1} \,}
+\newcommand{\types}[4]{#1 \, \type{;} \, #2 \, \type{\vdash} \, #3 \, \type{\triangleright} \, #4}
+\newcommand{\contains}[6]{#1 \, \type{;} \, #2 \, \type{\ni}_{#3} \, #4 \, \type{;} \, #5 \, \type{\triangleright} \, #6}
+\newcommand{\containsusage}[4]{#1 \, \type{\ni}_{#2} \, #3 \, \type{\triangleright} \, #4}
 \newcommand{\Var}{\type{VAR}}
 \newcommand{\Process}{\type{PROCESS}}
 \newcommand{\Unused}{\type{UNUSED}}
 \newcommand{\PreCtx}{\type{PRECTX}}
 \newcommand{\Ctx}{\type{CTX}}
-\newcommand{\Type}{\type{TYPE}\;}
-\newcommand{\Idx}{\type{IDX}\;}
+\newcommand{\Type}{\type{TYPE}\,}
+\newcommand{\Idx}{\type{IDX}\,}
 \newcommand{\Idxs}{\type{IDXS}}
 \newcommand{\Usage}{\type{USAGE}}
 \newcommand{\N}{\type{\mathbb{N}}}
 \newcommand{\Channel}{\type{CHANNEL}}
 \newcommand{\Rec}{\type{REC}}
 \newcommand{\Algebra}{\type{ALGEBRA}}
-\newcommand{\eq}[1]{\; \type{\simeq}_{#1} \;}
-\newcommand{\eqeq}{\; \type{\cong} \;}
+\newcommand{\eq}[1]{\, \type{\simeq}_{#1} \,}
+\newcommand{\eqeq}{\, \type{\cong} \,}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{$\pi$ with leftovers: \\ a mechanisation in Agda}
-\titlerunning{$\pi$ with leftovers: a mechanisation in Agda}
-\author{Uma Zalakain}{University of Glasgow, Scotland}
-       {u.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
-\author{Ornela Dardha}{University of Glasgow, Scotland}
-       {ornela.dardha@glasgow.ac.uk}{https://orcid.org/0000-0001-9927-7875}{}
-\authorrunning{U. Zalakain and O. Dardha}
-\Copyright{Uma Zalakain and Ornela Dardha}
+\title[$\pi$ with leftovers: a mechanisation in Agda]{$\pi$ with leftovers: \\ a mechanisation in Agda}
+\author{Uma Zalakain}
+\affiliation{University of Glasgow, Scotland}
+\email{u.zalakain.1@research.gla.ac.uk}
+\orcid{https://orcid.org/0000-0002-3268-9338}{}
+\author{Ornela Dardha}
+\affiliation{University of Glasgow, Scotland}
+\email{ornela.dardha@glasgow.ac.uk}
+\orcid{https://orcid.org/0000-0001-9927-7875}{}
+\keywords{pi-calculus, linear types, leftover typing, concurrency, mechanisation, Agda}
+\setcopyright{acmlicensed}
+\ccsdesc[300]{Theory of computation~Process calculi}
+% \supplement{\url{https://github.com/umazalakain/typing-linear-pi}}
 \begin{CCSXML}
 <ccs2012>
 <concept>
@@ -128,17 +115,15 @@
 </concept>
 </ccs2012>
 \end{CCSXML}
-\ccsdesc[300]{Theory of computation~Process calculi}
-\keywords{pi-calculus, linear types, leftover typing, concurrency, mechanisation, Agda}
-\supplement{\url{https://github.com/umazalakain/typing-linear-pi}}
-\acknowledgements{We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
-\funding{Supported by the UK EPSRC grant EP/K034413/1, ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233
-  ``Behavioural Application Program Interfaces'' (BehAPI).}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 \begin{document}
 
-\maketitle
+\begin{acks}
+We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.
+
+The authors would also like to thank the anonymous referees fortheir valuable comments and helpful suggestions. This work is supported by the \grantsponsor{UKEPSRC}{UK EPSRC}{} grant \grantnum{UKEPSRC}{EP/K034413/1} ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the \grantsponsor{EUHORIZON}{EU HORIZON 2020 MSCA RISE}{} project \grantnum{EUHORIZON}{778233} ``Behavioural Application Program Interfaces'' (BehAPI).
+\end{acks}
 
 \begin{abstract}
   The \picalc{} is a computational model for communication and concurrency.
@@ -157,6 +142,8 @@
 %
   Our formalisation is fully mechanised in Agda \cite{Zalakain2020Agda}.
 \end{abstract}
+
+\maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -269,8 +256,8 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 \label{syntax}
+
 \begin{figure}[h]
-  \begin{subfigure}{1\textwidth}
     \begin{mathpar}
       \datatype
       {n : \N}
@@ -290,8 +277,9 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
       {\Process_n : \Set}
       \; \textsc{Process}
     \end{mathpar}
-  \end{subfigure}
-  \begin{subfigure}[t]{.3\textwidth}
+\end{figure}
+
+\begin{figure}[h]
     \begin{equation*}
       \begin{split}
         P,Q ::=      & \; \PO                \\ 
@@ -303,22 +291,20 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
     \end{equation*}
     \caption{Ill-scoped grammar with names.}
     \label{fig:syntax-names}
-  \end{subfigure}
-  \hspace{.05\textwidth}
-  \begin{subfigure}[t]{.65\textwidth}
+\end{figure}
+
+\begin{figure}[h]
     \begin{equation*}
-      \begin{split}
+      \begin{aligned}
         \Process_n ::=& \; \PO_n               &&\text{(inaction)}   \\ 
         |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
         |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)} \\ 
         |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
         |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
-      \end{split}
+      \end{aligned}
     \end{equation*}
     \caption{Well-scoped grammar with type-level de Bruijn indices.}
     \label{fig:syntax}
-  \end{subfigure}
-  \caption{}
 \end{figure}
 
 Let $x, y,\ldots$ range over \emph{variables} (including channel names) and $P, Q,\ldots$ over processes.
@@ -333,15 +319,13 @@ In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound n
 Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
 Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
 \begin{example}
+  Example process using names (top) and de Bruijn indices (bottom).
+  \small
   \begin{equation*}
-    \begin{split}
-      & (\new{}x ) && (\comp {\recvp{x}{y} && \sendp{y}{a} && \PO} {(\new{} y) && (\sendp{x}{y} && \recvp{y}{z} && \PO)})
-      && \text{names}
-      \\
-      & \new{} && (\comp {\recv{0} && \send{0}{a} && \PO} {\new{} && (\send{1}{0} && \recv{0} && \PO)})
-      && \text{de Bruijn indices}
-      \\
-    \end{split}
+    \begin{aligned}
+      & (\new{}x ) && (\comp {\recvp{x}{y} && \sendp{y}{a} && \PO} {(\new{} y) && (\sendp{x}{y} && \recvp{y}{z} && \PO)}) \\
+      & \new{} && (\comp {\recv{0} && \send{0}{a} && \PO} {\new{} && (\send{1}{0} && \recv{0} && \PO)}) \\
+    \end{aligned}
   \end{equation*}
 \end{example}
 That is, terms at different \emph{depths} use different indices to refer to the same binding.
@@ -406,7 +390,7 @@ The last three ($\constr{scope}-$*) state garbage collection, scope extrusion an
 
 In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
 The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index greater than $i$.
-In $\constr{scope-comm}$ the function $\func{swap}_i \; P$ traverses $P$ (of type $\Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
+In $\constr{scope-comm}$ the function $\func{swap}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -502,7 +486,8 @@ We generalise over this notion by defining an algebra that is satisfied by linea
     &\func{\cdot-min^l}      &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
     &\func{\cdot-id^l}       &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
     &\func{\cdot-comm}       &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-    &\func{\cdot-assoc}      &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
+    &\func{\cdot-assoc}      &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \\
+    &                        &    &                  &        & \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
   \end{aligned}
   \end{equation*}
   \caption{
@@ -515,7 +500,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   \end{figure}
 \end{nidefinition}
 
-\begin{note}
+%\begin{note}
   \label{note:linearity}
   We will often work with pairs of input and output multiplicities.
   We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ tuple of input and output multiplicities, respectively.
@@ -523,7 +508,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
 %
   Henceforth, we use $\lz$ to denote the pair $0 \comma 0$ for a channel which cannot be used any further, $\li$ for the pair $1 \comma 0$ for a channel to be used in input exactly once, $\lo$ for $0 \comma 1$ for a channel to be used in output exactly once, and $\lio$ for $1 \comma 1$, for a channel to be used exactly once in input and exactly once in output.
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
-\end{note}
+%\end{note}
 
 Linear, graded and shared types are all defined as an instance of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
@@ -558,12 +543,12 @@ We use indexed sets of usage algebras to allow several usage algebras to coexist
   An \emph{indexed set of usage algebras} is a nonempty type $\Idx$ of indices together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras (\autoref{fig:indexed-multiplicities}).
   \begin{figure}[h]
     \begin{equation*}
-      \begin{split}
+      \begin{aligned}
         &\Idx               &:{} &\Set \\
         &\type{\exists IDX} &:{} &\Idx \\
         &\Usage             &:{} &\Idx \to \Set \\
         &\type{ALGEBRAS}    &:{} &(idx : \Idx) \to \Algebra_{\Usage_{idx}}
-      \end{split}
+      \end{aligned}
     \end{equation*}
     \caption{Indexed set of usage algebras.}
     \label{fig:indexed-multiplicities}
@@ -662,10 +647,10 @@ A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed l
 \end{nidefinition}
 
 
-\begin{note}
+% \begin{note}
   We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have a common underlying context of indices.
   All the properties of the partial monoid are lifted element-wise.
-\end{note}
+% \end{note}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing with Leftovers}
@@ -879,9 +864,9 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
   Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
 
-\begin{remark}
+% \begin{remark}
   The \emph{unusedness} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
-\end{remark}
+% \end{remark}
 
 \subparagraph*{Swapping}
 of two variables preserves the well-typedness of a process.
@@ -947,7 +932,6 @@ states that applying structural congruence rules to a well typed process preserv
 \end{proof}
 
 \begin{figure}[h]
-  \begin{subfigure}{.5\textwidth}
     \centering
     \begin{tikzpicture}
       \node (gamma-i) at (0,4)   {$\Gamma_i$};
@@ -984,9 +968,9 @@ states that applying structural congruence rules to a well typed process preserv
       Continuous lines represent known facts, dotted lines proof obligations.
     }
     \label{fig:subst}
-  \end{subfigure}
-  \hspace{\fill} % DO NOT LEAVE EMPTY LINE
-  \begin{subfigure}{.4\textwidth}
+\end{figure}
+
+\begin{figure}[h]
     \centering
     \begin{tikzpicture}
       \node (gamma-i) at (0,2)   {};
@@ -1013,8 +997,6 @@ states that applying structural congruence rules to a well typed process preserv
       This approach makes composing typing derivations before and after substitution more difficult.
     }
     \label{fig:subst-alternative}
-  \end{subfigure}
-  \caption{Substitution with and without the \emph{adjustment} arrows $\ni_i n$ and $\ni_j n$}
 \end{figure}
 
 \begin{nitheorem}[Substitution]
@@ -1030,9 +1012,9 @@ states that applying structural congruence rules to a well typed process preserv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-\begin{note}
+% \begin{note}
   We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
-\end{note}
+% \end{note}
 
 \subparagraph*{Subject Reduction}
 states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
@@ -1131,6 +1113,7 @@ Furthermore, it might also be worth identifying correspondences between our usag
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
 
 \newpage
+\bibliographystyle{plainurl}
 \bibliography{paper}
 
 %%
