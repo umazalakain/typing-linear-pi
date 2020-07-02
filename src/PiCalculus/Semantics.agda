@@ -16,7 +16,6 @@ import Data.Fin.Properties as Finₚ
 open Fin using (Fin ; zero ; suc; #_)
 
 open import PiCalculus.Syntax
-open Syntax
 open Scoped
 
 module PiCalculus.Semantics where
@@ -27,7 +26,6 @@ module PiCalculus.Semantics where
       P P' Q R : Scoped n
       x y : Fin n
 
-
   Unused : ∀ {n} → Fin n → Scoped n → Set
   Unused i 𝟘 = ⊤
   Unused i (υ P) = Unused (suc i) P
@@ -37,14 +35,14 @@ module PiCalculus.Semantics where
 
   lift : (i : Fin (suc n)) → Scoped n → Scoped (suc n)
   lift i 𝟘 = 𝟘
-  lift i (υ P) = υ lift (suc i) P
+  lift i (υ P) = υ (lift (suc i) P)
   lift i (P ∥ Q) = lift i P ∥ lift i Q
   lift i (x ⦅⦆ P) = Fin.punchIn i x ⦅⦆ lift (suc i) P
   lift i (x ⟨ y ⟩ P) = Fin.punchIn i x ⟨ Fin.punchIn i y ⟩ lift i P
 
   lower : (i : Fin (suc n)) (P : Scoped (suc n)) → Unused i P → Scoped n
   lower i 𝟘 uP = 𝟘
-  lower i (υ P) uP = υ lower (suc i) P uP
+  lower i (υ P) uP = υ (lower (suc i) P uP)
   lower i (P ∥ Q) (uP , uQ) = lower i P uP ∥ lower i Q uQ
   lower i (x ⦅⦆ P) (i≢x , uP) = Fin.punchOut i≢x ⦅⦆ lower (suc i) P uP
   lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = Fin.punchOut i≢x ⟨ Fin.punchOut i≢y ⟩ lower i P uP
@@ -61,7 +59,7 @@ module PiCalculus.Semantics where
 
   swap : Fin n → Scoped (suc n) → Scoped (suc n)
   swap i 𝟘 = 𝟘
-  swap i (υ P) = υ swap (suc i) P
+  swap i (υ P) = υ (swap (suc i) P)
   swap i (P ∥ Q) = swap i P ∥ swap i Q
   swap i (x ⦅⦆ P)  = swapFin i x ⦅⦆ swap (suc i) P
   swap i (x ⟨ y ⟩ P)  = swapFin i x ⟨ swapFin i y ⟩ swap i P
@@ -74,12 +72,12 @@ module PiCalculus.Semantics where
 
     comp-end : P ∥ 𝟘 ≈ P
 
-    scope-end : _≈_ {n} (υ 𝟘) 𝟘
+    scope-end : ∀ ⦃ name ⦄ → _≈_ {n} (υ 𝟘 ⦃ name ⦄) 𝟘
 
-    scope-ext : (u : Unused zero P)
-              → υ (P ∥ Q) ≈ lower zero P u ∥ (υ Q)
+    scope-ext : ∀ ⦃ name ⦄ (u : Unused zero P)
+              → υ (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (υ Q) ⦃ name ⦄
 
-    scope-scope-comm : υ (υ P) ≈ υ (υ swap zero P)
+    scope-scope-comm : ∀ ⦃ namex namey ⦄ → υ (υ P ⦃ namey ⦄) ⦃ namex ⦄ ≈ υ (υ (swap zero P) ⦃ namex ⦄) ⦃ namey ⦄
 
   data RecTree : Set where
     zero : RecTree
@@ -101,10 +99,13 @@ module PiCalculus.Semantics where
     cong-trans : P ≅⟨ r ⟩ Q → Q ≅⟨ p ⟩ R → P ≅⟨ two r p ⟩ R
 
     -- Congruent relation
-    υ-cong_    : P ≅⟨ r ⟩ P' → υ P     ≅⟨ one r ⟩ υ P'
+    υ-cong_    : ∀ ⦃ name ⦄ → P ≅⟨ r ⟩ P' → υ P ⦃ name ⦄     ≅⟨ one r ⟩ υ P' ⦃ name ⦄
     comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q     ≅⟨ one r ⟩ P' ∥ Q
-    input-cong_  : P ≅⟨ r ⟩ P' → x ⦅⦆ P    ≅⟨ one r ⟩ x ⦅⦆ P'
+    input-cong_  : ∀ ⦃ name ⦄ → P ≅⟨ r ⟩ P' → (x ⦅⦆ P) ⦃ name ⦄    ≅⟨ one r ⟩ (x ⦅⦆ P') ⦃ name ⦄
     output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P ≅⟨ one r ⟩ x ⟨ y ⟩ P'
+
+  _≅_ : Scoped n → Scoped n → Set
+  P ≅ Q = ∃[ r ] (P ≅⟨ r ⟩ Q)
 
   _[_↦_]' : Fin n → Fin n → Fin n → Fin n
   x [ i ↦ j ]' with i Finₚ.≟ x
@@ -149,19 +150,22 @@ module PiCalculus.Semantics where
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
 
-    comm : ∀ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
+    comm : ∀ ⦃ name ⦄ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
          → let uP' = subst-unused (λ ()) P
-         in (i ⦅⦆ P) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
+         in ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'
          → P ∥ Q =[ c ]⇒ P' ∥ Q
 
-    res_ : ∀ {c} {P Q : Scoped (1 + n)}
+    res_ : ∀ ⦃ name ⦄ {c} {P Q : Scoped (1 + n)}
          → P =[ c ]⇒ Q
-         → υ P =[ dec c ]⇒ υ Q
+         → υ P ⦃ name ⦄ =[ dec c ]⇒ υ Q
 
     struct : ∀ {c} {P Q P' : Scoped n}
            → P ≅⟨ r ⟩ P'
            → P' =[ c ]⇒ Q
            → P =[ c ]⇒ Q
+
+  _⇒_ : Scoped n → Scoped n → Set
+  P ⇒ Q = ∃[ c ] (P =[ c ]⇒ Q)

@@ -17,7 +17,6 @@ open ℕ using (ℕ; zero; suc)
 open Fin using (Fin; zero; suc)
 
 open import PiCalculus.Syntax
-open Syntax
 open Scoped
 open import PiCalculus.Semantics
 

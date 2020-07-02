@@ -22,7 +22,6 @@ open Product using (_×_; Σ-syntax; ∃-syntax; _,_; proj₁; proj₂)
 
 open import PiCalculus.Syntax
 open Scoped
-open Syntax
 open import PiCalculus.Semantics
 open import PiCalculus.Semantics.Properties
 open import PiCalculus.LinearTypeSystem.Algebras

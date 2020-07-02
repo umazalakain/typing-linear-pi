@@ -18,7 +18,6 @@ open Vec using (Vec; []; _∷_)
 open All using (All; []; _∷_)
 
 open import PiCalculus.Syntax
-open Syntax
 open Scoped
 open import PiCalculus.LinearTypeSystem.Algebras
 
@@ -101,16 +100,16 @@ data _；_⊢_▹_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → 
   end : γ ； Γ ⊢ 𝟘 ▹ Γ
 
   -- Note (μ , μ): the created channel is balanced
-  chan : (t : Type) {idx' : Idx} (m : Usage idx' ²) {idx : Idx} (μ : Usage idx)
-       → γ -, C[ t ； m ] ； Γ -, (μ , μ) ⊢ P  ▹ Δ -, ℓ∅
+  chan : ∀ ⦃ name ⦄ (t : Type) {idx' : Idx} (m : Usage idx' ²) {idx : Idx} (μ : Usage idx)
+       → γ -, C[ t ； m ] ； Γ -, (μ , μ) ⊢ P            ▹ Δ -, ℓ∅
        -----------------------------------------------------
-       → γ               ； Γ            ⊢ υ P ▹ Δ
+       → γ               ； Γ             ⊢ υ P ⦃ name ⦄ ▹ Δ
 
-  recv : {t : Type} {m : (Usage idx') ²}
+  recv : ∀ ⦃ name ⦄ {t : Type} {m : (Usage idx') ²}
        → γ      ； Γ       ∋[ i ] C[ t ； m ] ； ℓᵢ {idx} ▹ Ξ
        → γ -, t ； Ξ -, m  ⊢      P                      ▹ Θ -, ℓ∅
        -----------------------------------------------------------
-       → γ      ； Γ       ⊢ i ⦅⦆ P                      ▹ Θ
+       → γ      ； Γ       ⊢ (i ⦅⦆ P) ⦃ name ⦄           ▹ Θ
 
   send : {t : Type} {m : (Usage idx') ²}
        → γ ； Γ ∋[ i ] C[ t ； m ] ； ℓₒ {idx} ▹ Δ

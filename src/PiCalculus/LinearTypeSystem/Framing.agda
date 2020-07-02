@@ -23,7 +23,6 @@ open Fin using (Fin ; zero ; suc)
 open Product using (_×_; _,_; proj₁; proj₂)
 
 import PiCalculus.Syntax
-open PiCalculus.Syntax.Syntax
 open PiCalculus.Syntax.Scoped
 open import PiCalculus.Semantics
 open import PiCalculus.LinearTypeSystem.Algebras
