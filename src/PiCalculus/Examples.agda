@@ -1,7 +1,6 @@
 {-# OPTIONS --safe #-} -- --without-K #-}
 
 open import Data.Nat using (ℕ)
-open import Data.String.Base using (String)
 open import Data.Bool using (Bool; true; false)
 open import Data.Unit using (⊤; tt)
 open import Data.Fin using (#_; zero; suc)
@@ -71,10 +70,10 @@ channel-over-channel₆ = ⦅υ "z"⦆ 𝟘
 channel-over-channel₇ : Raw
 channel-over-channel₇ = 𝟘
 
-_!_≅_ : ∀ {n} → Vec String n → Raw → Raw → Set
+_!_≅_ : ∀ {n} → Vec Name n → Raw → Raw → Set
 _!_≅_ = map₂ _≅_
 
-_!_⇒_ : ∀ {n} → Vec String n → Raw → Raw → Set
+_!_⇒_ : ∀ {n} → Vec Name n → Raw → Raw → Set
 _!_⇒_ = map₂ _⇒_
 
 _ : ("y" ∷ []) ! channel-over-channel₀ ≅ channel-over-channel₁
@@ -117,7 +116,7 @@ module Shared-Linear where
   open import PiCalculus.LinearTypeSystem QUANTIFIERS
   open import PiCalculus.LinearTypeSystem.ContextLemmas QUANTIFIERS
 
-  _!_；[_]_⊢_▹_ : Vec String n → PreCtx n → (idxs : Idxs n) → Ctx idxs → Raw → Ctx idxs → Set
+  _!_；[_]_⊢_▹_ : Vec Name n → PreCtx n → (idxs : Idxs n) → Ctx idxs → Raw → Ctx idxs → Set
   ctx ! γ ；[ idxs ] Γ ⊢ P ▹ Δ = map (λ P' → γ ；[ idxs ] Γ ⊢ P' ▹ Δ) ctx P
 
   ω∙ : ⊤ ²
@@ -136,7 +135,7 @@ module Shared-Linear where
   ℓ∅ = false , false
 
   instance
-    name : String
+    name : Name
     name = ""
 
   _ : ([] -, "y") ! [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
