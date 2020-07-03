@@ -117,6 +117,9 @@ module Shared-Linear where
   open import PiCalculus.LinearTypeSystem QUANTIFIERS
   open import PiCalculus.LinearTypeSystem.ContextLemmas QUANTIFIERS
 
+  _!_；[_]_⊢_▹_ : Vec String n → PreCtx n → (idxs : Idxs n) → Ctx idxs → Raw → Ctx idxs → Set
+  ctx ! γ ；[ idxs ] Γ ⊢ P ▹ Δ = map (λ P' → γ ；[ idxs ] Γ ⊢ P' ▹ Δ) ctx P
+
   ω∙ : ⊤ ²
   ω∙ = tt , tt
 
@@ -135,6 +138,12 @@ module Shared-Linear where
   instance
     name : String
     name = ""
+
+  _ : ([] -, "y") ! [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
+  _ = chan C[ 𝟙 ； ω∙ ] ℓᵢ {LINEAR} 1∙
+      (comp (recv here (recv here end))
+            (chan 𝟙 ω∙ {LINEAR} 1∙
+                  (send (there here) here (send here (there (there here)) end))))
 
   _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ υ ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ▹ ε
   _ = chan 𝟙 ω∙ {LINEAR} 1∙
