@@ -78,25 +78,26 @@ _!_⇒_ : ∀ {n} → Vec String n → Raw → Raw → Set
 _!_⇒_ = map₂ _⇒_
 
 _ : ("y" ∷ []) ! channel-over-channel₀ ≅ channel-over-channel₁
-_ = _ , υ-cong_ ⦃ "x" ⦄ (cong-symm stop scope-ext ⦃ "z" ⦄ ((λ ()) , (λ ()) , tt))
+_ = _ , υ-cong cong-symm stop scope-ext ((λ ()) , (λ ()) , tt)
 
 _ : ("y" ∷ []) ! channel-over-channel₁ ≅ channel-over-channel₂
-_ = _ , stop (scope-scope-comm ⦃ "x" ⦄ ⦃ "z" ⦄)
+_ = _ , stop scope-scope-comm
 
 _ : ("y" ∷ []) ! channel-over-channel₂ ⇒ channel-over-channel₃
-_ = _ , res_ ⦃ "z" ⦄ (res_ ⦃ "x" ⦄ (comm ⦃ "r" ⦄))
+_ = _ , res res comm
 
 _ : ("y" ∷ []) ! channel-over-channel₃ ⇒ channel-over-channel₄
-_ = _ , res_ ⦃ "z" ⦄ (res_ ⦃ "x" ⦄ (comm ⦃ "p" ⦄))
+_ = _ , res res comm
 
 _ : ("y" ∷ []) ! channel-over-channel₄ ≅ channel-over-channel₅
-_ = _ , υ-cong_ ⦃ "z" ⦄ (υ-cong_ ⦃ "x" ⦄ (stop comp-end))
+_ = _ , υ-cong υ-cong stop comp-end
 
 _ : ("y" ∷ []) ! channel-over-channel₅ ≅ channel-over-channel₆
-_ = _ , υ-cong_ ⦃ "z" ⦄ (stop scope-end ⦃ "x" ⦄)
+_ = _ , υ-cong stop scope-end
 
 _ : ("y" ∷ []) ! channel-over-channel₆ ≅ channel-over-channel₇
-_ = _ , stop (scope-end ⦃ "z" ⦄)
+_ = _ , stop scope-end
+
 
 module Shared-Linear where
   pattern LINEAR = true

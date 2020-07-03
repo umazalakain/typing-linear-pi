@@ -72,12 +72,12 @@ module PiCalculus.Semantics where
 
     comp-end : P ∥ 𝟘 ≈ P
 
-    scope-end : ∀ ⦃ name ⦄ → _≈_ {n} (υ 𝟘 ⦃ name ⦄) 𝟘
+    scope-end : ∀ {name} → _≈_ {n} (υ 𝟘 ⦃ name ⦄) 𝟘
 
-    scope-ext : ∀ ⦃ name ⦄ (u : Unused zero P)
+    scope-ext : ∀ {name} (u : Unused zero P)
               → υ (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (υ Q) ⦃ name ⦄
 
-    scope-scope-comm : ∀ ⦃ namex namey ⦄ → υ (υ P ⦃ namey ⦄) ⦃ namex ⦄ ≈ υ (υ (swap zero P) ⦃ namex ⦄) ⦃ namey ⦄
+    scope-scope-comm : ∀ {namex namey} → υ (υ P ⦃ namey ⦄) ⦃ namex ⦄ ≈ υ (υ (swap zero P) ⦃ namex ⦄) ⦃ namey ⦄
 
   data RecTree : Set where
     zero : RecTree
@@ -99,9 +99,9 @@ module PiCalculus.Semantics where
     cong-trans : P ≅⟨ r ⟩ Q → Q ≅⟨ p ⟩ R → P ≅⟨ two r p ⟩ R
 
     -- Congruent relation
-    υ-cong_    : ∀ ⦃ name ⦄ → P ≅⟨ r ⟩ P' → υ P ⦃ name ⦄     ≅⟨ one r ⟩ υ P' ⦃ name ⦄
+    υ-cong_    : ∀ {name} → P ≅⟨ r ⟩ P' → υ P ⦃ name ⦄     ≅⟨ one r ⟩ υ P' ⦃ name ⦄
     comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q     ≅⟨ one r ⟩ P' ∥ Q
-    input-cong_  : ∀ ⦃ name ⦄ → P ≅⟨ r ⟩ P' → (x ⦅⦆ P) ⦃ name ⦄    ≅⟨ one r ⟩ (x ⦅⦆ P') ⦃ name ⦄
+    input-cong_  : ∀ {name} → P ≅⟨ r ⟩ P' → (x ⦅⦆ P) ⦃ name ⦄    ≅⟨ one r ⟩ (x ⦅⦆ P') ⦃ name ⦄
     output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P ≅⟨ one r ⟩ x ⟨ y ⟩ P'
 
   _≅_ : Scoped n → Scoped n → Set
@@ -150,7 +150,7 @@ module PiCalculus.Semantics where
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
 
-    comm : ∀ ⦃ name ⦄ {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
+    comm : ∀ {name} {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
          → let uP' = subst-unused (λ ()) P
          in ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
 
@@ -158,9 +158,9 @@ module PiCalculus.Semantics where
          → P =[ c ]⇒ P'
          → P ∥ Q =[ c ]⇒ P' ∥ Q
 
-    res_ : ∀ ⦃ name ⦄ {c} {P Q : Scoped (1 + n)}
+    res_ : ∀ {name} {c} {P Q : Scoped (1 + n)}
          → P =[ c ]⇒ Q
-         → υ P ⦃ name ⦄ =[ dec c ]⇒ υ Q
+         → υ P ⦃ name ⦄ =[ dec c ]⇒ υ Q ⦃ name ⦄
 
     struct : ∀ {c} {P Q P' : Scoped n}
            → P ≅⟨ r ⟩ P'
