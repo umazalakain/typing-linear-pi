@@ -84,9 +84,6 @@ module Conversion where
     variable
       n m : ℕ
 
-  -- fresh : Vec Name n → Name → Name
-  -- fresh ctx name = repr name (count ctx name)
-
   Ctx : ℕ → Set
   Ctx = Vec Name
 

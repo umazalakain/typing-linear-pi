@@ -80,7 +80,7 @@ module ℕₛ where
   import Data.Digit as Digit
   open import Function using (_$_)
   open import Data.Product using (proj₁; _,_)
-  open import Data.List.Base using (List; map; reverse)
+  open import Data.List.Base using (List; map; reverse; []; _∷_)
   open import Data.List.Relation.Unary.All using (All; []; _∷_)
   open import Data.Vec.Base using (Vec; _∷_; take; lookup; splitAt; _++_)
   open import Data.Vec.Relation.Unary.Any using (here; there)
@@ -89,6 +89,7 @@ module ℕₛ where
   open import Relation.Nullary.Decidable using (True)
   open import Data.Nat using (_≤_)
   open import Data.Nat.Properties using (_≤?_; m≤m+n)
+  open import Data.List.Relation.Binary.Equality.Propositional using (_≋_; ≡⇒≋; ≋⇒≡; []; _∷_)
 
   import Data.Vec.Membership.Propositional as ∈ᵥ
   import Data.Vec.Membership.Propositional.Properties as ∈ᵥₚ
@@ -130,10 +131,28 @@ module ℕₛ where
   toDigits-injective n m eq with Digit.toDigits 10 n | Digit.toDigits 10 m
   toDigits-injective .(Digit.fromDigits exp1) .(Digit.fromDigits exp2) eq | exp1 , refl | exp2 , refl = cong Digit.fromDigits eq
 
-  showDigit-injective : ∀ (n m : Digit.Digit 10) → Digit.showDigit n ≡ Digit.showDigit m → n ≡ m
-  showDigit-injective n m eq = {!eq!}
+  open AllAcc using ([]; _∷_)
 
-  open import Data.List.Relation.Binary.Equality.Propositional
+  module _ {a} {A : Set a} where
+    Fresh : Vec A n → Set a
+    Fresh = AllAcc.All λ x xs → x ∈ᵥ.∉ xs
+
+    lookup-fresh-injective : {xs : Vec A n} → Fresh xs → ∀ i j → lookup xs i ≡ lookup xs j → i ≡ j
+    lookup-fresh-injective fs zero zero eq = refl
+    lookup-fresh-injective (p ∷ ps) zero (suc j) refl = ⊥-elim (p (∈ᵥₚ.∈-lookup _ _))
+    lookup-fresh-injective (p ∷ ps) (suc i) zero refl = ⊥-elim (p (∈ᵥₚ.∈-lookup _ _))
+    lookup-fresh-injective (p ∷ ps) (suc i) (suc j) eq = cong suc (lookup-fresh-injective ps i j eq)
+
+  decimalsFresh : Fresh DECIMALS
+  decimalsFresh = {!!}
+
+  showDigit-injective : ∀ (n m : Digit.Digit 10) → Digit.showDigit n ≡ Digit.showDigit m → n ≡ m
+  showDigit-injective n m
+    rewrite take-lookup-inject n Digit.digitChars
+    | take-lookup-inject m Digit.digitChars
+    = lookup-fresh-injective decimalsFresh n m
+
+
   module _ {a b} {A : Set a} {B : Set b} where
     map-preserves-injectivity : {f : A → B} (xs ys : List A) → (∀ x y → f x ≡ f y → x ≡ y) → map f xs ≋ map f ys → xs ≋ ys
     map-preserves-injectivity List.[] List.[] f-inj [] = [] {A = A}
