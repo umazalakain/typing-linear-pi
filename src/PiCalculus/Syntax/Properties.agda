@@ -53,8 +53,8 @@ toName∘fromName (here px) = sym px
 toName∘fromName (there x∈ctx) = toName∘fromName x∈ctx
 
 postulate
+  -- PR into Agda pending https://github.com/agda/agda/pull/4790
   fromList-injective : ∀ a b → String.fromList a ≡ String.fromList b → a ≡ b
-  toDigitChars-injective : ∀ a b → ℕₛ.toDigitChars 10 a ≡ ℕₛ.toDigitChars 10 b → a ≡ b
 
 -- The circum (^) is not a decimal character
 ^∉DECIMALS : '^' ∈ᵥ.∉ ℕₛ.DECIMALS
@@ -69,7 +69,7 @@ toString-injective (nx , cx) (ny , cy) eq = cong₂ _,_ strip-toList strip-toDec
                                  (^∉DECIMALS ∘ (ℕₛ.∈toDigitChars⇒∈digitChars cx '^'))
                                  (^∉DECIMALS ∘ (ℕₛ.∈toDigitChars⇒∈digitChars cy '^'))
                                  strip-fromList
-    strip-toDecimalChars = toDigitChars-injective cx cy count-repr
+    strip-toDecimalChars = ℕₛ.toDigitChars-injective cx cy count-repr
     cancel-names = Listₚ.++-cancelʳ (String.toList nx) (String.toList ny)
                                     (subst (λ ● → String.toList nx List.++ ('^' ∷ ●) ≡ _)
                                            count-repr strip-fromList)

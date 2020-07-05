@@ -16,6 +16,10 @@ private
     n m : ℕ
 
 module AllAcc {a b} {A : Set a} where
+  open import Data.Product using (_×_; _,_; uncurry)
+  open import Relation.Nullary using (Dec; yes; no)
+  open import Relation.Nullary.Product using (_×-dec_)
+  open import Relation.Nullary.Decidable using (map′)
   import Data.Vec as Vec
   open Vec using (Vec; []; _∷_)
 
@@ -26,10 +30,17 @@ module AllAcc {a b} {A : Set a} where
 
   open All public
 
-  map : ∀ {c} {C : Set c} {P : ∀ {n} → A → Vec A n → Set b} {xs : Vec A n}
-      → (∀ {n x} {xs : Vec A n} → P x xs → C) → All P xs → Vec C n
-  map f [] = []
-  map f (x ∷ ps) = (f x) ∷ map f ps
+  module _ {P : ∀ {n} → A → Vec A n → Set b} where
+    uncons : ∀ {x} {xs : Vec A n} → All P (x ∷ xs) → P x xs × All P xs
+    uncons (p ∷ ps) = p , ps
+
+    map : ∀ {c} {C : Set c} {xs : Vec A n} → (∀ {n x} {xs : Vec A n} → P x xs → C) → All P xs → Vec C n
+    map f [] = []
+    map f (x ∷ ps) = (f x) ∷ map f ps
+
+    all : (∀ {n} x (xs : Vec A n) → Dec (P x xs)) → (xs : Vec A n) → Dec (All P xs)
+    all P? [] = yes []
+    all P? (x ∷ xs) = map′ (uncurry _∷_) uncons (P? x xs ×-dec all P? xs)
 
 
 module ListInv {a} {A : Set a} where
@@ -133,6 +144,12 @@ module ℕₛ where
 
   open AllAcc using ([]; _∷_)
 
+  open import Relation.Nullary using (Dec)
+  open import Relation.Nullary.Decidable using (toWitness; True)
+  open import Relation.Nullary.Negation using (¬?)
+  open import Data.Vec.Relation.Unary.Any using (any)
+  open import Data.Char.Properties as Charₚ
+
   module _ {a} {A : Set a} where
     Fresh : Vec A n → Set a
     Fresh = AllAcc.All λ x xs → x ∈ᵥ.∉ xs
@@ -143,8 +160,11 @@ module ℕₛ where
     lookup-fresh-injective (p ∷ ps) (suc i) zero refl = ⊥-elim (p (∈ᵥₚ.∈-lookup _ _))
     lookup-fresh-injective (p ∷ ps) (suc i) (suc j) eq = cong suc (lookup-fresh-injective ps i j eq)
 
-  decimalsFresh : Fresh DECIMALS
-  decimalsFresh = {!!}
+    decidable : ((x y : A) → Dec (x ≡ y)) → (xs : Vec A n) → Dec (Fresh xs)
+    decidable f = AllAcc.all λ x → ¬? ∘ any (f x)
+
+  decimalsFresh : {True (decidable Charₚ._≟_ DECIMALS)} → Fresh DECIMALS
+  decimalsFresh {t} = toWitness {Q = decidable Charₚ._≟_ DECIMALS} t
 
   showDigit-injective : ∀ (n m : Digit.Digit 10) → Digit.showDigit n ≡ Digit.showDigit m → n ≡ m
   showDigit-injective n m
