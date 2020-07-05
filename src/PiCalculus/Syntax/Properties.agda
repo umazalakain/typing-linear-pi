@@ -7,30 +7,34 @@ open import Relation.Nullary using (yes; no)
 
 open import Data.Empty using (⊥-elim)
 open import Data.Product using (_×_; _,_; Σ; proj₁; proj₂)
-open import Data.Vec.Base using ([]; _∷_; Vec; lookup)
 open import Data.Fin.Base using (Fin; zero; suc)
 open import Data.Unit using (⊤; tt)
-open import Data.Maybe using (Maybe; just; nothing; _>>=_; maybe)
-open import Data.Vec.Relation.Unary.Any using (here; there; index)
-open import Data.Vec.Membership.Propositional using (_∈_; _∉_)
 
+import Data.List.Base as List
+import Data.List.Properties as Listₚ
 import Data.Nat.Base as ℕ
-import Data.Char.Base as Char
-import Data.Nat.Show as ℕₛ
-import Data.String.Base as String
 import Data.Nat.Properties as ℕₚ
+import Data.String.Base as String
 import Data.Product.Properties as Productₚ
-import Data.Vec.Relation.Unary.Any.Properties as Anyₚ
-import Data.Vec.Membership.Propositional.Properties as ∈ₚ
+import Data.Vec.Base as Vec
+import Data.Vec.Relation.Unary.Any as Any
+import Data.Vec.Membership.Propositional as ∈ᵥ
+import Data.Vec.Membership.Propositional.Properties as ∈ᵥₚ
 import Data.String.Properties as Stringₚ
 
+open Vec using ([]; _∷_; Vec)
 open String using (String)
 open ℕ using (ℕ; zero; suc)
+open Any using (here; there)
+open List using (List; []; _∷_; [_])
 
 open import PiCalculus.Syntax
 open Raw
 open Scoped
 open Conversion
+
+open import PiCalculus.Utils
+open AllAcc using ([]; _∷_)
 
 module PiCalculus.Syntax.Properties where
 
@@ -40,67 +44,40 @@ private
     P Q R S : Scoped n
     namex namey : Name
 
-fromName∘toName : (i : Fin n) (ctx : Ctx n) → ∈toFin (∈ₚ.∈-lookup i ctx) ≡ i
+fromName∘toName : (i : Fin n) (ctx : Ctx n) → ∈toFin (∈ᵥₚ.∈-lookup i ctx) ≡ i
 fromName∘toName zero (x ∷ ctx) = refl
 fromName∘toName (suc i) (x ∷ ctx) rewrite fromName∘toName i ctx = refl
 
-toName∘fromName : ∀ {x} {ctx : Ctx n} (x∈ctx : x ∈ ctx) → lookup ctx (∈toFin x∈ctx) ≡ x
+toName∘fromName : ∀ {x} {ctx : Ctx n} (x∈ctx : x ∈ᵥ.∈ ctx) → Vec.lookup ctx (∈toFin x∈ctx) ≡ x
 toName∘fromName (here px) = sym px
 toName∘fromName (there x∈ctx) = toName∘fromName x∈ctx
 
-import Data.List.Base as List
-import Data.List.Properties as Listₚ
-open List using (List; []; _∷_; [_])
-import Data.List.Membership.Propositional as List-∈
-import Data.List.Membership.Propositional.Properties as List-∈ₚ
-open Char using (show)
-import Data.Digit as Digit
-import Data.List.Relation.Unary.All as All
-open All using (All; []; _∷_)
-open import PiCalculus.Utils
-open AllAcc using ([]; _∷_)
-
-showDigit-10-≢-circum : ∀ (n : Digit.Digit 10) → Digit.showDigit n ≢ '^'
-showDigit-10-≢-circum zero eq with cong Char.toℕ eq
-showDigit-10-≢-circum zero eq | ()
-showDigit-10-≢-circum (suc zero) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc zero) eq | ()
-showDigit-10-≢-circum (suc (suc zero)) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc zero)) eq | ()
-showDigit-10-≢-circum (suc (suc (suc zero))) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc (suc zero))) eq | ()
-showDigit-10-≢-circum (suc (suc (suc (suc zero)))) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc (suc (suc zero)))) eq | ()
-showDigit-10-≢-circum (suc (suc (suc (suc (suc zero))))) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc (suc (suc (suc zero))))) eq | ()
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc zero)))))) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc zero)))))) eq | ()
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc (suc zero))))))) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc (suc zero))))))) eq | ()
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))) eq | ()
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))) eq with cong Char.toℕ eq
-showDigit-10-≢-circum (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))) eq | ()
-
 postulate
   fromList-injective : ∀ a b → String.fromList a ≡ String.fromList b → a ≡ b
-  ^∉decimalChars : ∀ n → '^' List-∈.∉ (ℕₛ.toDecimalChars n)
-  toDecimalChars-injective : ∀ a b → ℕₛ.toDecimalChars a ≡ ℕₛ.toDecimalChars b → a ≡ b
+  toDigitChars-injective : ∀ a b → ℕₛ.toDigitChars 10 a ≡ ℕₛ.toDigitChars 10 b → a ≡ b
 
+-- The circum (^) is not a decimal character
+^∉DECIMALS : '^' ∈ᵥ.∉ ℕₛ.DECIMALS
+^∉DECIMALS (there (there (there (there (there (there (there (there (there (there ()))))))))))
+
+-- In <name>^<natural> the <natural> does not contain ^, therefore toString is injective
 toString-injective : (x y : Name × ℕ) → toString x ≡ toString y → x ≡ y
 toString-injective (nx , cx) (ny , cy) eq = cong₂ _,_ strip-toList strip-toDecimalChars
   where
     strip-fromList = fromList-injective (toCharList (nx , cx)) (toCharList (ny , cy)) eq
     count-repr = ListInv.inv-++ʳ (String.toList nx) (String.toList ny) '^'
-                                 (^∉decimalChars cx) (^∉decimalChars cy) strip-fromList
-    strip-toDecimalChars = toDecimalChars-injective cx cy count-repr
+                                 (^∉DECIMALS ∘ (ℕₛ.∈toDigitChars⇒∈digitChars cx '^'))
+                                 (^∉DECIMALS ∘ (ℕₛ.∈toDigitChars⇒∈digitChars cy '^'))
+                                 strip-fromList
+    strip-toDecimalChars = toDigitChars-injective cx cy count-repr
     cancel-names = Listₚ.++-cancelʳ (String.toList nx) (String.toList ny)
                                     (subst (λ ● → String.toList nx List.++ ('^' ∷ ●) ≡ _)
                                            count-repr strip-fromList)
     strip-toList = Stringₚ.toList-injective nx ny cancel-names
 
 
-fresh-∉' : ∀ m name (xs : Ctx n) (isf : Fresh xs) → toString (name , m ℕ.+ (count name xs)) ∉ apply isf
+-- A fresh variable name created from inspecting a context cannot be in that context
+fresh-∉' : ∀ m name (xs : Ctx n) (isf : Fresh xs) → toString (name , m ℕ.+ (count name xs)) ∈ᵥ.∉ apply isf
 fresh-∉' m name (x ∷ xs) ((._ , refl) ∷ ps) (here seq) with x Stringₚ.≟ name
 ... | yes refl = ℕₚ.m≢1+n+m _ (begin
   count name xs
@@ -114,7 +91,7 @@ fresh-∉' m name (x ∷ xs) (_ ∷ _) (there ∈ps) with x Stringₚ.≟ name
 fresh-∉' m name (x ∷ xs) (_ ∷ _) (there ∈ps) | yes refl rewrite ℕₚ.+-suc m (count name xs) = fresh-∉' (suc m) name _ _ ∈ps
 fresh-∉' m name (x ∷ xs) (_ ∷ _) (there ∈ps) | no ¬q = fresh-∉' m name _ _ ∈ps
 
-fresh-∉ : ∀ name {xs : Ctx n} (isf : Fresh xs) → toString (name , count name xs) ∉ apply isf
+fresh-∉ : ∀ name {xs : Ctx n} (isf : Fresh xs) → toString (name , count name xs) ∈ᵥ.∉ apply isf
 fresh-∉ name {xs} isf = fresh-∉' zero name xs isf
 
 -- Translating from de Bruijn to names results in a well-scoped process
@@ -123,8 +100,8 @@ toRaw-WellScoped : {ctx : Ctx n} (fP : Fresh ctx) (P : Scoped n) → WellScoped 
 toRaw-WellScoped {ctx = ctx} fP 𝟘 = tt
 toRaw-WellScoped {ctx = ctx} fP (υ P ⦃ name ⦄) = toRaw-WellScoped (fresh name ctx ∷ fP) P
 toRaw-WellScoped {ctx = ctx} fP (P ∥ Q) = toRaw-WellScoped fP P , toRaw-WellScoped fP Q
-toRaw-WellScoped {ctx = ctx} fP ((x ⦅⦆ P) ⦃ name ⦄) = ∈ₚ.∈-lookup _ _ , toRaw-WellScoped (fresh name ctx ∷ fP) P
-toRaw-WellScoped {ctx = ctx} fP (x ⟨ y ⟩ P) = ∈ₚ.∈-lookup _ _ , ∈ₚ.∈-lookup _ _ , toRaw-WellScoped fP P
+toRaw-WellScoped {ctx = ctx} fP ((x ⦅⦆ P) ⦃ name ⦄) = ∈ᵥₚ.∈-lookup _ _ , toRaw-WellScoped (fresh name ctx ∷ fP) P
+toRaw-WellScoped {ctx = ctx} fP (x ⟨ y ⟩ P) = ∈ᵥₚ.∈-lookup _ _ , ∈ᵥₚ.∈-lookup _ _ , toRaw-WellScoped fP P
 
 toRaw-NotShadowed : {ctx : Ctx n} (fP : Fresh ctx) (P : Scoped n) → NotShadowed (apply fP) (toRaw fP P)
 toRaw-NotShadowed {ctx = ctx} fP 𝟘 = tt

@@ -59,7 +59,6 @@ module Conversion where
     import Data.List.Base as List
     import Data.String.Base as String
     import Data.String.Properties as Stringₚ
-    import Data.Nat.Show as ℕₛ
     import Data.Vec.Membership.DecPropositional as DecPropositional
 
     open import Data.Empty using (⊥)
@@ -79,6 +78,7 @@ module Conversion where
 
     import PiCalculus.Utils
     module AllAcc = PiCalculus.Utils.AllAcc
+    module ℕₛ = PiCalculus.Utils.ℕₛ
     open AllAcc using ([]; _∷_)
 
     variable
@@ -112,7 +112,7 @@ module Conversion where
 
   -- From tuples to strings, convert to lists first so that we can reason about it
   toCharList : Name × ℕ → List Char.Char
-  toCharList (x , i) = String.toList x List.++ ('^' ∷ (ℕₛ.toDecimalChars i))
+  toCharList (x , i) = String.toList x List.++ ('^' ∷ ℕₛ.toDigitChars 10 i)
 
   toString : Name × ℕ → Name
   toString = String.fromList ∘ toCharList
