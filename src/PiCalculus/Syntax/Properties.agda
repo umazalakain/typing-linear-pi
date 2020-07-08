@@ -146,6 +146,9 @@ module _ where
       x y w z : Name
       ks vs : Ctx n
 
+  _∈²_ : ∀ {n} → (Name × Name) → (Ctx n × Ctx n) → Set
+  (x , y ) ∈² (xs , ys) = Σ[ i ∈ Fin _ ] (Vec.lookup xs i ≡ x × Vec.lookup ys i ≡ y)
+
   infix 5 _α[_↦_]≡_
   data _α[_↦_]≡_ : Raw → ∀ {n} → Ctx n → Ctx n → Raw → Set where
     inaction : 𝟘 α[ ks ↦ vs ]≡ 𝟘
@@ -154,11 +157,11 @@ module _ where
     comp     : P α[ ks ↦ vs ]≡ Q
              → R α[ ks ↦ vs ]≡ S
              → P ∥ R α[ ks ↦ vs ]≡ Q ∥ S
-    input    : x ∈ᵥ.∈ ks → y ∈ᵥ.∈ vs
+    input    : (x , y) ∈² (ks , vs)
              → P α[ w ∷ ks ↦ z ∷ vs ]≡ Q
              → x ⦅ w ⦆ P α[ ks ↦ vs ]≡ y ⦅ z ⦆ Q
-    output   : x ∈ᵥ.∈ ks → y ∈ᵥ.∈ vs
-             → w ∈ᵥ.∈ ks → z ∈ᵥ.∈ vs
+    output   : (x , y) ∈² (ks , vs)
+             → (w , z) ∈² (ks , vs)
              → P α[ ks ↦ vs ]≡ Q
              → x ⟨ w ⟩ P α[ ks ↦ vs ]≡ (y ⟨ z ⟩ Q)
 
@@ -171,8 +174,12 @@ module _ where
   toRaw∘fromRaw {ctx = ctx} isf (⦅υ x ⦆ P) wsP
     = scope (toRaw∘fromRaw (fresh x ctx ∷ isf) P wsP)
   toRaw∘fromRaw isf (P ∥ Q) (wsP , wsQ)
-    = comp (toRaw∘fromRaw isf P wsP) (toRaw∘fromRaw isf Q wsQ)
+    = comp (toRaw∘fromRaw isf P wsP)
+           (toRaw∘fromRaw isf Q wsQ)
   toRaw∘fromRaw {ctx = ctx} isf (x ⦅ y ⦆ P) (x∈ctx , wsP)
-    = input (∈ᵥₚ.∈-lookup _ _) x∈ctx (toRaw∘fromRaw (fresh y ctx ∷ isf) P wsP)
+    = input (_ , refl , toName∘fromName x∈ctx)
+            (toRaw∘fromRaw (fresh y ctx ∷ isf) P wsP)
   toRaw∘fromRaw isf (x ⟨ y ⟩ P) (x∈ctx , y∈ctx , wsP)
-    = output (∈ᵥₚ.∈-lookup _ _) x∈ctx (∈ᵥₚ.∈-lookup _ _) y∈ctx (toRaw∘fromRaw isf P wsP)
+    = output (_ , refl , toName∘fromName x∈ctx)
+             (_ , refl , toName∘fromName y∈ctx)
+             (toRaw∘fromRaw isf P wsP)
