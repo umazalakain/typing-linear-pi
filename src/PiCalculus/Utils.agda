@@ -23,7 +23,7 @@ module AllAcc {a b} {A : Set a} where
   import Data.Vec as Vec
   open Vec using (Vec; []; _∷_)
 
-  -- Like Data.Vec.Relation.Unary.All, but we also depend on the list constructed so far
+  -- PR agda-stdlib: https://github.com/agda/agda-stdlib/pull/1256
   data All (P : ∀ {n} → A → Vec A n → Set b) : ∀ {n} → Vec A n → Set (a ⊔ b) where
     [] : All P []
     _∷_ : ∀ {n x} {xs : Vec A n} → P x xs → All P xs → All P (x ∷ xs)
@@ -53,6 +53,7 @@ module ListInv {a} {A : Set a} where
   open import Data.List.Relation.Binary.Equality.Propositional {A = A} using (_≋_; []; _∷_; ≋⇒≡; ≡⇒≋; ≋-refl)
   open List using (List; []; _∷_; [_]; _++_; _∷ʳ_)
 
+  -- PR agda-stdlib: https://github.com/agda/agda-stdlib/pull/1251
   module _ {b} {P : A → Set b} where
     Any-reverse : {xs : List A} → Any P xs → Any P (List.reverse xs)
     Any-reverse {xs = x ∷ xs} (here p) rewrite Listₚ.unfold-reverse x xs = Anyₚ.++⁺ʳ _ (here p)
@@ -123,6 +124,8 @@ module ℕₛ where
   take-step n x xs with splitAt n xs
   take-step n x .(xs ++ ys) | xs , ys , refl = refl
 
+  -- PR stdlib https://github.com/agda/agda-stdlib/pull/1250
+  -- PR stdlib https://github.com/agda/agda-stdlib/pull/1255
   take-lookup-inject : ∀ {a} {A : Set a} (i : Fin n) (xs : Vec A (n ℕ.+ m)) → lookup xs (inject≤ i (m≤m+n _ _)) ≡ lookup (take n xs) i
   take-lookup-inject {n = suc n} zero (x ∷ xs) rewrite take-step n x xs = refl
   take-lookup-inject {n = suc (suc n)} (suc zero) (x ∷ x' ∷ xs) rewrite take-step (suc n) x (x' ∷ xs) | take-step n x' xs = refl
@@ -178,6 +181,7 @@ module ℕₛ where
     map-preserves-injectivity List.[] List.[] f-inj [] = [] {A = A}
     map-preserves-injectivity (x List.∷ xs) (y List.∷ ys) f-inj (x~y ∷ r) = _∷_ {A = A} (f-inj x y x~y) (map-preserves-injectivity xs ys f-inj r)
 
+  -- PR agda-stdlib WIP
   toDigitChars-injective : ∀ n m → toDigitChars 10 n ≡ toDigitChars 10 m → n ≡ m
   toDigitChars-injective n m = toDigits-injective _ _
                              ∘ ListInv.reverse-injective
