@@ -49,9 +49,7 @@
 \newcommand{\comp}[2]{#1 \, \constr{\parallel} \, #2}
 \newcommand{\new}{\constr{\boldsymbol{\nu}} \,}
 \newcommand{\send}[2]{#1 \, \constr{\langle} \, #2 \,\constr{\rangle} \,}
-\newcommand{\sendp}[2]{#1 \, \constr{\langle} \, #2 \, \constr{\rangle} \, . \,}
-\newcommand{\recv}[1]{#1 \, \constr{\mathbb{()}} \,}
-\newcommand{\recvp}[2]{#1 \, \constr{(} \, #2 \, \constr{)} \, . \, }
+\newcommand{\recv}[2]{#1 \, \constr{\mathbb{(}} \, #2 \, \constr{\mathbb{)}} \,}
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \, #1 \, \constr{]}}
@@ -78,6 +76,11 @@
 \newcommand{\containsusage}[4]{#1 \, \type{\ni}_{#2} \, #3 \, \type{\triangleright} \, #4}
 \newcommand{\Var}{\type{VAR}}
 \newcommand{\Process}{\type{PROCESS}}
+\newcommand{\Raw}{\type{RAW}}
+\newcommand{\Name}{\type{NAME}}
+\newcommand{\Names}{\type{NAMES}}
+\newcommand{\Fresh}{\type{FRESH}}
+\newcommand{\WellScoped}{\type{WELLSCOPED}}
 \newcommand{\Unused}{\type{UNUSED}}
 \newcommand{\PreCtx}{\type{PRECTX}}
 \newcommand{\Ctx}{\type{CTX}}
@@ -246,7 +249,8 @@ In particular, while linearity is needed for type safety in communication-centri
 
 \autoref{fig:notation} illustrates the notation used in this paper.
 Data type definitions ($\type{\N}$) use double lines and index-free synonyms (\textsc{Nat}) as rule names (for ease of reference).
-We otherwise use constructor names ($\constr{0}$ and $\suc$) to name our typing rules.
+Constructors ($\constr{0}$ and $\suc$) are given as inference rules, although we occasionally use a BNF style definition of types for brevity.
+We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda --- where premises become argument types and conclusions return types.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned by type definitions but omitted by constructors.
 
@@ -258,85 +262,136 @@ $\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\const
 \label{syntax}
 
 \begin{figure}[h]
-    \begin{mathpar}
-      \datatype
-      {n : \N}
-      {\Var_n : \Set}
-      \; \textsc{Var}
+  \begin{mathpar}
+    \datatype
+    { }
+    {\Raw : \Set}
+    \; \textsc{Raw}
+  \end{mathpar}
 
-      \inferrule
-      {n : \N}
-      {\constr{0} : \Var_{\suc n}}
-
-      \inferrule
-      {x : \Var_n}
-      {\suc x : \Var_{\suc n}}
-
-      \datatype
-      {n : \N}
-      {\Process_n : \Set}
-      \; \textsc{Process}
-    \end{mathpar}
+  \begin{equation*}
+    \begin{aligned}
+      \Raw ::= &\; \PO              &&\text{(inaction)}    \\ 
+      |& \; (\new{\Name}) \; \Raw         &&\text{(restriction)} \\ 
+      |& \; \comp{\Raw}{\Raw}       &&\text{(parallel)}    \\ 
+      |& \; \recv{\Name}{\Name}\Raw &&\text{(input)}       \\ 
+      |& \; \send{\Name}{\Name}\Raw &&\text{(output)}      \\
+    \end{aligned}
+  \end{equation*}
+  \caption{Grammar with names.}
+  \label{fig:syntax-names}
 \end{figure}
 
 \begin{figure}[h]
-    \begin{equation*}
-      \begin{split}
-        P,Q ::=      & \; \PO                \\ 
-                    |& \; (\new{}x) \; P       \\ 
-                    |& \; \comp{P}{Q}        \\ 
-                    |& \; \recvp{x}{y} P \\ 
-                    |& \; \sendp{x}{y} P 
-      \end{split}
-    \end{equation*}
-    \caption{Ill-scoped grammar with names.}
-    \label{fig:syntax-names}
+  \begin{mathpar}
+    \datatype
+    {n : \N}
+    {\Var_n : \Set}
+    \; \textsc{Var}
+
+    \inferrule
+    {n : \N}
+    {\constr{0} : \Var_{\suc n}}
+
+    \inferrule
+    {x : \Var_n}
+    {\suc x : \Var_{\suc n}}
+
+    \datatype
+    {n : \N}
+    {\Process_n : \Set}
+    \; \textsc{Process}
+  \end{mathpar}
+
+  \begin{equation*}
+    \begin{aligned}
+      \Process_n ::=& \; \PO_n               &&\text{(inaction)}   \\ 
+      |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
+      |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)} \\ 
+      |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
+      |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
+    \end{aligned}
+  \end{equation*}
+  \caption{Well-scoped grammar with type-level de Bruijn indices.}
+  \label{fig:syntax}
 \end{figure}
 
-\begin{figure}[h]
-    \begin{equation*}
-      \begin{aligned}
-        \Process_n ::=& \; \PO_n               &&\text{(inaction)}   \\ 
-        |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
-        |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)} \\ 
-        |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
-        |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
-      \end{aligned}
-    \end{equation*}
-    \caption{Well-scoped grammar with type-level de Bruijn indices.}
-    \label{fig:syntax}
-\end{figure}
-
-Let $x, y,\ldots$ range over \emph{variables} (including channel names) and $P, Q,\ldots$ over processes.
 The syntax of the \picalc{} \cite{Sangio01} is given by the grammar in \autoref{fig:syntax-names}.
 Process $\PO$ denotes the terminated process, where no operations can further occur.
 Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
-Processes $\recvp{x}{y} P$ and $\sendp{x}{y} P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
+Processes $\recv{x}{y} P$ and $\send{x}{y} P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
 
-Scope restriction $(\new{}x) \; P$ and input $\recvp{x}{y} \; P$ are \emph{binders}, they are the only constructs which introduce bound names --- $x$ and $y$ in $P$, respectively.
+Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs which introduce bound names --- $x$ and $y$ in $P$, respectively.
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
-Names are cumbersome to mechanise: inserting a new variable into a context means proving that its name differs from all other variable names in context.
-Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago --- hence binders no longer introduce names.
+Names are cumbersome to mechanise: they offer no guarantee of being well-scoped, one has to deal with alpha-conversion, and inserting new variables into context entails proving that their names differ from all other names in context.
+Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
+That is, terms at different \emph{depths} use different indices to refer to the same binding, and binders no longer introduce names.
 \begin{example}
   Example process using names (top) and de Bruijn indices (bottom).
   \small
   \begin{equation*}
     \begin{aligned}
-      & (\new{}x ) && (\comp {\recvp{x}{y} && \sendp{y}{a} && \PO} {(\new{} y) && (\sendp{x}{y} && \recvp{y}{z} && \PO)}) \\
-      & \new{} && (\comp {\recv{0} && \send{0}{a} && \PO} {\new{} && (\send{1}{0} && \recv{0} && \PO)}) \\
+      & (\new{}x ) && (\comp {\recv{x}{y} && \send{y}{a} && \PO} {(\new{} y) && (\send{x}{y} && \recv{y}{z} && \PO)}) \\
+      & \new{} && (\comp {\recv{0}{} && \send{0}{a} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
     \end{aligned}
   \end{equation*}
 \end{example}
-That is, terms at different \emph{depths} use different indices to refer to the same binding.
 
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
 References outside of that range are meaningless.
-It is useful to rule out these ill-scoped nonsensical terms syntactically.
+It is useful to rule out these ill-scoped terms syntactically.
 In \autoref{fig:syntax}, we do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
 Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within to refer to one more thing.
 
+\subsection{From names to de Bruijn indices and back}
+
+De Bruijn indices are easier to manipulate, but as humans we rather deal with names.
+To that end, we provide the user with named processes, while using de Bruijn indexed processes internally.
+We do so by defining translation functions in both directions and proving that they are inverses of each other up to $\alpha$-conversion.
+
+\paragraph{From names to de Bruijn indices}
+We keep the original binder names around as name hints when we translate into processes with de Bruijn names --- these names will serve as hints when we translate back.
+The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps between the first $n$ indices and their names, and substituting named references within the process with their corresponding de Bruijn index.
+We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate it.
+\begin{equation*}
+  \begin{aligned}
+    &\func{fromRaw} && : (ctx : \Names_n) \; (P : \Raw) \\
+    &               && \to \WellScoped \; ctx \; P \to \Process_n \\
+  \end{aligned}
+\end{equation*}
+
+\paragraph{From de Bruijn indices to names}
+The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps between $n$ de Bruijn indices and names, and substituting indices within the process with their corresponding names.
+As many widely-used languages do, we produce unique variable names but use the original variable names kept around throughout the de Bruijn representation as hints, to make the correspondence visually more straightforward.
+For this, we use the naming scheme $<name-hint>\textasciicircum<n>$, where $<n>$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
+\begin{equation*}
+  \begin{aligned}
+    &\func{toRaw} && : (ctx : \Names_n) \to \Process_n \to \Raw
+  \end{aligned}
+\end{equation*}
+
+\begin{nilemma}
+  Translating from de Bruijn indices to names results in a well-scoped process.
+\end{nilemma}
+
+\begin{nilemma}
+  Translating from de Bruijn indices to names results in a process with no shadowed variables.
+\end{nilemma}
+
+\begin{nilemma}
+  Translating from de Bruijn indices to names and back results in the same process modulo variable name hints.
+\end{nilemma}
+
+\begin{nilemma}
+  Translating from names to de Bruijn indices and back results in the same process modulo $\alpha$-conversion.
+\end{nilemma}
+
+\begin{proof}
+  TODO
+\end{proof}
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Semantics}
 \label{semantics}
@@ -399,7 +454,7 @@ In all the above, $i$ is incremented every time we go under a binder.
 
 The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs (\autoref{fig:reduction}).
 We keep track of channel $c$ so we can state subject reduction (\autoref{thm:subject-reduction}).
-We distinguish between channels that are created inside of the process ($\constr{internal}$) and channels that are created outside ($\constr{external}\ i$, where $i$ is the index of the channel variable).
+We distinguish between channels that are created inside of the process ($\constr{internal}$) and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable).
 
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
@@ -434,7 +489,7 @@ This $\func{dec}$ function saturates at $\constr{internal}$: wrapping an interna
 
   \inferrule
   {i \; j : \Var_n \\ P : \Process_{\suc n} \\ Q : \Process_n}
-  {\constr{comm} : \comp{\recv{i}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{\func{lower}_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}}) \; uP'}{Q}}
+  {\constr{comm} : \comp{\recv{i}{}P}{\send{i}{j}{Q}} \reduce{\constr{external} \; i} \comp{\func{lower}_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}}) \; uP'}{Q}}
 
   \inferrule
   {red : P \reduce{c} P'}
@@ -762,7 +817,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
         {\stacked{
             chan_i : \contains{\gamma \hspace{1.2em}}{\Gamma \hspace{1.3em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
             cont \hspace{0.6em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{4.6em}}{\Theta \comma \lz}}}
-        {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{P}}{\Theta}}
+        {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{}P}{\Theta}}
   
     \inferrule
         {\stacked{
@@ -815,7 +870,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing a process that sends part of one channel over another.]
   $\func{p}$ : $\Process_{\suc \constr{zero}}$
   $\func{p}$ = $\new{}$
-       $(\comp{\recv{\constr{0}} (\recv{\constr{0}} \PO)}$
+       $(\comp{\recv{\constr{0}}{} (\recv{\constr{0}}{} \PO)}$
        ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
 
   $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\func{\epsilon}}$
