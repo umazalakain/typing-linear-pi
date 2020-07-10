@@ -117,8 +117,9 @@ module Conversion where
   repr : ∀ {x} (xs : Vec Name n) → CountedName x xs → Name
   repr xs = toString ∘ erase xs
 
-  apply : {ctx : Ctx n} → Fresh ctx → Ctx n
-  apply = Vec.map toString ∘ AllAcc.map λ { {xs = xs} → erase xs}
+  apply : Ctx n → Ctx n
+  apply [] = []
+  apply (x ∷ xs) = repr xs (fresh x xs) ∷ apply xs
 
   WellScoped : Ctx n → Raw → Set
   WellScoped ctx 𝟘 = ⊤
@@ -166,18 +167,20 @@ module Conversion where
   fromRaw : (ctx : Ctx n) (P : Raw) → ⦃ _ : True (WellScoped? ctx P) ⦄ → Scoped n
   fromRaw ctx P ⦃ p ⦄ = fromRaw' ctx P (toWitness p)
 
-  toRaw : {ctx : Ctx n} → Fresh ctx → Scoped n → Raw
-  toRaw {ctx = ctx} isf 𝟘 = 𝟘
-  toRaw {ctx = ctx} isf (υ P ⦃ name ⦄) =
+  toRaw : Ctx n → Scoped n → Raw
+  toRaw ctx 𝟘 = 𝟘
+  toRaw ctx (υ P ⦃ name ⦄) =
     let cname = fresh name ctx in
-    ⦅υ repr ctx cname ⦆ toRaw (cname ∷ isf) P
-  toRaw {ctx = ctx} isf (P ∥ Q) =
-    toRaw isf P ∥ toRaw isf Q
-  toRaw {ctx = ctx} isf ((x ⦅⦆ P) ⦃ name ⦄) =
-    let cname = fresh name ctx in
-    Vec.lookup (apply isf) x ⦅ repr ctx cname ⦆ toRaw (cname ∷ isf) P
-  toRaw {ctx = ctx} isf (x ⟨ y ⟩ P) =
-    Vec.lookup (apply isf) x ⟨ Vec.lookup (apply isf) y ⟩ toRaw isf P
+    ⦅υ repr ctx cname ⦆ toRaw (name ∷ ctx) P
+  toRaw ctx (P ∥ Q) =
+    toRaw ctx P ∥ toRaw ctx Q
+  toRaw ctx ((x ⦅⦆ P) ⦃ name ⦄) =
+    let cname = fresh name ctx
+        ctx' = apply ctx
+    in Vec.lookup ctx' x ⦅ repr ctx cname ⦆ toRaw (name ∷ ctx) P
+  toRaw ctx (x ⟨ y ⟩ P) =
+    let ctx' = apply ctx
+    in Vec.lookup ctx' x ⟨ Vec.lookup ctx' y ⟩ toRaw ctx P
 
   map : ∀ {a} (B : Scoped n → Set a) (ctx : Vec Name n) (P : Raw) → Set a
   map B ctx P with WellScoped? ctx P

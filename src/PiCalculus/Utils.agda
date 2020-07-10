@@ -34,10 +34,6 @@ module AllAcc {a b} {A : Set a} where
     uncons : ∀ {x} {xs : Vec A n} → All P (x ∷ xs) → P x xs × All P xs
     uncons (p ∷ ps) = p , ps
 
-    map : ∀ {c} {C : Set c} {xs : Vec A n} → (∀ {n x} {xs : Vec A n} → P x xs → C) → All P xs → Vec C n
-    map f [] = []
-    map f (x ∷ ps) = (f x) ∷ map f ps
-
     all : (∀ {n} x (xs : Vec A n) → Dec (P x xs)) → (xs : Vec A n) → Dec (All P xs)
     all P? [] = yes []
     all P? (x ∷ xs) = map′ (uncurry _∷_) uncons (P? x xs ×-dec all P? xs)
