@@ -737,7 +737,6 @@ The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ 
 The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
 
-
 \begin{nidefinition}[\textsc{VarRef}: typing variable references]
   \label{def:varref}
 
@@ -748,15 +747,14 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   
     \datatype{
       \gamma : \PreCtx_n \\
-      \stacked{
-        idxs : \Idxs_n \\\\
-        \Gamma : \Ctx_{idxs}} \\
       i : \Var_n \\
-      t : \Type \\
       \stacked{
+        t : \Type \\\\
         idx : \Idx \\\\
         y : \Usage_{idx}^{\func{2}}} \\
-      \Delta : \Ctx_{idxs}}
+      \stacked{
+        idxs : \Idxs_n \\\\
+        \Gamma \; \Delta : \Ctx_{idxs}}}
     {\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta} : \Set}
     \; \textsc{VarRef}
   
@@ -799,11 +797,10 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   \begin{mathpar}
     \datatype{
       \gamma : \PreCtx_n \\
+      P : \Process_n \\
       \stacked{
         idxs : \Idxs_n \\\\
-        \Gamma : \Ctx_{idxs}} \\
-      P : \Process_n \\
-      \Delta : \Ctx_{idxs}}
+        \Gamma \; \Delta : \Ctx_{idxs}}}
     {\types{\gamma}{\Gamma}{P}{\Delta} : \Set}
     \; \textsc{Types}
     
