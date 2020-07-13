@@ -533,7 +533,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra that is satisfied by linear, graded and shared types alike.
 
 \begin{nidefinition}[Usage algebra]
-  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{decidable}, \emph{deterministic}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
+  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{deterministic}, \emph{cancellative}, \emph{associative}, \emph{commutative}, and in which the leftovers can be \emph{computed}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
   \autoref{fig:multiplicities} models such an algebra as a record $\Algebra_C$ on a carrier $C$.
@@ -774,7 +774,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
-  We use the \emph{decidability} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
+  We use the \emph{computability} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
 \end{nidefinition}
 
