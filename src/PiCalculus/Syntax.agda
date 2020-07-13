@@ -10,8 +10,7 @@ Name = String
 module Raw where
   infix 20 _∥_
   infixr 15 ⦅ν_⦆_
-  infixr 9 _⦅_⦆_
-  infixr 9 _⟨_⟩_
+  infixr 10 _⦅_⦆_ _⟨_⟩_
 
   data Raw : Set where
     𝟘     : Raw
@@ -27,8 +26,7 @@ module Scoped where
 
   infix 20 _∥_
   infixr 15 ν
-  infixr 9 _⦅⦆_
-  infixr 9 _⟨_⟩_
+  infixr 10 _⦅⦆_ _⟨_⟩_
 
   private
     variable

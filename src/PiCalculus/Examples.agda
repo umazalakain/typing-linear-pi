@@ -13,7 +13,6 @@ import Level as L
 
 open import PiCalculus.Syntax
 open Scoped
-open Conversion
 open import PiCalculus.Semantics
 open import PiCalculus.LinearTypeSystem.Algebras
 open import PiCalculus.LinearTypeSystem.Algebras.Linear using (Linear)
@@ -31,10 +30,7 @@ raw = ⦅ν "x"⦆ (("x" ⦅ "y" ⦆ 𝟘) ∥ ("x" ⟨ "a" ⟩ 𝟘))
 scoped : Scoped 1
 scoped = ν (((# 0) ⦅⦆ 𝟘) ⦃ "y" ⦄ ∥ ((# 0) ⟨ # 1 ⟩ 𝟘)) ⦃ "x" ⦄
 
-_ : fromRaw ("a" ∷ []) raw ≡ scoped
-_ = refl
-
-_ : toRaw ("a" ∷ []) scoped ≡ raw
+_ : Conversion.fromRaw ("a" ∷ []) raw ≡ scoped
 _ = refl
 
 channel-over-channel₀ : Raw
@@ -71,10 +67,10 @@ channel-over-channel₇ : Raw
 channel-over-channel₇ = 𝟘
 
 _!_≅_ : ∀ {n} → Vec Name n → Raw → Raw → Set
-_!_≅_ = map₂ _≅_
+_!_≅_ = Conversion.map₂ _≅_
 
 _!_⇒_ : ∀ {n} → Vec Name n → Raw → Raw → Set
-_!_⇒_ = map₂ _⇒_
+_!_⇒_ = Conversion.map₂ _⇒_
 
 _ : ("y" ∷ []) ! channel-over-channel₀ ≅ channel-over-channel₁
 _ = _ , ν-cong cong-symm stop scope-ext ((λ ()) , (λ ()) , tt)
@@ -117,7 +113,7 @@ module Shared-Linear where
   open import PiCalculus.LinearTypeSystem.ContextLemmas QUANTIFIERS
 
   _!_；[_]_⊢_▹_ : Vec Name n → PreCtx n → (idxs : Idxs n) → Ctx idxs → Raw → Ctx idxs → Set
-  ctx ! γ ；[ idxs ] Γ ⊢ P ▹ Δ = map (λ P' → γ ；[ idxs ] Γ ⊢ P' ▹ Δ) ctx P
+  ctx ! γ ；[ idxs ] Γ ⊢ P ▹ Δ = Conversion.map (λ P' → γ ；[ idxs ] Γ ⊢ P' ▹ Δ) ctx P
 
   ω∙ : ⊤ ²
   ω∙ = tt , tt
@@ -139,24 +135,22 @@ module Shared-Linear where
     name = ""
 
   _ : ([] -, "y") ! [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
-  _ = chan C[ 𝟙 ； ω∙ ] ℓᵢ {LINEAR} 1∙
-      (comp (recv here (recv here end))
-            (chan 𝟙 ω∙ {LINEAR} 1∙
-                  (send (there here) here (send here (there (there here)) end))))
+  _ = ν C[ 𝟙 ； ω∙ ] ℓᵢ {LINEAR} 1∙
+      ((here ⦅⦆ (here ⦅⦆ 𝟘)) ∥
+            (ν 𝟙 ω∙ {LINEAR} 1∙
+                  ((there here) ⟨ here ⟩ (here ⟨ there (there here) ⟩ 𝟘))))
 
   _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ ν ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ▹ ε
-  _ = chan 𝟙 ω∙ {LINEAR} 1∙
-      (comp (send here (there here) end)
-      (recv here end))
+  _ = ν 𝟙 ω∙ {LINEAR} 1∙ ((here ⟨ there here ⟩ 𝟘) ∥ (here ⦅⦆ 𝟘))
 
   p : Scoped 1
   p = ν ((zero ⦅⦆ (zero ⦅⦆ 𝟘)) ∥ (ν (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘)))
 
   _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ p ▹ ε
-  _ = chan C[ 𝟙 ； ω∙ ] {LINEAR} ℓᵢ {LINEAR} 1∙ (comp
-           (recv here (recv here end))
-           (chan 𝟙 ω∙ 1∙
-                 (send (there here) here (send here (there there here) end))))
+  _ = ν C[ 𝟙 ； ω∙ ] {LINEAR} ℓᵢ {LINEAR} 1∙ (
+           (here ⦅⦆ (here ⦅⦆ 𝟘)) ∥
+           (ν 𝟙 ω∙ 1∙
+                 ((there here) ⟨ here ⟩ (here ⟨ there there here ⟩ 𝟘))))
 
 
 module Linear where

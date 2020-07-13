@@ -45,16 +45,16 @@ private
          → Unused i P
          → γ ； Γ ⊢ P ▹ Θ
          → All.lookup i Γ ≡ All.lookup i Θ
-⊢-unused i uP end = refl
-⊢-unused i uP (chan t m μ ⊢P) = ⊢-unused (suc i) uP ⊢P
-⊢-unused i (i≢x , uP) (recv (_ , x) ⊢P) = trans
+⊢-unused i uP 𝟘 = refl
+⊢-unused i uP (ν t m μ ⊢P) = ⊢-unused (suc i) uP ⊢P
+⊢-unused i (i≢x , uP) ((_ , x) ⦅⦆ ⊢P) = trans
   (∋-lookup-≢ x i i≢x)
   (⊢-unused (suc i) uP ⊢P)
-⊢-unused i (i≢x , i≢y , uP) (send (_ , x) (_ , y) ⊢P) = trans (trans
+⊢-unused i (i≢x , i≢y , uP) ((_ , x) ⟨ _ , y ⟩ ⊢P) = trans (trans
   (∋-lookup-≢ x i i≢x)
   (∋-lookup-≢ y i i≢y))
   (⊢-unused i uP ⊢P)
-⊢-unused i (uP , uQ) (comp ⊢P ⊢Q) = trans
+⊢-unused i (uP , uQ) (⊢P ∥ ⊢Q) = trans
   (⊢-unused i uP ⊢P)
   (⊢-unused i uQ ⊢Q)
 
@@ -93,8 +93,8 @@ module _ {a} {A : Set a} where
        → (i : Fin n)
        → γ ； Γ ⊢ P ▹ Θ
        → swapᵥ i γ ； swapₐ i Γ ⊢ swap i P ▹ swapₐ i Θ
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i end = end
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (chan t m μ ⊢P) = chan t m μ (⊢-swap (suc i) ⊢P)
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (recv {Ξ = _ -, _ -, _} x ⊢P) = recv (∋-swap i x) (⊢-swap (suc i) ⊢P)
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (send x y ⊢P) = send (∋-swap i x) (∋-swap i y) (⊢-swap i ⊢P)
-⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (comp ⊢P ⊢Q) = comp (⊢-swap i ⊢P) (⊢-swap i ⊢Q)
+⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i 𝟘 = 𝟘
+⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (ν t m μ ⊢P) = ν t m μ (⊢-swap (suc i) ⊢P)
+⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (_⦅⦆_ {Ξ = _ -, _ -, _} x ⊢P) = ∋-swap i x ⦅⦆ ⊢-swap (suc i) ⊢P
+⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (x ⟨ y ⟩ ⊢P) = ∋-swap i x ⟨ ∋-swap i y ⟩ (⊢-swap i ⊢P)
+⊢-swap {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (⊢P ∥ ⊢Q) = ⊢-swap i ⊢P ∥ ⊢-swap i ⊢Q

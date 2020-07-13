@@ -55,12 +55,12 @@ private
              → (uP : Unused i P)
              → γ ； Γ ⊢ P ▹ Θ
              → Vec.remove γ i ； ctx-remove Γ i ⊢ lower i P uP ▹ ctx-remove Θ i
-⊢-strengthen i uP end = end
-⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (chan t m μ ⊢P)
-  = chan t m μ (⊢-strengthen (suc i) uP ⊢P)
-⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i (i≢x , uP) (recv {Ξ = _ -, _} x ⊢P)
-  = recv (∋-strengthen i i≢x x) (⊢-strengthen (suc i) uP ⊢P)
-⊢-strengthen {γ = _ -, _} i (i≢x , i≢y , uP) (send x y ⊢P)
-  = send (∋-strengthen i i≢x x) (∋-strengthen i i≢y y) (⊢-strengthen i uP ⊢P)
-⊢-strengthen {γ = _ -, _} i (uP , uQ) (comp ⊢P ⊢Q)
-  = comp (⊢-strengthen i uP ⊢P) (⊢-strengthen i uQ ⊢Q)
+⊢-strengthen i uP 𝟘 = 𝟘
+⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i uP (ν t m μ ⊢P)
+  = ν t m μ (⊢-strengthen (suc i) uP ⊢P)
+⊢-strengthen {γ = _ -, _} {Γ = _ -, _} {Θ = _ -, _} i (i≢x , uP) (_⦅⦆_ {Ξ = _ -, _} x ⊢P)
+  = ∋-strengthen i i≢x x ⦅⦆ ⊢-strengthen (suc i) uP ⊢P
+⊢-strengthen {γ = _ -, _} i (i≢x , i≢y , uP) (x ⟨ y ⟩ ⊢P)
+  = ∋-strengthen i i≢x x ⟨ ∋-strengthen i i≢y y ⟩ ⊢-strengthen i uP ⊢P
+⊢-strengthen {γ = _ -, _} i (uP , uQ) (⊢P ∥ ⊢Q)
+  = ⊢-strengthen i uP ⊢P ∥ ⊢-strengthen i uQ ⊢Q

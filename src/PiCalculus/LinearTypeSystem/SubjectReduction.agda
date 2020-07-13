@@ -90,29 +90,29 @@ align i o io ⊢P | refl | refl | refl =
 
 comm-≥ℓ# : {γ : PreCtx n} {Γ Δ : Ctx idxs} {c : Channel n}
       → P =[ c ]⇒ Q → γ ； Γ ⊢ P ▹ Δ → c ≡ external i → ∃[ y ] (All.lookup i Γ ≔ ℓ# ∙² y)
-comm-≥ℓ# {i = i} comm (comp (recv (_ , x) ⊢P) (send (_ , x') _ ⊢Q)) refl with ⊢-⊗ ⊢P
-comm-≥ℓ# {i = i} comm (comp (recv (_ , x) ⊢P) (send (_ , x') _ ⊢Q)) refl | (_ -, _) , (Ξ≔ , _) = extract-ℓ# x x' Ξ≔
-comm-≥ℓ# (par P→P') (comp ⊢P ⊢Q) refl = comm-≥ℓ# P→P' ⊢P refl
-comm-≥ℓ# (res_ {c = internal} P→Q) (chan t m μ ⊢P) ()
-comm-≥ℓ# (res_ {c = external zero} P→Q) (chan t m μ ⊢P) ()
-comm-≥ℓ# (res_ {c = external (suc i)} P→Q) (chan t m μ ⊢P) refl = comm-≥ℓ# P→Q ⊢P refl
+comm-≥ℓ# {i = i} comm (((_ , x) ⦅⦆ ⊢P) ∥ ((_ , x') ⟨ _ ⟩ ⊢Q)) refl with ⊢-⊗ ⊢P
+comm-≥ℓ# {i = i} comm (((_ , x) ⦅⦆ ⊢P) ∥ ((_ , x') ⟨ _ ⟩ ⊢Q)) refl | (_ -, _) , (Ξ≔ , _) = extract-ℓ# x x' Ξ≔
+comm-≥ℓ# (par P→P') (⊢P ∥ ⊢Q) refl = comm-≥ℓ# P→P' ⊢P refl
+comm-≥ℓ# (res_ {c = internal} P→Q) (ν t m μ ⊢P) ()
+comm-≥ℓ# (res_ {c = external zero} P→Q) (ν t m μ ⊢P) ()
+comm-≥ℓ# (res_ {c = external (suc i)} P→Q) (ν t m μ ⊢P) refl = comm-≥ℓ# P→Q ⊢P refl
 comm-≥ℓ# (struct P≅P' P'→Q) ⊢P refl = comm-≥ℓ# P'→Q (subject-cong P≅P' ⊢P) refl
 
 subject-reduction : SubjectReduction
-subject-reduction Γ'⇒Γ comm (comp (recv {P = P} (tx , x) ⊢P) (send (tx' , x') y ⊢Q)) with trans (sym (∋-≡Type tx)) (∋-≡Type tx')
-subject-reduction Γ'⇒Γ comm (comp (recv {P = P} (tx , x) ⊢P) (send (tx' , x') y ⊢Q)) | refl = comp ⊢P' ⊢Q
+subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) with trans (sym (∋-≡Type tx)) (∋-≡Type tx')
+subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) | refl = ⊢P' ∥ ⊢Q
   where ⊢P' = ⊢P
             |> align (suc x) (suc x') (suc Γ'⇒Γ)
             |> ⊢-subst y
             |> ⊢-strengthen zero (subst-unused (λ ()) P)
-subject-reduction Γ'⇒Γ (par P→P') (comp ⊢P ⊢Q) = comp (subject-reduction Γ'⇒Γ P→P' ⊢P) ⊢Q
-subject-reduction {idx = idx} refl (res_ {c = internal} P→Q) (chan t m μ ⊢P)
-  = chan t m μ (subject-reduction {idx = idx} refl P→Q ⊢P)
-subject-reduction refl (res_ {c = external zero} P→Q) (chan t m μ ⊢P)
+subject-reduction Γ'⇒Γ (par P→P') (⊢P ∥ ⊢Q) = subject-reduction Γ'⇒Γ P→P' ⊢P ∥ ⊢Q
+subject-reduction {idx = idx} refl (res_ {c = internal} P→Q) (ν t m μ ⊢P)
+  = ν t m μ (subject-reduction {idx = idx} refl P→Q ⊢P)
+subject-reduction refl (res_ {c = external zero} P→Q) (ν t m μ ⊢P)
   = let (lμ' , rμ') , (ls , rs) = comm-≥ℓ# P→Q ⊢P refl
         rs' = subst (λ ● → _ ≔ _ ∙ ●) (∙-uniqueˡ (∙-comm rs) (∙-comm ls)) rs
-     in chan t m lμ' (subject-reduction (zero (ls , rs')) P→Q ⊢P)
-subject-reduction Γ'⇒Γ (res_ {c = external (suc i)} P→Q) (chan t m μ ⊢P)
-  = chan t m μ (subject-reduction (suc Γ'⇒Γ) P→Q ⊢P)
+     in ν t m lμ' (subject-reduction (zero (ls , rs')) P→Q ⊢P)
+subject-reduction Γ'⇒Γ (res_ {c = external (suc i)} P→Q) (ν t m μ ⊢P)
+  = ν t m μ (subject-reduction (suc Γ'⇒Γ) P→Q ⊢P)
 subject-reduction Γ'⇒Γ (struct P≅P' P'→Q) ⊢P
   = subject-reduction Γ'⇒Γ P'→Q (subject-cong P≅P' ⊢P)

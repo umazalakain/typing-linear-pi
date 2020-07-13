@@ -44,8 +44,8 @@ private
          → (j : Fin (suc n))
          → γ ； Γ ⊢ P ▹ Θ
          → Vec.insert γ j t ； ctx-insert j xs Γ ⊢ lift j P ▹ ctx-insert j xs Θ
-⊢-weaken j end = end
-⊢-weaken j (chan t m μ ⊢P) = chan t m μ (⊢-weaken (suc j) ⊢P)
-⊢-weaken j (comp ⊢P ⊢Q) = comp (⊢-weaken j ⊢P) (⊢-weaken j ⊢Q)
-⊢-weaken j (recv x ⊢P) = recv (∋-weaken j x) (⊢-weaken (suc j) ⊢P)
-⊢-weaken j (send x y ⊢P) = send (∋-weaken j x) (∋-weaken j y) (⊢-weaken j ⊢P)
+⊢-weaken j 𝟘 = 𝟘
+⊢-weaken j (ν t m μ ⊢P) = ν t m μ (⊢-weaken (suc j) ⊢P)
+⊢-weaken j (⊢P ∥ ⊢Q) = ⊢-weaken j ⊢P ∥ ⊢-weaken j ⊢Q
+⊢-weaken j (x ⦅⦆ ⊢P) = ∋-weaken j x ⦅⦆ ⊢-weaken (suc j) ⊢P
+⊢-weaken j (x ⟨ y ⟩ ⊢P) = ∋-weaken j x ⟨ ∋-weaken j y ⟩ ⊢-weaken j ⊢P
