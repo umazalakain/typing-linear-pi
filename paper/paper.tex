@@ -23,6 +23,13 @@
 % inference rules
 \usepackage{mathpartir}
 
+% Newline inside table
+\usepackage{makecell}
+
+% Fix autoref's example treatment 
+\newtheorem{example}{Example}
+\newcommand{\exampleautorefname}{Example}
+
 % Do not use italics in definitions and theorems
 \theoremstyle{definition}
 \newtheorem{nidefinition}{Definition}
@@ -65,7 +72,7 @@
 \newcommand{\one}{\func{1\cdot}}
 \newcommand{\li}{\func{\ell_i}}
 \newcommand{\lo}{\func{\ell_o}}
-\newcommand{\lz}{\func{\ell_{\o}}}
+\newcommand{\lz}{\func{\ell_{\varnothing}}}
 \newcommand{\lio}{\func{\ell_{\#}}}
 
 % Types
@@ -152,11 +159,11 @@ The authors would also like to thank the anonymous referees fortheir valuable co
 \section{Introduction}
 
 We live in a concurrent world where any given state is often interactively computed by a myriad of parties --- people, machines, processors, services, networks.
-As humans, we aim to model, predict, and build such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
+As humans, we aim to model, build, and predict such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
 
 The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
 It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data over communication channels.
-Notably, it features channel mobility: channels themselves are first order values, and can therefore be transmitted.
+Notably, it features channel mobility: channels themselves are first class values, and can therefore be transmitted.
 The \picalc{} has been a foundation for the design and implementation of programming languages for concurrency, such as Pict \cite{PierceT00} and (more recently) Go \footnote{https://golang.org}.
 At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types. This makes the \picalc{} a fully-fledged tool for modelling and verification of concurrent and distributed systems.
 
@@ -186,13 +193,14 @@ We do so by defining a specification for an algebra on \emph{multiplicities} (ho
 The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
 This allows for linear, graded and shared types to be used either separately or mixed in a type system.
 Ultimately, we can exploit this formalisation as a unified framework for type safe distributed modelling and programming with a variety of type systems, and build on top of it more advanced types, theories and languages.
-In particular, while linearity is needed for type safety in communication-centric programming, graded and shared types are needed to model real-world software systems.
 
 \subsection{Contributions}
 \begin{enumerate}
 \item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
  \begin{itemize}
    \item \textbf{Syntax}: \autoref{syntax} uses type level \emph{de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it.
+     For convenience, the user can convert from and to a syntax with names.
+     These two conversion functions are shown to be inverses of one another modulo $\alpha$-conversion.
    
    \item \textbf{Semantics}: \autoref{semantics} provides an operational semantics for the \picalc{}, prior to any typing.
    This operational semantics is defined as a reduction relation on processes (\autoref{operational-semantics}).
@@ -252,10 +260,10 @@ Data type definitions ($\type{\N}$) use double lines and index-free synonyms (\t
 Constructors ($\constr{0}$ and $\suc$) are given as inference rules, although we occasionally use a BNF style definition of types for brevity.
 We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda --- where premises become argument types and conclusions return types.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
-Implicit arguments are mentioned by type definitions but omitted by constructors.
+Implicit arguments are mentioned in type definitions but omitted by constructors.
 
 We use colours to further distinguish the different entities in this paper.
-$\type{TYPES}$ are blue violet (uppercased, with indices as subscripts), $\constr{constructors}$ are burnt orange, $\func{functions}$ are olive green, variables are black, and some constructor names are overloaded --- and disambiguated by context.
+$\type{TYPES}$ are blue (uppercased, with indices as subscripts), $\constr{constructors}$ are orange, $\func{functions}$ are olive green, variables are black, and some constructor names are overloaded --- and disambiguated by context.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
@@ -388,8 +396,9 @@ For this, we use the naming scheme $<name-hint>\textasciicircum<n>$, where $<n>$
   Translating from names to de Bruijn indices and back results in the same process modulo $\alpha$-conversion.
 \end{nilemma}
 
-\begin{proof}
-  TODO
+\begin{proof}[Sketch]
+  All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
+  For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -527,7 +536,7 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{decidable}, \emph{deterministic}, \emph{cancellative}, \emph{associative}, and \emph{commutative}.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
   It has an element $\one$ that is used to count inputs and outputs.
-  \autoref{fig:multiplicities} uses a ternary relation to model such an algebra as a record $\Algebra_C$ on a carrier $C$.
+  \autoref{fig:multiplicities} models such an algebra as a record $\Algebra_C$ on a carrier $C$.
 
   \begin{figure}[h]
   \begin{equation*}
@@ -565,29 +574,22 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 %\end{note}
 
-Linear, graded and shared types are all defined as an instance of our usage algebra.
+\autoref{fig:algebra-instances} sketches the implementation of linear, graded and shared types as instances of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
-\begin{description}
-  \item [Linear]
-    The carrier is a type with two trivial constructors $\constr{zero}$ and $\constr{one}$.
-    The monoidal operation has the element $\constr{zero}$ as neutral on both sides, and the element $\constr{one}$ splitting into $\constr{one}$ and $\constr{zero}$ (or $\constr{zero}$ and $\constr{one}$), and is uninhabited otherwise.
-    All the properties of the algebra follow trivially.
-    As an example, the multiplicity pair $\ell_i$ is represented as $\constr{one} \comma \constr{zero}$.
 
-    \item [Graded]
-    The carrier is the type of natural numbers.
-    The element $\zero$ corresponds to 0, and $\one$ to 1.
-    The partial monoid $\op{x}{y}{z}$ is defined exactly when $x = y + z$.
-    All other properties of the algebra follow from the algebraic rules for the addition of natural numbers.
-    As an example, we use $5 \comma 3$ to represent the multiplicities of a channel that is able to input 5 times and output 3 times.
-
-    \item [Shared]
-    The carrier is a type with a single trivial constructor $\constr{\omega}$.
-    Both $\zero$ and $\one$ are instantiated to $\constr{\omega}$.
-    The relation $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ is inhabited.
-    All the properties of the algebra follow trivially.
-    Shared channels have multiplicities $\constr{\omega} \comma \constr{\omega}$, which they will forever preserve.
-\end{description}
+\begin{figure}[h]
+\begin{tabular}{l | l | l}
+  & carrier & operation \\
+  \hline
+  \textbf{linear} & \makecell[cl]{$\constr{0} \, : \, \type{Lin}$ \\ $\constr{1} \, : \, \type{Lin}$} & \makecell[cl]{$\op{\constr{0}}{\constr{0}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{1}}{\constr{0}}$ \\ $\op{\constr{1}}{\constr{0}}{\constr{1}}$} \\
+  \hline
+  \textbf{graded} & \makecell[cl]{$\constr{0} \, : \type{Gra}$ \\ $\suc \, : \type{Gra} \to \type{Gra}$} & \makecell[cl]{$\forall \, x \, y \, z$ \\ $\to x \, \type{\equiv} \, y \, \func{+} \, z$ \\ $\to \op{x}{y}{z}$} \\
+  \hline
+  \textbf{shared} & $\constr{\omega} \, : \, \type{Sha}$ & $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ \\
+\end{tabular}
+\caption{Example instances of $\Usage$ and a ternary relation that satisfies our $\Algebra$ interface.}
+\label{fig:algebra-instances}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing Contexts}
@@ -595,7 +597,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
 We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system with leftovers (\autoref{leftover-typing}).
 \begin{nidefinition}[Indexed set of usage algebras]
-  An \emph{indexed set of usage algebras} is a nonempty type $\Idx$ of indices together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras (\autoref{fig:indexed-multiplicities}).
+  An \emph{indexed set of usage algebras} is a type $\Idx$ of indices that is nonempty ($\type{\exists IDX}$) together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras of the corresponding type (\autoref{fig:indexed-multiplicities}).
   \begin{figure}[h]
     \begin{equation*}
       \begin{aligned}
@@ -933,7 +935,7 @@ We extend $\func{swap}_i$  introduced in \autoref{structural-congruence} to swap
 \end{nitheorem}
 
 \begin{proof}[Proof (Sketch)]
-  All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
+  All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
   For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
 
@@ -1110,9 +1112,9 @@ In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}
 
 Allais \cite{Allais2018a} uses leftover typing to mechanise in Agda a bidirectional type system for the linear \lambdacalc{}.
 He proves type preservation and provides a decision procedure for type checking and type inference.
-In our paper, we apply leftover typing to the \picalc{} following Allais \cite{Allais2018a}, and focus on type checking. We give a more general usage algebra, leading to linear, graded and shared type systems.
-Drawing from quantitative type theory (by McBride and Atkey \cite{McBride2016, Atkey2018}), in our work, we too are able to talk about fully consumed resources.
-As such, we can transmit over a channel the $\lz$ multiplicities of a fully exhausted channel.
+In this paper, we follow Allais \cite{Allais2018a} and apply leftover typing to the \picalc{}.
+We give a more general usage algebra, leading to linear, graded and shared type systems.
+Drawing from quantitative type theory (by McBride and Atkey \cite{McBride2016, Atkey2018}), in our work, we too are able to talk about fully consumed resources --- e.g., we can transmit over a channel $\lz$ multiplicities of a fully exhausted channel.
 %
 In their recent paper (unpublished at the time of writing), Ciccone and Padovani mechanise a dependently-typed linear \picalc{} in Agda \cite{Ciccone}.
 They do so by defining an intrinsicly-typed calculus, which allows them to leverage Agda to provide a dependently-typed interpretation of messages.
@@ -1153,7 +1155,7 @@ Based on contextual type theory \cite{Pientkaa, Pientka}, LINCX \cite{Georges201
 The result is a meta-theory in which HOAS encodings with both linear and dependent types can be described.
 The developer obtains for free an equational theory of substitution and decidable typechecking without having to encode context splits within the object language.
 
-Further work on mechanising the \picalc{} \cite{Henry-Gerard1999, Honsell2001a, Bengtson2013, Despeyroux2000, Affeldt2008}, focuses on  non-linear variations, whether we present a range of linear, graded and shared types.
+Further work on mechanising the \picalc{} \cite{Henry-Gerard1999, Honsell2001a, Bengtson2013, Despeyroux2000, Affeldt2008}, focuses on non-linear variations, whereas we present a range of linear, graded and shared types.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 To conclude, in this paper we provide a well scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
