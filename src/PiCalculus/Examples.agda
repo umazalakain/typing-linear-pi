@@ -3,7 +3,7 @@
 open import Data.Nat using (ℕ)
 open import Data.Bool using (Bool; true; false)
 open import Data.Unit using (⊤; tt)
-open import Data.Fin using (#_; zero; suc)
+open import Data.Fin using (zero; suc) renaming (#_ to #'_)
 open import Data.Product using (_,_)
 open import Data.Vec using (Vec; []; _∷_)
 open import Data.Vec.Relation.Unary.All using (All; []; _∷_)
@@ -28,7 +28,7 @@ raw : Raw
 raw = ⦅ν "x"⦆ (("x" ⦅ "y" ⦆ 𝟘) ∥ ("x" ⟨ "a" ⟩ 𝟘))
 
 scoped : Scoped 1
-scoped = ν (((# 0) ⦅⦆ 𝟘) ⦃ "y" ⦄ ∥ ((# 0) ⟨ # 1 ⟩ 𝟘)) ⦃ "x" ⦄
+scoped = ν (((#' 0) ⦅⦆ 𝟘) ⦃ "y" ⦄ ∥ ((#' 0) ⟨ #' 1 ⟩ 𝟘)) ⦃ "x" ⦄
 
 _ : Conversion.fromRaw ("a" ∷ []) raw ≡ scoped
 _ = refl
@@ -136,21 +136,19 @@ module Shared-Linear where
 
   _ : ([] -, "y") ! [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
   _ = ν C[ 𝟙 ； ω∙ ] ℓᵢ {LINEAR} 1∙
-      ((here ⦅⦆ (here ⦅⦆ 𝟘)) ∥
+      (((# 0) ⦅⦆ (# 0 ⦅⦆ 𝟘)) ∥
             (ν 𝟙 ω∙ {LINEAR} 1∙
-                  ((there here) ⟨ here ⟩ (here ⟨ there (there here) ⟩ 𝟘))))
+                  ((# 1) ⟨ # 0 ⟩ (# 0 ⟨ # 2 ⟩ 𝟘))))
 
-  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ ν ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ▹ ε
-  _ = ν 𝟙 ω∙ {LINEAR} 1∙ ((here ⟨ there here ⟩ 𝟘) ∥ (here ⦅⦆ 𝟘))
+  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ ν (((#' 0) ⟨ #' 1 ⟩ 𝟘) ∥ ((#' 0) ⦅⦆ 𝟘)) ▹ ε
+  _ = ν 𝟙 ω∙ {LINEAR} 1∙ ((# 0 ⟨ # 1 ⟩ 𝟘) ∥ (# 0 ⦅⦆ 𝟘))
 
   p : Scoped 1
-  p = ν ((zero ⦅⦆ (zero ⦅⦆ 𝟘)) ∥ (ν (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘)))
+  p = ν (((#' 0) ⦅⦆ ((#' 0) ⦅⦆ 𝟘)) ∥ (ν ((#' 1) ⟨ #' 0 ⟩ (#' 0) ⟨ #' 2 ⟩ 𝟘)))
 
   _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ p ▹ ε
   _ = ν C[ 𝟙 ； ω∙ ] {LINEAR} ℓᵢ {LINEAR} 1∙ (
-           (here ⦅⦆ (here ⦅⦆ 𝟘)) ∥
-           (ν 𝟙 ω∙ 1∙
-                 ((there here) ⟨ here ⟩ (here ⟨ there there here ⟩ 𝟘))))
+           (# 0 ⦅⦆ (# 0 ⦅⦆ 𝟘)) ∥ (ν 𝟙 ω∙ 1∙ ((# 1) ⟨ # 0 ⟩ (# 0 ⟨ # 2 ⟩ 𝟘))))
 
 
 module Linear where
@@ -162,6 +160,7 @@ module Linear where
 
   open Algebras QUANTIFIERS
   open import PiCalculus.LinearTypeSystem QUANTIFIERS
+  open import PiCalculus.LinearTypeSystem.ContextLemmas QUANTIFIERS
 
-  _ : [] -, C[ 𝟙 ； ℓᵢ ] -, 𝟙 ； [] -, ℓ# -, ℓ# ∋[ suc zero ] C[ 𝟙 ； ℓᵢ ] ； ℓᵢ ▹ [] -, ℓₒ -, ℓ#
+  _ : [] -, C[ 𝟙 ； ℓᵢ ] -, 𝟙 ； [] -, ℓ# -, ℓ# ∋[ #' 1 ] C[ 𝟙 ； ℓᵢ ] ； ℓᵢ ▹ [] -, ℓₒ -, ℓ#
   _ = there here
