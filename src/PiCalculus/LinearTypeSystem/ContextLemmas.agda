@@ -2,13 +2,14 @@
 
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
 open import Relation.Nullary using (Dec; yes; no)
-open import Relation.Nullary.Decidable using (toWitness; fromWitness)
+open import Relation.Nullary.Decidable using (True; toWitness; fromWitness)
 open import Function using (_∘_)
 
 import Data.Maybe as Maybe
 import Data.Empty as Empty
 import Data.Unit as Unit
 import Data.Nat as ℕ
+import Data.Nat.Properties as ℕₚ
 import Data.Product as Product
 import Data.Product.Properties as Productₚ
 import Data.Vec as Vec
@@ -254,3 +255,22 @@ ctx-remove (Γ -, ys -, xs) (suc i) = ctx-remove (Γ -, ys) i -, xs
 ctx-update : (i : Fin n) → Usage (Vec.lookup idxs i) ² → Ctx idxs → Ctx idxs
 ctx-update zero m' (ms -, m) = ms -, m'
 ctx-update (suc i) m' (ms -, m) = ctx-update i m' ms -, m
+
+fromFin : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs}
+        → ∀ i
+        → {y z : Usage (Vec.lookup idxs i) ²}
+        → All.lookup i Γ ≔ y ∙² z
+        → γ ； Γ ∋[ i ] Vec.lookup γ i ； y ▹ ctx-update i z Γ
+fromFin {γ = γ -, t} {Γ = Γ -, x} zero split = zero , (zero split)
+fromFin {γ = γ -, t} {Γ = Γ -, x} (suc i) split = there (fromFin i split)
+
+#_ : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs}
+   → ∀ m {m<n : True (m ℕₚ.<? n)}
+   → let i = Fin.fromℕ< (toWitness m<n)
+     in {y : Usage (Vec.lookup idxs i) ²}
+   → {check : True (∙²-computeʳ (All.lookup i Γ) y)}
+   → let z , _ = toWitness check
+     in γ ； Γ ∋[ i ] Vec.lookup γ i ； y ▹ ctx-update i z Γ
+(# m) {m<n} {check = check} =
+  let _ , split = toWitness check
+  in fromFin (Fin.fromℕ< (toWitness m<n)) split
