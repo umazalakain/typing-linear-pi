@@ -104,7 +104,7 @@ data _；_⊢_▹_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → 
   chan : ∀ (t : Type) {idx' : Idx} (m : Usage idx' ²) {idx : Idx} (μ : Usage idx)
        → γ -, C[ t ； m ] ； Γ -, (μ , μ) ⊢ P            ▹ Δ -, ℓ∅
        -----------------------------------------------------
-       → γ               ； Γ             ⊢ υ P ⦃ name ⦄ ▹ Δ
+       → γ               ； Γ             ⊢ ν P ⦃ name ⦄ ▹ Δ
 
   recv : ∀ {t : Type} {m : (Usage idx') ²}
        → γ      ； Γ       ∋[ i ] C[ t ； m ] ； ℓᵢ {idx} ▹ Ξ

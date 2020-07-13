@@ -26,10 +26,10 @@ variable
   n : ℕ
 
 raw : Raw
-raw = ⦅υ "x"⦆ (("x" ⦅ "y" ⦆ 𝟘) ∥ ("x" ⟨ "a" ⟩ 𝟘))
+raw = ⦅ν "x"⦆ (("x" ⦅ "y" ⦆ 𝟘) ∥ ("x" ⟨ "a" ⟩ 𝟘))
 
 scoped : Scoped 1
-scoped = υ (((# 0) ⦅⦆ 𝟘) ⦃ "y" ⦄ ∥ ((# 0) ⟨ # 1 ⟩ 𝟘)) ⦃ "x" ⦄
+scoped = ν (((# 0) ⦅⦆ 𝟘) ⦃ "y" ⦄ ∥ ((# 0) ⟨ # 1 ⟩ 𝟘)) ⦃ "x" ⦄
 
 _ : fromRaw ("a" ∷ []) raw ≡ scoped
 _ = refl
@@ -38,34 +38,34 @@ _ : toRaw ("a" ∷ []) scoped ≡ raw
 _ = refl
 
 channel-over-channel₀ : Raw
-channel-over-channel₀ = ⦅υ "x"⦆
+channel-over-channel₀ = ⦅ν "x"⦆
                         ( ("x" ⦅ "r" ⦆ "r" ⦅ "p" ⦆ 𝟘)
-                        ∥ (⦅υ "z"⦆ ("x" ⟨ "z" ⟩ "z" ⟨ "y" ⟩ 𝟘)))
+                        ∥ (⦅ν "z"⦆ ("x" ⟨ "z" ⟩ "z" ⟨ "y" ⟩ 𝟘)))
 
 channel-over-channel₁ : Raw
-channel-over-channel₁ = ⦅υ "x"⦆ ⦅υ "z"⦆
+channel-over-channel₁ = ⦅ν "x"⦆ ⦅ν "z"⦆
                         ( ("x" ⦅ "r" ⦆ "r" ⦅ "p" ⦆ 𝟘)
                         ∥ ("x" ⟨ "z" ⟩ "z" ⟨ "y" ⟩ 𝟘))
 
 channel-over-channel₂ : Raw
-channel-over-channel₂ = ⦅υ "z"⦆ ⦅υ "x"⦆
+channel-over-channel₂ = ⦅ν "z"⦆ ⦅ν "x"⦆
                         ( ("x" ⦅ "r" ⦆ "r" ⦅ "p" ⦆ 𝟘)
                         ∥ ("x" ⟨ "z" ⟩ "z" ⟨ "y" ⟩ 𝟘))
 
 channel-over-channel₃ : Raw
-channel-over-channel₃ = ⦅υ "z"⦆ ⦅υ "x"⦆
+channel-over-channel₃ = ⦅ν "z"⦆ ⦅ν "x"⦆
                         ( ("z" ⦅ "p" ⦆ 𝟘)
                         ∥ ("z" ⟨ "y" ⟩ 𝟘))
 
 channel-over-channel₄ : Raw
-channel-over-channel₄ = ⦅υ "z"⦆ ⦅υ "x"⦆
+channel-over-channel₄ = ⦅ν "z"⦆ ⦅ν "x"⦆
                         (𝟘 ∥ 𝟘)
 
 channel-over-channel₅ : Raw
-channel-over-channel₅ = ⦅υ "z"⦆ ⦅υ "x"⦆ 𝟘
+channel-over-channel₅ = ⦅ν "z"⦆ ⦅ν "x"⦆ 𝟘
 
 channel-over-channel₆ : Raw
-channel-over-channel₆ = ⦅υ "z"⦆ 𝟘
+channel-over-channel₆ = ⦅ν "z"⦆ 𝟘
 
 channel-over-channel₇ : Raw
 channel-over-channel₇ = 𝟘
@@ -77,7 +77,7 @@ _!_⇒_ : ∀ {n} → Vec Name n → Raw → Raw → Set
 _!_⇒_ = map₂ _⇒_
 
 _ : ("y" ∷ []) ! channel-over-channel₀ ≅ channel-over-channel₁
-_ = _ , υ-cong cong-symm stop scope-ext ((λ ()) , (λ ()) , tt)
+_ = _ , ν-cong cong-symm stop scope-ext ((λ ()) , (λ ()) , tt)
 
 _ : ("y" ∷ []) ! channel-over-channel₁ ≅ channel-over-channel₂
 _ = _ , stop scope-scope-comm
@@ -89,10 +89,10 @@ _ : ("y" ∷ []) ! channel-over-channel₃ ⇒ channel-over-channel₄
 _ = _ , res res comm
 
 _ : ("y" ∷ []) ! channel-over-channel₄ ≅ channel-over-channel₅
-_ = _ , υ-cong υ-cong stop comp-end
+_ = _ , ν-cong ν-cong stop comp-end
 
 _ : ("y" ∷ []) ! channel-over-channel₅ ≅ channel-over-channel₆
-_ = _ , υ-cong stop scope-end
+_ = _ , ν-cong stop scope-end
 
 _ : ("y" ∷ []) ! channel-over-channel₆ ≅ channel-over-channel₇
 _ = _ , stop scope-end
@@ -144,13 +144,13 @@ module Shared-Linear where
             (chan 𝟙 ω∙ {LINEAR} 1∙
                   (send (there here) here (send here (there (there here)) end))))
 
-  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ υ ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ▹ ε
+  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ ν ((zero ⟨ suc zero ⟩ 𝟘) ∥ (zero ⦅⦆ 𝟘)) ▹ ε
   _ = chan 𝟙 ω∙ {LINEAR} 1∙
       (comp (send here (there here) end)
       (recv here end))
 
   p : Scoped 1
-  p = υ ((zero ⦅⦆ (zero ⦅⦆ 𝟘)) ∥ (υ (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘)))
+  p = ν ((zero ⦅⦆ (zero ⦅⦆ 𝟘)) ∥ (ν (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘)))
 
   _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ p ▹ ε
   _ = chan C[ 𝟙 ； ω∙ ] {LINEAR} ℓᵢ {LINEAR} 1∙ (comp

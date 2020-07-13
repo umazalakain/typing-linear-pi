@@ -73,14 +73,14 @@ subject-cong (cong-symm (stop scope-scope-comm)) (chan t c μ (chan t₁ c₁ μ
 -- Equivalence and congruence
 subject-cong cong-refl ⊢P = ⊢P
 subject-cong (cong-trans P≅Q Q≅R) ⊢P = subject-cong Q≅R (subject-cong P≅Q ⊢P)
-subject-cong (υ-cong P≅Q) (chan t m μ ⊢P) = chan t m μ (subject-cong P≅Q ⊢P)
+subject-cong (ν-cong P≅Q) (chan t m μ ⊢P) = chan t m μ (subject-cong P≅Q ⊢P)
 subject-cong (comp-cong P≅Q) (comp ⊢P ⊢R) = comp (subject-cong P≅Q ⊢P) ⊢R
 subject-cong (input-cong P≅Q) (recv x ⊢P) = recv x (subject-cong P≅Q ⊢P)
 subject-cong (output-cong P≅Q) (send x y ⊢P) = send x y (subject-cong P≅Q ⊢P)
 subject-cong (cong-symm cong-refl) ⊢P = ⊢P
 subject-cong (cong-symm (cong-symm P≅Q)) ⊢P = subject-cong P≅Q ⊢P
 subject-cong (cong-symm cong-trans P≅Q P≅R) ⊢P = subject-cong (cong-symm P≅Q) (subject-cong (cong-symm P≅R) ⊢P)
-subject-cong (cong-symm (υ-cong P≅Q)) (chan t m μ ⊢P) = chan t m μ (subject-cong (cong-symm P≅Q) ⊢P)
+subject-cong (cong-symm (ν-cong P≅Q)) (chan t m μ ⊢P) = chan t m μ (subject-cong (cong-symm P≅Q) ⊢P)
 subject-cong (cong-symm (comp-cong P≅Q)) (comp ⊢P ⊢R) = comp (subject-cong (cong-symm P≅Q) ⊢P) ⊢R
 subject-cong (cong-symm (input-cong P≅Q)) (recv x ⊢P) = recv x (subject-cong (cong-symm P≅Q) ⊢P)
 subject-cong (cong-symm (output-cong P≅Q)) (send x y ⊢P) = send x y (subject-cong (cong-symm P≅Q) ⊢P)

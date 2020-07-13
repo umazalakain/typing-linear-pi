@@ -101,7 +101,7 @@ module _ where
 
   toRaw-WellScoped : (ctx : Ctx n) (P : Scoped n) → WellScoped (apply ctx) (toRaw ctx P)
   toRaw-WellScoped ctx 𝟘 = tt
-  toRaw-WellScoped ctx (υ P ⦃ name ⦄) = toRaw-WellScoped (name ∷ ctx) P
+  toRaw-WellScoped ctx (ν P ⦃ name ⦄) = toRaw-WellScoped (name ∷ ctx) P
   toRaw-WellScoped ctx (P ∥ Q) = toRaw-WellScoped ctx P , toRaw-WellScoped ctx Q
   toRaw-WellScoped ctx ((x ⦅⦆ P) ⦃ name ⦄) = ∈ᵥₚ.∈-lookup _ _ , toRaw-WellScoped (name ∷ ctx) P
   toRaw-WellScoped ctx (x ⟨ y ⟩ P) = ∈ᵥₚ.∈-lookup _ _ , ∈ᵥₚ.∈-lookup _ _ , toRaw-WellScoped ctx P
@@ -110,7 +110,7 @@ module _ where
 
   toRaw-NotShadowed : (ctx : Ctx n) (P : Scoped n) → NotShadowed (apply ctx) (toRaw ctx P)
   toRaw-NotShadowed ctx 𝟘 = tt
-  toRaw-NotShadowed ctx (υ P ⦃ name ⦄) = fresh-∉ name ctx , (toRaw-NotShadowed (_ ∷ ctx) P)
+  toRaw-NotShadowed ctx (ν P ⦃ name ⦄) = fresh-∉ name ctx , (toRaw-NotShadowed (_ ∷ ctx) P)
   toRaw-NotShadowed ctx (P ∥ Q) = toRaw-NotShadowed ctx P , toRaw-NotShadowed ctx Q
   toRaw-NotShadowed ctx ((x ⦅⦆ P) ⦃ name ⦄) = fresh-∉ name ctx , toRaw-NotShadowed (name ∷ ctx) P
   toRaw-NotShadowed ctx (x ⟨ y ⟩ P) = toRaw-NotShadowed ctx P
@@ -119,7 +119,7 @@ module _ where
 
   data _α-≡_ {n} : Scoped n → Scoped n → Set where
     inaction : 𝟘 α-≡ 𝟘
-    scope    : P α-≡ Q → υ P ⦃ namex ⦄ α-≡ υ Q ⦃ namey ⦄
+    scope    : P α-≡ Q → ν P ⦃ namex ⦄ α-≡ ν Q ⦃ namey ⦄
     comp     : P α-≡ Q → R α-≡ S → (P ∥ R) α-≡ (Q ∥ S)
     input    : P α-≡ Q → (x ⦅⦆ P) ⦃ namex ⦄ α-≡ (x ⦅⦆ Q) ⦃ namey ⦄
     output   : P α-≡ Q → (x ⟨ y ⟩ P) α-≡ (x ⟨ y ⟩ Q)
@@ -127,7 +127,7 @@ module _ where
   fromRaw∘toRaw : (ctx : Ctx n) (P : Scoped n)
                 → fromRaw' (apply ctx) (toRaw ctx P) (toRaw-WellScoped ctx P) α-≡ P
   fromRaw∘toRaw ctx 𝟘 = inaction
-  fromRaw∘toRaw ctx (υ P ⦃ name ⦄) =
+  fromRaw∘toRaw ctx (ν P ⦃ name ⦄) =
     scope (fromRaw∘toRaw (name ∷ ctx) P)
   fromRaw∘toRaw ctx (P ∥ Q) =
     comp (fromRaw∘toRaw ctx P) (fromRaw∘toRaw ctx Q)
@@ -154,7 +154,7 @@ module _ where
   data _α[_↦_]≡_ : Raw → ∀ {n} → Ctx n → Ctx n → Raw → Set where
     inaction : 𝟘 α[ ks ↦ vs ]≡ 𝟘
     scope    : P α[ x ∷ ks ↦ y ∷ vs ]≡ Q
-             → ⦅υ x ⦆ P α[ ks ↦ vs ]≡ ⦅υ y ⦆ Q
+             → ⦅ν x ⦆ P α[ ks ↦ vs ]≡ ⦅ν y ⦆ Q
     comp     : P α[ ks ↦ vs ]≡ Q
              → R α[ ks ↦ vs ]≡ S
              → P ∥ R α[ ks ↦ vs ]≡ Q ∥ S
@@ -172,7 +172,7 @@ module _ where
   toRaw∘fromRaw : (ctx : Ctx n) (P : Raw) (wsP : WellScoped ctx P)
                 → toRaw ctx (fromRaw' ctx P wsP) α[ apply ctx ↦ ctx ]≡ P
   toRaw∘fromRaw ctx 𝟘 wsP = inaction
-  toRaw∘fromRaw ctx (⦅υ x ⦆ P) wsP
+  toRaw∘fromRaw ctx (⦅ν x ⦆ P) wsP
     = scope (toRaw∘fromRaw (x ∷ ctx) P wsP)
   toRaw∘fromRaw ctx (P ∥ Q) (wsP , wsQ)
     = comp (toRaw∘fromRaw ctx P wsP)

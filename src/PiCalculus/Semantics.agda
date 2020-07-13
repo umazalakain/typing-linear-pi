@@ -29,21 +29,21 @@ module PiCalculus.Semantics where
 
   Unused : ∀ {n} → Fin n → Scoped n → Set
   Unused i 𝟘 = ⊤
-  Unused i (υ P) = Unused (suc i) P
+  Unused i (ν P) = Unused (suc i) P
   Unused i (P ∥ Q) = Unused i P × Unused i Q
   Unused i (x ⦅⦆ P) = i ≢ x × Unused (suc i) P
   Unused i (x ⟨ y ⟩ P) = i ≢ x × i ≢ y × Unused i P
 
   lift : (i : Fin (suc n)) → Scoped n → Scoped (suc n)
   lift i 𝟘 = 𝟘
-  lift i (υ P) = υ (lift (suc i) P)
+  lift i (ν P) = ν (lift (suc i) P)
   lift i (P ∥ Q) = lift i P ∥ lift i Q
   lift i (x ⦅⦆ P) = Fin.punchIn i x ⦅⦆ lift (suc i) P
   lift i (x ⟨ y ⟩ P) = Fin.punchIn i x ⟨ Fin.punchIn i y ⟩ lift i P
 
   lower : (i : Fin (suc n)) (P : Scoped (suc n)) → Unused i P → Scoped n
   lower i 𝟘 uP = 𝟘
-  lower i (υ P) uP = υ (lower (suc i) P uP)
+  lower i (ν P) uP = ν (lower (suc i) P uP)
   lower i (P ∥ Q) (uP , uQ) = lower i P uP ∥ lower i Q uQ
   lower i (x ⦅⦆ P) (i≢x , uP) = Fin.punchOut i≢x ⦅⦆ lower (suc i) P uP
   lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = Fin.punchOut i≢x ⟨ Fin.punchOut i≢y ⟩ lower i P uP
@@ -60,7 +60,7 @@ module PiCalculus.Semantics where
 
   swap : Fin n → Scoped (suc n) → Scoped (suc n)
   swap i 𝟘 = 𝟘
-  swap i (υ P) = υ (swap (suc i) P)
+  swap i (ν P) = ν (swap (suc i) P)
   swap i (P ∥ Q) = swap i P ∥ swap i Q
   swap i (x ⦅⦆ P)  = swapFin i x ⦅⦆ swap (suc i) P
   swap i (x ⟨ y ⟩ P)  = swapFin i x ⟨ swapFin i y ⟩ swap i P
@@ -73,12 +73,12 @@ module PiCalculus.Semantics where
 
     comp-end : P ∥ 𝟘 ≈ P
 
-    scope-end : _≈_ {n} (υ 𝟘 ⦃ name ⦄) 𝟘
+    scope-end : _≈_ {n} (ν 𝟘 ⦃ name ⦄) 𝟘
 
     scope-ext : (u : Unused zero P)
-              → υ (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (υ Q) ⦃ name ⦄
+              → ν (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (ν Q) ⦃ name ⦄
 
-    scope-scope-comm : υ (υ P ⦃ namey ⦄) ⦃ namex ⦄ ≈ υ (υ (swap zero P) ⦃ namex ⦄) ⦃ namey ⦄
+    scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (swap zero P) ⦃ namex ⦄) ⦃ namey ⦄
 
   data RecTree : Set where
     zero : RecTree
@@ -100,7 +100,7 @@ module PiCalculus.Semantics where
     cong-trans : P ≅⟨ r ⟩ Q → Q ≅⟨ p ⟩ R → P ≅⟨ two r p ⟩ R
 
     -- Congruent relation
-    υ-cong_      : P ≅⟨ r ⟩ P' → υ P ⦃ name ⦄      ≅⟨ one r ⟩ υ P' ⦃ name ⦄
+    ν-cong_      : P ≅⟨ r ⟩ P' → ν P ⦃ name ⦄      ≅⟨ one r ⟩ ν P' ⦃ name ⦄
     comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q             ≅⟨ one r ⟩ P' ∥ Q
     input-cong_  : P ≅⟨ r ⟩ P' → (x ⦅⦆ P) ⦃ name ⦄ ≅⟨ one r ⟩ (x ⦅⦆ P') ⦃ name ⦄
     output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P         ≅⟨ one r ⟩ x ⟨ y ⟩ P'
@@ -115,7 +115,7 @@ module PiCalculus.Semantics where
 
   _[_↦_] : Scoped n → (i j : Fin n) → Scoped n
   𝟘           [ i ↦ j ] = 𝟘
-  (υ P)       [ i ↦ j ] = υ (P [ suc i ↦ suc j ])
+  (ν P)       [ i ↦ j ] = ν (P [ suc i ↦ suc j ])
   (P ∥ Q)     [ i ↦ j ] = (P [ i ↦ j ]) ∥ (Q [ i ↦ j ])
   (x ⦅⦆ P)    [ i ↦ j ] = (x [ i ↦ j ]') ⦅⦆ (P [ suc i ↦ suc j ])
   (x ⟨ y ⟩ P) [ i ↦ j ] = (x [ i ↦ j ]') ⟨ y [ i ↦ j ]' ⟩ (P [ i ↦ j ])
@@ -130,7 +130,7 @@ module PiCalculus.Semantics where
                → (P : Scoped (suc n))
                → Unused i (P [ i ↦ j ])
   subst-unused i≢j 𝟘 = tt
-  subst-unused i≢j (υ P) = subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
+  subst-unused i≢j (ν P) = subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
   subst-unused i≢j (P ∥ Q) = subst-unused i≢j P , subst-unused i≢j Q
   subst-unused i≢j (x ⦅⦆ P) = substFin-unused x i≢j , subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
   subst-unused i≢j (x ⟨ y ⟩ P) = substFin-unused x i≢j , substFin-unused y i≢j , subst-unused i≢j P
@@ -161,7 +161,7 @@ module PiCalculus.Semantics where
 
     res_ : ∀ {c} {P Q : Scoped (1 + n)}
          → P =[ c ]⇒ Q
-         → υ P ⦃ name ⦄ =[ dec c ]⇒ υ Q ⦃ name ⦄
+         → ν P ⦃ name ⦄ =[ dec c ]⇒ ν Q ⦃ name ⦄
 
     struct : ∀ {c} {P Q P' : Scoped n}
            → P ≅⟨ r ⟩ P'

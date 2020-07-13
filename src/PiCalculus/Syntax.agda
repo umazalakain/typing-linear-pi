@@ -9,13 +9,13 @@ Name = String
 
 module Raw where
   infix 20 _∥_
-  infixr 15 ⦅υ_⦆_
+  infixr 15 ⦅ν_⦆_
   infixr 9 _⦅_⦆_
   infixr 9 _⟨_⟩_
 
   data Raw : Set where
     𝟘     : Raw
-    ⦅υ_⦆_ : Name → Raw → Raw
+    ⦅ν_⦆_ : Name → Raw → Raw
     _∥_   : Raw → Raw → Raw
     _⦅_⦆_ : Name → Name → Raw → Raw
     _⟨_⟩_ : Name → Name → Raw → Raw
@@ -26,7 +26,7 @@ module Scoped where
   open import Data.Nat.Base
 
   infix 20 _∥_
-  infixr 15 υ
+  infixr 15 ν
   infixr 9 _⦅⦆_
   infixr 9 _⟨_⟩_
 
@@ -36,7 +36,7 @@ module Scoped where
 
   data Scoped : ℕ → Set where
     𝟘     : Scoped n
-    υ : Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
+    ν : Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
     _∥_   : Scoped n → Scoped n → Scoped n
     _⦅⦆_ : Fin n → Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
     _⟨_⟩_ : Fin n → Fin n → Scoped n → Scoped n
@@ -123,28 +123,28 @@ module Conversion where
 
   WellScoped : Ctx n → Raw → Set
   WellScoped ctx 𝟘 = ⊤
-  WellScoped ctx (⦅υ x ⦆ P) = WellScoped (x ∷ ctx) P
+  WellScoped ctx (⦅ν x ⦆ P) = WellScoped (x ∷ ctx) P
   WellScoped ctx (P ∥ Q) = WellScoped ctx P × WellScoped ctx Q
   WellScoped ctx (x ⦅ y ⦆ P) = (x ∈ ctx) × WellScoped (y ∷ ctx) P
   WellScoped ctx (x ⟨ y ⟩ P) = (x ∈ ctx) × (y ∈ ctx) × WellScoped ctx P
 
   WellScoped? : (ctx : Ctx n) (P : Raw) → Dec (WellScoped ctx P)
   WellScoped? ctx 𝟘 = yes tt
-  WellScoped? ctx (⦅υ x ⦆ P) = WellScoped? (x ∷ ctx) P
+  WellScoped? ctx (⦅ν x ⦆ P) = WellScoped? (x ∷ ctx) P
   WellScoped? ctx (P ∥ Q) = WellScoped? ctx P ×-dec WellScoped? ctx Q
   WellScoped? ctx (x ⦅ y ⦆ P) = x ∈? ctx ×-dec WellScoped? (y ∷ ctx) P
   WellScoped? ctx (x ⟨ y ⟩ P) = x ∈? ctx ×-dec y ∈? ctx ×-dec WellScoped? ctx P
 
   NotShadowed : Ctx n → Raw → Set
   NotShadowed ctx 𝟘 = ⊤
-  NotShadowed ctx (⦅υ name ⦆ P) = name ∉ ctx × NotShadowed (name ∷ ctx) P
+  NotShadowed ctx (⦅ν name ⦆ P) = name ∉ ctx × NotShadowed (name ∷ ctx) P
   NotShadowed ctx (P ∥ Q) = NotShadowed ctx P × NotShadowed ctx Q
   NotShadowed ctx (x ⦅ y ⦆ P) = y ∉ ctx × NotShadowed (y ∷ ctx) P
   NotShadowed ctx (x ⟨ y ⟩ P) = NotShadowed ctx P
 
   NotShadowed? : (ctx : Ctx n) (P : Raw) → Dec (NotShadowed ctx P)
   NotShadowed? ctx 𝟘 = yes tt
-  NotShadowed? ctx (⦅υ name ⦆ P) = ¬? (name ∈? ctx) ×-dec NotShadowed? (name ∷ ctx) P
+  NotShadowed? ctx (⦅ν name ⦆ P) = ¬? (name ∈? ctx) ×-dec NotShadowed? (name ∷ ctx) P
   NotShadowed? ctx (P ∥ Q) = NotShadowed? ctx P ×-dec NotShadowed? ctx Q
   NotShadowed? ctx (x ⦅ y ⦆ P) = ¬? (y ∈? ctx) ×-dec NotShadowed? (y ∷ ctx) P
   NotShadowed? ctx (x ⟨ y ⟩ P) = NotShadowed? ctx P
@@ -155,8 +155,8 @@ module Conversion where
 
   fromRaw' : (ctx : Ctx n) (P : Raw) → WellScoped ctx P → Scoped n
   fromRaw' ctx 𝟘 tt = 𝟘
-  fromRaw' ctx (⦅υ x ⦆ P) wsP =
-    υ (fromRaw' (x ∷ ctx) P wsP) ⦃ x ⦄
+  fromRaw' ctx (⦅ν x ⦆ P) wsP =
+    ν (fromRaw' (x ∷ ctx) P wsP) ⦃ x ⦄
   fromRaw' ctx (P ∥ Q) (wsP , wsQ) =
     fromRaw' ctx P wsP ∥ fromRaw' ctx Q wsQ
   fromRaw' ctx (x ⦅ y ⦆ P) (x∈ctx , wsP) =
@@ -169,9 +169,9 @@ module Conversion where
 
   toRaw : Ctx n → Scoped n → Raw
   toRaw ctx 𝟘 = 𝟘
-  toRaw ctx (υ P ⦃ name ⦄) =
+  toRaw ctx (ν P ⦃ name ⦄) =
     let cname = fresh name ctx in
-    ⦅υ repr ctx cname ⦆ toRaw (name ∷ ctx) P
+    ⦅ν repr ctx cname ⦆ toRaw (name ∷ ctx) P
   toRaw ctx (P ∥ Q) =
     toRaw ctx P ∥ toRaw ctx Q
   toRaw ctx ((x ⦅⦆ P) ⦃ name ⦄) =
