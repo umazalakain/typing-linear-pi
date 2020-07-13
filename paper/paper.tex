@@ -793,6 +793,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   \label{def:types}
 
   The \textsc{Types} typing relation for \picalc{} processes is presented in \autoref{fig:types}.
+  For convenience, we reuse the constructor names introduced for the syntax in \autoref{fig:syntax}.
   
   \begin{figure}[h]
   \begin{mathpar}
@@ -808,51 +809,51 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
     
     \inferrule
     { }
-    {\constr{end} : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
+    {\PO : \types{\gamma}{\Gamma}{\PO}{\Gamma}}
   
     \inferrule
     {t : \Type \\ x : \Usage_{idx}^{\func{2}} \\ y : \Usage_{idx'} \\\\
      cont : \types{\gamma \comma \channel{t}{x}}{\Gamma \comma (y \comma y) }{P}{\Delta \comma \lz}}
-    {\constr{chan} \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
+    {\new \; t \; x \; y \; cont : \types{\gamma}{\Gamma}{\new P}{\Delta}}
   
     \inferrule
         {\stacked{
             chan_i : \contains{\gamma \hspace{1.2em}}{\Gamma \hspace{1.3em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
             cont \hspace{0.6em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{4.6em}}{\Theta \comma \lz}}}
-        {\constr{recv} \; chan_i \; cont : \types{\gamma}{\Gamma}{\recv{i}{}P}{\Theta}}
+        {\recv{chan_i}{} cont : \types{\gamma}{\Gamma}{\recv{i}{}P}{\Theta}}
   
     \inferrule
         {\stacked{
             chan_i : \contains{\gamma}{\Gamma \hspace{0.2em}}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
             loc_j \hspace{0.8em} : \contains{\gamma}{\Delta}{j}{t \hspace{3.2em}}{x \hspace{0.3em}}{\Xi} \\\\
             cont \hspace{0.6em} : \types{\gamma}{\Xi \hspace{0.3em}}{P\hspace{4.8em}}{\Theta}}}
-        {\constr{send} \; chan_i \; loc_j \; cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
+        {\send{chan_i}{loc_j} cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
   
     \inferrule
     {l \hspace{0.3em} : \types{\gamma}{\Gamma \hspace{0.2em}}{P}{\Delta} \\\\
      r : \types{\gamma}{\Delta}{Q}{\Xi}}
-    {\constr{comp} \; l \; r : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
+    {\comp{l}{r} : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
   \end{mathpar}
   \caption{Leftover typing for a resource-aware type system.}
   \label{fig:types}
   \end{figure}
 
-  The inaction process in rule $\constr{end}$ does not change usage annotations.
-  The scope restriction in rule $\constr{chan}$ expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ of what is being transmitted; and the multiplicity $y$ given to the channel itself.
+  The inaction process in rule $\PO$ does not change usage annotations.
+  The scope restriction in rule $\new$ expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ of what is being transmitted; and the multiplicity $y$ given to the channel itself.
   This multiplicity $y$ is used for both input and output, so that they are balanced.
   The continuation process $P$ is provided with the new channel with usage annotation $y \comma y$, which it must completely exhaust.
 
-  The input process in rule $\constr{recv}$ requires a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  The input process in rule $\recv{}{}$ requires a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
   Note that the index $i$ is used in the syntax of the typed process.
   We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
 
-  Similarly to input, the output process in rule $\constr{send}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  Similarly to input, the output process in rule $\send{}{}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
   We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of the channel $chan_i$.
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
   
-  Parallel composition in rule $\constr{comp}$ uses the leftovers of the left-hand process to type the right-hand process.
+  Parallel composition in rule $\comp{}{}$ uses the leftovers of the left-hand process to type the right-hand process.
   By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide an extrinsic proof of context split.
 \end{nidefinition}
 
@@ -873,13 +874,12 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   $\func{p}$ : $\Process_{\suc \constr{zero}}$
   $\func{p}$ = $\new{}$
        $(\comp{\recv{\constr{0}}{} (\recv{\constr{0}}{} \PO)}$
-       ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}}) \; \PO)})$
+       ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}} \; \PO)})$
 
   $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\func{\epsilon}}$
-  $\func{\_}$ = $\constr{chan} \; \channel{\unit}{\func{\omega}} \; \li \; \one \; (\constr{comp}$
-       $(\constr{recv} \; \constr{0} \; (\constr{recv} \; \constr{0} \; \constr{end}))$
-       $(\constr{chan} \; \unit \; \func{\omega} \; \one \; (\constr{send} \; (\suc \; \constr{0}) \; \constr{0} \; (\constr{send} \; \constr{0} \; (\suc \; \suc \; \constr{0}) \; \constr{end})))
-       )$
+  $\func{\_}$ = $\new \; \channel{\unit}{\func{\omega}} \; \li \; \one$
+       $(\comp{\recv{\constr{0}}{} \; (\recv{\constr{0}}{} \; \PO)}$
+       ${\new \; \unit \; \func{\omega} \; \one \; (\send{\suc \; \constr{0}}{\constr{0}} \; (\send{\constr{0}}{\suc \; \suc \; \constr{0}} \; \PO))}$
   \end{lstlisting}
 \end{example}
 
@@ -980,11 +980,11 @@ states that applying structural congruence rules to a well typed process preserv
   Full details are found in \autoref{app:subst-generalization}.
   \begin{itemize}
    \item
-     Constructor $\constr{end}$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
+     Constructor $\PO$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
    \item
-     Constructor $\constr{chan}$: we proceed inductively.
+     Constructor $\new$: we proceed inductively.
    \item
-     Constructors $\constr{recv}$, $\constr{send}$ and $\constr{comp}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction. \qedhere
+     Constructors $\recv{}{}$, $\send{}{}$ and $\comp{}{}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction. \qedhere
  \end{itemize}
 \end{proof}
 
@@ -1021,7 +1021,7 @@ states that applying structural congruence rules to a well typed process preserv
       \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
     \end{tikzpicture}
     \caption{
-      Diagrammatic representation of the $\constr{comp}$ case for substitution.
+      Diagrammatic representation of the $\comp{}{}$ case for substitution.
       Continuous lines represent known facts, dotted lines proof obligations.
     }
     \label{fig:subst}
