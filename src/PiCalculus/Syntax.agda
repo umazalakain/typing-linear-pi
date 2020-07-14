@@ -45,10 +45,9 @@ module Conversion where
     open Scoped
 
     open import Level using (Lift; _⊔_)
-    open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym)
     open import Function using (_∘_)
-    open import Relation.Nullary using (Dec; yes; no; _because_)
-    open import Relation.Nullary.Decidable using (True; toWitness)
+    open import Relation.Nullary using (Dec; yes; no)
+    open import Relation.Nullary.Decidable using (isYes; True; toWitness)
     open import Relation.Nullary.Product using (_×-dec_)
     open import Relation.Nullary.Negation using (¬?)
 
@@ -60,8 +59,8 @@ module Conversion where
     import Data.Vec.Membership.DecPropositional as DecPropositional
 
     open import Data.Empty using (⊥)
-    open import Data.Bool.Base using (true; false)
-    open import Data.Product using (_,_; _×_; Σ)
+    open import Data.Bool.Base using (true; false; if_then_else_)
+    open import Data.Product using (_,_; _×_)
     open import Data.Unit using (⊤; tt)
     open import Data.Nat.Base using (ℕ; zero; suc)
     open import Data.Fin.Base using (Fin; zero; suc)
@@ -75,9 +74,7 @@ module Conversion where
     _∈?_ = DecPropositional._∈?_ Stringₚ._≟_
 
     import PiCalculus.Utils
-    module AllAcc = PiCalculus.Utils.AllAcc
     module ℕₛ = PiCalculus.Utils.ℕₛ
-    open AllAcc using ([]; _∷_)
 
     variable
       n m : ℕ
@@ -86,38 +83,20 @@ module Conversion where
   Ctx = Vec Name
 
   count : Name → Ctx n → ℕ
-  count hint [] = zero
-  count hint (name ∷ ctx) with name Stringₚ.≟ hint
-  count hint (name ∷ ctx) | true because _ = suc (count hint ctx)
-  count hint (name ∷ ctx) | false because _ = count hint ctx
+  count name = Vec.sum ∘ Vec.map ((if_then 1 else 0) ∘ isYes ∘ (Stringₚ._≟ name))
 
-  CountedName : Name → Ctx n → Set
-  CountedName name ctx = Σ ℕ (count name ctx ≡_)
-
-  Fresh : Ctx n → Set
-  Fresh = AllAcc.All CountedName
-
-  -- From contexts to name counts
-  fresh : ∀ name (ctx : Ctx n) → CountedName name ctx
-  fresh hint ctx = count hint ctx , refl
-
-  -- From name counts to tuples
-  erase : ∀ {x} (xs : Vec Name n) → CountedName x xs → Name × ℕ
-  erase {x = x} xs (i , _) = x , i
-
-  -- From tuples to strings, convert to lists first so that we can reason about it
   toCharList : Name × ℕ → List Char.Char
   toCharList (x , i) = String.toList x List.++ ('^' ∷ ℕₛ.toDigitChars 10 i)
 
   toString : Name × ℕ → Name
   toString = String.fromList ∘ toCharList
 
-  repr : ∀ {x} (xs : Vec Name n) → CountedName x xs → Name
-  repr xs = toString ∘ erase xs
+  repr : ∀ x (xs : Vec Name n) → Name
+  repr x xs = toString (x , (count x xs))
 
   apply : Ctx n → Ctx n
   apply [] = []
-  apply (x ∷ xs) = repr xs (fresh x xs) ∷ apply xs
+  apply (x ∷ xs) = repr x xs ∷ apply xs
 
   WellScoped : Ctx n → Raw → Set
   WellScoped ctx 𝟘 = ⊤
@@ -168,14 +147,12 @@ module Conversion where
   toRaw : Ctx n → Scoped n → Raw
   toRaw ctx 𝟘 = 𝟘
   toRaw ctx (ν P ⦃ name ⦄) =
-    let cname = fresh name ctx in
-    ⦅ν repr ctx cname ⦆ toRaw (name ∷ ctx) P
+    ⦅ν repr name ctx ⦆ toRaw (name ∷ ctx) P
   toRaw ctx (P ∥ Q) =
     toRaw ctx P ∥ toRaw ctx Q
   toRaw ctx ((x ⦅⦆ P) ⦃ name ⦄) =
-    let cname = fresh name ctx
-        ctx' = apply ctx
-    in Vec.lookup ctx' x ⦅ repr ctx cname ⦆ toRaw (name ∷ ctx) P
+    let ctx' = apply ctx
+    in Vec.lookup ctx' x ⦅ repr name ctx ⦆ toRaw (name ∷ ctx) P
   toRaw ctx (x ⟨ y ⟩ P) =
     let ctx' = apply ctx
     in Vec.lookup ctx' x ⟨ Vec.lookup ctx' y ⟩ toRaw ctx P
