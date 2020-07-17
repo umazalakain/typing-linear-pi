@@ -223,10 +223,10 @@ Ultimately, we can exploit this formalisation as a unified framework for type sa
     This approach adds a leftover usage context to the typing judgements.
     Typing derivations take the resources of their input usage context, consume some of them, and leave the rest as leftovers in the output usage context.
 
-    Leftover typing renders top-down context splits unnecessary, allows for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and makes it possible to generalise the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
+    Leftover typing \textbf{makes top-down context splits unnecessary}, allows for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and makes it possible to generalise the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
   \end{itemize}
 
-  \item \textbf{Fully mechanised formalisation and proofs of the \picalc{} with leftovers}:
+  \item \textbf{Fully mechanised formalisation and type safety proofs}:
     \autoref{type-safety} presents the type safety properties of our \picalc{} with leftovers.
     Leftover typing for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and generalises the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
     We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{renaming} (\autoref{thm:renaming}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
@@ -446,7 +446,7 @@ Its congruent equivalence closure \textsc{Equals} $\eq{}$ is defined in \autoref
   {\constr{scope-end} : \new \PO_{\suc n} \eqeq \PO_n}
   
   \inferrule
-  {uQ : \Unused_{\constr{0} \; Q}}
+  {uQ : \Unused_{\constr{0}} \; Q}
   {\constr{scope-ext} : \new (\comp{P}{Q}) \eqeq \comp{(\new P)}{\func{lower}_{\constr{0}} \; \; Q \; uQ}}
 
   \inferrule
@@ -460,7 +460,7 @@ Its congruent equivalence closure \textsc{Equals} $\eq{}$ is defined in \autoref
 The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as being the neutral element of parallel composition, respectively.
 The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
 
-In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
+In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$ (see \autoref{app:definitions}).
 The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index greater than $i$.
 In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
