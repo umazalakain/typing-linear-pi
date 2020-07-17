@@ -150,7 +150,7 @@ The authors would also like to thank the anonymous referees fortheir valuable co
   We provide framing, weakening and strengthening theorems, which can now be stated for the linear \picalc{} and use them to prove subject congruence.
   We show that the type system is stable under renaming and prove subject reduction.
 %
-  Our formalisation is fully mechanised in Agda \cite{Zalakain2020Agda}.
+  Our formalisation is fully mechanised in Agda.
 \end{abstract}
 
 \maketitle
@@ -225,7 +225,11 @@ Ultimately, we can exploit this formalisation as a unified framework for type sa
     Benefits of typing with leftovers include: removing the need for extrinsic context splits, which are rendered unnecessary; and for the first time we can state theorems like \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the linear \picalc{}.    
   \end{itemize}
   \item \textbf{Fully mechanised formalisation and proofs of the \picalc{} with leftovers}:
-  The formalisation of the \picalc{} with leftovers has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}.
+    The formalisation of the \picalc{} with leftovers has been fully mechanised in Agda and is publicly available in our GitHub repository%
+\begin{anonsuppress}
+\cite{Zalakain2020Agda}
+\end{anonsuppress}
+.
   
   \autoref{type-safety} details the type safety properties of our \picalc{} with leftovers.
   Leftover typing allows \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to be stated.
@@ -397,7 +401,11 @@ These unique variable names use the naming scheme $<name-hint>\textasciicircum<n
 
 \begin{proof}[Prove (Sketch)]
   All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
-  For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
+  For details, refer to our mechanisation in Agda%
+\begin{anonsuppress}
+\cite{Zalakain2020Agda}
+\end{anonsuppress}
+.
 \end{proof}
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -924,7 +932,11 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
 
 \begin{proof}[Proof (Sketch)]
   All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
-  For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
+  For details, refer to our mechanisation in Agda%
+\begin{anonsuppress}
+\cite{Zalakain2020Agda}
+\end{anonsuppress}
+.
 \end{proof}
 
 \subsection{Towards Subject Reduction}
@@ -939,7 +951,11 @@ states that applying structural congruence rules to a well typed process preserv
 \begin{proof}[Proof (Sketch)]
   The proof is by induction on \textsc{Equals} $\eq{}$.
   For the nontrivial base cases and their symmetric variants, we apply a combination of \autoref{thm:framing}, \autoref{thm:strengthening}, \autoref{thm:weakening} and \autoref{thm:exchange}.
-  Further details can be found in \autoref{app:struct} and the full proof in \cite{Zalakain2020Agda}.
+  Further details can be found in \autoref{app:struct} and the full proof in%
+\begin{anonsuppress}
+\cite{Zalakain2020Agda}
+\end{anonsuppress}
+.
 \end{proof}
 
 \subparagraph*{Renaming}
@@ -1149,7 +1165,11 @@ Further work on mechanising the \picalc{} \cite{Henry-Gerard1999, Honsell2001a, 
 To conclude, in this paper we provide a well scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
 As a result, theorems like framing, weakening and strengthening can now we stated for the linear \picalc{}.
-Our work is fully mechanised in around 1500 lines of code in Agda \cite{Zalakain2020Agda}.
+Our work is fully mechanised in around 1500 lines of code in Agda%
+\begin{anonsuppress}
+\cite{Zalakain2020Agda}
+\end{anonsuppress}
+.
 %
 As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
 We intend to add support for products, sum types and recursion to both our syntax and our type system.
