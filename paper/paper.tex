@@ -29,6 +29,8 @@
 % Fix autoref's example treatment 
 \newtheorem{example}{Example}
 \newcommand{\exampleautorefname}{Example}
+\newcommand{\nitheoremautorefname}{Theorem}
+\newcommand{\nidefinitionautorefname}{Definition}
 
 % Do not use italics in definitions and theorems
 \theoremstyle{definition}
@@ -709,28 +711,28 @@ A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed l
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
 
-We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context $\PreCtx_n$ and (input) usage context $\Ctx_{idxs}$, adds an extra \emph{output usage context} $\Ctx_{idxs}$ to the typing rules.
-
+We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context $\PreCtx_n$ and (input) usage context $\Ctx_{idxs}$, adds an extra \emph{(output) usage context} $\Ctx_{idxs}$ to the typing rules.
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
-Leftover typing presents three main advantages:
-\begin{itemize}
-  \item \textbf{Encapsulation}:
-    The transformations to the usage context (consequence of receiving and sending over a channel) are encapsulated into a variable reference judgement with both an input and an output usage context.
-  \item \textbf{No extensional context split}:
-    No need for an extensional context splitting proof for parallel composition.
-    % Such a proof would need to construct a witness $\opctx{\Gamma_m}{\Gamma_l}{\Gamma_r}$, where $\Gamma_l \vdash P$, $\Gamma_r \vdash Q$ and $\Gamma_m \vdash \comp{P}{Q}$.
-    % This could be obtained through automated search --- but it is better yet not to need it.
-    Leftover typing uses the leftovers of $P$ to type $Q$.
-  \item \textbf{New theorems}:
-    For the first time, theorems like \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) can be stated within the linear \picalc{} thanks to the presence of a leftover context.
-\end{itemize}
+
+Typing judgments for linear calculi typically carry a single context of usage annotations and thus the typing rules require frequent explicit proofs of context splitting --- e.g., the typing rule for parallel composition would look as follows:
+\begin{mathpar}
+  \inferrule
+  {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
+  {\Gamma \; \type{\vdash} \; \comp{P}{Q}}
+\end{mathpar}
+Input requires a similar context split; output requires two such context splits.
+This is rather cumbersome: for input and output, the proof of context split carries \emph{exactly} the same information as the typing rule for variables; for parallel composition it means that the typing derivations of both subprocesses will have no context information whatsoever until the context split is determined.
+
+Leftover typing solves this problem by inverting the flow of information so that \textbf{the typing derivations of the subprocesses determine the context split}.
+As a result, context information is threaded left to right through the typing derivation, and explicit context split proofs are no longer needed.
+In addition to this, it allows a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and for the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to acquire a more general form.
 
 Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
 Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
 
-The typing judgement for variables $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ in typing context $\gamma$ is of type $t$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftovers $\Delta$''.
-The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
+The \textbf{typing judgement for variables} $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ in typing context $\gamma$ is of type $t$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftovers $\Delta$''.
+The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
 
 \begin{nidefinition}[\textsc{VarRef}: typing variable references]
@@ -1177,12 +1179,10 @@ Orthogonally, making our typing rules bidirectional would allow us to provide a 
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
 
-\newpage
 \bibliographystyle{plainurl}
 \bibliography{paper}
 
 %%
-\newpage
 \appendix
 \input{appendix.tex}
 \end{document}
