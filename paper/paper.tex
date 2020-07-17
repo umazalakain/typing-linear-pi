@@ -533,8 +533,8 @@ We generalise over this notion of multiplicities by defining an algebra for them
 We then use pairs of multiplicities as usage annotations for channels.
 
 \begin{nidefinition}[Usage algebra]
-  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{deterministic}, \emph{cancellative}, \emph{associative}, \emph{commutative}, and in which the leftovers can be \emph{computed}.
-  It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal}.
+  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational resoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
+  It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal} (so that new resources cannot arbitrarily spring into life).
   It has an element $\one$ that is used to count inputs and outputs.
   \autoref{fig:multiplicities} models such an algebra as a record $\Algebra_C$ on a carrier $C$.
 
