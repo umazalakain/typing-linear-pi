@@ -563,16 +563,6 @@ We generalise over this notion by defining an algebra that is satisfied by linea
   \end{figure}
 \end{nidefinition}
 
-%\begin{note}
-  \label{note:linearity}
-  We will often work with pairs of input and output multiplicities.
-  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ tuple of input and output multiplicities, respectively.
-  We use $\opsquared{x}{y}{z}$ to stand for a monoidal operation on pairs of multiplicities -- where the algebraic laws are lifted element-wise.
-%
-  Henceforth, we use $\lz$ to denote the pair $0 \comma 0$ for a channel which cannot be used any further, $\li$ for the pair $1 \comma 0$ for a channel to be used in input exactly once, $\lo$ for $0 \comma 1$ for a channel to be used in output exactly once, and $\lio$ for $1 \comma 1$, for a channel to be used exactly once in input and exactly once in output.
-  This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
-%\end{note}
-
 \autoref{fig:algebra-instances} sketches the implementation of linear, graded and shared types as instances of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivations}.
 
@@ -664,9 +654,13 @@ This notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are 
 A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
 
 \begin{nidefinition}[\textsc{Ctx}: usage contexts]
-  A \emph{usage context} is a context $\Ctx_{idxs}$ of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
+  A \emph{usage context} is a context $\Ctx_{idxs}$ of pairs of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
 
   A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to an existing context $\Gamma$.
+
+  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ tuple of input and output multiplicities, respectively.
+  Henceforth, we use $\lz$ to denote the pair $0 \comma 0$ for a channel which cannot be used any further, $\li$ for the pair $1 \comma 0$ for a channel to be used in input exactly once, $\lo$ for $0 \comma 1$ for a channel to be used in output exactly once, and $\lio$ for $1 \comma 1$, for a channel to be used exactly once in input and exactly once in output.
+  This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 
   \begin{figure}[h]
   \begin{mathpar}
@@ -702,12 +696,6 @@ A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed l
   \end{figure}
 \end{nidefinition}
 
-
-% \begin{note}
-  We lift the monoidal operation on usage annotations $\opsquared{x}{y}{z}$ to a monoidal operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have a common underlying context of indices.
-  All the properties of the partial monoid are lifted element-wise.
-% \end{note}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
@@ -740,6 +728,7 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   \label{def:varref}
 
   The \textsc{VarRef} typing relation for variable references is presented in \autoref{fig:variable-references}.
+
   \begin{figure}[h]
   \begin{mathpar}
     \mprset{sep=0.5em}
@@ -768,6 +757,8 @@ The typing judgement for processes $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts t
   \caption{Typing rules for variable references.}
   \label{fig:variable-references}
   \end{figure}
+
+  We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{x_l \comma x_r}{y_l \comma y_r}{z_l \comma z_r}$ on pairs of multiplicities and an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with the same underlying context of indices.
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
