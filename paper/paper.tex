@@ -141,15 +141,14 @@ The authors would also like to thank the anonymous referees fortheir valuable co
   The \picalc{} is a computational model for communication and concurrency.
   The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
   It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, including \emph{session types} \cite{H93,THK94,HVK98}.
-  %Linearity is key for type safety in session communication.
 
   We present the \emph{first} full mechanisation in Agda of a \picalc{} with \emph{linear}, \emph{graded} and \emph{shared} types, all under the same unified framework.
   While linearity is key for type safety in communication-centric programming, graded and shared types are needed to model real-world software systems.
   
   We present the syntax, semantics, type system and corresponding type safety properties.
-  For the first time in the \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
+  For the first time in the \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates usage constraints into process continuations and requires of no top-down context splits.
   We generalise the algebras on multiplicities, allowing the user to choose a mix of linear, graded and shared typing.
-  We provide framing, weakening and strengthening theorems, which can now be stated for the linear \picalc{} and use them to prove subject congruence.
+  Thanks to leftover typing, we provide a framing theorem, and generalise the weakening and strengthening theorems, and use them to prove subject congruence.
   We show that the type system is stable under renaming and prove subject reduction.
 %
   Our formalisation is fully mechanised in Agda.
@@ -202,7 +201,7 @@ Ultimately, we can exploit this formalisation as a unified framework for type sa
  \begin{itemize}
    \item \textbf{Syntax}: \autoref{syntax} uses type level \emph{de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it.
      For convenience, the user can convert from and to a syntax with names.
-     These two conversion functions are shown to be inverses of one another modulo $\alpha$-conversion.
+     These conversion functions are shown to be inverses of one another modulo $\alpha$-conversion.
    
    \item \textbf{Semantics}: \autoref{semantics} provides an operational semantics for the \picalc{}, prior to any typing.
    This operational semantics is defined as a reduction relation on processes (\autoref{operational-semantics}).
@@ -224,19 +223,19 @@ Ultimately, we can exploit this formalisation as a unified framework for type sa
     This approach adds a leftover usage context to the typing judgements.
     Typing derivations take the resources of their input usage context, consume some of them, and leave the rest as leftovers in the output usage context.
 
-    Benefits of typing with leftovers include: removing the need for extrinsic context splits, which are rendered unnecessary; and for the first time we can state theorems like \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the linear \picalc{}.    
+    Leftover typing renders top-down context splits unnecessary, allows for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and makes it possible to generalise the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
   \end{itemize}
+
   \item \textbf{Fully mechanised formalisation and proofs of the \picalc{} with leftovers}:
-    The formalisation of the \picalc{} with leftovers has been fully mechanised in Agda and is publicly available in our GitHub repository%
+    \autoref{type-safety} presents the type safety properties of our \picalc{} with leftovers.
+    Leftover typing for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and generalises the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
+    We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{renaming} (\autoref{thm:renaming}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
+
+    The formalisation of the \picalc{} with leftovers has been fully mechanised in Agda%
 \begin{anonsuppress}
-\cite{Zalakain2020Agda}
+and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 \end{anonsuppress}
 .
-  
-  \autoref{type-safety} details the type safety properties of our \picalc{} with leftovers.
-  Leftover typing allows \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to be stated.
-  We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{renaming} (\autoref{thm:renaming}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
-
 \end{enumerate}
 
 
@@ -411,10 +410,10 @@ These unique variable names use the naming scheme $<name-hint>\textasciicircum<n
 \end{proof}
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Semantics}
+\section{Operational Semantics}
 \label{semantics}
 Thanks to our well-scoped grammar in \autoref{fig:syntax}, the semantics of our language can now be defined on the totality of the syntax.
-We start by defining structural congruence in \autoref{structural-congruence} and then the reduction relation in \autoref{operational-semantics}.
+We define structural congruence in \autoref{structural-congruence} and provide a reduction relation in \autoref{operational-semantics}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Structural Congruence}
@@ -715,7 +714,7 @@ We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approac
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
 
-Typing judgments for linear calculi typically carry a single context of usage annotations and thus the typing rules require frequent explicit proofs of context splitting --- e.g., the typing rule for parallel composition would look as follows:
+Typing judgments for linear calculi typically carry a single context of usage annotations and thus the typing rules require frequent top-down proofs of context splitting --- e.g., the typing rule for parallel composition would look as follows:
 \begin{mathpar}
   \inferrule
   {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
@@ -725,7 +724,7 @@ Input requires a similar context split; output requires two such context splits.
 This is rather cumbersome: for input and output, the proof of context split carries \emph{exactly} the same information as the typing rule for variables; for parallel composition it means that the typing derivations of both subprocesses will have no context information whatsoever until the context split is determined.
 
 Leftover typing solves this problem by inverting the flow of information so that \textbf{the typing derivations of the subprocesses determine the context split}.
-As a result, context information is threaded left to right through the typing derivation, and explicit context split proofs are no longer needed.
+As a result, usage information is threaded bottom-up through the typing derivation, and top-down context split proofs are no longer needed.
 In addition to this, it allows a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and for the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to acquire a more general form.
 
 Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
