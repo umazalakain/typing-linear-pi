@@ -148,7 +148,7 @@ The authors would also like to thank the anonymous referees fortheir valuable co
   For the first time in the \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates linearity constraints into process continuations.
   We generalise the algebras on multiplicities, allowing the user to choose a mix of linear, graded and shared typing.
   We provide framing, weakening and strengthening theorems, which can now be stated for the linear \picalc{} and use them to prove subject congruence.
-  We show that the type system is stable under substitution and prove subject reduction.
+  We show that the type system is stable under renaming and prove subject reduction.
 %
   Our formalisation is fully mechanised in Agda \cite{Zalakain2020Agda}.
 \end{abstract}
@@ -229,7 +229,7 @@ Ultimately, we can exploit this formalisation as a unified framework for type sa
   
   \autoref{type-safety} details the type safety properties of our \picalc{} with leftovers.
   Leftover typing allows \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to be stated.
-  We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
+  We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{renaming} (\autoref{thm:renaming}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
 
 \end{enumerate}
 
@@ -442,7 +442,7 @@ Its congruent equivalence closure \textsc{Equals} $\eq{}$ is defined in \autoref
 
   \inferrule
   { }
-  {\constr{scope-comm} : \new \new P \eqeq \new \new \func{swap}_{\constr{0}} \; P}
+  {\constr{scope-comm} : \new \new P \eqeq \new \new \func{exchange}_{\constr{0}} \; P}
 \end{mathpar}
 \caption{Base cases of structural congruence.}
 \label{fig:struct-cong-base}
@@ -453,7 +453,7 @@ The last three ($\constr{scope}-$*) state garbage collection, scope extrusion an
 
 In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$.
 The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index greater than $i$.
-In $\constr{scope-comm}$ the function $\func{swap}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
+In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -466,7 +466,7 @@ We distinguish between channels that are created inside of the process ($\constr
 
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
-After substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:subst-unused} in \autoref{app:lemmas} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
+After this renaming, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:renaming-unused} in \autoref{app:lemmas} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
@@ -921,13 +921,13 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
   The \emph{unusedness} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
 % \end{remark}
 
-\subparagraph*{Swapping}
+\subparagraph*{Exchange}
 of two variables preserves the well-typedness of a process.
-We extend $\func{swap}_i$  introduced in \autoref{structural-congruence} to swap types in typing contexts and usage annotations in usage contexts.
-\begin{nitheorem}[Swapping]
-  \label{thm:swapping}
+We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to exchange types in typing contexts and usage annotations in usage contexts.
+\begin{nitheorem}[Exchange]
+  \label{thm:exchange}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, $\types{\func{swap}_i \; \gamma}{\func{swap}_i \; \Gamma}{\allowbreak \func{swap}_i \; P}{\func{swap}_i \; \Xi}$.
+  Then, $\types{\func{exchange}_i \; \gamma}{\func{exchange}_i \; \Gamma}{\allowbreak \func{exchange}_i \; P}{\func{exchange}_i \; \Xi}$.
 \end{nitheorem}
 
 \begin{proof}[Proof (Sketch)]
@@ -946,16 +946,16 @@ states that applying structural congruence rules to a well typed process preserv
 
 \begin{proof}[Proof (Sketch)]
   The proof is by induction on \textsc{Equals} $\eq{}$.
-  For the nontrivial base cases and their symmetric variants, we apply a combination of \autoref{thm:framing}, \autoref{thm:strengthening}, \autoref{thm:weakening} and \autoref{thm:swapping}.
+  For the nontrivial base cases and their symmetric variants, we apply a combination of \autoref{thm:framing}, \autoref{thm:strengthening}, \autoref{thm:weakening} and \autoref{thm:exchange}.
   Further details can be found in \autoref{app:struct} and the full proof in \cite{Zalakain2020Agda}.
 \end{proof}
 
-\subparagraph*{Substitution}
-\autoref{thm:subst-generalization} proves a generalised version of substitution, where the substitution $\subst{P}{j}{i}$ is on any variable $i$.
-\autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
+\subparagraph*{Renaming}
+\autoref{thm:renaming-generalization} proves a generalised version of renaming, where the renaming $\subst{P}{j}{i}$ is on any variable $i$.
+\autoref{thm:renaming} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
-\begin{nitheorem}[Generalised substitution]
-  \label{thm:subst-generalization}
+\begin{nitheorem}[Generalised renaming]
+  \label{thm:renaming-generalization}
   Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   Then, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
   \begin{multicols}{2}
@@ -968,12 +968,12 @@ states that applying structural congruence rules to a well typed process preserv
   \end{multicols}
   Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
   Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
-  Then substituting $i$ with $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+  Then renaming $i$ to $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
 \end{nitheorem}
 
 \begin{proof}[Proof (Sketch)]
   By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  Full details are found in \autoref{app:subst-generalization}.
+  Full details are found in \autoref{app:renaming-generalization}.
   \begin{itemize}
    \item
      Constructor $\PO$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
@@ -1017,7 +1017,7 @@ states that applying structural congruence rules to a well typed process preserv
       \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
     \end{tikzpicture}
     \caption{
-      Diagrammatic representation of the $\comp{}{}$ case for substitution.
+      Diagrammatic representation of the $\comp{}{}$ case for renaming.
       Continuous lines represent known facts, dotted lines proof obligations.
     }
     \label{fig:subst}
@@ -1047,20 +1047,20 @@ states that applying structural congruence rules to a well typed process preserv
     \end{tikzpicture}
     \caption{
       Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
-      This approach makes composing typing derivations before and after substitution more difficult.
+      This approach makes composing typing derivations before and after renaming more difficult.
     }
     \label{fig:subst-alternative}
 \end{figure}
 
-\begin{nitheorem}[Substitution]
-  \label{thm:substitution}
+\begin{nitheorem}[Renaming]
+  \label{thm:renaming}
   Let $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
-  Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
+  Then, we can rename the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
 \end{nitheorem}
 \begin{proof}[Proof (Sketch)]
   We use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
-  Then, we use these to apply \autoref{thm:subst-generalization}.
+  Then, we use these to apply \autoref{thm:renaming-generalization}.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -1087,7 +1087,7 @@ In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}
   \hfill{}\\
   \begin{itemize}
     \item
-    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
+    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), renaming (\autoref{thm:renaming}) and strengthening (\autoref{thm:strengthening}).
   
     \item
     Case $\constr{par}$: by induction on the process that is being reduced.
