@@ -7,7 +7,7 @@ open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Nat.Base
 open import Data.Bool.Base using (false; true)
-open import Data.Product hiding (swap)
+open import Data.Product using (_×_; _,_; ∃-syntax)
 
 import Data.Fin as Fin
 import Data.Nat.Properties as ℕₚ
@@ -51,19 +51,19 @@ module PiCalculus.Semantics where
   notMax : (i : Fin n) (x : Fin (suc n)) → Fin.inject₁ i ≡ x → n ≢ Fin.toℕ x
   notMax i x p n≡x = Finₚ.toℕ-inject₁-≢ i (trans n≡x (sym (cong Fin.toℕ p)))
 
-  swapFin : Fin n → Fin (suc n) → Fin (suc n)
-  swapFin i x with Fin.inject₁ i Fin.≟ x
-  swapFin i x | true because ofʸ p = suc (Fin.lower₁ x (notMax i x p))
-  swapFin i x | false because _ with (suc i) Fin.≟ x
-  swapFin i x | false because _ | true because _ = Fin.inject₁ i
-  swapFin i x | false because _ | false because _ = x
+  exchangeFin : Fin n → Fin (suc n) → Fin (suc n)
+  exchangeFin i x with Fin.inject₁ i Fin.≟ x
+  exchangeFin i x | true because ofʸ p = suc (Fin.lower₁ x (notMax i x p))
+  exchangeFin i x | false because _ with (suc i) Fin.≟ x
+  exchangeFin i x | false because _ | true because _ = Fin.inject₁ i
+  exchangeFin i x | false because _ | false because _ = x
 
-  swap : Fin n → Scoped (suc n) → Scoped (suc n)
-  swap i 𝟘 = 𝟘
-  swap i (ν P) = ν (swap (suc i) P)
-  swap i (P ∥ Q) = swap i P ∥ swap i Q
-  swap i (x ⦅⦆ P)  = swapFin i x ⦅⦆ swap (suc i) P
-  swap i (x ⟨ y ⟩ P)  = swapFin i x ⟨ swapFin i y ⟩ swap i P
+  exchange : Fin n → Scoped (suc n) → Scoped (suc n)
+  exchange i 𝟘 = 𝟘
+  exchange i (ν P) = ν (exchange (suc i) P)
+  exchange i (P ∥ Q) = exchange i P ∥ exchange i Q
+  exchange i (x ⦅⦆ P)  = exchangeFin i x ⦅⦆ exchange (suc i) P
+  exchange i (x ⟨ y ⟩ P)  = exchangeFin i x ⟨ exchangeFin i y ⟩ exchange i P
 
   infixl 10 _≈_
   data _≈_ : Scoped n → Scoped n → Set where
@@ -78,7 +78,7 @@ module PiCalculus.Semantics where
     scope-ext : (u : Unused zero P)
               → ν (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (ν Q) ⦃ name ⦄
 
-    scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (swap zero P) ⦃ namex ⦄) ⦃ namey ⦄
+    scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (exchange zero P) ⦃ namex ⦄) ⦃ namey ⦄
 
   data RecTree : Set where
     zero : RecTree
@@ -120,20 +120,20 @@ module PiCalculus.Semantics where
   (x ⦅⦆ P)    [ i ↦ j ] = (x [ i ↦ j ]') ⦅⦆ (P [ suc i ↦ suc j ])
   (x ⟨ y ⟩ P) [ i ↦ j ] = (x [ i ↦ j ]') ⟨ y [ i ↦ j ]' ⟩ (P [ i ↦ j ])
 
-  substFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
-  substFin-unused {i = i} x i≢j  with i Finₚ.≟ x
-  substFin-unused {i = i} x i≢j | true because _ = i≢j
-  substFin-unused {i = i} x i≢j | false because ofⁿ ¬p = ¬p
+  renameFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
+  renameFin-unused {i = i} x i≢j  with i Finₚ.≟ x
+  renameFin-unused {i = i} x i≢j | true because _ = i≢j
+  renameFin-unused {i = i} x i≢j | false because ofⁿ ¬p = ¬p
 
-  subst-unused : {i j : Fin (suc n)}
+  rename-unused : {i j : Fin (suc n)}
                → i ≢ j
                → (P : Scoped (suc n))
                → Unused i (P [ i ↦ j ])
-  subst-unused i≢j 𝟘 = tt
-  subst-unused i≢j (ν P) = subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  subst-unused i≢j (P ∥ Q) = subst-unused i≢j P , subst-unused i≢j Q
-  subst-unused i≢j (x ⦅⦆ P) = substFin-unused x i≢j , subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  subst-unused i≢j (x ⟨ y ⟩ P) = substFin-unused x i≢j , substFin-unused y i≢j , subst-unused i≢j P
+  rename-unused i≢j 𝟘 = tt
+  rename-unused i≢j (ν P) = rename-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
+  rename-unused i≢j (P ∥ Q) = rename-unused i≢j P , rename-unused i≢j Q
+  rename-unused i≢j (x ⦅⦆ P) = renameFin-unused x i≢j , rename-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
+  rename-unused i≢j (x ⟨ y ⟩ P) = renameFin-unused x i≢j , renameFin-unused y i≢j , rename-unused i≢j P
 
   data Channel : ℕ → Set where
     internal : ∀ {n}         → Channel n
@@ -152,7 +152,7 @@ module PiCalculus.Semantics where
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
 
     comm : {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
-         → let uP' = subst-unused (λ ()) P
+         → let uP' = rename-unused (λ ()) P
          in ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}

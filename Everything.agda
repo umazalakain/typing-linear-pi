@@ -4,9 +4,9 @@ import PiCalculus.Syntax.Properties
 import PiCalculus.Semantics
 import PiCalculus.Semantics.Properties
 import PiCalculus.LinearTypeSystem
-import PiCalculus.LinearTypeSystem.Swapping
+import PiCalculus.LinearTypeSystem.Exchange
 import PiCalculus.LinearTypeSystem.Strengthening
-import PiCalculus.LinearTypeSystem.Substitution
+import PiCalculus.LinearTypeSystem.Renaming
 import PiCalculus.LinearTypeSystem.ContextLemmas
 import PiCalculus.LinearTypeSystem.SubjectCongruence
 import PiCalculus.LinearTypeSystem.SubjectReduction
