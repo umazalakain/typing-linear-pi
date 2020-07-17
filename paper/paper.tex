@@ -529,7 +529,8 @@ We provide a type system for a resource-aware \picalc{} in \autoref{leftover-typ
 \label{multiplicities}
 
 In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
-We generalise over this notion by defining an algebra that is satisfied by linear, graded and shared types alike.
+We generalise over this notion of multiplicities by defining an algebra for them that is satisfied by linear, graded and shared types alike.
+We then use pairs of multiplicities as usage annotations for channels.
 
 \begin{nidefinition}[Usage algebra]
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial}, \emph{deterministic}, \emph{cancellative}, \emph{associative}, \emph{commutative}, and in which the leftovers can be \emph{computed}.
