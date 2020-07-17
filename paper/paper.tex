@@ -329,12 +329,12 @@ Process $\PO$ denotes the terminated process, where no operations can further oc
 Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
 Processes $\recv{x}{y} P$ and $\send{x}{y} P$ denote respectively the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
-
 Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs which introduce bound names --- $x$ and $y$ in $P$, respectively.
+
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
-Names are cumbersome to mechanise: they offer no guarantee of being well-scoped, one has to deal with alpha-conversion, and inserting new variables into context entails proving that their names differ from all other names in context.
+Names are cumbersome to mechanise: they are not inherently well-scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
 Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
-That is, terms at different \emph{depths} use different indices to refer to the same binding, and binders no longer introduce names.
+That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 \begin{example}
   Example process using names (top) and de Bruijn indices (bottom).
   \small
@@ -355,13 +355,12 @@ Every time we go under a binder, we increase the index of the continuation proce
 
 \subsection{From names to de Bruijn indices and back}
 
-De Bruijn indices are easier to manipulate, but as humans we rather deal with names.
-To that end, we provide the user with named processes, while using de Bruijn indexed processes internally.
-We do so by defining translation functions in both directions and proving that they are inverses of each other up to $\alpha$-conversion.
+In order to demonstrate the correspondence between an encoding that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
 
 \paragraph{From names to de Bruijn indices}
-We keep the original binder names around as name hints when we translate into processes with de Bruijn names --- these names will serve as hints when we translate back.
-The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps between the first $n$ indices and their names, and substituting named references within the process with their corresponding de Bruijn index.
+We keep the original binder names around as name hints when we translate to processes with de Bruijn names --- these names will serve as hints for when we translate back.
+The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
+Named references within the process are substituted with their corresponding de Bruijn index.
 We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate it.
 \begin{equation*}
   \begin{aligned}
@@ -371,12 +370,12 @@ We demand that the original process is well-scoped: that all its free variable n
 \end{equation*}
 
 \paragraph{From de Bruijn indices to names}
-The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps between $n$ de Bruijn indices and names, and substituting indices within the process with their corresponding names.
-As many widely-used languages do, we produce unique variable names but use the original variable names kept around throughout the de Bruijn representation as hints, to make the correspondence visually more straightforward.
-For this, we use the naming scheme $<name-hint>\textasciicircum<n>$, where $<n>$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
+The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
+As many widely-used languages do, this translation function produces unique variable names.
+These unique variable names use the naming scheme $<name-hint>\textasciicircum<n>$, where $<n>$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
 \begin{equation*}
   \begin{aligned}
-    &\func{toRaw} && : (ctx : \Names_n) \to \Process_n \to \Raw
+    \func{toRaw} : (ctx : \Names_n) \to \Process_n \to \Raw
   \end{aligned}
 \end{equation*}
 
@@ -389,14 +388,14 @@ For this, we use the naming scheme $<name-hint>\textasciicircum<n>$, where $<n>$
 \end{nilemma}
 
 \begin{nilemma}
-  Translating from de Bruijn indices to names and back results in the same process modulo variable name hints.
+  Translating from de Bruijn indices to names and back results in the same process modulo internal variable name hints.
 \end{nilemma}
 
 \begin{nilemma}
   Translating from names to de Bruijn indices and back results in the same process modulo $\alpha$-conversion.
 \end{nilemma}
 
-\begin{proof}[Sketch]
+\begin{proof}[Prove (Sketch)]
   All the above theorems are proved by induction on \textsc{Process} and \textsc{Var}.
   For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
