@@ -62,7 +62,7 @@
 \newcommand{\suc}{\constr{\scriptstyle 1+}}
 \newcommand{\unit}{\constr{\mathbbm{1}}}
 \newcommand{\base}[1]{\constr{B[} \, #1 \, \constr{]}}
-\newcommand{\channel}[2]{\constr{C[} \, #1 \, \constr{,} \, #2 \, \constr{]}}
+\newcommand{\channel}[2]{\constr{C[} \, #1 \, \constr{;} \, #2 \, \constr{]}}
 \newcommand{\comma}{\, \constr{,} \,}
 
 % Functions
@@ -779,8 +779,8 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \begin{example}[Variable reference]
   \autoref{lst:channels} types a variable reference under a linear algebra.
   \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=Typing variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.]
-  _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
-  _ = $\suc \constr{0}$
+_ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
+_ = $\suc \constr{0}$
   \end{lstlisting}
   The underscore \_ introduces an anonymous declaration immediately followed by its definition.
   We must show that the variable at position $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $\constr{[]} \comma \channel{\unit}{\li} \comma \unit$ and a usage context $\constr{[]} \comma \lio \comma \lio$.
@@ -858,28 +858,32 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 
 \begin{example}[Typing derivation]
   \label{example-derivations}
-  In \autoref{lst:derivation} we illustrate a typing derivation of the process $\func{p}$ (lines 1-4) using linear and shared types.
+  In \autoref{lst:derivation} we illustrate a typing derivation using shared, graded and linear types.
+  We use $\func{\omega}$ as a shortcut for $\one \comma \one$ in an algebra of shared types.
 
-  Let $\func{\omega}$ be a shortcut for $\one \comma \one$ in an algebra of shared types.
-  Let $\func{\epsilon}$ be the empty usage context --- where all usage annotations are $\zero \comma \zero$.
-  To type $\func{p}$, we need a channel over which we can transmit another channel.
-  We therefore create a new channel with usage annotations $\one \comma \one$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we only transmit input capabilities over it (line 7).
-  The left-hand process (line 3) is typed following its syntax (line 8).
-  For the right-hand (line 4) we need the channel that is going to be sent (line 9).
+  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing two processes that send parts of one channel over another.]
+$\func{P}$ : $\Process_{\suc \suc \constr{0}}$
+$\func{P}$ = $\comp{(\new{} \; (\send{\suc \; \constr{0}} {\constr{0}} \send{\constr{0}}{\suc \; \suc \; \constr{0}} \PO))}{\recv{\constr{0}}{\recv{\constr{0}}{}} \PO}$
+
+$\func{\gamma}$ : $\PreCtx_{\suc \suc \constr{0}}$
+$\func{\gamma}$ = $\constr{[]} \comma \unit \comma \channel{\channel{\unit}{\func{\omega}}}{\li}$
+
+$\func{\vdash P}$ : $\forall \{n\} \to \types{\func{\gamma}}{\constr{[]} \comma \func{\omega} \comma (\suc n \comma \suc n)}{\func{P}}{\constr{[]} \comma \func{\omega} \comma (n \comma n)}$
+$\func{\vdash P}$ = $\comp{(\new \; \unit \; \func{\omega} \; \one \; (\send{\suc \; \constr{0}}{\constr{0}} \; \send{\constr{0}}{\suc \; \suc \; \constr{0}} \PO))} {\recv{\constr{0}}{} \; \recv{\constr{0}}{} \PO}$
+
+$\func{\vdash PP}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\new{} \comp{\func{P}}{\func{P}}}{\constr{[]} \comma \func{\omega}}$
+$\func{\vdash PP}$ = $\new \; \channel{\unit}{\func{\omega}} \; \li \; (\suc \suc \constr{0}) \; (\comp{\vdash P}{\vdash P})$
+  \end{lstlisting}
+
+  Notice that the \emph{only} difference between the definition of the untyped process $\func{P}$ and its typing derivation are the extra type annotations that accompany scope restriction.
+  This extra information requires a (limited) choice.
+  To type $\func{P}$, we need a channel over which we can transmit another channel.
+  We therefore create a new channel with usage annotations $\one \comma \one$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we only transmit input capabilities over it (line 9).
+  The left-hand process (line 3) is typed following its syntax (line 10).
+  For the right-hand (lines 4-5) we need the channel that is going to be sent (lines 11-12).
   The type $\unit$ of this channel is entirely determined by the type $\channel{\unit}{\func{\omega}}$ of the channel over which it is going to be transmitted.
   Its usage annotation is $\one \comma \one$: we will transmit $\one \comma \zero$ and save $\zero \comma \one$ for the continuation process.
   
-  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing a process that sends part of one channel over another.]
-  $\func{p}$ : $\Process_{\suc \constr{zero}}$
-  $\func{p}$ = $\new{}$
-       $(\comp{\recv{\constr{0}}{} (\recv{\constr{0}}{} \PO)}$
-       ${\new{} (\send{\suc \; \constr{0}} {\constr{0}} (\send{\constr{0}}{\suc \; \suc \; \constr{0}} \; \PO)})$
-
-  $\func{\_}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\func{p}}{\func{\epsilon}}$
-  $\func{\_}$ = $\new \; \channel{\unit}{\func{\omega}} \; \li \; \one$
-       $(\comp{\recv{\constr{0}}{} \; (\recv{\constr{0}}{} \; \PO)}$
-       ${\new \; \unit \; \func{\omega} \; \one \; (\send{\suc \; \constr{0}}{\constr{0}} \; (\send{\constr{0}}{\suc \; \suc \; \constr{0}} \; \PO))}$
-  \end{lstlisting}
 \end{example}
 
 

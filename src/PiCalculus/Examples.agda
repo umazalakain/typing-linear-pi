@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-} -- --without-K #-}
 
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ; zero; suc)
 open import Data.Bool using (Bool; true; false)
 open import Data.Unit using (⊤; tt)
 open import Data.Fin using (zero; suc) renaming (#_ to #'_)
@@ -17,6 +17,7 @@ open import PiCalculus.Semantics
 open import PiCalculus.LinearTypeSystem.Algebras
 open import PiCalculus.LinearTypeSystem.Algebras.Linear using (Linear)
 open import PiCalculus.LinearTypeSystem.Algebras.Shared using (Shared)
+open import PiCalculus.LinearTypeSystem.Algebras.Graded using (Graded)
 
 module PiCalculus.Examples where
 open Raw
@@ -94,19 +95,22 @@ _ : ("y" ∷ []) ! channel-over-channel₆ ≅ channel-over-channel₇
 _ = _ , stop scope-end
 
 
-module Shared-Linear where
-  pattern LINEAR = true
-  pattern SHARED = false
+module Shared-Graded-Linear where
+  data Usage : Set where
+    sha gra lin : Usage
+
   pattern 0∙ = false
   pattern 1∙ = true
 
   QUANTIFIERS : Algebras
-  Algebras.Idx QUANTIFIERS = Bool
-  Algebras.∃Idx QUANTIFIERS = SHARED
-  Algebras.Usage QUANTIFIERS SHARED = ⊤
-  Algebras.Usage QUANTIFIERS LINEAR = Bool
-  Algebras.UsageAlgebra QUANTIFIERS SHARED = Shared
-  Algebras.UsageAlgebra QUANTIFIERS LINEAR = Linear
+  Algebras.Idx QUANTIFIERS = Usage
+  Algebras.∃Idx QUANTIFIERS = sha
+  Algebras.Usage QUANTIFIERS sha = ⊤
+  Algebras.Usage QUANTIFIERS gra = ℕ
+  Algebras.Usage QUANTIFIERS lin = Bool
+  Algebras.UsageAlgebra QUANTIFIERS sha = Shared
+  Algebras.UsageAlgebra QUANTIFIERS gra = Graded
+  Algebras.UsageAlgebra QUANTIFIERS lin = Linear
 
   open Algebras QUANTIFIERS hiding (ℓᵢ;ℓₒ;ℓ∅;ℓ#;0∙;1∙)
   open import PiCalculus.LinearTypeSystem QUANTIFIERS
@@ -134,22 +138,30 @@ module Shared-Linear where
     name : Name
     name = ""
 
-  _ : ([] -, "y") ! [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
-  _ = ν C[ 𝟙 ； ω∙ ] ℓᵢ {LINEAR} 1∙
-      (((# 0) ⦅⦆ (# 0 ⦅⦆ 𝟘)) ∥
-            (ν 𝟙 ω∙ {LINEAR} 1∙
-                  ((# 1) ⟨ # 0 ⟩ (# 0 ⟨ # 2 ⟩ 𝟘))))
+  _ : ([] -, "y") ! [] -, 𝟙 ；[ [] -, sha ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
+  _ = ν C[ 𝟙 ； ω∙ ] ℓᵢ {lin} 1∙
+      (((here ) ⦅⦆ (here ⦅⦆ 𝟘)) ∥
+            (ν 𝟙 ω∙ {lin} 1∙
+                  ((there here) ⟨ here ⟩ (here ⟨ there there here ⟩ 𝟘))))
 
-  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ ν (((#' 0) ⟨ #' 1 ⟩ 𝟘) ∥ ((#' 0) ⦅⦆ 𝟘)) ▹ ε
-  _ = ν 𝟙 ω∙ {LINEAR} 1∙ ((# 0 ⟨ # 1 ⟩ 𝟘) ∥ (# 0 ⦅⦆ 𝟘))
+  _ : [] -, 𝟙 ；[ [] -, sha ] [] -, ω∙ ⊢ ν (((#' 0) ⟨ #' 1 ⟩ 𝟘) ∥ ((#' 0) ⦅⦆ 𝟘)) ▹ ε
+  _ = ν 𝟙 ω∙ {lin} 1∙ ((# 0 ⟨ # 1 ⟩ 𝟘) ∥ (# 0 ⦅⦆ 𝟘))
 
   p : Scoped 1
   p = ν (((#' 0) ⦅⦆ ((#' 0) ⦅⦆ 𝟘)) ∥ (ν ((#' 1) ⟨ #' 0 ⟩ (#' 0) ⟨ #' 2 ⟩ 𝟘)))
 
-  _ : [] -, 𝟙 ；[ [] -, SHARED ] [] -, ω∙ ⊢ p ▹ ε
-  _ = ν C[ 𝟙 ； ω∙ ] {LINEAR} ℓᵢ {LINEAR} 1∙ (
-           (# 0 ⦅⦆ (# 0 ⦅⦆ 𝟘)) ∥ (ν 𝟙 ω∙ 1∙ ((# 1) ⟨ # 0 ⟩ (# 0 ⟨ # 2 ⟩ 𝟘))))
+  _ : [] -, 𝟙 ；[ [] -, sha ] [] -, ω∙ ⊢ p ▹ ε
+  _ = ν C[ 𝟙 ； ω∙ ] {lin} ℓᵢ {lin} 1∙ (
+           (here ⦅⦆ (here ⦅⦆ 𝟘)) ∥ (ν 𝟙 ω∙ 1∙ (there here ⟨ here ⟩ (here ⟨ there there here ⟩ 𝟘))))
 
+  P : Scoped 2
+  P = (ν (suc zero ⟨ zero ⟩ zero ⟨ suc (suc zero) ⟩ 𝟘)) ∥ (zero ⦅⦆ zero ⦅⦆ 𝟘)
+
+  ⊢P : ∀ {n} → [] -, 𝟙 -, C[ C[ 𝟙 ； ω∙ ] ； ℓᵢ ] ；[ [] -, sha -, gra ] [] -, ω∙ -, (suc n , suc n) ⊢ P ▹ [] -, ω∙ -, (n , n)
+  ⊢P = ν 𝟙 ω∙ {lin} 1∙ ((there here) ⟨ here ⟩ (here ⟨ there there here ⟩ 𝟘)) ∥ (here ⦅⦆ (here ⦅⦆ 𝟘))
+
+  ⊢P∥P : [] -, 𝟙 ；[ [] -, sha ] [] -, ω∙ ⊢ ν (P ∥ P) ▹ ε
+  ⊢P∥P = ν C[ 𝟙 ； ω∙ ] ℓᵢ 2 (⊢P ∥ ⊢P)
 
 module Linear where
   QUANTIFIERS : Algebras

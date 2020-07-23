@@ -8,7 +8,7 @@ Name : Set
 Name = String
 
 module Raw where
-  infix 20 _∥_
+  infixr 20 _∥_
   infixr 15 ⦅ν_⦆_
   infixr 10 _⦅_⦆_ _⟨_⟩_
 
@@ -24,7 +24,7 @@ module Scoped where
   open import Data.Fin.Base
   open import Data.Nat.Base
 
-  infix 20 _∥_
+  infixr 20 _∥_
   infixr 15 ν
   infixr 10 _⦅⦆_ _⟨_⟩_
 
