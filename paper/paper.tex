@@ -768,7 +768,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   \label{fig:variable-references}
   \end{figure}
 
-  We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{x_l \comma x_r}{y_l \comma y_r}{z_l \comma z_r}$ on pairs of multiplicities and an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with the same underlying context of indices.
+  We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)}$ on pairs of multiplicities and an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with the same underlying context of indices.
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
@@ -777,14 +777,16 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \end{nidefinition}
 
 \begin{example}[Variable reference]
-  Let us illustrate the use of variable reference relations with an example in \autoref{lst:channels}.
+  \autoref{lst:channels} types a variable reference under a linear algebra.
   \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=Typing variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.]
-  _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \; \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
-  _ = $\suc \; \constr{0}$
+  _ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
+  _ = $\suc \constr{0}$
   \end{lstlisting}
   The underscore \_ introduces an anonymous declaration immediately followed by its definition.
+  We must show that the variable at position $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $\constr{[]} \comma \channel{\unit}{\li} \comma \unit$ and a usage context $\constr{[]} \comma \lio \comma \lio$.
+  Which \textsc{VarRef} constructors to use is completely determined by the $\suc \; \constr{0}$ in the type.
   The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
-  The constructor $\constr{0}$ asserts that the next variable is of a channel type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving $\lo$ as the leftover, to be used later on.
+  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that we can split its input annotation $\lio$, taking away $\li$ and leaving $\lo$ as the leftover.
 \end{example}
 
 \begin{nidefinition}[\textsc{Types}: typing processes]
