@@ -340,16 +340,6 @@ In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound n
 Names are cumbersome to mechanise: they are not inherently well-scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
 Instead, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
-\begin{example}
-  Example process using names (top) and de Bruijn indices (bottom).
-  \small
-  \begin{equation*}
-    \begin{aligned}
-      & (\new{}x ) && (\comp {\recv{x}{y} && \send{y}{a} && \PO} {(\new{} y) && (\send{x}{y} && \recv{y}{z} && \PO)}) \\
-      & \new{} && (\comp {\recv{0}{} && \send{0}{a} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
-    \end{aligned}
-  \end{equation*}
-\end{example}
 
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
 References outside of that range are meaningless.
@@ -362,11 +352,23 @@ Every time we go under a binder, we increase the index of the continuation proce
 
 In order to demonstrate the correspondence between an encoding that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
 
+\begin{example}
+  Example process using names (top) translated to de Bruijn indices (middle) and back to names (bottom). The result is a process that follows the Barendregt convention and is $\alpha$-equivalent to the original.
+  \small
+  \begin{equation*}
+    \begin{aligned}
+      & (\new{x} ) && (\comp {\recv{x}{x} && \send{x}{z} && \PO} {(\new{y}) && (\send{x}{y} && \recv{y}{y} && \PO)}) \\
+      & \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
+      & (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)}) \\
+    \end{aligned}
+  \end{equation*}
+\end{example}
+
 \paragraph{From names to de Bruijn indices}
-We keep the original binder names around as name hints when we translate to processes with de Bruijn names --- these names will serve as hints for when we translate back.
+When we translate into de Bruijn indices we keep the original binder names around --- they will serve as name hints for when we translate back.
 The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 Named references within the process are substituted with their corresponding de Bruijn index.
-We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate it.
+We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such proof term.
 \begin{equation*}
   \begin{aligned}
     &\func{fromRaw} && : (ctx : \Names_n) \; (P : \Raw) \\
@@ -376,8 +378,8 @@ We demand that the original process is well-scoped: that all its free variable n
 
 \paragraph{From de Bruijn indices to names}
 The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
-As many widely-used languages do, this translation function produces unique variable names.
-These unique variable names use the naming scheme $<name-hint>\textasciicircum<n>$, where $<n>$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
+As some widely-used languages do, this translation function produces unique variable names.
+These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{<n>}$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
 \begin{equation*}
   \begin{aligned}
     \func{toRaw} : (ctx : \Names_n) \to \Process_n \to \Raw
