@@ -15,6 +15,23 @@ private
   variable
     n m : ℕ
 
+module Sum {a b} {A : Set a} {B : Set b} where
+  open import Data.Sum.Base
+  open import Data.Unit
+  open import Data.Empty
+
+  IsInj₁ : A ⊎ B → Set
+  IsInj₁ (inj₁ _) = ⊤
+  IsInj₁ (inj₂ _) = ⊥
+
+module All2Vec {a b c} {A : Set a} {P : A → Set b} {C : Set c} where
+  open import Data.Vec
+  open import Data.Vec.Relation.Unary.All
+
+  all2vec : {xs : Vec A n} → (∀ {x} → P x → C) → All P xs → Vec C n
+  all2vec f [] = []
+  all2vec f (x ∷ xs) = f x ∷ all2vec f xs
+
 module AllAcc {a b} {A : Set a} where
   open import Data.Product using (_×_; _,_; uncurry)
   open import Relation.Nullary using (Dec; yes; no)

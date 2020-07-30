@@ -1,69 +1,170 @@
 {-# OPTIONS --safe --without-K #-}
 
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong; subst; inspect; [_])
 open import Relation.Nullary using (_because_; ofʸ; ofⁿ)
+open import Function using (id)
 
+open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
-open import Data.Nat.Base
+open import Data.Nat.Base as ℕ using (ℕ; zero; suc)
 open import Data.Bool.Base using (false; true)
-open import Data.Product using (_×_; _,_; ∃-syntax)
+open import Data.Product using (_×_; _,_; Σ-syntax; ∃-syntax)
+open import Data.Fin as Fin using (Fin ; zero ; suc; #_)
+open import Data.Vec.Base as Vec using (Vec; []; _∷_; map)
+open import Data.Vec.Relation.Unary.All as All using (All)
 
-import Data.Fin as Fin
+import Data.Vec.Relation.Unary.All.Properties as Allₚ
 import Data.Nat.Properties as ℕₚ
 import Data.Fin.Properties as Finₚ
 
-open Fin using (Fin ; zero ; suc; #_)
 
 open import PiCalculus.Syntax
 open Scoped
+
+import PiCalculus.Utils
+open PiCalculus.Utils.All2Vec
+open PiCalculus.Utils.Sum
 
 module PiCalculus.Semantics where
 
   private
     variable
-      name namex namey : Name
-      n : ℕ
+      n m l : ℕ
+      nx ny : Name
+      ns : Vec Name n
       P P' Q R : Scoped n
       x y : Fin n
+      ys : Vec (Fin n) m
 
-  Unused : ∀ {n} → Fin n → Scoped n → Set
-  Unused i 𝟘 = ⊤
-  Unused i (ν P) = Unused (suc i) P
-  Unused i (P ∥ Q) = Unused i P × Unused i Q
-  Unused i (x ⦅⦆ P) = i ≢ x × Unused (suc i) P
-  Unused i (x ⟨ y ⟩ P) = i ≢ x × i ≢ y × Unused i P
+  data _+_≔_ : ℕ → ℕ → ℕ → Set where
+    zero  :             zero  + zero  ≔ zero
+    left  : n + m ≔ l → suc n + m     ≔ suc l
+    right : n + m ≔ l → n     + suc m ≔ suc l
 
-  lift : (i : Fin (suc n)) → Scoped n → Scoped (suc n)
-  lift i 𝟘 = 𝟘
-  lift i (ν P) = ν (lift (suc i) P)
-  lift i (P ∥ Q) = lift i P ∥ lift i Q
-  lift i (x ⦅⦆ P) = Fin.punchIn i x ⦅⦆ lift (suc i) P
-  lift i (x ⟨ y ⟩ P) = Fin.punchIn i x ⟨ Fin.punchIn i y ⟩ lift i P
+  invert : n + m ≔ l → Fin l → Fin n ⊎ Fin m
+  invert (left ρ) zero = inj₁ zero
+  invert (right ρ) zero = inj₂ zero
+  invert (left ρ) (suc x) = Sum.map suc id (invert ρ x)
+  invert (right ρ) (suc x) = Sum.map id suc (invert ρ x)
 
-  lower : (i : Fin (suc n)) (P : Scoped (suc n)) → Unused i P → Scoped n
-  lower i 𝟘 uP = 𝟘
-  lower i (ν P) uP = ν (lower (suc i) P uP)
-  lower i (P ∥ Q) (uP , uQ) = lower i P uP ∥ lower i Q uQ
-  lower i (x ⦅⦆ P) (i≢x , uP) = Fin.punchOut i≢x ⦅⦆ lower (suc i) P uP
-  lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = Fin.punchOut i≢x ⟨ Fin.punchOut i≢y ⟩ lower i P uP
+  +-identityʳ : n + zero ≔ n
+  +-identityʳ {zero} = zero
+  +-identityʳ {suc n} = left +-identityʳ
 
-  notMax : (i : Fin n) (x : Fin (suc n)) → Fin.inject₁ i ≡ x → n ≢ Fin.toℕ x
-  notMax i x p n≡x = Finₚ.toℕ-inject₁-≢ i (trans n≡x (sym (cong Fin.toℕ p)))
+  +-comm : n + m ≔ l → m + n ≔ l
+  +-comm zero = zero
+  +-comm (left ρ) = right (+-comm ρ)
+  +-comm (right ρ) = left (+-comm ρ)
 
-  exchangeFin : Fin n → Fin (suc n) → Fin (suc n)
-  exchangeFin i x with Fin.inject₁ i Fin.≟ x
-  exchangeFin i x | true because ofʸ p = suc (Fin.lower₁ x (notMax i x p))
-  exchangeFin i x | false because _ with (suc i) Fin.≟ x
-  exchangeFin i x | false because _ | true because _ = Fin.inject₁ i
-  exchangeFin i x | false because _ | false because _ = x
+  right-first : ∀ n m → n + m ≔ (m ℕ.+ n)
+  right-first zero zero = zero
+  right-first (suc n) zero = left (right-first n zero)
+  right-first n (suc m) = right (right-first n m)
 
-  exchange : Fin n → Scoped (suc n) → Scoped (suc n)
-  exchange i 𝟘 = 𝟘
-  exchange i (ν P) = ν (exchange (suc i) P)
-  exchange i (P ∥ Q) = exchange i P ∥ exchange i Q
-  exchange i (x ⦅⦆ P)  = exchangeFin i x ⦅⦆ exchange (suc i) P
-  exchange i (x ⟨ y ⟩ P)  = exchangeFin i x ⟨ exchangeFin i y ⟩ exchange i P
+  extend : ∀ k → n + m ≔ l → (k ℕ.+ n) + m ≔ (k ℕ.+ l)
+  extend {n = n} {l = l} zero ρ = ρ
+  extend {n = n} {l = l} (suc k) ρ = left (extend k ρ)
+
+  IsLeftFin : n + m ≔ l → Fin l → Set
+  IsLeftFin ρ x = IsInj₁ (invert ρ x)
+
+  IsLeft : n + m ≔ l → Scoped l → Set
+  IsLeft ρ 𝟘 = ⊤
+  IsLeft ρ (ν P) = IsLeft (left ρ) P
+  IsLeft ρ (P ∥ Q) = IsLeft ρ P × IsLeft ρ Q
+  IsLeft ρ (x ⦅ m ⦆ P) = IsLeftFin ρ x × IsLeft (extend m ρ) P
+  IsLeft ρ (x ⟨ ys ⟩ P) = IsLeftFin ρ x × All (IsLeftFin ρ) ys × IsLeft ρ P
+
+  ----------------------------------------------------------
+  -- Punch Out (lowering, stregthening)
+
+  punchOutFin : (ρ : n + m ≔ l) (x : Fin l) → IsLeftFin ρ x → Fin n
+  punchOutFin ρ x il with invert ρ x
+  punchOutFin ρ x il | inj₁ l = l
+
+  punchOut : (ρ : n + m ≔ l) (P : Scoped l) → IsLeft ρ P → Scoped n
+  punchOut ρ 𝟘 il = 𝟘
+  punchOut ρ (ν P) il = ν (punchOut (left ρ) P il)
+  punchOut ρ (P ∥ Q) (ilP , ilQ) = punchOut ρ P ilP ∥ punchOut ρ Q ilQ
+  punchOut ρ (x ⦅ m ⦆ P) (ilx , ilP) = punchOutFin ρ x ilx ⦅ m ⦆ punchOut (extend m ρ) P ilP
+  punchOut ρ (x ⟨ ys ⟩ P) (ilx , ilys , ilP) =
+    punchOutFin ρ x ilx ⟨ all2vec (punchOutFin ρ _) ilys ⟩ punchOut ρ P ilP
+
+  ----------------------------------------------------------
+  -- Punch In (lifting, weakening)
+
+  punchInFin : n + m ≔ l → Fin n → Fin l
+  punchInFin (left ρ) zero = zero
+  punchInFin (left ρ) (suc x) = suc (punchInFin ρ x)
+  punchInFin (right ρ) x = suc (punchInFin ρ x)
+
+  punchIn : n + m ≔ l → Scoped n → Scoped l
+  punchIn ρ 𝟘 = 𝟘
+  punchIn ρ (ν P) = ν (punchIn (left ρ) P)
+  punchIn ρ (P ∥ Q) = punchIn ρ P ∥ punchIn ρ Q
+  punchIn ρ (x ⦅ m ⦆ P) = punchInFin ρ x ⦅ m ⦆ punchIn (extend m ρ) P
+  punchIn ρ (x ⟨ ys ⟩ P) = punchInFin ρ x ⟨ map (punchInFin ρ) ys ⟩ punchIn ρ P
+
+  left-IsLeftFin : (ρ : n + m ≔ l) → IsLeftFin ρ x → IsLeftFin (left ρ) (suc x)
+  left-IsLeftFin {x = x} ρ il with invert ρ x
+  left-IsLeftFin {x = x} ρ il | inj₁ _ = tt
+
+  right-IsLeftFin : (ρ : n + m ≔ l) → IsLeftFin ρ x → IsLeftFin (right ρ) (suc x)
+  right-IsLeftFin {x = x} ρ il with invert ρ x
+  right-IsLeftFin {x = x} ρ il | inj₁ _ = tt
+
+  punchInFin-IsLeftFin : (ρ : n + m ≔ l) (x : Fin n) → IsLeftFin ρ (punchInFin ρ x)
+  punchInFin-IsLeftFin (left ρ) zero = tt
+  punchInFin-IsLeftFin (left ρ) (suc x) = left-IsLeftFin ρ (punchInFin-IsLeftFin ρ x)
+  punchInFin-IsLeftFin (right ρ) x = right-IsLeftFin ρ (punchInFin-IsLeftFin ρ x)
+
+  ----------------------------------------------------------
+  -- Exchange
+
+  exchangeFin : m + 2 ≔ l → Fin l → Fin l
+  exchangeFin ρ x with invert ρ x
+  exchangeFin ρ x | inj₁ r = x
+  exchangeFin ρ x | inj₂ zero = punchInFin (+-comm ρ) (suc zero)
+  exchangeFin ρ x | inj₂ (suc zero) = punchInFin (+-comm ρ) zero
+
+  exchange : n + 2 ≔ l → Scoped l → Scoped l
+  exchange ρ 𝟘 = 𝟘
+  exchange ρ (ν P) = ν (exchange (left ρ) P)
+  exchange ρ (P ∥ Q) = exchange ρ P ∥ exchange ρ Q
+  exchange ρ (x ⦅ m ⦆ P) = exchangeFin ρ x ⦅ m ⦆ exchange (extend m ρ) P
+  exchange ρ (x ⟨ ys ⟩ P) = exchangeFin ρ x ⟨ map (exchangeFin ρ) ys ⟩ exchange ρ P
+
+  ----------------------------------------------------------
+  -- Simultaneous renaming
+
+  _[_↦_]-Fin : Fin l → n + m ≔ l → Vec (Fin n) m → Fin l
+  x [ ρ ↦ xs ]-Fin with invert ρ x
+  (x [ ρ ↦ xs ]-Fin) | inj₁ l = x
+  (x [ ρ ↦ xs ]-Fin) | inj₂ r = punchInFin ρ (Vec.lookup xs r)
+
+  _[_↦_] : Scoped l → n + m ≔ l → Vec (Fin n) m → Scoped l
+  𝟘 [ ρ ↦ xs ] = 𝟘
+  ν P [ ρ ↦ xs ] = ν (P [ left ρ ↦ map suc xs ])
+  (P ∥ Q) [ ρ ↦ xs ] = (P [ ρ ↦ xs ]) ∥ (Q [ ρ ↦ xs ])
+  (x ⦅ m ⦆ P) [ ρ ↦ xs ] = (x [ ρ ↦ xs ]-Fin) ⦅ m ⦆ (P [ extend m ρ ↦ map (Fin.raise m) xs ])
+  (x ⟨ ys ⟩ P) [ ρ ↦ xs ] = (x [ ρ ↦ xs ]-Fin) ⟨ map (_[ ρ ↦ xs ]-Fin) ys ⟩ (P [ ρ ↦ xs ])
+
+  subst-IsLeftFin : {xs : Vec (Fin n) m} (ρ : n + m ≔ l) (x : Fin l)
+                  → IsLeftFin ρ (x [ ρ ↦ xs ]-Fin)
+  subst-IsLeftFin {xs = xs} ρ x with invert ρ x | inspect (invert ρ) x
+  subst-IsLeftFin {xs = xs} ρ x | inj₁ _ | [ eq ] rewrite eq = tt
+  subst-IsLeftFin {xs = xs} ρ x | inj₂ q | eq = punchInFin-IsLeftFin ρ (Vec.lookup xs q)
+
+  subst-IsLeft : {xs : Vec (Fin n) m} (ρ : n + m ≔ l) (P : Scoped l) → IsLeft ρ (P [ ρ ↦ xs ])
+  subst-IsLeft ρ 𝟘 = tt
+  subst-IsLeft ρ (ν P) = subst-IsLeft (left ρ) P
+  subst-IsLeft ρ (P ∥ Q) = (subst-IsLeft ρ P) , (subst-IsLeft ρ Q)
+  subst-IsLeft ρ (x ⦅ m ⦆ P) = subst-IsLeftFin ρ x , subst-IsLeft (extend m ρ) P
+  subst-IsLeft ρ (x ⟨ ys ⟩ P) = subst-IsLeftFin ρ x , Allₚ.map⁺ (All.universal (subst-IsLeftFin ρ ) ys) , subst-IsLeft ρ P
+
+  ----------------------------------------------------------
+  -- Structural Congruence
 
   infixl 10 _≈_
   data _≈_ : Scoped n → Scoped n → Set where
@@ -73,12 +174,12 @@ module PiCalculus.Semantics where
 
     comp-end : P ∥ 𝟘 ≈ P
 
-    scope-end : _≈_ {n} (ν 𝟘 ⦃ name ⦄) 𝟘
+    scope-end : _≈_ {n} (ν 𝟘 ⦃ nx ⦄) 𝟘
 
-    scope-ext : (u : Unused zero P)
-              → ν (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (ν Q) ⦃ name ⦄
+    scope-ext : (il : IsLeft (right +-identityʳ) P)
+              → ν (P ∥ Q) ⦃ nx ⦄ ≈ punchOut (right +-identityʳ) P il ∥ (ν Q) ⦃ nx ⦄
 
-    scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (exchange zero P) ⦃ namex ⦄) ⦃ namey ⦄
+    scope-scope-comm : ν (ν P ⦃ ny ⦄) ⦃ nx ⦄ ≈ ν (ν (exchange (right (right +-identityʳ)) P) ⦃ nx ⦄) ⦃ ny ⦄
 
   data RecTree : Set where
     zero : RecTree
@@ -89,7 +190,6 @@ module PiCalculus.Semantics where
     variable
       r p : RecTree
 
-  -- TODO: change names as per paper
   infixl 5 _≅⟨_⟩_
   data _≅⟨_⟩_ : Scoped n → RecTree → Scoped n → Set where
     stop_ : P ≈ Q → P ≅⟨ zero ⟩ Q
@@ -100,40 +200,13 @@ module PiCalculus.Semantics where
     cong-trans : P ≅⟨ r ⟩ Q → Q ≅⟨ p ⟩ R → P ≅⟨ two r p ⟩ R
 
     -- Congruent relation
-    ν-cong_      : P ≅⟨ r ⟩ P' → ν P ⦃ name ⦄      ≅⟨ one r ⟩ ν P' ⦃ name ⦄
+    ν-cong_      : P ≅⟨ r ⟩ P' → ν P ⦃ nx ⦄      ≅⟨ one r ⟩ ν P' ⦃ nx ⦄
     comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q             ≅⟨ one r ⟩ P' ∥ Q
-    input-cong_  : P ≅⟨ r ⟩ P' → (x ⦅⦆ P) ⦃ name ⦄ ≅⟨ one r ⟩ (x ⦅⦆ P') ⦃ name ⦄
-    output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P         ≅⟨ one r ⟩ x ⟨ y ⟩ P'
+    input-cong_  : P ≅⟨ r ⟩ P' → (x ⦅ n ⦆ P) ⦃ ns ⦄ ≅⟨ one r ⟩ (x ⦅ n ⦆ P') ⦃ ns ⦄
+    output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ ys ⟩ P         ≅⟨ one r ⟩ x ⟨ ys ⟩ P'
 
   _≅_ : Scoped n → Scoped n → Set
   P ≅ Q = ∃[ r ] (P ≅⟨ r ⟩ Q)
-
-  _[_↦_]' : Fin n → Fin n → Fin n → Fin n
-  x [ i ↦ j ]' with i Finₚ.≟ x
-  x [ i ↦ j ]' | true because _ = j
-  x [ i ↦ j ]' | false because _ = x
-
-  _[_↦_] : Scoped n → (i j : Fin n) → Scoped n
-  𝟘           [ i ↦ j ] = 𝟘
-  (ν P)       [ i ↦ j ] = ν (P [ suc i ↦ suc j ])
-  (P ∥ Q)     [ i ↦ j ] = (P [ i ↦ j ]) ∥ (Q [ i ↦ j ])
-  (x ⦅⦆ P)    [ i ↦ j ] = (x [ i ↦ j ]') ⦅⦆ (P [ suc i ↦ suc j ])
-  (x ⟨ y ⟩ P) [ i ↦ j ] = (x [ i ↦ j ]') ⟨ y [ i ↦ j ]' ⟩ (P [ i ↦ j ])
-
-  renameFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
-  renameFin-unused {i = i} x i≢j  with i Finₚ.≟ x
-  renameFin-unused {i = i} x i≢j | true because _ = i≢j
-  renameFin-unused {i = i} x i≢j | false because ofⁿ ¬p = ¬p
-
-  rename-unused : {i j : Fin (suc n)}
-               → i ≢ j
-               → (P : Scoped (suc n))
-               → Unused i (P [ i ↦ j ])
-  rename-unused i≢j 𝟘 = tt
-  rename-unused i≢j (ν P) = rename-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  rename-unused i≢j (P ∥ Q) = rename-unused i≢j P , rename-unused i≢j Q
-  rename-unused i≢j (x ⦅⦆ P) = renameFin-unused x i≢j , rename-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  rename-unused i≢j (x ⟨ y ⟩ P) = renameFin-unused x i≢j , renameFin-unused y i≢j , rename-unused i≢j P
 
   data Channel : ℕ → Set where
     internal : ∀ {n}         → Channel n
@@ -148,20 +221,29 @@ module PiCalculus.Semantics where
   maybe b f internal = b
   maybe b f (external x) = f x
 
+  ----------------------------------------------------------
+  -- Reduction
+
   infixl 5 _=[_]⇒_
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
 
-    comm : {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
-         → let uP' = rename-unused (λ ()) P
-         in ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
+    comm : {P : Scoped (m ℕ.+ n)} {Q : Scoped n} {x : Fin n} {ys : Vec (Fin n) m} →
+         let
+           m+n = right-first n m
+           gr = subst-IsLeft m+n P
+           P' = punchOut m+n (P [ m+n ↦ ys ]) gr
+         in
+         (x ⦅ m ⦆ P) ⦃ ns ⦄ ∥ (x ⟨ ys ⟩ Q)
+           =[ external x ]⇒
+         P' ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'
          → P ∥ Q =[ c ]⇒ P' ∥ Q
 
-    res_ : ∀ {c} {P Q : Scoped (1 + n)}
+    res_ : ∀ {c} {P Q : Scoped (1 ℕ.+ n)}
          → P =[ c ]⇒ Q
-         → ν P ⦃ name ⦄ =[ dec c ]⇒ ν Q ⦃ name ⦄
+         → ν P ⦃ nx ⦄ =[ dec c ]⇒ ν Q ⦃ nx ⦄
 
     struct : ∀ {c} {P Q P' : Scoped n}
            → P ≅⟨ r ⟩ P'

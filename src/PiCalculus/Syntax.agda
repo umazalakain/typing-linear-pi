@@ -1,11 +1,21 @@
 {-# OPTIONS --safe --without-K #-}
 
+open import Relation.Binary.PropositionalEquality using (subst)
+
+open import Data.Vec.Base as Vec using (Vec; []; _∷_; map; lookup; _++_; sum; length)
 open import Data.String.Base using (String)
+open import Data.Nat.Base using (ℕ; zero; suc; _+_)
+open import Data.Fin.Base using (Fin; zero; suc)
+import Data.Nat.Properties as ℕₚ
 
 module PiCalculus.Syntax where
 
 Name : Set
 Name = String
+
+private
+  variable
+    n m : ℕ
 
 module Raw where
   infixr 20 _∥_
@@ -16,28 +26,22 @@ module Raw where
     𝟘     : Raw
     ⦅ν_⦆_ : Name → Raw → Raw
     _∥_   : Raw → Raw → Raw
-    _⦅_⦆_ : Name → Name → Raw → Raw
-    _⟨_⟩_ : Name → Name → Raw → Raw
+    _⦅_⦆_ : Name → Vec Name n → Raw → Raw
+    _⟨_⟩_ : Name → Vec Name n → Raw → Raw
 
 
 module Scoped where
-  open import Data.Fin.Base
-  open import Data.Nat.Base
 
   infixr 20 _∥_
   infixr 15 ν
-  infixr 10 _⦅⦆_ _⟨_⟩_
-
-  private
-    variable
-      n : ℕ
+  infixr 10 _⦅_⦆_ _⟨_⟩_
 
   data Scoped : ℕ → Set where
     𝟘     : Scoped n
-    ν : Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
+    ν     : Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
     _∥_   : Scoped n → Scoped n → Scoped n
-    _⦅⦆_ : Fin n → Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
-    _⟨_⟩_ : Fin n → Fin n → Scoped n → Scoped n
+    _⦅_⦆_ : Fin n → (m : ℕ) → Scoped (m + n) → ⦃ names : Vec Name m ⦄ → Scoped n
+    _⟨_⟩_ : Fin n → Vec (Fin n) m → Scoped n → Scoped n
 
 module Conversion where
   private
@@ -46,12 +50,11 @@ module Conversion where
 
     open import Level using (Lift; _⊔_)
     open import Function using (_∘_)
-    open import Relation.Nullary using (Dec; yes; no)
+    open import Relation.Nullary using (¬_; Dec; yes; no)
     open import Relation.Nullary.Decidable using (isYes; True; toWitness)
     open import Relation.Nullary.Product using (_×-dec_)
     open import Relation.Nullary.Negation using (¬?)
 
-    import Data.Vec.Base as Vec
     import Data.Char.Base as Char
     import Data.List.Base as List
     import Data.String.Base as String
@@ -62,28 +65,25 @@ module Conversion where
     open import Data.Bool.Base using (true; false; if_then_else_)
     open import Data.Product using (_,_; _×_)
     open import Data.Unit using (⊤; tt)
-    open import Data.Nat.Base using (ℕ; zero; suc)
-    open import Data.Fin.Base using (Fin; zero; suc)
-    open import Data.String.Base using (_++_)
     open import Data.Vec.Membership.Propositional using (_∈_; _∉_)
-    open import Data.Vec.Relation.Unary.Any using (here; there)
+    open import Data.Vec.Relation.Unary.Any as Any using (here; there)
+    open import Data.Vec.Relation.Unary.All as All using (All; []; _∷_)
 
-    open Vec using (Vec; []; _∷_)
     open List using (List; []; _∷_)
-
-    _∈?_ = DecPropositional._∈?_ Stringₚ._≟_
 
     import PiCalculus.Utils
     module ℕₛ = PiCalculus.Utils.ℕₛ
+    open PiCalculus.Utils.All2Vec
 
-    variable
-      n m : ℕ
+    _∈?_ = DecPropositional._∈?_ Stringₚ._≟_
 
   Ctx : ℕ → Set
   Ctx = Vec Name
 
   count : Name → Ctx n → ℕ
-  count name = Vec.sum ∘ Vec.map ((if_then 1 else 0) ∘ isYes ∘ (Stringₚ._≟ name))
+  count name = sum ∘ map ((if_then 1 else 0) ∘ isYes ∘ (Stringₚ._≟ name))
+  -- TODO: rewrite to the following and make proofs work
+  -- count name = Vec.count (Stringₚ._≟ name)
 
   toCharList : Name × ℕ → List Char.Char
   toCharList (x , i) = String.toList x List.++ ('^' ∷ ℕₛ.toDigitChars 10 i)
@@ -94,6 +94,10 @@ module Conversion where
   repr : ∀ x (xs : Vec Name n) → Name
   repr x xs = toString (x , (count x xs))
 
+  apply-++ : ∀ (xs : Vec Name n) (ys : Vec Name m) → Vec Name n
+  apply-++ [] ys = []
+  apply-++ (x ∷ xs) ys = repr x (xs ++ ys) ∷ apply-++ xs ys
+
   apply : Ctx n → Ctx n
   apply [] = []
   apply (x ∷ xs) = repr x xs ∷ apply xs
@@ -102,33 +106,29 @@ module Conversion where
   WellScoped ctx 𝟘 = ⊤
   WellScoped ctx (⦅ν x ⦆ P) = WellScoped (x ∷ ctx) P
   WellScoped ctx (P ∥ Q) = WellScoped ctx P × WellScoped ctx Q
-  WellScoped ctx (x ⦅ y ⦆ P) = (x ∈ ctx) × WellScoped (y ∷ ctx) P
-  WellScoped ctx (x ⟨ y ⟩ P) = (x ∈ ctx) × (y ∈ ctx) × WellScoped ctx P
+  WellScoped ctx (x ⦅ ys ⦆ P) = (x ∈ ctx) × WellScoped (ys ++ ctx) P
+  WellScoped ctx (x ⟨ ys ⟩ P) = (x ∈ ctx) × All (_∈ ctx) ys × WellScoped ctx P
 
   WellScoped? : (ctx : Ctx n) (P : Raw) → Dec (WellScoped ctx P)
   WellScoped? ctx 𝟘 = yes tt
   WellScoped? ctx (⦅ν x ⦆ P) = WellScoped? (x ∷ ctx) P
   WellScoped? ctx (P ∥ Q) = WellScoped? ctx P ×-dec WellScoped? ctx Q
-  WellScoped? ctx (x ⦅ y ⦆ P) = x ∈? ctx ×-dec WellScoped? (y ∷ ctx) P
-  WellScoped? ctx (x ⟨ y ⟩ P) = x ∈? ctx ×-dec y ∈? ctx ×-dec WellScoped? ctx P
+  WellScoped? ctx (x ⦅ ys ⦆ P) = x ∈? ctx ×-dec WellScoped? (ys ++ ctx) P
+  WellScoped? ctx (x ⟨ ys ⟩ P) = x ∈? ctx ×-dec All.all (_∈? ctx) ys ×-dec WellScoped? ctx P
 
   NotShadowed : Ctx n → Raw → Set
   NotShadowed ctx 𝟘 = ⊤
   NotShadowed ctx (⦅ν name ⦆ P) = name ∉ ctx × NotShadowed (name ∷ ctx) P
   NotShadowed ctx (P ∥ Q) = NotShadowed ctx P × NotShadowed ctx Q
-  NotShadowed ctx (x ⦅ y ⦆ P) = y ∉ ctx × NotShadowed (y ∷ ctx) P
-  NotShadowed ctx (x ⟨ y ⟩ P) = NotShadowed ctx P
+  NotShadowed ctx (x ⦅ ys ⦆ P) = All (_∉ ctx) ys × NotShadowed (ys ++ ctx) P
+  NotShadowed ctx (x ⟨ ys ⟩ P) = NotShadowed ctx P
 
   NotShadowed? : (ctx : Ctx n) (P : Raw) → Dec (NotShadowed ctx P)
   NotShadowed? ctx 𝟘 = yes tt
   NotShadowed? ctx (⦅ν name ⦆ P) = ¬? (name ∈? ctx) ×-dec NotShadowed? (name ∷ ctx) P
   NotShadowed? ctx (P ∥ Q) = NotShadowed? ctx P ×-dec NotShadowed? ctx Q
-  NotShadowed? ctx (x ⦅ y ⦆ P) = ¬? (y ∈? ctx) ×-dec NotShadowed? (y ∷ ctx) P
-  NotShadowed? ctx (x ⟨ y ⟩ P) = NotShadowed? ctx P
-
-  ∈toFin : ∀ {a} {A : Set a} {x} {xs : Vec A n} → x ∈ xs → Fin n
-  ∈toFin (here px) = zero
-  ∈toFin (there x∈xs) = suc (∈toFin x∈xs)
+  NotShadowed? ctx (x ⦅ ys ⦆ P) = All.all (¬? ∘ _∈? ctx) ys ×-dec NotShadowed? (ys ++ ctx) P
+  NotShadowed? ctx (x ⟨ ys ⟩ P) = NotShadowed? ctx P
 
   fromRaw' : (ctx : Ctx n) (P : Raw) → WellScoped ctx P → Scoped n
   fromRaw' ctx 𝟘 tt = 𝟘
@@ -136,10 +136,10 @@ module Conversion where
     ν (fromRaw' (x ∷ ctx) P wsP) ⦃ x ⦄
   fromRaw' ctx (P ∥ Q) (wsP , wsQ) =
     fromRaw' ctx P wsP ∥ fromRaw' ctx Q wsQ
-  fromRaw' ctx (x ⦅ y ⦆ P) (x∈ctx , wsP) =
-    (∈toFin x∈ctx ⦅⦆ fromRaw' (y ∷ ctx) P wsP) ⦃ y ⦄
-  fromRaw' ctx (x ⟨ y ⟩ P) (x∈ctx , y∈ctx , wsP) =
-    ∈toFin x∈ctx ⟨ ∈toFin y∈ctx ⟩ fromRaw' ctx P wsP
+  fromRaw' {n = n} ctx (x ⦅ ys ⦆ P) (x∈ctx , wsP) =
+    (Any.index x∈ctx ⦅ length ys ⦆ fromRaw' (ys ++ ctx) P wsP) ⦃ ys ⦄
+  fromRaw' ctx (x ⟨ ys ⟩ P) (x∈ctx , ys∈ctx , wsP) =
+    Any.index x∈ctx ⟨  all2vec Any.index ys∈ctx  ⟩ fromRaw' ctx P wsP
 
   fromRaw : (ctx : Ctx n) (P : Raw) → ⦃ _ : True (WellScoped? ctx P) ⦄ → Scoped n
   fromRaw ctx P ⦃ p ⦄ = fromRaw' ctx P (toWitness p)
@@ -150,19 +150,20 @@ module Conversion where
     ⦅ν repr name ctx ⦆ toRaw (name ∷ ctx) P
   toRaw ctx (P ∥ Q) =
     toRaw ctx P ∥ toRaw ctx Q
-  toRaw ctx ((x ⦅⦆ P) ⦃ name ⦄) =
+  toRaw {n = n} ctx ((x ⦅ m ⦆ P) ⦃ names ⦄)
+    rewrite ℕₚ.+-comm n m =
     let ctx' = apply ctx
-    in Vec.lookup ctx' x ⦅ repr name ctx ⦆ toRaw (name ∷ ctx) P
-  toRaw ctx (x ⟨ y ⟩ P) =
+    in lookup ctx' x ⦅ apply-++ names ctx ⦆ toRaw (names ++ ctx) P
+  toRaw ctx (x ⟨ ys ⟩ P) =
     let ctx' = apply ctx
-    in Vec.lookup ctx' x ⟨ Vec.lookup ctx' y ⟩ toRaw ctx P
+    in lookup ctx' x ⟨ map (lookup ctx') ys ⟩ toRaw ctx P
 
-  map : ∀ {a} (B : Scoped n → Set a) (ctx : Vec Name n) (P : Raw) → Set a
-  map B ctx P with WellScoped? ctx P
-  map B ctx P | yes wsP = B (fromRaw' ctx P wsP)
-  map B ctx P | no _ = Lift _ ⊥
+  fmap : ∀ {a} (B : Scoped n → Set a) (ctx : Vec Name n) (P : Raw) → Set a
+  fmap B ctx P with WellScoped? ctx P
+  fmap B ctx P | yes wsP = B (fromRaw' ctx P wsP)
+  fmap B ctx P | no _ = Lift _ ⊥
 
-  map₂ : ∀ {a} (B : Scoped n → Scoped n → Set a) (ctx : Vec Name n) (P Q : Raw) → Set a
-  map₂ B ctx P Q with WellScoped? ctx P | WellScoped? ctx Q
-  map₂ B ctx P Q | yes wsP | yes wsQ = B (fromRaw' ctx P wsP) (fromRaw' ctx Q wsQ)
-  map₂ B ctx P Q | _       | _       = Lift _ ⊥
+  fmap₂ : ∀ {a} (B : Scoped n → Scoped n → Set a) (ctx : Vec Name n) (P Q : Raw) → Set a
+  fmap₂ B ctx P Q with WellScoped? ctx P | WellScoped? ctx Q
+  fmap₂ B ctx P Q | yes wsP | yes wsQ = B (fromRaw' ctx P wsP) (fromRaw' ctx Q wsQ)
+  fmap₂ B ctx P Q | _       | _       = Lift _ ⊥

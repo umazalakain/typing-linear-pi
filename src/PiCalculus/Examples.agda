@@ -26,33 +26,34 @@ variable
   n : ℕ
 
 raw : Raw
-raw = ⦅ν "x"⦆ (("x" ⦅ "y" ⦆ 𝟘) ∥ ("x" ⟨ "a" ⟩ 𝟘))
+raw = ⦅ν "x"⦆ (("x" ⦅ "y" ∷ [] ⦆ 𝟘) ∥ ("x" ⟨ "a" ∷ [] ⟩ 𝟘))
 
 scoped : Scoped 1
-scoped = ν (((#' 0) ⦅⦆ 𝟘) ⦃ "y" ⦄ ∥ ((#' 0) ⟨ #' 1 ⟩ 𝟘)) ⦃ "x" ⦄
+scoped = ν (((#' 0) ⦅ 1 ⦆ 𝟘) ⦃ "y" ∷ [] ⦄ ∥ ((#' 0) ⟨ #' 1 ∷ [] ⟩ 𝟘)) ⦃ "x" ⦄
 
 _ : Conversion.fromRaw ("a" ∷ []) raw ≡ scoped
 _ = refl
 
+
 channel-over-channel₀ : Raw
 channel-over-channel₀ = ⦅ν "x"⦆
-                        ( ("x" ⦅ "r" ⦆ "r" ⦅ "p" ⦆ 𝟘)
-                        ∥ (⦅ν "z"⦆ ("x" ⟨ "z" ⟩ "z" ⟨ "y" ⟩ 𝟘)))
+                        ( ("x" ⦅ "r" ∷ [] ⦆ "r" ⦅ "p" ∷ [] ⦆ 𝟘)
+                        ∥ (⦅ν "z"⦆ ("x" ⟨ "z" ∷ [] ⟩ "z" ⟨ "y" ∷ [] ⟩ 𝟘)))
 
 channel-over-channel₁ : Raw
 channel-over-channel₁ = ⦅ν "x"⦆ ⦅ν "z"⦆
-                        ( ("x" ⦅ "r" ⦆ "r" ⦅ "p" ⦆ 𝟘)
-                        ∥ ("x" ⟨ "z" ⟩ "z" ⟨ "y" ⟩ 𝟘))
+                        ( ("x" ⦅ "r" ∷ [] ⦆ "r" ⦅ "p" ∷ [] ⦆ 𝟘)
+                        ∥ ("x" ⟨ "z" ∷ [] ⟩ "z" ⟨ "y" ∷ [] ⟩ 𝟘))
 
 channel-over-channel₂ : Raw
 channel-over-channel₂ = ⦅ν "z"⦆ ⦅ν "x"⦆
-                        ( ("x" ⦅ "r" ⦆ "r" ⦅ "p" ⦆ 𝟘)
-                        ∥ ("x" ⟨ "z" ⟩ "z" ⟨ "y" ⟩ 𝟘))
+                        ( ("x" ⦅ "r" ∷ [] ⦆ "r" ⦅ "p" ∷ [] ⦆ 𝟘)
+                        ∥ ("x" ⟨ "z" ∷ [] ⟩ "z" ⟨ "y" ∷ [] ⟩ 𝟘))
 
 channel-over-channel₃ : Raw
 channel-over-channel₃ = ⦅ν "z"⦆ ⦅ν "x"⦆
-                        ( ("z" ⦅ "p" ⦆ 𝟘)
-                        ∥ ("z" ⟨ "y" ⟩ 𝟘))
+                        ( ("z" ⦅ "p" ∷ [] ⦆ 𝟘)
+                        ∥ ("z" ⟨ "y" ∷ [] ⟩ 𝟘))
 
 channel-over-channel₄ : Raw
 channel-over-channel₄ = ⦅ν "z"⦆ ⦅ν "x"⦆
@@ -68,13 +69,13 @@ channel-over-channel₇ : Raw
 channel-over-channel₇ = 𝟘
 
 _!_≅_ : ∀ {n} → Vec Name n → Raw → Raw → Set
-_!_≅_ = Conversion.map₂ _≅_
+_!_≅_ = Conversion.fmap₂ _≅_
 
 _!_⇒_ : ∀ {n} → Vec Name n → Raw → Raw → Set
-_!_⇒_ = Conversion.map₂ _⇒_
+_!_⇒_ = Conversion.fmap₂ _⇒_
 
 _ : ("y" ∷ []) ! channel-over-channel₀ ≅ channel-over-channel₁
-_ = _ , ν-cong cong-symm stop scope-ext ((λ ()) , (λ ()) , tt)
+_ = _ , ν-cong cong-symm stop scope-ext (tt , tt , tt)
 
 _ : ("y" ∷ []) ! channel-over-channel₁ ≅ channel-over-channel₂
 _ = _ , stop scope-scope-comm
@@ -94,7 +95,7 @@ _ = _ , ν-cong stop scope-end
 _ : ("y" ∷ []) ! channel-over-channel₆ ≅ channel-over-channel₇
 _ = _ , stop scope-end
 
-
+{-
 module Shared-Graded-Linear where
   data Usage : Set where
     sha gra lin : Usage
@@ -176,3 +177,4 @@ module Linear where
 
   _ : [] -, C[ 𝟙 ； ℓᵢ ] -, 𝟙 ； [] -, ℓ# -, ℓ# ∋[ #' 1 ] C[ 𝟙 ； ℓᵢ ] ； ℓᵢ ▹ [] -, ℓₒ -, ℓ#
   _ = there here
+-}
