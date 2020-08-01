@@ -89,7 +89,7 @@ module PiCalculus.Semantics where
   punchOut ρ (P ∥ Q) (ilP , ilQ) = punchOut ρ P ilP ∥ punchOut ρ Q ilQ
   punchOut ρ (x ⦅ m ⦆ P) (ilx , ilP) = punchOutFin ρ x ilx ⦅ m ⦆ punchOut (extend m ρ) P ilP
   punchOut ρ (x ⟨ ys ⟩ P) (ilx , ilys , ilP) =
-    punchOutFin ρ x ilx ⟨ all2vec (punchOutFin ρ _) ilys ⟩ punchOut ρ P ilP
+    punchOutFin ρ x ilx ⟨ all2vec (λ {x} → punchOutFin ρ x) ilys ⟩ punchOut ρ P ilP
 
   ----------------------------------------------------------
   -- Punch In (lifting, weakening)
@@ -106,27 +106,24 @@ module PiCalculus.Semantics where
   punchIn ρ (x ⦅ m ⦆ P) = punchInFin ρ x ⦅ m ⦆ punchIn (extend m ρ) P
   punchIn ρ (x ⟨ ys ⟩ P) = punchInFin ρ x ⟨ map (punchInFin ρ) ys ⟩ punchIn ρ P
 
-  left-IsLeftFin : (ρ : n + m ≔ l) → IsLeftFin ρ x → IsLeftFin (left ρ) (suc x)
-  left-IsLeftFin {x = x} ρ il with invert ρ x
-  left-IsLeftFin {x = x} ρ il | inj₁ _ = tt
-
-  right-IsLeftFin : (ρ : n + m ≔ l) → IsLeftFin ρ x → IsLeftFin (right ρ) (suc x)
-  right-IsLeftFin {x = x} ρ il with invert ρ x
-  right-IsLeftFin {x = x} ρ il | inj₁ _ = tt
-
   punchInFin-IsLeftFin : (ρ : n + m ≔ l) (x : Fin n) → IsLeftFin ρ (punchInFin ρ x)
   punchInFin-IsLeftFin (left ρ) zero = tt
-  punchInFin-IsLeftFin (left ρ) (suc x) = left-IsLeftFin ρ (punchInFin-IsLeftFin ρ x)
-  punchInFin-IsLeftFin (right ρ) x = right-IsLeftFin ρ (punchInFin-IsLeftFin ρ x)
+  punchInFin-IsLeftFin (left ρ) (suc x) with invert ρ (punchInFin ρ x) | punchInFin-IsLeftFin ρ x
+  punchInFin-IsLeftFin (left ρ) (suc x) | inj₁ _ | _ = tt
+  punchInFin-IsLeftFin (right ρ) x with invert ρ (punchInFin ρ x) | punchInFin-IsLeftFin ρ x
+  punchInFin-IsLeftFin (right ρ) x | inj₁ _ | _ = tt
 
   ----------------------------------------------------------
   -- Exchange
 
+  neg : Fin 2 → Fin 2
+  neg zero = suc zero
+  neg (suc zero) = zero
+
   exchangeFin : m + 2 ≔ l → Fin l → Fin l
   exchangeFin ρ x with invert ρ x
-  exchangeFin ρ x | inj₁ r = x
-  exchangeFin ρ x | inj₂ zero = punchInFin (+-comm ρ) (suc zero)
-  exchangeFin ρ x | inj₂ (suc zero) = punchInFin (+-comm ρ) zero
+  exchangeFin ρ x | inj₁ _ = x
+  exchangeFin ρ x | inj₂ r = punchInFin (+-comm ρ) (neg r)
 
   exchange : n + 2 ≔ l → Scoped l → Scoped l
   exchange ρ 𝟘 = 𝟘

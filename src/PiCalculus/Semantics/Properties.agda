@@ -1,113 +1,160 @@
 {-# OPTIONS --safe #-} -- --without-K #-}
 
-open import Function using (_∘_)
+open import Function using (_∘_; id)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong; cong₂; inspect; [_])
+open import Relation.Nullary.Negation using (contradiction)
+
 open import Data.Empty using (⊥-elim)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong; cong₂)
-open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Data.Product using (Σ-syntax; _,_)
 open import Data.Unit using (tt)
 open import Relation.Nullary using (yes; no)
-
-import Data.Nat as ℕ
+open import Data.Nat.Base as ℕ using (ℕ; zero; suc)
+open import Data.Fin.Base as Fin using (Fin; zero; suc)
+open import Data.Sum.Base as Sum using (_⊎_; inj₁; inj₂)
+open import Data.Vec.Base as Vec using (Vec; []; _∷_)
+open import Data.Vec.Relation.Unary.All as All using (All; []; _∷_)
+import Data.Sum.Properties as Sumₚ
+import Data.Vec.Properties as Vecₚ
 import Data.Nat.Properties as ℕₚ
-import Data.Fin as Fin
 import Data.Fin.Properties as Finₚ
+import Data.Vec.Relation.Unary.All.Properties as Allₚ
+import Data.Vec.Relation.Binary.Equality.Propositional as ≋
+import Data.Vec.Functional.Relation.Binary.Pointwise
 
-open ℕ using (ℕ; zero; suc)
-open Fin using (Fin; zero; suc)
 
 open import PiCalculus.Syntax
 open Scoped
 open import PiCalculus.Semantics
+import PiCalculus.Utils
+open PiCalculus.Utils.Sum
+open PiCalculus.Utils.All2Vec
 
 module PiCalculus.Semantics.Properties where
 private
   variable
-    n : ℕ
+    n m l : ℕ
     i j : Fin n
     P : Scoped n
 
-lift-lower : (i : Fin (suc n)) (P : Scoped (suc n)) (uP : Unused i P)
-           → lift i (lower i P uP) ≡ P
-lift-lower i 𝟘 uP = refl
-lift-lower i (ν P) uP
-  rewrite lift-lower (suc i) P uP = refl
-lift-lower i (P ∥ Q) (uP , uQ)
-  rewrite lift-lower i P uP
-  | lift-lower i Q uQ = refl
-lift-lower i (x ⦅⦆ P) (i≢x , uP)
-  rewrite lift-lower (suc i) P uP
-  | Finₚ.punchIn-punchOut i≢x = refl
-lift-lower i (x ⟨ y ⟩ P) (i≢x , i≢y , uP)
-  rewrite lift-lower i P uP
-  | Finₚ.punchIn-punchOut i≢x
-  | Finₚ.punchIn-punchOut i≢y = refl
+punchInFin∘invert : ∀ x {y} (ρ : n + m ≔ l) → invert ρ x ≡ inj₁ y → punchInFin ρ y ≡ x
+punchInFin∘invert zero (left ρ) refl = refl
+punchInFin∘invert (suc x) (left ρ) eq with invert ρ x | inspect (invert ρ) x
+punchInFin∘invert (suc x) (left ρ) refl | inj₁ _ | [ eq ] = cong suc (punchInFin∘invert x ρ eq)
+punchInFin∘invert (suc x) (right ρ) eq with invert ρ x | inspect (invert ρ) x
+punchInFin∘invert (suc x) (right ρ) refl | inj₁ _ | [ qe ] = cong suc (punchInFin∘invert x ρ qe)
 
-renameFin-suc : (i j x : Fin n) → (suc x) [ suc i ↦ suc j ]' ≡ suc (x [ i ↦ j ]')
-renameFin-suc i j x with i Finₚ.≟ x
-renameFin-suc i j x | yes p = refl
-renameFin-suc i j x | no ¬p = refl
+invert∘punchInFin : ∀ (ρ : n + m ≔ l) i → invert ρ (punchInFin (+-comm ρ) i) ≡ inj₂ i
+invert∘punchInFin (left ρ) i rewrite invert∘punchInFin ρ i = refl
+invert∘punchInFin (right ρ) zero = refl
+invert∘punchInFin (right ρ) (suc i) rewrite invert∘punchInFin ρ i = refl
 
-exchangeFin-suc : (i : Fin n) (x : Fin (suc n)) → suc (exchangeFin i x) ≡ exchangeFin (suc i) (suc x)
-exchangeFin-suc i x with Fin.inject₁ i Finₚ.≟ x
-exchangeFin-suc i .(Fin.inject₁ i) | yes refl = cong suc (cong suc (Finₚ.lower₁-irrelevant _ _ _))
-exchangeFin-suc i x | no ¬p with (suc i) Fin.≟ x
-exchangeFin-suc i x | no ¬p | yes q = refl
-exchangeFin-suc i x | no ¬p | no ¬q = refl
+------------------------------------------------------------
+-- punchIn and punchOut are inverses
 
-exchangeFin-injectˡ : (i : Fin n) → exchangeFin i (Fin.inject₁ i) ≡ suc i
-exchangeFin-injectˡ zero = refl
-exchangeFin-injectˡ (suc i) rewrite sym (exchangeFin-suc i (Fin.inject₁ i)) = cong suc (exchangeFin-injectˡ i)
+punchInFin∘punchOutFin : (ρ : n + m ≔ l) (x : Fin l) (ilx : IsLeftFin ρ x)
+                       → punchInFin ρ (punchOutFin ρ x ilx) ≡ x
+punchInFin∘punchOutFin (left ρ) zero ilx = refl
+punchInFin∘punchOutFin (left ρ) (suc x) ilx with invert ρ x | inspect (invert ρ) x
+punchInFin∘punchOutFin (left ρ) (suc x) ilx | inj₁ _ | [ eq ] = cong suc (punchInFin∘invert _ ρ eq)
+punchInFin∘punchOutFin (right ρ) (suc x) ilx with invert ρ x | inspect (invert ρ) x
+punchInFin∘punchOutFin (right ρ) (suc x) ilx | inj₁ _ | [ eq ] = cong suc (punchInFin∘invert _ ρ eq)
 
-exchangeFin-injectʳ : (i : Fin n) → exchangeFin i (suc i) ≡ Fin.inject₁ i
-exchangeFin-injectʳ zero = refl
-exchangeFin-injectʳ (suc i) rewrite sym (exchangeFin-suc i (suc i)) = cong suc (exchangeFin-injectʳ i)
 
-exchangeFin-neq : (i j : Fin n) → i ≢ j → Fin.inject₁ i ≢ suc j → exchangeFin i (suc j) ≡ suc j
-exchangeFin-neq zero zero i≢j ii≢sj = ⊥-elim (i≢j refl)
-exchangeFin-neq zero (suc zero) i≢j ii≢sj = refl
-exchangeFin-neq zero (suc (suc j)) i≢j ii≢sj = refl
-exchangeFin-neq (suc zero) zero i≢j ii≢sj = ⊥-elim (ii≢sj refl)
-exchangeFin-neq (suc (suc i)) zero i≢j ii≢sj = refl
-exchangeFin-neq (suc i) (suc j) i≢j ii≢sj
-  rewrite sym (exchangeFin-suc i (suc j))
-  = cong suc (exchangeFin-neq i j (i≢j ∘ cong suc) (ii≢sj ∘ cong suc))
+punchIn∘punchOut : (ρ : n + m ≔ l) (P : Scoped l) (ilP : IsLeft ρ P)
+                 → punchIn ρ (punchOut ρ P ilP) ≡ P
+punchIn∘punchOut ρ 𝟘 ilP = refl
+punchIn∘punchOut ρ (ν P) ilP =
+  cong (λ ● → ν ●) (punchIn∘punchOut (left ρ) P ilP)
+punchIn∘punchOut ρ (P ∥ Q) (ilP , ilQ) =
+  cong₂ _∥_ (punchIn∘punchOut ρ P ilP) (punchIn∘punchOut ρ Q ilQ)
+punchIn∘punchOut ρ (x ⦅ m ⦆ P) (ilx , ilP) =
+  cong₂ _⦅ m ⦆_ (punchInFin∘punchOutFin ρ x ilx) (punchIn∘punchOut (extend m ρ) P ilP)
+punchIn∘punchOut ρ (x ⟨ ys ⟩ P) (ilx , ilys , ilP)
+  rewrite punchIn∘punchOut ρ P ilP
+  = cong₂ (_⟨_⟩ _) (punchInFin∘punchOutFin ρ x ilx) (helper ρ ilys)
+  where
+  helper : ∀ {k} (ρ : n + m ≔ l) {ys : Vec (Fin l) k} (ilys : All (IsInj₁ ∘ invert ρ) ys)
+      → Vec.map (punchInFin ρ) (all2vec (λ {●} → punchOutFin ρ ●) ilys) ≡ ys
+  helper ρ [] = refl
+  helper ρ (px ∷ pxs) = cong₂ _∷_ (punchInFin∘punchOutFin ρ _ px) (helper ρ pxs)
 
-exchangeFin-exchangeFin : ∀ (i : Fin n) (x : Fin (suc n)) → exchangeFin i (exchangeFin i x) ≡ x
-exchangeFin-exchangeFin i x with Fin.inject₁ i Fin.≟ x
-exchangeFin-exchangeFin i x | yes p with Fin.inject₁ i Finₚ.≟ (suc (Fin.lower₁ x (notMax i x p)))
-exchangeFin-exchangeFin i .(Fin.inject₁ i) | yes refl | yes q = ⊥-elim (ℕₚ.1+n≢n (begin
-  suc (Fin.toℕ i)                              ≡˘⟨ cong (suc ∘ Fin.toℕ) (Finₚ.lower₁-inject₁ i) ⟩
-  suc (Fin.toℕ (Fin.lower₁ (Fin.inject₁ i) _)) ≡⟨ cong (suc ∘ Fin.toℕ) (Finₚ.lower₁-irrelevant _ _ _) ⟩
-  suc (Fin.toℕ (Fin.lower₁ (Fin.inject₁ i) _)) ≡˘⟨ cong Fin.toℕ q ⟩
-  Fin.toℕ (Fin.inject₁ i)                      ≡⟨ Finₚ.toℕ-inject₁ i ⟩
-  Fin.toℕ i                                    ∎
-  ))
-exchangeFin-exchangeFin i x | yes p | no ¬q with i Finₚ.≟ Fin.lower₁ x (notMax i x p)
-exchangeFin-exchangeFin i x | yes p | no ¬q | yes r = p
-exchangeFin-exchangeFin i x | yes refl | no ¬q | no ¬r = ⊥-elim (¬r (begin
-  i                            ≡˘⟨ Finₚ.lower₁-inject₁ i ⟩
-  Fin.lower₁ (Fin.inject₁ i) _ ≡⟨ Finₚ.lower₁-irrelevant _ _ _ ⟩
-  Fin.lower₁ (Fin.inject₁ i) _ ∎))
-exchangeFin-exchangeFin i x | no ¬p with (suc i) Fin.≟ x
-exchangeFin-exchangeFin i x | no ¬p | yes q with Fin.inject₁ i Fin.≟ Fin.inject₁ i
-exchangeFin-exchangeFin i x | no ¬p | yes refl | yes refl = begin
-  suc (Fin.lower₁ (Fin.inject₁ i) _)
-    ≡⟨ cong suc (Finₚ.lower₁-irrelevant _ _ _) ⟩
-  suc (Fin.lower₁ (Fin.inject₁ i) _)
-    ≡⟨ cong suc (Finₚ.lower₁-inject₁ i) ⟩
-  suc i
-    ∎
-exchangeFin-exchangeFin i x | no ¬p | yes q | no ¬r = ⊥-elim (¬r refl)
-exchangeFin-exchangeFin i x | no ¬p | no ¬q with Fin.inject₁ i Fin.≟ x
-exchangeFin-exchangeFin i x | no ¬p | no ¬q | yes r = ⊥-elim (¬p r)
-exchangeFin-exchangeFin i x | no ¬p | no ¬q | no ¬r with (suc i) Fin.≟ x
-exchangeFin-exchangeFin i x | no ¬p | no ¬q | no ¬r | yes s = ⊥-elim (¬q s)
-exchangeFin-exchangeFin i x | no ¬p | no ¬q | no ¬r | no ¬s = refl
+------------------------------------------------------------
+-- Substituting by an empty set of variables
 
-exchange-exchange : ∀ (i : Fin n) (P : Scoped (suc n)) → exchange i (exchange i P) ≡ P
-exchange-exchange i 𝟘 = refl
-exchange-exchange i (ν P) rewrite exchange-exchange (suc i) P = refl
-exchange-exchange i (P ∥ Q) rewrite exchange-exchange i P | exchange-exchange i Q = refl
-exchange-exchange i (x ⦅⦆ P) rewrite exchangeFin-exchangeFin i x | exchange-exchange (suc i) P = refl
-exchange-exchange i (x ⟨ y ⟩ P) rewrite exchangeFin-exchangeFin i x | exchangeFin-exchangeFin i y | exchange-exchange i P = refl
+substFin-id : (ρ : n + zero ≔ l) (x : Fin l) → x [ ρ ↦ [] ]-Fin ≡ x
+substFin-id ρ x with invert ρ x
+substFin-id ρ x | inj₁ _ = refl
+
+subst-id : (ρ : n + zero ≔ l) (P : Scoped l) → P [ ρ ↦ [] ] ≡ P
+subst-id ρ 𝟘 = refl
+subst-id ρ (ν P) = cong (λ ● → ν ●) (subst-id (left ρ) P)
+subst-id ρ (P ∥ Q) = cong₂ _∥_ (subst-id ρ P) (subst-id ρ Q)
+subst-id ρ (x ⦅ m ⦆ P) = cong₂ _⦅ m ⦆_ (substFin-id ρ x) (subst-id (extend m ρ) P)
+subst-id ρ (x ⟨ ys ⟩ P) rewrite subst-id ρ P = cong₂ (_⟨_⟩ _) (substFin-id ρ x) (helper ρ ys)
+  where
+  helper : ∀ {k} (ρ : n + zero ≔ l) (ys : Vec (Fin l) k) → Vec.map (_[ ρ ↦ [] ]-Fin) ys ≡ ys
+  helper ρ [] = refl
+  helper ρ (y ∷ ys) = cong₂ _∷_ (substFin-id ρ y) (helper ρ ys)
+
+invert-comm : (ρ : n + m ≔ l) (x : Fin l) → invert (+-comm ρ) x ≡ Sum.swap (invert ρ x)
+invert-comm (left ρ) zero = refl
+invert-comm (left ρ) (suc x) with invert ρ x | inspect (invert ρ) x | invert (+-comm ρ) x | inspect (invert (+-comm ρ)) x
+invert-comm (left ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₁ x₂ | [ qe ] with invert-comm ρ x
+invert-comm (left ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₁ x₂ | [ qe ] | qee rewrite qe | eq = contradiction qee λ ()
+invert-comm (left ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₂ y | [ qe ] with invert-comm ρ x
+invert-comm (left ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₂ y | [ qe ] | qee rewrite qe | eq = cong (Sum.map id suc) qee
+invert-comm (left ρ) (suc x) | inj₂ y | [ eq ] | inj₁ x₁ | [ qe ] with invert-comm ρ x
+invert-comm (left ρ) (suc x) | inj₂ y | [ eq ] | inj₁ x₁ | [ qe ] | qee rewrite qe | eq = cong (Sum.map id suc) qee
+invert-comm (left ρ) (suc x) | inj₂ y | [ eq ] | inj₂ y₁ | [ qe ] with invert-comm ρ x
+invert-comm (left ρ) (suc x) | inj₂ y | [ eq ] | inj₂ y₁ | [ qe ] | qee rewrite qe | eq = contradiction qee λ ()
+invert-comm (right ρ) zero = refl
+invert-comm (right ρ) (suc x) with invert ρ x | inspect (invert ρ) x | invert (+-comm ρ) x | inspect (invert (+-comm ρ)) x
+invert-comm (right ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₁ x₂ | [ qe ] with invert-comm ρ x
+invert-comm (right ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₁ x₂ | [ qe ] | qee rewrite qe | eq = contradiction qee λ ()
+invert-comm (right ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₂ y | [ qe ] with invert-comm ρ x
+invert-comm (right ρ) (suc x) | inj₁ x₁ | [ eq ] | inj₂ y | [ qe ] | qee rewrite qe | eq = cong (Sum.map suc id) qee
+invert-comm (right ρ) (suc x) | inj₂ y | [ eq ] | inj₁ x₁ | [ qe ] with invert-comm ρ x
+invert-comm (right ρ) (suc x) | inj₂ y | [ eq ] | inj₁ x₁ | [ qe ] | qee rewrite qe | eq = cong (Sum.map suc id) qee
+invert-comm (right ρ) (suc x) | inj₂ y | [ eq ] | inj₂ y₁ | [ qe ] with invert-comm ρ x
+invert-comm (right ρ) (suc x) | inj₂ y | [ eq ] | inj₂ y₁ | [ qe ] | qee rewrite qe | eq = contradiction qee λ ()
+
+------------------------------------------------------------
+-- exchange is involutive
+
+neg-involutive : ∀ i → neg (neg i) ≡ i
+neg-involutive zero = refl
+neg-involutive (suc zero) = refl
+
+exchangeFin-involutive : (ρ : n + 2 ≔ l) (x : Fin l) → exchangeFin ρ (exchangeFin ρ x) ≡ x
+exchangeFin-involutive ρ x with invert ρ x | inspect (invert ρ) x
+exchangeFin-involutive ρ x | inj₁ x₁ | [ eq ] rewrite eq = refl
+exchangeFin-involutive ρ x | inj₂ y | [ eq ] with invert ρ (punchInFin (+-comm ρ) (neg y)) | inspect (invert ρ) (punchInFin (+-comm ρ) (neg y))
+exchangeFin-involutive ρ x | inj₂ y | [ eq ] | inj₁ x₁ | [ qe ] rewrite invert∘punchInFin ρ (neg y) = contradiction qe λ ()
+exchangeFin-involutive ρ x | inj₂ y | [ eq ] | inj₂ y₁ | [ qe ]
+  -- invert ρ -> neg -> punchIn (+-comm ρ) -> invert ρ -> neg -> punchIn (+-comm ρ)
+  --   invert ρ (punchIn (+-comm ρ) i) ≡ inj₂ i
+  -- invert ρ -> neg -> neg -> punchIn (+-comm ρ)
+  --   neg neg
+  -- invert ρ -> punchIn (+-comm ρ)
+  --   invert ρ x ≡ inj₂ i → punchIn (+-comm ρ) i ≡ x
+  -- id
+  rewrite
+    Sumₚ.inj₂-injective (trans (sym qe) (invert∘punchInFin ρ (neg y))) |
+    neg-involutive y |
+    punchInFin∘invert _ (+-comm ρ) (trans (invert-comm ρ x) (cong Sum.swap eq))
+    = refl
+
+exchange-involutive : (ρ : n + 2 ≔ l) (P : Scoped l) → exchange ρ (exchange ρ P) ≡ P
+exchange-involutive ρ 𝟘 = refl
+exchange-involutive ρ (ν P) =
+  cong (λ ● → ν ●) (exchange-involutive (left ρ) P)
+exchange-involutive ρ (P ∥ Q) =
+  cong₂ _∥_ (exchange-involutive ρ P) (exchange-involutive ρ Q)
+exchange-involutive ρ (x ⦅ m ⦆ P) =
+  cong₂ _⦅ m ⦆_ (exchangeFin-involutive ρ x) (exchange-involutive (extend m ρ) P)
+exchange-involutive ρ (x ⟨ ys ⟩ P) rewrite exchange-involutive ρ P =
+  cong₂ (_⟨_⟩ _) (exchangeFin-involutive ρ x) (helper ρ ys)
+  where
+  helper : ∀ {k} (ρ : n + 2 ≔ l) (ys : Vec (Fin l) k) → Vec.map (exchangeFin ρ) (Vec.map (exchangeFin ρ) ys) ≡ ys
+  helper ρ [] = refl
+  helper ρ (y ∷ ys) = cong₂ _∷_ (exchangeFin-involutive ρ y) (helper ρ ys)

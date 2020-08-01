@@ -150,8 +150,7 @@ module Conversion where
     ⦅ν repr name ctx ⦆ toRaw (name ∷ ctx) P
   toRaw ctx (P ∥ Q) =
     toRaw ctx P ∥ toRaw ctx Q
-  toRaw {n = n} ctx ((x ⦅ m ⦆ P) ⦃ names ⦄)
-    rewrite ℕₚ.+-comm n m =
+  toRaw {n = n} ctx ((x ⦅ m ⦆ P) ⦃ names ⦄) =
     let ctx' = apply ctx
     in lookup ctx' x ⦅ apply-++ names ctx ⦆ toRaw (names ++ ctx) P
   toRaw ctx (x ⟨ ys ⟩ P) =
