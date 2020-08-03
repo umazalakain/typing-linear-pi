@@ -1,10 +1,9 @@
 {-# OPTIONS --safe #-} -- --without-K #-}
 
 open import Function using (_∘_; id)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong; cong₂; inspect; [_])
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; cong; cong₂; inspect; [_])
 open import Relation.Nullary.Negation using (contradiction)
 
-open import Data.Empty using (⊥-elim)
 open import Data.Product using (Σ-syntax; _,_)
 open import Data.Unit using (tt)
 open import Relation.Nullary using (yes; no)

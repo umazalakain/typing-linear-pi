@@ -1,17 +1,15 @@
 {-# OPTIONS --safe --without-K #-}
 
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong; subst; inspect; [_])
-open import Relation.Nullary using (_because_; ofʸ; ofⁿ)
+open import Relation.Binary.PropositionalEquality using (inspect; [_])
 open import Function using (id)
 
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
-open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Empty using (⊥)
 open import Data.Nat.Base as ℕ using (ℕ; zero; suc)
-open import Data.Bool.Base using (false; true)
-open import Data.Product using (_×_; _,_; Σ-syntax; ∃-syntax)
-open import Data.Fin as Fin using (Fin ; zero ; suc; #_)
-open import Data.Vec.Base as Vec using (Vec; []; _∷_; map)
+open import Data.Product using (_×_; _,_; ∃-syntax)
+open import Data.Fin as Fin using (Fin ; zero ; suc)
+open import Data.Vec.Base as Vec using (Vec; []; _∷_; map; lookup)
 open import Data.Vec.Relation.Unary.All as All using (All)
 
 import Data.Vec.Relation.Unary.All.Properties as Allₚ
@@ -138,7 +136,7 @@ module PiCalculus.Semantics where
   _[_↦_]-Fin : Fin l → n + m ≔ l → Vec (Fin n) m → Fin l
   x [ ρ ↦ xs ]-Fin with invert ρ x
   (x [ ρ ↦ xs ]-Fin) | inj₁ l = x
-  (x [ ρ ↦ xs ]-Fin) | inj₂ r = punchInFin ρ (Vec.lookup xs r)
+  (x [ ρ ↦ xs ]-Fin) | inj₂ r = punchInFin ρ (lookup xs r)
 
   _[_↦_] : Scoped l → n + m ≔ l → Vec (Fin n) m → Scoped l
   𝟘 [ ρ ↦ xs ] = 𝟘
@@ -151,7 +149,7 @@ module PiCalculus.Semantics where
                   → IsLeftFin ρ (x [ ρ ↦ xs ]-Fin)
   subst-IsLeftFin {xs = xs} ρ x with invert ρ x | inspect (invert ρ) x
   subst-IsLeftFin {xs = xs} ρ x | inj₁ _ | [ eq ] rewrite eq = tt
-  subst-IsLeftFin {xs = xs} ρ x | inj₂ q | eq = punchInFin-IsLeftFin ρ (Vec.lookup xs q)
+  subst-IsLeftFin {xs = xs} ρ x | inj₂ q | eq = punchInFin-IsLeftFin ρ (lookup xs q)
 
   subst-IsLeft : {xs : Vec (Fin n) m} (ρ : n + m ≔ l) (P : Scoped l) → IsLeft ρ (P [ ρ ↦ xs ])
   subst-IsLeft ρ 𝟘 = tt
