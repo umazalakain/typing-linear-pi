@@ -29,12 +29,14 @@ open import PiCalculus.LinearTypeSystem.Algebras
 module PiCalculus.LinearTypeSystem.SubjectReduction (Ω : Algebras) where
 open Algebras Ω
 open import PiCalculus.LinearTypeSystem Ω
+{-
 open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 open import PiCalculus.LinearTypeSystem.Framing Ω
 open import PiCalculus.LinearTypeSystem.Weakening Ω
 open import PiCalculus.LinearTypeSystem.Strengthening Ω
 open import PiCalculus.LinearTypeSystem.Renaming Ω
 open import PiCalculus.LinearTypeSystem.SubjectCongruence Ω
+-}
 
 SubjectReduction : Set
 SubjectReduction = {n : ℕ} {γ : PreCtx n} {idxs : Idxs n} {idx : Idx} {Γ Γ' Ξ : Ctx idxs}
@@ -51,6 +53,7 @@ private
     idxs : Idxs n
     P Q : Scoped n
 
+{-
 extract-ℓ# : {Γ Ξ Δ Ψ Θ : Ctx idxs} {idx idx' : Idx}
            → Γ ∋[ i ] ℓᵢ {idx} ▹ Ξ
            → Ψ ∋[ i ] ℓₒ {idx'} ▹ Θ
@@ -97,22 +100,23 @@ comm-≥ℓ# (res_ {c = internal} P→Q) (ν t m μ ⊢P) ()
 comm-≥ℓ# (res_ {c = external zero} P→Q) (ν t m μ ⊢P) ()
 comm-≥ℓ# (res_ {c = external (suc i)} P→Q) (ν t m μ ⊢P) refl = comm-≥ℓ# P→Q ⊢P refl
 comm-≥ℓ# (struct P≅P' P'→Q) ⊢P refl = comm-≥ℓ# P'→Q (subject-cong P≅P' ⊢P) refl
+-}
 
 subject-reduction : SubjectReduction
-subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) with trans (sym (∋-≡Type tx)) (∋-≡Type tx')
-subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) | refl = ⊢P' ∥ ⊢Q
+subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) with trans (sym {!∋-≡Type tx!}) {!∋-≡Type tx'!}
+subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) | eq = ⊢P' ∥ ⊢Q
   where ⊢P' = ⊢P
-            |> align (suc x) (suc x') (suc Γ'⇒Γ)
-            |> ⊢-rename y
-            |> ⊢-strengthen zero (rename-unused (λ ()) P)
+            |> {!align (suc x) (suc x') (suc Γ'⇒Γ)!}
+            |> {!⊢-rename y!}
+            |> {!⊢-strengthen zero (rename-unused (λ ()) P)!}
 subject-reduction Γ'⇒Γ (par P→P') (⊢P ∥ ⊢Q) = subject-reduction Γ'⇒Γ P→P' ⊢P ∥ ⊢Q
-subject-reduction {idx = idx} refl (res_ {c = internal} P→Q) (ν t m μ ⊢P)
-  = ν t m μ (subject-reduction {idx = idx} refl P→Q ⊢P)
-subject-reduction refl (res_ {c = external zero} P→Q) (ν t m μ ⊢P)
-  = let (lμ' , rμ') , (ls , rs) = comm-≥ℓ# P→Q ⊢P refl
+subject-reduction {idx = idx} refl (res_ {c = internal} P→Q) (ν ts μ ⊢P)
+  = ν ts μ (subject-reduction {idx = idx} refl P→Q ⊢P)
+subject-reduction refl (res_ {c = external zero} P→Q) (ν ts μ ⊢P)
+  = {! let (lμ' , rμ') , (ls , rs) = comm-≥ℓ# P→Q ⊢P refl
         rs' = subst (λ ● → _ ≔ _ ∙ ●) (∙-uniqueˡ (∙-comm rs) (∙-comm ls)) rs
-     in ν t m lμ' (subject-reduction (zero (ls , rs')) P→Q ⊢P)
-subject-reduction Γ'⇒Γ (res_ {c = external (suc i)} P→Q) (ν t m μ ⊢P)
-  = ν t m μ (subject-reduction (suc Γ'⇒Γ) P→Q ⊢P)
+     in !} ν ts {!lμ'!} (subject-reduction (zero {!ls , rs'!}) P→Q ⊢P)
+subject-reduction Γ'⇒Γ (res_ {c = external (suc i)} P→Q) (ν ts μ ⊢P)
+  = ν ts μ (subject-reduction (suc Γ'⇒Γ) P→Q ⊢P)
 subject-reduction Γ'⇒Γ (struct P≅P' P'→Q) ⊢P
-  = subject-reduction Γ'⇒Γ P'→Q (subject-cong P≅P' ⊢P)
+  = subject-reduction Γ'⇒Γ P'→Q {!subject-cong P≅P' ⊢P!}

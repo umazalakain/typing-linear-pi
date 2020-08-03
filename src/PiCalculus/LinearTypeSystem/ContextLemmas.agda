@@ -51,10 +51,6 @@ data _≔_⊗_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
   []  : [] ≔ [] ⊗ []
   _,_ : Γ ≔ Δ ⊗ Ξ → x ≔ y ∙² z → (Γ -, x) ≔ (Δ -, y) ⊗ (Ξ -, z)
 
-ε : ∀ {idxs : Idxs n} → Ctx idxs
-ε {idxs = []} = []
-ε {idxs = _ -, _} = ε -, (0∙ , 0∙)
-
 ⊗-get : {idxs : Idxs n} {Γ Δ Ξ : Ctx idxs} (i : Fin n) → Γ ≔ Δ ⊗ Ξ → All.lookup i Γ ≔ All.lookup i Δ ∙² All.lookup i Ξ
 ⊗-get zero (Γ≔ , x≔) = x≔
 ⊗-get (suc i) (Γ≔ , x) = ⊗-get i Γ≔
@@ -222,22 +218,27 @@ split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl rewrite ∙²-unique x ∙�
 split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl | refl = ∙²-uniqueˡ y ∙²-idˡ , ∙²-uniqueˡ z ∙²-idˡ
 split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
 
+import Data.Vec.Relation.Unary.All.Properties as Allₚ
+import PiCalculus.Utils
+open PiCalculus.Utils.Cong
 ⊢-⊗ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ； Γ ⊢ P ▹ Ξ → Σ[ Δ ∈ Ctx idxs ] (Γ ≔ Δ ⊗ Ξ)
 ⊢-⊗ 𝟘 = ε , ⊗-idˡ
-⊢-⊗ (ν t m μ ⊢P) with ⊢-⊗ ⊢P
-⊢-⊗ (ν t m μ ⊢P) | (_ -, _) , (P≔ , _) = _ , P≔
+⊢-⊗ (ν t μ ⊢P) with ⊢-⊗ ⊢P
+⊢-⊗ (ν t μ ⊢P) | (_ -, _) , (P≔ , _) = _ , P≔
 ⊢-⊗ ((_ , x) ⦅⦆ ⊢P) with ⊢-⊗ ⊢P
-⊢-⊗ ((_ , x) ⦅⦆ ⊢P) | (_ -, _) , (P≔ , _) =
+⊢-⊗ ((_ , x) ⦅⦆ ⊢P) | _ , P≔ =
   let _ , x≔ , _ = ∋-⊗ x
-      _ , xP≔ , _ = ⊗-assoc⁻¹ x≔ P≔
+      _ , xP≔ , _ = ⊗-assoc⁻¹ x≔ (subst (_≔ _ ⊗ _) {!!} {!!})
    in _ , xP≔
-⊢-⊗ ((_ , x) ⟨ _ , y ⟩ ⊢P) =
+⊢-⊗ ((_ , x) ⟨ _ , ys ⟩ ⊢P) = {!!}
+{-
   let _ , x≔ , _ = ∋-⊗ x
       _ , y≔ , _ = ∋-⊗ y
       _ , P≔ = ⊢-⊗ ⊢P
       _ , xy≔ , _ = ⊗-assoc⁻¹ x≔ y≔
       _ , Pxy≔ , _ = ⊗-assoc⁻¹ xy≔ P≔
    in _ , Pxy≔
+   -}
 ⊢-⊗ (⊢P ∥ ⊢Q) =
   let _ , P≔ = ⊢-⊗ ⊢P
       _ , Q≔ = ⊢-⊗ ⊢Q

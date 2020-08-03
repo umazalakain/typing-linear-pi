@@ -15,6 +15,19 @@ private
   variable
     n m : ℕ
 
+
+module Cong {a b} {A : Set a} {B : Set b} where
+  open import Relation.Binary.PropositionalEquality
+
+  infixl 9 _&_
+  infixl 8 _⊗_
+
+  _&_ : {x y : A} (f : A → B) → x ≡ y → f x ≡ f y
+  f & refl = refl
+
+  _⊗_ : {f g : A → B} {x y : A} → f ≡ g → x ≡ y → f x ≡ g y
+  refl ⊗ refl = refl
+
 module Sum {a b} {A : Set a} {B : Set b} where
   open import Data.Sum.Base
   open import Data.Unit
