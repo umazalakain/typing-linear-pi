@@ -95,7 +95,6 @@ _ = _ , ν-cong stop scope-end
 _ : ("y" ∷ []) ! channel-over-channel₆ ≅ channel-over-channel₇
 _ = _ , stop scope-end
 
-{-
 module Shared-Graded-Linear where
   data Usage : Set where
     sha gra lin : Usage
@@ -118,7 +117,7 @@ module Shared-Graded-Linear where
   open import PiCalculus.LinearTypeSystem.ContextLemmas QUANTIFIERS
 
   _!_；[_]_⊢_▹_ : Vec Name n → PreCtx n → (idxs : Idxs n) → Ctx idxs → Raw → Ctx idxs → Set
-  ctx ! γ ；[ idxs ] Γ ⊢ P ▹ Δ = Conversion.map (λ P' → γ ；[ idxs ] Γ ⊢ P' ▹ Δ) ctx P
+  ctx ! γ ；[ idxs ] Γ ⊢ P ▹ Δ = Conversion.fmap (λ P' → γ ；[ idxs ] Γ ⊢ P' ▹ Δ) ctx P
 
   ω∙ : ⊤ ²
   ω∙ = tt , tt
@@ -139,7 +138,19 @@ module Shared-Graded-Linear where
     name : Name
     name = ""
 
-  _ : ([] -, "y") ! [] -, 𝟙 ；[ [] -, sha ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
+    names : ∀ {n} → Vec Name n
+    names = Data.Vec.replicate ""
+
+  _ : [] ；[ [] ] [] ⊢ ν (ν (suc zero ⟨ zero ∷ [] ⟩ 𝟘) ∥ (zero ⦅ 1 ⦆ 𝟘)) ▹ ε
+  _ = ν ((C[ [] ] , (sha , ω∙)) ∷ []) {lin} 1∙ (ν [] tt ((there here) ⟨ ([] , zero) , ([] , zero (tt , tt)) ⟩ 𝟘) ∥ (here ⦅⦆ 𝟘))
+
+  _ : ([] -, "y") ! [] -, C[ [] ] ；[ [] -, sha ] [] -, ω∙ ⊢ channel-over-channel₀ ▹ ε
+  _ = ν ((C[ (C[ [] ] , sha , ω∙) ∷ [] ] , lin , ℓᵢ) ∷ []) 1∙
+      ({!(zero , ?) ⦅⦆ ?!}
+      ∥ ν ((C[ [] ] , (sha , ω∙)) ∷ []) 1∙
+        ((there here) ⟨ ([] , zero) , ([] , zero (PiCalculus.LinearTypeSystem.Algebras.Linear._≔_∙_.left , PiCalculus.LinearTypeSystem.Algebras.Linear._≔_∙_.right)) ⟩ {!? ⟨ ? ⟩ ?!}))
+
+{-
   _ = ν C[ 𝟙 ； ω∙ ] ℓᵢ {lin} 1∙
       (((here ) ⦅⦆ (here ⦅⦆ 𝟘)) ∥
             (ν 𝟙 ω∙ {lin} 1∙

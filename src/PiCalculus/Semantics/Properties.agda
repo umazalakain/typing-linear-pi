@@ -95,6 +95,9 @@ subst-id ρ (x ⟨ ys ⟩ P) rewrite subst-id ρ P = cong₂ (_⟨_⟩ _) (subst
   helper ρ [] = refl
   helper ρ (y ∷ ys) = cong₂ _∷_ (substFin-id ρ y) (helper ρ ys)
 
+------------------------------------------------------------
+-- Commute and invert
+
 invert-comm : (ρ : n + m ≔ l) (x : Fin l) → invert (+-comm ρ) x ≡ Sum.swap (invert ρ x)
 invert-comm (left ρ) zero = refl
 invert-comm (left ρ) (suc x) with invert ρ x | inspect (invert ρ) x | invert (+-comm ρ) x | inspect (invert (+-comm ρ)) x

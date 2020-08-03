@@ -3,28 +3,20 @@
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; refl; subst; trans; cong)
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Decidable using (True; toWitness; fromWitness)
-open import Function using (_∘_)
+open import Function using (_∘_; id)
 
-import Data.Maybe as Maybe
-import Data.Empty as Empty
-import Data.Unit as Unit
-import Data.Nat as ℕ
+open import Data.Maybe using (nothing; just)
+open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Unit using (⊤; tt)
+open import Data.Nat as ℕ using (ℕ; zero; suc)
+open import Data.Product as Product using (Σ-syntax; ∃-syntax; _×_; _,_; proj₂; proj₁)
+open import Data.Vec as Vec using (Vec; []; _∷_)
+open import Data.Vec.Relation.Unary.All as All using (All; []; _∷_)
+open import Data.Fin as Fin using (Fin ; zero ; suc)
 import Data.Nat.Properties as ℕₚ
-import Data.Product as Product
+import Data.Vec.Relation.Unary.All.Properties as Allₚ
 import Data.Product.Properties as Productₚ
-import Data.Vec as Vec
-import Data.Vec.Relation.Unary.All as All
-import Data.Fin as Fin
 
-open Maybe using (nothing; just)
-open Empty using (⊥; ⊥-elim)
-open Unit using (⊤; tt)
-open ℕ using (ℕ; zero; suc)
-open Product using (Σ-syntax; ∃-syntax; _×_; _,_; proj₂; proj₁)
-open Vec using (Vec; []; _∷_)
-open All using (All; []; _∷_)
-open Fin using (Fin ; zero ; suc)
-open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
@@ -37,23 +29,20 @@ open import PiCalculus.LinearTypeSystem Ω
 
 private
   variable
-    n : ℕ
+    n m : ℕ
     idxs idxsₗ idxsᵣ : Idxs n
     γ : PreCtx n
     idx idx' : Idx
     t : Type
     P Q : Scoped n
     i j : Fin n
-    Γ Δ Ξ Θ : Ctx idxs
+    js : Vec (Fin n) m
+    Γ Δ Ξ Θ xs : Ctx idxs
     x x' y z : Usage idx ²
 
 data _≔_⊗_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
   []  : [] ≔ [] ⊗ []
   _,_ : Γ ≔ Δ ⊗ Ξ → x ≔ y ∙² z → (Γ -, x) ≔ (Δ -, y) ⊗ (Ξ -, z)
-
-ε : ∀ {idxs : Idxs n} → Ctx idxs
-ε {idxs = []} = []
-ε {idxs = _ -, _} = ε -, (0∙ , 0∙)
 
 ⊗-get : {idxs : Idxs n} {Γ Δ Ξ : Ctx idxs} (i : Fin n) → Γ ≔ Δ ⊗ Ξ → All.lookup i Γ ≔ All.lookup i Δ ∙² All.lookup i Ξ
 ⊗-get zero (Γ≔ , x≔) = x≔
@@ -110,6 +99,18 @@ data _≔_⊗_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
 ≡Type-∋ {γ = _ -, _} {i = zero} refl = zero
 ≡Type-∋ {γ = _ -, _} {i = suc i} eq = suc (≡Type-∋ eq)
 
+∋-frame : {idxs : Idxs n} {Γ Θ Δ Ξ Ψ : Ctx idxs} {x : Usage idx ²}
+        → Γ ≔ Δ ⊗ Θ → Ξ ≔ Δ ⊗ Ψ
+        → Γ ∋[ i ] x ▹ Θ
+        → Ξ ∋[ i ] x ▹ Ψ
+
+∋-frame (Γ≔ , x≔) (Ξ≔ , x'≔) (zero xyz)
+  rewrite ⊗-uniqueˡ Γ≔ ⊗-idˡ | ⊗-unique Ξ≔ ⊗-idˡ
+  | ∙²-uniqueˡ x≔ xyz = zero x'≔
+∋-frame (Γ≔ , x≔) (Ξ≔ , x'≔) (suc x)
+  rewrite ∙²-uniqueˡ x≔ ∙²-idˡ | ∙²-unique x'≔ ∙²-idˡ
+  = suc (∋-frame Γ≔ Ξ≔ x)
+
 ∋-⊗ : {Γ Ξ : Ctx idxs}
     → Γ ∋[ i ] x ▹ Ξ
     → Σ[ Δ ∈ Ctx idxs ]
@@ -118,12 +119,32 @@ data _≔_⊗_ : Ctx idxs → Ctx idxs → Ctx idxs → Set where
 ∋-⊗ (suc s) with ∋-⊗ s
 ∋-⊗ (suc s) | _ , Γ≔ , Δ≔ = _ , (Γ≔ , ∙²-idˡ) , suc Δ≔
 
-⊗-∋ : {Γ Δ Ξ : Ctx idxs}
-    → Γ ≔ Δ ⊗ Ξ
-    → Δ ∋[ i ] x ▹ ε {idxs = idxs}
-    → Γ ∋[ i ] x ▹ Ξ
-⊗-∋ (sp , s) (zero x) rewrite ⊗-unique sp ⊗-idˡ | ∙²-unique x ∙²-idʳ = zero s
-⊗-∋ (sp , s) (suc only) rewrite ∙²-unique s ∙²-idˡ = suc (⊗-∋ sp only)
+module _ where
+  ⊇-frame : {idxs : Idxs n} {Γ Θ Δ Ξ Ψ : Ctx idxs}
+          → Γ ≔ Δ ⊗ Θ → Ξ ≔ Δ ⊗ Ψ
+          → Γ ⊇[ js ] xs ▹ Θ
+          → Ξ ⊇[ js ] xs ▹ Ψ
+
+  ⊇-⊗ : {Γ Ξ : Ctx idxs}
+      → Γ ⊇[ js ] xs ▹ Ξ
+      → Σ[ Δ ∈ Ctx idxs ]
+        (Γ ≔ Δ ⊗ Ξ × Δ ⊇[ js ] xs ▹ ε {idxs = idxs})
+
+  ⊇-⊗ [] = ε , ⊗-idˡ , []
+  ⊇-⊗ (xs , x) with ⊇-⊗ xs | ∋-⊗ x
+  ⊇-⊗ (xs , x) | Δ , p , r | Δ' , p' , r' =
+    let Δ'' , p'' , r'' = ⊗-assoc⁻¹ p p' in
+    Δ'' , p'' , (⊇-frame ⊗-idʳ r'' r , ∋-frame ⊗-idʳ ⊗-idʳ r')
+
+  ⊇-frame Γ≔ Ξ≔ []
+    rewrite ⊗-uniqueˡ Γ≔ ⊗-idˡ | ⊗-unique Ξ≔ ⊗-idˡ = []
+  ⊇-frame Γ≔ Ξ≔ (xs , x) =
+    let a , b , c = ∋-⊗ x
+        d , e , f = ⊇-⊗ xs
+        _ , g , h = ⊗-assoc⁻¹ e b
+        _ , k , l = ⊗-assoc Ξ≔ (subst (λ ● → ● ≔ _ ⊗ _) (⊗-uniqueˡ g Γ≔) h)
+    in ⊇-frame e k xs , ∋-frame b l x
+
 
 ∋-ℓ∅ : {idxs : Idxs n} {Γ : Ctx idxs} {i : Fin n} {idx : Idx}→ Vec.lookup idxs i ≡ idx → Γ ∋[ i ] ℓ∅ {idx} ▹ Γ
 ∋-ℓ∅ {Γ = _ -, _} {i = zero} refl = zero ∙²-idˡ
@@ -222,22 +243,35 @@ split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl rewrite ∙²-unique x ∙�
 split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl | refl = ∙²-uniqueˡ y ∙²-idˡ , ∙²-uniqueˡ z ∙²-idˡ
 split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
 
+⊗-++⁺ : ∀ {Γₗ Δₗ Ξₗ : Ctx idxsₗ} {Γᵣ Δᵣ Ξᵣ : Ctx idxsᵣ}
+      → Γₗ ≔ Δₗ ⊗ Ξₗ
+      → Γᵣ ≔ Δᵣ ⊗ Ξᵣ
+      → Allₚ.++⁺ Γₗ Γᵣ ≔ Allₚ.++⁺ Δₗ Δᵣ ⊗ Allₚ.++⁺ Ξₗ Ξᵣ
+⊗-++⁺ [] ps = ps
+⊗-++⁺ (sp , s) ps = ⊗-++⁺ sp ps , s
+
+⊗-++⁻ : ∀ {Γₗ Ξₗ : Ctx idxsₗ} Δₗ {Γᵣ Δᵣ Ξᵣ : Ctx idxsᵣ}
+      → Allₚ.++⁺ Γₗ Γᵣ ≔ Allₚ.++⁺ Δₗ Δᵣ ⊗ Allₚ.++⁺ Ξₗ Ξᵣ
+      → Γₗ ≔ Δₗ ⊗ Ξₗ × Γᵣ ≔ Δᵣ ⊗ Ξᵣ
+⊗-++⁻ {Γₗ = []} {Ξₗ = []} [] sp = [] , sp
+⊗-++⁻ {Γₗ = _ -, _} {Ξₗ = _ -, _} (_ -, _) (ss , s) = Product.map (_, s) id (⊗-++⁻ _ ss)
+
 ⊢-⊗ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ； Γ ⊢ P ▹ Ξ → Σ[ Δ ∈ Ctx idxs ] (Γ ≔ Δ ⊗ Ξ)
 ⊢-⊗ 𝟘 = ε , ⊗-idˡ
-⊢-⊗ (ν t m μ ⊢P) with ⊢-⊗ ⊢P
-⊢-⊗ (ν t m μ ⊢P) | (_ -, _) , (P≔ , _) = _ , P≔
+⊢-⊗ (ν t μ ⊢P) with ⊢-⊗ ⊢P
+⊢-⊗ (ν t μ ⊢P) | (_ -, _) , (P≔ , _) = _ , P≔
 ⊢-⊗ ((_ , x) ⦅⦆ ⊢P) with ⊢-⊗ ⊢P
-⊢-⊗ ((_ , x) ⦅⦆ ⊢P) | (_ -, _) , (P≔ , _) =
+⊢-⊗ {idxs = idxs} ((_ , x) ⦅⦆ ⊢P) | Δ , P≔ rewrite sym (Allₚ.++⁺∘++⁻ idxs Δ) =
   let _ , x≔ , _ = ∋-⊗ x
-      _ , xP≔ , _ = ⊗-assoc⁻¹ x≔ P≔
+      _ , xP≔ , _ = ⊗-assoc⁻¹ x≔ (proj₁ (⊗-++⁻ (proj₁ (Allₚ.++⁻ idxs Δ)) P≔))
    in _ , xP≔
-⊢-⊗ ((_ , x) ⟨ _ , y ⟩ ⊢P) =
+⊢-⊗ ((_ , x) ⟨ _ , ys ⟩ ⊢P) =
   let _ , x≔ , _ = ∋-⊗ x
-      _ , y≔ , _ = ∋-⊗ y
+      _ , ys≔ , _ = ⊇-⊗ ys
       _ , P≔ = ⊢-⊗ ⊢P
-      _ , xy≔ , _ = ⊗-assoc⁻¹ x≔ y≔
-      _ , Pxy≔ , _ = ⊗-assoc⁻¹ xy≔ P≔
-   in _ , Pxy≔
+      _ , xys≔ , _ = ⊗-assoc⁻¹ x≔ ys≔
+      _ , Pxys≔ , _ = ⊗-assoc⁻¹ xys≔ P≔
+   in _ , Pxys≔
 ⊢-⊗ (⊢P ∥ ⊢Q) =
   let _ , P≔ = ⊢-⊗ ⊢P
       _ , Q≔ = ⊢-⊗ ⊢Q

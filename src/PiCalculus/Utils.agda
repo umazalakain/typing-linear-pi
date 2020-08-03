@@ -15,14 +15,25 @@ private
   variable
     n m : ℕ
 
+
 module Sum {a b} {A : Set a} {B : Set b} where
   open import Data.Sum.Base
   open import Data.Unit
   open import Data.Empty
-  open import Data.Product using (∃-syntax)
+  open import Data.Product using (∃-syntax; _,_)
 
   IsInj₁ : A ⊎ B → Set _
   IsInj₁ x = ∃[ y ] (x ≡ inj₁ y)
+
+  IsInj₂ : A ⊎ B → Set _
+  IsInj₂ x = ∃[ y ] (x ≡ inj₂ y)
+
+  IsInj : A ⊎ B → Set _
+  IsInj x = IsInj₁ x ⊎ IsInj₂ x
+
+  reflect : (x : A ⊎ B) → IsInj x
+  reflect (inj₁ x) = inj₁ (x , refl)
+  reflect (inj₂ x) = inj₂ (x , refl)
 
 module All2Vec {a b c} {A : Set a} {P : A → Set b} {C : Set c} where
   open import Data.Vec
