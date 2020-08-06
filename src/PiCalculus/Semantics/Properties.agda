@@ -1,4 +1,4 @@
-{-# OPTIONS --safe #-} -- --without-K #-}
+{-# OPTIONS --safe --without-K #-}
 
 open import Function using (_∘_; id)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; cong; cong₂; inspect; [_])
