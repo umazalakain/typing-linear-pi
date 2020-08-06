@@ -19,10 +19,10 @@ module Sum {a b} {A : Set a} {B : Set b} where
   open import Data.Sum.Base
   open import Data.Unit
   open import Data.Empty
+  open import Data.Product using (∃-syntax)
 
-  IsInj₁ : A ⊎ B → Set
-  IsInj₁ (inj₁ _) = ⊤
-  IsInj₁ (inj₂ _) = ⊥
+  IsInj₁ : A ⊎ B → Set _
+  IsInj₁ x = ∃[ y ] (x ≡ inj₁ y)
 
 module All2Vec {a b c} {A : Set a} {P : A → Set b} {C : Set c} where
   open import Data.Vec

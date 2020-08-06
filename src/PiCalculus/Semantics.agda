@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --without-K #-}
 
-open import Relation.Binary.PropositionalEquality using (inspect; [_])
-open import Function using (id)
+open import Relation.Binary.PropositionalEquality using (refl; inspect; [_])
+open import Function using (const; id; _∘_)
 
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
@@ -78,8 +78,7 @@ module PiCalculus.Semantics where
   -- Punch Out (lowering, stregthening)
 
   punchOutFin : (ρ : n + m ≔ l) (x : Fin l) → IsLeftFin ρ x → Fin n
-  punchOutFin ρ x il with invert ρ x
-  punchOutFin ρ x il | inj₁ l = l
+  punchOutFin ρ x (l , _) = l
 
   punchOut : (ρ : n + m ≔ l) (P : Scoped l) → IsLeft ρ P → Scoped n
   punchOut ρ 𝟘 il = 𝟘
@@ -105,11 +104,11 @@ module PiCalculus.Semantics where
   punchIn ρ (x ⟨ ys ⟩ P) = punchInFin ρ x ⟨ map (punchInFin ρ) ys ⟩ punchIn ρ P
 
   punchInFin-IsLeftFin : (ρ : n + m ≔ l) (x : Fin n) → IsLeftFin ρ (punchInFin ρ x)
-  punchInFin-IsLeftFin (left ρ) zero = tt
+  punchInFin-IsLeftFin (left ρ) zero = _ , refl
   punchInFin-IsLeftFin (left ρ) (suc x) with invert ρ (punchInFin ρ x) | punchInFin-IsLeftFin ρ x
-  punchInFin-IsLeftFin (left ρ) (suc x) | inj₁ _ | _ = tt
+  punchInFin-IsLeftFin (left ρ) (suc x) | inj₁ _ | _ = _ , refl
   punchInFin-IsLeftFin (right ρ) x with invert ρ (punchInFin ρ x) | punchInFin-IsLeftFin ρ x
-  punchInFin-IsLeftFin (right ρ) x | inj₁ _ | _ = tt
+  punchInFin-IsLeftFin (right ρ) x | inj₁ _ | _ = _ , refl
 
   ----------------------------------------------------------
   -- Exchange
@@ -119,9 +118,7 @@ module PiCalculus.Semantics where
   neg (suc zero) = zero
 
   exchangeFin : m + 2 ≔ l → Fin l → Fin l
-  exchangeFin ρ x with invert ρ x
-  exchangeFin ρ x | inj₁ _ = x
-  exchangeFin ρ x | inj₂ r = punchInFin (+-comm ρ) (neg r)
+  exchangeFin ρ x = Sum.[ const x , punchInFin (+-comm ρ) ∘ neg ] (invert ρ x)
 
   exchange : n + 2 ≔ l → Scoped l → Scoped l
   exchange ρ 𝟘 = 𝟘
@@ -134,9 +131,7 @@ module PiCalculus.Semantics where
   -- Simultaneous renaming
 
   _[_↦_]-Fin : Fin l → n + m ≔ l → Vec (Fin n) m → Fin l
-  x [ ρ ↦ xs ]-Fin with invert ρ x
-  (x [ ρ ↦ xs ]-Fin) | inj₁ l = x
-  (x [ ρ ↦ xs ]-Fin) | inj₂ r = punchInFin ρ (lookup xs r)
+  x [ ρ ↦ xs ]-Fin = Sum.[ const x , punchInFin ρ ∘ lookup xs ] (invert ρ x)
 
   _[_↦_] : Scoped l → n + m ≔ l → Vec (Fin n) m → Scoped l
   𝟘 [ ρ ↦ xs ] = 𝟘
@@ -148,15 +143,15 @@ module PiCalculus.Semantics where
   subst-IsLeftFin : {xs : Vec (Fin n) m} (ρ : n + m ≔ l) (x : Fin l)
                   → IsLeftFin ρ (x [ ρ ↦ xs ]-Fin)
   subst-IsLeftFin {xs = xs} ρ x with invert ρ x | inspect (invert ρ) x
-  subst-IsLeftFin {xs = xs} ρ x | inj₁ _ | [ eq ] rewrite eq = tt
+  subst-IsLeftFin {xs = xs} ρ x | inj₁ _ | [ eq ] = _ , eq
   subst-IsLeftFin {xs = xs} ρ x | inj₂ q | eq = punchInFin-IsLeftFin ρ (lookup xs q)
 
   subst-IsLeft : {xs : Vec (Fin n) m} (ρ : n + m ≔ l) (P : Scoped l) → IsLeft ρ (P [ ρ ↦ xs ])
   subst-IsLeft ρ 𝟘 = tt
   subst-IsLeft ρ (ν P) = subst-IsLeft (left ρ) P
-  subst-IsLeft ρ (P ∥ Q) = (subst-IsLeft ρ P) , (subst-IsLeft ρ Q)
-  subst-IsLeft ρ (x ⦅ m ⦆ P) = subst-IsLeftFin ρ x , subst-IsLeft (extend m ρ) P
-  subst-IsLeft ρ (x ⟨ ys ⟩ P) = subst-IsLeftFin ρ x , Allₚ.map⁺ (All.universal (subst-IsLeftFin ρ ) ys) , subst-IsLeft ρ P
+  subst-IsLeft ρ (P ∥ Q) = subst-IsLeft ρ P , subst-IsLeft ρ Q
+  subst-IsLeft {xs = xs} ρ (x ⦅ m ⦆ P) = subst-IsLeftFin {xs = xs} ρ x , subst-IsLeft (extend m ρ) P
+  subst-IsLeft {xs = xs} ρ (x ⟨ ys ⟩ P) = subst-IsLeftFin {xs = xs} ρ x , Allₚ.map⁺ (All.universal (subst-IsLeftFin {xs = xs} ρ ) ys) , subst-IsLeft ρ P
 
   ----------------------------------------------------------
   -- Structural Congruence

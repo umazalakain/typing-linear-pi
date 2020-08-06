@@ -52,11 +52,11 @@ invert∘punchInFin (right ρ) (suc i) rewrite invert∘punchInFin ρ i = refl
 
 punchInFin∘punchOutFin : (ρ : n + m ≔ l) (x : Fin l) (ilx : IsLeftFin ρ x)
                        → punchInFin ρ (punchOutFin ρ x ilx) ≡ x
-punchInFin∘punchOutFin (left ρ) zero ilx = refl
+punchInFin∘punchOutFin (left ρ) zero (.zero , refl) = refl
 punchInFin∘punchOutFin (left ρ) (suc x) ilx with invert ρ x | inspect (invert ρ) x
-punchInFin∘punchOutFin (left ρ) (suc x) ilx | inj₁ _ | [ eq ] = cong suc (punchInFin∘invert _ ρ eq)
+punchInFin∘punchOutFin (left ρ) (suc x) (_ , refl) | inj₁ _ | [ eq ] = cong suc (punchInFin∘invert _ ρ eq)
 punchInFin∘punchOutFin (right ρ) (suc x) ilx with invert ρ x | inspect (invert ρ) x
-punchInFin∘punchOutFin (right ρ) (suc x) ilx | inj₁ _ | [ eq ] = cong suc (punchInFin∘invert _ ρ eq)
+punchInFin∘punchOutFin (right ρ) (suc x) (_ , refl) | inj₁ _ | [ eq ] = cong suc (punchInFin∘invert _ ρ eq)
 
 
 punchIn∘punchOut : (ρ : n + m ≔ l) (P : Scoped l) (ilP : IsLeft ρ P)
