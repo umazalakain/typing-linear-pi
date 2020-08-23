@@ -11,6 +11,7 @@ open import Data.Vec as Vec using (Vec; []; _∷_; map; length; _++_)
 open import Data.Vec.Relation.Unary.All as All using (All; []; _∷_)
 open import Data.Vec.Relation.Unary.All.Properties renaming (++⁺ to _++⁺_)
 
+open import PiCalculus.Splits
 open import PiCalculus.Syntax
 open Scoped
 open import PiCalculus.LinearTypeSystem.Algebras
@@ -79,7 +80,7 @@ data _∋[_]_ : PreCtx n → Fin n → Type → Set where
 
 data _⊇[_]_ : PreCtx n → Vec (Fin n) m → Vec Type m → Set where
   [] : γ ⊇[ [] ] []
-  _∷_ : ∀ {ts} → γ ∋[ j ] t → γ ⊇[ js ] ts → γ ⊇[ js -, j ] (ts -, t)
+  _,_ : ∀ {ts} → γ ⊇[ js ] ts → γ ∋[ j ] t → γ ⊇[ js -, j ] (ts -, t)
 
 
 -- Γ ∋[ i ] x ▹ Δ is a proof that subtracting x from variable in in Γ results in Δ
@@ -136,11 +137,11 @@ data _；_⊢_▹_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → 
     -----------------------------------------------------
     → γ            ； Γ            ⊢ ν P ⦃ nx ⦄ ▹ Δ
 
-  _⦅⦆_ : ∀ {ts : Vec TypeUsage m} {Γ Ξ Θ : Ctx idxs}
+  _⦅⦆_ : ∀ {idxs : Idxs n} {ts : Vec TypeUsage m} {Γ Ξ Θ : Ctx idxs}
        → γ             ； Γ                ∋[ i ] C[ ts ] ； ℓᵢ {idx}   ▹ Ξ
-       → γ ++ types ts ； Ξ ++⁺ usages ts  ⊢      P                     ▹ Θ ++⁺ ε
+       → vec-++ (types ts) γ ； all-++ (usages ts) Ξ  ⊢      P                     ▹ all-++ ε Θ
        ------------------------------------------------------------------------
-       → γ             ； Γ                ⊢ (i ⦅ length ts ⦆ P) ⦃ ns ⦄ ▹ Θ
+       → γ             ； Γ                ⊢ (i ⦅ m ⦆ P) ⦃ ns ⦄ ▹ Θ
 
   _⟨_⟩_ : {ts : Vec TypeUsage m}
         → γ ； Γ ∋[ i ]  C[ ts ] ； ℓₒ {idx} ▹ Δ

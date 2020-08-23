@@ -20,6 +20,7 @@ import Data.Product.Properties as Productₚ
 
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
+open import PiCalculus.Splits
 open import PiCalculus.Semantics
 open import PiCalculus.LinearTypeSystem.Algebras
 
@@ -29,7 +30,7 @@ open import PiCalculus.LinearTypeSystem Ω
 
 private
   variable
-    n m : ℕ
+    n m l : ℕ
     idxs idxsₗ idxsᵣ : Idxs n
     γ : PreCtx n
     idx idx' : Idx
@@ -243,28 +244,34 @@ split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl rewrite ∙²-unique x ∙�
 split-ℓ∅ {i = zero} (a , x) (b , y) (c , z) refl | refl = ∙²-uniqueˡ y ∙²-idˡ , ∙²-uniqueˡ z ∙²-idˡ
 split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
 
-⊗-++⁺ : ∀ {Γₗ Δₗ Ξₗ : Ctx idxsₗ} {Γᵣ Δᵣ Ξᵣ : Ctx idxsᵣ}
-      → Γₗ ≔ Δₗ ⊗ Ξₗ
-      → Γᵣ ≔ Δᵣ ⊗ Ξᵣ
-      → Allₚ.++⁺ Γₗ Γᵣ ≔ Allₚ.++⁺ Δₗ Δᵣ ⊗ Allₚ.++⁺ Ξₗ Ξᵣ
-⊗-++⁺ [] ps = ps
-⊗-++⁺ (sp , s) ps = ⊗-++⁺ sp ps , s
+⊗-merge : ∀ {Γₗ Δₗ Ξₗ : Ctx idxsₗ} {Γᵣ Δᵣ Ξᵣ : Ctx idxsᵣ}
+         → (ρ : n + m ≔ l)
+         → Γₗ ≔ Δₗ ⊗ Ξₗ
+         → Γᵣ ≔ Δᵣ ⊗ Ξᵣ
+         → all-merge ρ Γₗ Γᵣ ≔ all-merge ρ Δₗ Δᵣ ⊗ all-merge ρ Ξₗ Ξᵣ
+⊗-merge zero [] [] = []
+⊗-merge (left ρ) (xs , x) ys = ⊗-merge ρ xs ys , x
+⊗-merge (right ρ) xs (ys , y) = ⊗-merge ρ xs ys , y
 
-⊗-++⁻ : ∀ {Γₗ Ξₗ : Ctx idxsₗ} Δₗ {Γᵣ Δᵣ Ξᵣ : Ctx idxsᵣ}
-      → Allₚ.++⁺ Γₗ Γᵣ ≔ Allₚ.++⁺ Δₗ Δᵣ ⊗ Allₚ.++⁺ Ξₗ Ξᵣ
-      → Γₗ ≔ Δₗ ⊗ Ξₗ × Γᵣ ≔ Δᵣ ⊗ Ξᵣ
-⊗-++⁻ {Γₗ = []} {Ξₗ = []} [] sp = [] , sp
-⊗-++⁻ {Γₗ = _ -, _} {Ξₗ = _ -, _} (_ -, _) (ss , s) = Product.map (_, s) id (⊗-++⁻ _ ss)
+⊗-split : (ρ : n + m ≔ l)
+        → ∀ {Γₗ Δₗ Ξₗ : Ctx idxsₗ} {Γᵣ Δᵣ Ξᵣ : Ctx idxsᵣ}
+        → all-merge ρ Γₗ Γᵣ ≔ all-merge ρ Δₗ Δᵣ ⊗ all-merge ρ Ξₗ Ξᵣ
+        → Γₗ ≔ Δₗ ⊗ Ξₗ × Γᵣ ≔ Δᵣ ⊗ Ξᵣ
+⊗-split zero {[]} {[]} {[]} {[]} {[]} {[]} [] = [] , []
+⊗-split (left ρ) {_ -, _} {_ -, _} {_ -, _} (xs , x) = Product.map (_, x) id (⊗-split ρ xs)
+⊗-split (right ρ) {Γᵣ = _ -, _} {_ -, _} {_ -, _} (xs , x) = Product.map id (_, x) (⊗-split ρ xs)
 
 ⊢-⊗ : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs} → γ ； Γ ⊢ P ▹ Ξ → Σ[ Δ ∈ Ctx idxs ] (Γ ≔ Δ ⊗ Ξ)
 ⊢-⊗ 𝟘 = ε , ⊗-idˡ
 ⊢-⊗ (ν t μ ⊢P) with ⊢-⊗ ⊢P
 ⊢-⊗ (ν t μ ⊢P) | (_ -, _) , (P≔ , _) = _ , P≔
 ⊢-⊗ ((_ , x) ⦅⦆ ⊢P) with ⊢-⊗ ⊢P
-⊢-⊗ {idxs = idxs} ((_ , x) ⦅⦆ ⊢P) | Δ , P≔ rewrite sym (Allₚ.++⁺∘++⁻ idxs Δ) =
+⊢-⊗ (_⦅⦆_ {ts = ts} (_ , x) ⊢P) | Δ , P≔
+  rewrite sym (all-merge∘split (left-first′ _ _) (Vec.map (proj₁ ∘ proj₂) ts) _ Δ) =
   let _ , x≔ , _ = ∋-⊗ x
-      _ , xP≔ , _ = ⊗-assoc⁻¹ x≔ (proj₁ (⊗-++⁻ (proj₁ (Allₚ.++⁻ idxs Δ)) P≔))
+      _ , xP≔ , _ = ⊗-assoc⁻¹ x≔ (proj₂ (⊗-split (left-first′ _ _) P≔))
    in _ , xP≔
+
 ⊢-⊗ ((_ , x) ⟨ _ , ys ⟩ ⊢P) =
   let _ , x≔ , _ = ∋-⊗ x
       _ , ys≔ , _ = ⊇-⊗ ys
@@ -278,25 +285,14 @@ split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
       _ , PQ≔ , _ = ⊗-assoc⁻¹ P≔ Q≔
    in _ , PQ≔
 
-ctx-insert : (i : Fin (suc n)) → Usage idx ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
-ctx-insert zero xs' Γ = Γ -, xs'
-ctx-insert (suc i) xs' (Γ -, xs) = ctx-insert i xs' Γ -, xs
-
-ctx-remove : Ctx idxs → (i : Fin (suc n)) → Ctx (Vec.remove idxs i)
-ctx-remove (Γ -, _) zero = Γ
-ctx-remove (Γ -, ys -, xs) (suc i) = ctx-remove (Γ -, ys) i -, xs
-
-ctx-update : (i : Fin n) → Usage (Vec.lookup idxs i) ² → Ctx idxs → Ctx idxs
-ctx-update zero m' (ms -, m) = ms -, m'
-ctx-update (suc i) m' (ms -, m) = ctx-update i m' ms -, m
-
-fromFin : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs}
-        → ∀ i
-        → {y z : Usage (Vec.lookup idxs i) ²}
-        → All.lookup i Γ ≔ y ∙² z
-        → γ ； Γ ∋[ i ] Vec.lookup γ i ； y ▹ ctx-update i z Γ
-fromFin {γ = γ -, t} {Γ = Γ -, x} zero split = zero , (zero split)
-fromFin {γ = γ -, t} {Γ = Γ -, x} (suc i) split = there (fromFin i split)
+{-
+∋-fromFin : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs}
+          → ∀ i
+          → {y z : Usage (Vec.lookup idxs i) ²}
+          → All.lookup i Γ ≔ y ∙² z
+          → γ ； Γ ∋[ i ] Vec.lookup γ i ； y ▹ all-update i z Γ
+∋-fromFin {γ = γ -, t} {Γ = Γ -, x} zero split = zero , (zero split)
+∋-fromFin {γ = γ -, t} {Γ = Γ -, x} (suc i) split = there (∋-fromFin i split)
 
 #_ : {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs}
    → ∀ m {m<n : True (m ℕₚ.<? n)}
@@ -307,4 +303,5 @@ fromFin {γ = γ -, t} {Γ = Γ -, x} (suc i) split = there (fromFin i split)
      in γ ； Γ ∋[ i ] Vec.lookup γ i ； y ▹ ctx-update i z Γ
 (# m) {m<n} {check = check} =
   let _ , split = toWitness check
-  in fromFin (Fin.fromℕ< (toWitness m<n)) split
+  in ∋-fromFin (Fin.fromℕ< (toWitness m<n)) split
+-}

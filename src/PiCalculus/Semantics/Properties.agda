@@ -23,6 +23,7 @@ import Data.Vec.Functional.Relation.Binary.Pointwise
 
 open import PiCalculus.Syntax
 open Scoped
+open import PiCalculus.Splits
 open import PiCalculus.Semantics
 import PiCalculus.Utils
 open PiCalculus.Utils.Sum
@@ -76,6 +77,13 @@ punchIn∘punchOut ρ (x ⟨ ys ⟩ P) (ilx , ilys , ilP)
       → Vec.map (punchInFin ρ) (all2vec (λ {●} → punchOutFin ρ ●) ilys) ≡ ys
   helper ρ [] = refl
   helper ρ (px ∷ pxs) = cong₂ _∷_ (punchInFin∘punchOutFin ρ _ px) (helper ρ pxs)
+
+------------------------------------------------------------
+-- Punching in nothing
+
+punchInFin-id : (i : Fin n) (ρ : n + zero ≔ n) → punchInFin ρ i ≡ i
+punchInFin-id zero (left ρ) = refl
+punchInFin-id (suc i) (left ρ) = cong suc (punchInFin-id i ρ)
 
 ------------------------------------------------------------
 -- Substituting by an empty set of variables

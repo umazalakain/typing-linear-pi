@@ -17,6 +17,7 @@ import Data.Vec.Relation.Unary.All.Properties as Allₚ
 
 import PiCalculus.Syntax
 open PiCalculus.Syntax.Scoped
+open import PiCalculus.Splits
 open import PiCalculus.Semantics
 open import PiCalculus.LinearTypeSystem.Algebras
 
@@ -46,11 +47,12 @@ private
 ⊢-frame Γ≔ Ξ≔ (ν ts μ ⊢P)
   = ν ts μ (⊢-frame {Δ = _ -, (μ , μ)} (Γ≔ , ∙²-idʳ) (Ξ≔ , ∙²-idʳ) ⊢P)
 ⊢-frame Γ≔ Ξ≔ ((t , ∋i) ⦅⦆ ⊢P) with ∋-⊗ ∋i | ⊢-⊗ ⊢P
-⊢-frame {idxs = idxs} Γ≔ Ξ≔ ((t , ∋i) ⦅⦆ ⊢P) | _ , i≔ , _ | Δ , P≔ rewrite sym (Allₚ.++⁺∘++⁻ idxs Δ) =
-  let Pₗ≔ , Pᵣ≔     = ⊗-++⁻ (proj₁ (Allₚ.++⁻ idxs Δ)) P≔
-      iP≔           = ⊗-comp i≔ Pₗ≔ Γ≔
+⊢-frame {idxs = idxs} Γ≔ Ξ≔ ((t , ∋i) ⦅⦆ ⊢P) | _ , i≔ , _ | Δ , P≔
+  rewrite sym (all-merge∘split (left-first′ _ _) _ idxs Δ) =
+  let Pₗ≔ , Pᵣ≔     = ⊗-split (left-first′ _ _) P≔
+      iP≔           = ⊗-comp i≔ Pᵣ≔ Γ≔
       _ , i'≔ , P'≔ = ⊗-assoc Ξ≔ iP≔
-  in (t , ∋-frame i≔ i'≔ ∋i) ⦅⦆ ⊢-frame P≔ (⊗-++⁺ P'≔ Pᵣ≔) ⊢P
+  in (t , ∋-frame i≔ i'≔ ∋i) ⦅⦆ ⊢-frame P≔ (⊗-merge (left-first′ _ _) Pₗ≔ P'≔) ⊢P
 ⊢-frame Γ≔ Ξ≔ ((ti , ∋i) ⟨ tj , ∋js ⟩ ⊢P) with ∋-⊗ ∋i | ⊇-⊗ ∋js | ⊢-⊗ ⊢P
 ⊢-frame Γ≔ Ξ≔ ((ti , ∋i) ⟨ tj , ∋js ⟩ ⊢P) | _ , i≔ , _ | _ , js≔ , _ | _ , P≔ =
   let _ , ijs≔ , _    = ⊗-assoc⁻¹ i≔ js≔
