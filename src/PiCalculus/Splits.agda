@@ -1,140 +1,225 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe #-}
 
 open import Function using (id; _∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
+open import Data.Product as Product using (Σ-syntax; ∃; ∃-syntax; _×_; _,_; proj₁; proj₂) renaming (∃! to ∃!-setoid)
 
 open import Data.Nat.Base as ℕ using (ℕ; zero; suc)
 open import Data.Fin as Fin using (Fin ; zero ; suc)
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product as Product using (_×_; _,_; proj₁; proj₂)
 open import Data.Vec.Base as Vec using (Vec; []; _∷_)
 import Data.Nat.Properties as ℕₚ
 
 module PiCalculus.Splits where
 
-private
-  variable
-    n m l k : ℕ
-    x y : Fin n
+∃! : ∀ {a b} {A : Set a} → (A → Set b) → Set _
+∃! = ∃!-setoid _≡_
 
-data _+_≔_ : ℕ → ℕ → ℕ → Set where
-  zero  :             zero  + zero  ≔ zero
-  left  : n + m ≔ l → suc n + m     ≔ suc l
-  right : n + m ≔ l → n     + suc m ≔ suc l
+-- TODO: enters the stdlib
+infix 5 _<*>_
+_<*>_ : ∀ {a p q} {A : Set a} → (A → Set p) → (A → Set q) → (A → Set _)
+(f <*> g) i = f i × g i
 
-invert : n + m ≔ l → Fin l → Fin n ⊎ Fin m
-invert (left ρ) zero = inj₁ zero
-invert (right ρ) zero = inj₂ zero
-invert (left ρ) (suc x) = Sum.map suc id (invert ρ x)
-invert (right ρ) (suc x) = Sum.map id suc (invert ρ x)
+module _ where
+  private
+    variable
+      n m l k : ℕ
+      x y : Fin n
 
-+-identityʳ : n + zero ≔ n
-+-identityʳ {zero} = zero
-+-identityʳ {suc n} = left +-identityʳ
+  data _+_≔_ : ℕ → ℕ → ℕ → Set where
+    zero  :             zero  + zero  ≔ zero
+    left  : n + m ≔ l → suc n + m     ≔ suc l
+    right : n + m ≔ l → n     + suc m ≔ suc l
 
-+-cancelˡ : zero + m ≔ l → m ≡ l
-+-cancelˡ zero = refl
-+-cancelˡ (right ρ) = cong suc (+-cancelˡ ρ)
+  invert : n + m ≔ l → Fin l → Fin n ⊎ Fin m
+  invert (left ρ) zero = inj₁ zero
+  invert (right ρ) zero = inj₂ zero
+  invert (left ρ) (suc x) = Sum.map suc id (invert ρ x)
+  invert (right ρ) (suc x) = Sum.map id suc (invert ρ x)
 
-+-comm : n + m ≔ l → m + n ≔ l
-+-comm zero = zero
-+-comm (left ρ) = right (+-comm ρ)
-+-comm (right ρ) = left (+-comm ρ)
+  +-identityˡ : zero + n ≔ n
+  +-identityˡ {zero} = zero
+  +-identityˡ {suc n} = right +-identityˡ
 
-left-first : ∀ n m → m + n ≔ (n ℕ.+ m)
-left-first zero zero = zero
-left-first (suc n) m = right (left-first n m)
-left-first zero (suc m) = left (left-first zero m)
+  +-identityʳ : n + zero ≔ n
+  +-identityʳ {zero} = zero
+  +-identityʳ {suc n} = left +-identityʳ
 
-left-first′ : ∀ n m → n + m ≔ (n ℕ.+ m)
-left-first′ zero zero = zero
-left-first′ zero (suc m) = right (left-first′ zero m)
-left-first′ (suc n) m = left (left-first′ n m)
+  +-suc : suc n + m ≔ l → n + suc m ≔ l
+  +-suc (left ρ) = right ρ
+  +-suc (right ρ) = right (+-suc ρ)
 
-+-fromFin : Fin (suc n) → n + 1 ≔ suc n
-+-fromFin zero = right +-identityʳ
-+-fromFin {suc n} (suc i) = left (+-fromFin i)
+  +-unique : n + m ≔ l → n + m ≔ k → l ≡ k
+  +-unique zero zero = refl
+  +-unique (left ρ) (left ρ') = cong suc (+-unique ρ ρ')
+  +-unique (left ρ) (right ρ') = cong suc (+-unique ρ (+-suc ρ'))
+  +-unique (right ρ) (left ρ') = cong suc (+-unique (+-suc ρ) ρ')
+  +-unique (right ρ) (right ρ') = cong suc (+-unique ρ ρ')
 
-+-toFin : n + 1 ≔ m → Fin m
-+-toFin (left s) = suc (+-toFin s)
-+-toFin (right s) = zero
+  +-comm : n + m ≔ l → m + n ≔ l
+  +-comm zero = zero
+  +-comm (left ρ) = right (+-comm ρ)
+  +-comm (right ρ) = left (+-comm ρ)
 
-extend : ∀ k → n + m ≔ l → (k ℕ.+ n) + m ≔ (k ℕ.+ l)
-extend {n = n} {l = l} zero ρ = ρ
-extend {n = n} {l = l} (suc k) ρ = left (extend k ρ)
+  +-mk : ∀ n m → ∃! (n + m ≔_)
+  +-mk zero m = m , +-identityˡ , +-unique (+-identityˡ)
+  +-mk (suc n) m = Product.map suc (Product.map left (λ {s} _ → +-unique (left s))) (+-mk n m)
+
+  _+_ : ℕ → ℕ → ℕ
+  n + m = proj₁ (+-mk n m)
+
+  +-assoc : ∃ (n + m ≔_ <*> _+ l ≔ k) → ∃ (m + l ≔_ <*> n +_≔ k)
+  +-assoc (_ , zero , r) = _ , +-identityˡ , r
+  +-assoc (_ , left l , left r) with _ , l' , r' ← +-assoc (_ , l , r) = _ , l' , left r'
+  +-assoc (_ , left l , right r) with _ , l' , r' ← +-assoc (_ , l , +-suc r) = _ , l' , left r'
+  +-assoc (_ , right l , left r) with _ , l' , r' ← +-assoc (_ , l , r) = _ , left l' , right r'
+  +-assoc (_ , right l , right r) with _ , l' , r' ← +-assoc (_ , l , +-suc r) = _ , left l' , right r'
+
+  +-fromFin : Fin (suc n) → n + 1 ≔ suc n
+  +-fromFin zero = right +-identityʳ
+  +-fromFin {suc n} (suc i) = left (+-fromFin i)
+
+  +-toFin : n + 1 ≔ m → Fin m
+  +-toFin (left s) = suc (+-toFin s)
+  +-toFin (right s) = zero
+
+  extend : ∀ k → n + m ≔ l → (k + n) + m ≔ (k + l)
+  extend {n = n} {l = l} zero ρ = ρ
+  extend {n = n} {l = l} (suc k) ρ = left (extend k ρ)
 
 module _ {a} {A : Set a} where
+  open import Level using (_⊔_) renaming (suc to lsuc)
   open import Data.Vec.Relation.Unary.All using (All; []; _∷_)
 
-  vec-merge : (ρ : n + m ≔ l) → Vec A n → Vec A m → Vec A l
-  vec-merge zero [] [] = []
-  vec-merge (left ρ) (x ∷ xs) ys = x ∷ vec-merge ρ xs ys
-  vec-merge (right ρ) xs (y ∷ ys) = y ∷ vec-merge ρ xs ys
+  private
+    variable
+      n m l k nm ml : ℕ
+      x : A
+      xs ys zs ws xys : Vec A n
+      ρ ρ' ξ ξ' : n + m ≔ l
 
-  vec-merge-idˡ : ∀ (ρ : 0 + n ≔ n) xs → vec-merge ρ [] xs ≡ xs
-  vec-merge-idˡ zero [] = refl
-  vec-merge-idˡ (right ρ) (x ∷ xs) = cong (x ∷_) (vec-merge-idˡ ρ xs)
+  data _>_<_≔_ : Vec A n → n + m ≔ l → Vec A m → Vec A l → Set (lsuc a) where
+    zero : [] > zero < [] ≔ []
+    left : xs > ρ < ys ≔ zs → (x ∷ xs) > left ρ < ys ≔ (x ∷ zs)
+    right : xs > ρ < ys ≔ zs → xs > right ρ < (x ∷ ys) ≔ (x ∷ zs)
 
-  vec-++ : Vec A n → Vec A m → Vec A (n ℕ.+ m)
-  vec-++ xs ys = vec-merge (left-first′ _ _) xs ys
+  ><-identityˡ : {xs : Vec A n} {ρ : zero + n ≔ n} → [] > ρ < xs ≔ xs
+  ><-identityˡ {xs = []} {zero} = zero
+  ><-identityˡ {xs = x ∷ xs} {right ρ} = right ><-identityˡ
 
-  vec-update : (ρ : n + 1 ≔ m) → A → Vec A m → Vec A m
-  vec-update (left ρ) y (x ∷ xs) = x ∷ vec-update ρ y xs
-  vec-update (right ρ) y (x ∷ xs) = y ∷ xs
+  ><-unique : xs > ρ < ys ≔ zs → xs > ρ < ys ≔ ws → zs ≡ ws
+  ><-unique zero zero = refl
+  ><-unique (left ρ) (left ρ') = cong (_ ∷_) (><-unique ρ ρ')
+  ><-unique (right ρ) (right ρ') = cong (_ ∷_) (><-unique ρ ρ')
 
-  vec-split : (ρ : n + m ≔ l) → Vec A l → Vec A n × Vec A m
-  vec-split zero [] = [] , []
-  vec-split (left ρ) (x ∷ xs) = Product.map (x ∷_) id (vec-split ρ xs)
-  vec-split (right ρ) (x ∷ xs) = Product.map id (x ∷_) (vec-split ρ xs)
+  ><-mk : (ρ : n + m ≔ l) (xs : Vec A n) (ys : Vec A m) → ∃! (xs > ρ < ys ≔_)
+  ><-mk zero [] [] = [] , zero , ><-unique zero
+  ><-mk (left ρ) (x ∷ xs) ys = Product.map (_ ∷_) (Product.map left (λ {ρ} _ → ><-unique (left ρ))) (><-mk ρ xs ys)
+  ><-mk (right ρ) xs (y ∷ ys) = Product.map (_ ∷_) (Product.map right (λ {ρ} _ → ><-unique (right ρ))) (><-mk ρ xs ys)
 
-  vec-remove : (ρ : n + m ≔ l) → Vec A l → Vec A n
-  vec-remove ρ = proj₁ ∘ vec-split ρ
+  _>_<_ : Vec A n → (n + m ≔ l) → Vec A m → Vec A (n + m)
+  _>_<_ {n = n} {m = m} xs ρ ys
+    with _ , ρ' , uρ' ← +-mk n m
+    with refl ← uρ' ρ
+    with zs , _ , _ ← ><-mk ρ xs ys
+    = zs
 
-  vec-merge-++ : ∀ (ρ : n + k ≔ l) (xs : Vec A m) {ys : Vec A n} {zs : Vec A k}
-               → vec-++ xs (vec-merge ρ ys zs) ≡ vec-merge (extend m ρ) (vec-++ xs ys) zs
-  vec-merge-++ ρ [] {ys} {zs}
-    rewrite vec-merge-idˡ (left-first′ _ _) ys
-    | vec-merge-idˡ (left-first′ _ _) (vec-merge ρ ys zs)
-    = refl
-  vec-merge-++ ρ (x ∷ xs) = cong (x ∷_) (vec-merge-++ ρ xs)
+  _++_ : Vec A n → Vec A m → Vec A (n + m)
+  _++_ {n = n} {m = m} xs ys
+    with _ , ρ , uρ ← +-mk n m
+    with zs , _ , _ ← ><-mk ρ xs ys
+    = zs
+
+  ><-assoc : {xs : Vec A n} {ys : Vec A m} {zs : Vec A l} {ws : Vec A k}
+           → (ρ : n + m ≔ nm) (ξ : nm + l ≔ k)
+           → ∃ (xs > ρ  < ys ≔_ <*>   _> ξ  < zs ≔ ws)
+           → Σ[ ml ∈ ℕ ] Σ[ ρ' ∈ n + ml ≔ k ] Σ[ ξ' ∈ m + l ≔ ml ]
+             ∃ (xs > ρ' <_≔ ws  <*> ys > ξ' < zs ≔_)
+  ><-assoc zero ξ (_ , zero , r)
+    with refl ← +-unique ξ +-identityˡ
+    with refl ← ><-unique r ><-identityˡ
+    = _ , +-identityˡ , ξ , _ , ><-identityˡ , ><-identityˡ
+  ><-assoc .(left _) .(left _) (_ , left l , left r)
+    with _ , _ , _ , _ , l' , r' ← ><-assoc _ _ (_ , l , r)
+    = _ , _ , _ , _ , left l' , r'
+  ><-assoc .(left _) .(right _) (_ , left l , right r)
+    with _ , _ , _ , _ , l' , r' ← ><-assoc _ _ (_ , left l , r)
+    = _ , _ , _ , _ , right l' , right r'
+  ><-assoc .(right _) .(left _) (_ , right l , left r)
+    with _ , _ , _ , _ , l' , r' ← ><-assoc _ _ (_ , l , r)
+    = _ , _ , _ , _ , right l' , left r'
+  ><-assoc (right ρ) (right ξ) (_ , right l , right r)
+    with _ , _ , _ , _ , l' , r' ← ><-assoc _ _ (_ , right l , r)
+    = _ , _ , _ , _ , right l' , right r'
+
 
   module _ {p} {P : A → Set p} where
-    all-merge : ∀ (ρ : n + m ≔ l) {xs : Vec A n} {ys : Vec A m}
-              → All P xs → All P ys → All P (vec-merge ρ xs ys)
-    all-merge zero [] [] = []
-    all-merge (left ρ) (x ∷ xs) ys = x ∷ all-merge ρ xs ys
-    all-merge (right ρ) xs (y ∷ ys) = y ∷ all-merge ρ xs ys
+    private
+      variable
+        px py : P x
+        >ρ< : xs > ρ < ys ≔ zs
+        pxs pys pzs pws : All P xs
 
-    all-++ : ∀ {xs : Vec A n} {ys : Vec A m} → All P xs → All P ys → All P (vec-++ xs ys)
-    all-++ xs ys = all-merge (left-first′ _ _) xs ys
+    data _|>_<|_≔_ : {xs : Vec A n} {ys : Vec A m} {zs : Vec A l} {ρ : n + m ≔ l}
+                   → All P xs → xs > ρ < ys ≔ zs → All P ys → All P zs → Set (lsuc (a ⊔ p)) where
 
-    all-update : ∀ (ρ : n + 1 ≔ m) {x} {xs} → P x → All P xs → All P (vec-update ρ x xs)
-    all-update (left ρ) y (x ∷ xs) = x ∷ all-update ρ y xs
-    all-update (right ρ) y (x ∷ xs) = y ∷ xs
+      zero  : [] |> zero <| [] ≔ []
+      left  : pxs |> >ρ< <| pys ≔ pzs → (px ∷ pxs) |> left >ρ< <| pys ≔ (px ∷ pzs)
+      right : pxs |> >ρ< <| pys ≔ pzs → pxs |> right >ρ< <| (px ∷ pys) ≔ (px ∷ pzs)
 
-    all-split : ∀ (ρ : n + m ≔ l) {xs ys} → All P (vec-merge ρ xs ys) → All P xs × All P ys
-    all-split zero {[]} {[]} [] = [] , []
-    all-split (left ρ) {x ∷ xs} (p ∷ ps) = Product.map (p ∷_) id (all-split ρ ps)
-    all-split (right ρ) {_} {y ∷ ys} (p ∷ ps) = Product.map id (p ∷_) (all-split ρ ps)
+    |><|-identityˡ : {pxs : All P xs} {>ρ< : [] > ρ < xs ≔ xs} → [] |> >ρ< <| pxs ≔ pxs
+    |><|-identityˡ {pxs = []} {>ρ< = zero} = zero
+    |><|-identityˡ {pxs = _ ∷ _} {>ρ< = right >ρ<} = right |><|-identityˡ
 
-    all-remove : ∀ (ρ : n + m ≔ l) {xs ys} → All P (vec-merge ρ xs ys) → All P xs
-    all-remove ρ = proj₁ ∘ all-split ρ
+    |><|-unique : pxs |> >ρ< <| pys ≔ pzs → pxs |> >ρ< <| pys ≔ pws → pzs ≡ pws
+    |><|-unique zero zero = refl
+    |><|-unique (left ρ) (left ρ') = cong (_ ∷_) (|><|-unique ρ ρ')
+    |><|-unique (right ρ) (right ρ') = cong (_ ∷_) (|><|-unique ρ ρ')
 
-    all-merge∘split : ∀ (ρ : n + m ≔ l) xs ys (ps : All P (vec-merge ρ xs ys))
-                    → Product.uncurry′ (all-merge ρ) (all-split ρ ps) ≡ ps
-    all-merge∘split zero [] [] [] = refl
-    all-merge∘split (left ρ) (x ∷ xs) ys (p ∷ ps) = cong (p ∷_) (all-merge∘split ρ _ _ ps)
-    all-merge∘split (right ρ) xs (y ∷ ys) (p ∷ ps) = cong (p ∷_) (all-merge∘split ρ _ _ ps)
+    |><|-mk : (>ρ< : xs > ρ < ys ≔ zs) (pxs : All P xs) (pys : All P ys) → ∃! (pxs |> >ρ< <| pys ≔_)
+    |><|-mk zero [] [] = [] , zero , |><|-unique zero
+    |><|-mk (left ρ) (px ∷ pxs) pys = Product.map (_ ∷_) (Product.map left (λ {>ρ<} _ → |><|-unique (left >ρ<))) (|><|-mk ρ pxs pys)
+    |><|-mk (right ρ) pxs (py ∷ pys) = Product.map (_ ∷_) (Product.map right (λ {>ρ<} _ → |><|-unique (right >ρ<))) (|><|-mk ρ pxs pys)
 
-{-
-    open import Relation.Binary.HeterogeneousEquality using (_≅_; icong) renaming (cong to hcong; cong₂ to hcong₂; refl to hrefl)
-    all-merge-idˡ : ∀ (ρ : 0 + n ≔ n) {xs} (pxs : All P xs) → all-merge ρ [] pxs ≅ pxs
-    all-merge-idˡ zero {[]} [] = hrefl
-    all-merge-idˡ (right ρ) {x ∷ xs} (px ∷ pxs) = {!!}
+    _|>_<|_ : {xs : Vec A n} {ys : Vec A m} → All P xs → (>ρ< : xs > ρ < ys ≔ zs) → All P ys → All P (xs > ρ < ys)
+    _|>_<|_ {n = n} {m = m} {ρ = ρ} {xs = xs} {ys = ys} pxs >ρ< pys
+      with _ , ρ' , uρ ← +-mk n m
+      with refl ← uρ ρ
+      with _ , >ρ<' , u>ρ< ← ><-mk ρ xs ys
+      with refl ← u>ρ< >ρ<
+      with pzs , _ , _ ← |><|-mk >ρ< pxs pys
+      = pzs
 
-    all-merge-++ : ∀ (ρ : n + k ≔ l) {xs : Vec A m} {ys : Vec A n} {zs : Vec A k}
-                 → (pxs : All P xs) {pys : All P ys} {pzs : All P zs}
-                 → all-++ pxs (all-merge ρ pys pzs) ≅ all-merge (extend m ρ) (all-++ pxs pys) pzs
-    all-merge-++ ρ [] = {!!}
-    all-merge-++ ρ (px ∷ pxs) {pys} {pzs} =  hcong₂ _∷_ hrefl (all-merge-++ ρ pxs)
--}
+    _|++|_ : {xs : Vec A n} {ys : Vec A m} → All P xs → All P ys → All P (xs ++ ys)
+    _|++|_ {n = n} {m = m} {xs = xs} {ys = ys} pxs pys
+      with _ , ρ , uρ ← +-mk n m
+      with _ , >ρ< , u>ρ< ← ><-mk ρ xs ys
+      with pzs , _ , _ ← |><|-mk >ρ< pxs pys
+      = pzs
+
+    |><|-assoc : {pxs : All P xs} {pys : All P ys} {pzs : All P zs} {pws : All P ws}
+               → (>ρ< : xs > ρ < ys ≔ xys) (>ξ< : xys > ξ < zs ≔ ws)
+               → ∃ (pxs |> >ρ< <| pys ≔_ <*>   _|> >ξ< <| pzs ≔ pws)
+               → Σ[ ml ∈ ℕ ] Σ[ ρ' ∈ n + ml ≔ k ] Σ[ ξ' ∈ m + l ≔ ml ]
+                 Σ[ yzs ∈ Vec A ml ] Σ[ >ρ'< ∈ xs > ρ' < yzs ≔ ws ] Σ[ >ξ'< ∈ ys > ξ' < zs ≔ yzs ]
+                 ∃ (pxs |> >ρ'< <|_≔ pws <*> pys |> >ξ'< <| pzs ≔_)
+
+    |><|-assoc {ξ = ξ} .zero >ξ< (_ , zero , r)
+      with refl ← +-unique ξ +-identityˡ
+      with refl ← ><-unique >ξ< ><-identityˡ
+      with refl ← |><|-unique r |><|-identityˡ
+      = _ , +-identityˡ , +-identityˡ
+      , _ , ><-identityˡ , ><-identityˡ
+      , _ , |><|-identityˡ , |><|-identityˡ
+    |><|-assoc .(left _) .(left _) (_ , left l , left r)
+      with _ , _ , _ , _ , _ , _ , _ , l' , r' ← |><|-assoc _ _ (_ , l , r)
+      = _ , _ , _ , _ , _ , _ , _ , left l' , r'
+    |><|-assoc .(left _) .(right _) (_ , left l , right r)
+      with _ , _ , _ , _ , _ , _ , _ , l' , r' ← |><|-assoc _ _ (_ , left l , r)
+      = _ , _ , _ , _ , _ , _ , _ , right l' , right r'
+    |><|-assoc .(right _) .(left _) (_ , right l , left r)
+      with _ , _ , _ , _ , _ , _ , _ , l' , r' ← |><|-assoc _ _ (_ , l , r)
+      = _ , _ , _ , _ , _ , _ , _ , right l' , left r'
+    |><|-assoc .(right _) .(right _) (_ , right l , right r)
+      with _ , _ , _ , _ , _ , _ , _ , l' , r' ← |><|-assoc _ _ (_ , right l , r)
+      = _ , _ , _ , _ , _ , _ , _ , right l' , right r'
