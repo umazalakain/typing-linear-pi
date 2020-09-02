@@ -39,7 +39,7 @@
 \label{app:lemmas}
 
 \begin{nilemma}
-  \label{lm:renaming-unused}
+  \label{lm:substitution-unused}
   For every variables $i$ and $j$, if $i \not\equiv j$ then $\Unused_i (\subst{P}{j}{i})$.
 \end{nilemma}
 \begin{proof}
@@ -182,14 +182,14 @@ Full proof in \cite{Zalakain2020Agda}.
   \end{itemize}
 \end{proof}
 
-\section{Renaming}
-\label{app:renaming-generalization}
+\section{Substitution}
+\label{app:substitution-generalization}
 
-\begin{nitheorem}[Generalised renaming]
+\begin{nitheorem}[Generalised substitution]
   \label{thm:subst-generalization1}
   Let process $P$ be well-typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   The substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
-  Renaming will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
+  Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
   In other words, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
   \begin{multicols}{2}
   \begin{itemize}
@@ -201,7 +201,7 @@ Full proof in \cite{Zalakain2020Agda}.
   \end{multicols}
   Let $\Gamma$ and $\Psi$ be related such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
   Let $\Delta$ have a usage annotation $\lz$ at position $i$, so that all consumption from $m$ to $n$ must happen in $P$.
-  Then renaming $i$ to $j$ in $P$ will be well-typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+  Then substituting $i$ to $j$ in $P$ will be well-typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
   Refer to \autoref{fig:subst} for a diagramatic representation.
 \end{nitheorem}
 

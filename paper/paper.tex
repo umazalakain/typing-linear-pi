@@ -142,14 +142,11 @@ The authors would also like to thank the anonymous referees fortheir valuable co
   The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
   It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, including \emph{session types} \cite{H93,THK94,HVK98}.
 
-  We present the \emph{first} full mechanisation in Agda of a \picalc{} with \emph{linear}, \emph{graded} and \emph{shared} types, all under the same unified framework.
-  While linearity is key for type safety in communication-centric programming, graded and shared types are needed to model real-world software systems.
-  
-  We present the syntax, semantics, type system and corresponding type safety properties.
-  For the first time in the \picalc{}, we use leftover typing \cite{Allais2018a} to encode our typing rules in a way that propagates usage constraints into process continuations and requires of no top-down context splits.
-  We generalise the algebras on multiplicities, allowing the user to choose a mix of linear, graded and shared typing.
-  Thanks to leftover typing, we provide a framing theorem, and generalise the weakening and strengthening theorems, and use them to prove subject congruence.
-  We show that the type system is stable under renaming and prove subject reduction.
+  We present the syntax, semantics, type system and corresponding type safety properties for the \picalc{}.
+  We generalise the algebras on multiplicities, and allow the user to use a mix of \emph{linear}, \emph{graded} and \emph{shared} types.
+  We use leftover typing \cite{Allais2018a} to encode our typing rules, thus avoiding the ubiquitous context splitting proofs so common in type systems for linear calculi.
+  We provide a framing theorem, and generalise the weakening and strengthening theorems, and use them to prove subject congruence.
+  We show that the type system is stable under substitution and prove subject reduction.
 %
   Our formalisation is fully mechanised in Agda.
 \end{abstract}
@@ -168,27 +165,22 @@ Notably, it features channel mobility: channels themselves are first class value
 The \picalc{} has been a foundation for the design and implementation of programming languages for concurrency, such as Pict \cite{PierceT00} and (more recently) Go \footnote{https://golang.org}.
 At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, types for liveness properties (such as deadlock freedom, livelock freedom or termination), and most notably, session types. This makes the \picalc{} a fully-fledged tool for modelling and verification of concurrent and distributed systems.
 
-In a parallel track, J.-Y. Girard's development of linear logic \cite{Girard87} opened new avenues in computing science in the early '90s by introducing \emph{linear types} for (functional) programming languages \cite{Wadler90,Bernardy2018}.
+J.-Y. Girard's development of linear logic \cite{Girard87} opened new avenues in computing science in the early '90s by introducing \emph{linear types} for (functional) programming languages \cite{Wadler90,Bernardy2018}.
 Linear type systems guarantee that resources are used \emph{exactly once}.
 Enforcing ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
-Later on, linearity inspired unique types (as in Clean \cite{BarendsenS96}) and ownership types (as in Rust \cite{MatsakisK14}).
+Linearity later on inspired unique types (as in Clean \cite{BarendsenS96}) and ownership types (as in Rust \cite{MatsakisK14}).
 
-The \picalc{} also benefited from the linearity wave of the early '90s.
-Kobayashi et al. \cite{KPT96} defined the {linear} \picalc{}, a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
+Kobayashi et al. \cite{KPT96} brought linearity to the \picalc{} and provided a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
 %
-In the meantime, with the rise of \emph{session types} \cite{H93,THK94,HVK98} linearity acquired a different flavour in the \picalc{}.
-Session types are a type formalism used in communication-centric programming.
-In session types, linearity ensures that a channel is owned by exactly one communicating participant, whilst the channel itself is used multiple times as per its session type.
+In the meantime, linearity acquired a different flavour with the rise of \emph{session types} \cite{H93,THK94,HVK98} --- a formalism used in communication-centric programming.
+With session types, linearity ensures that a channel is owned by exactly one communicating participant --- the channel itself is used multiple times, as per its session type.
 Linearity in session types is the key ingredient that guarantees type safety.
 
-Recent work has pushed the linear \picalc{} into the spotlight again \cite{KPT96} thanks to an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17}.
-This encoding not only has theoretical benefits in terms of the expressivity of session types and the reusability of theoretical results from the linear \picalc{}, but is useful in practice, too.
-The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}.
-This allows us to use the linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be built.
+Recently, an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17} has pushed the linear \picalc{} into the spotlight again \cite{KPT96}.
+This encoding not only has theoretical benefits in terms of the expressivity of session types and the reusability of theoretical results from the linear \picalc{}, but is useful in practice too.
+The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}, and it also allows us to use the linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be built.
 
-Considering the relevance of the \picalc{} and of linearity in modelling concurrent and distributed systems, in this paper we focus our research on both and go beyond.
-
-\emph{We present the first full mechanisation in Agda of a \picalc{} with linear, graded and shared types, all under the same unified framework.}
+\emph{In this paper we present the first full mechanisation in Agda of a \picalc{} with linear, graded and shared types, all under a common unified framework.}
 
 We do so by defining a specification for an algebra on \emph{multiplicities} (how many times a channel can be used) and use it to apply leftover typing (following Allais \cite{Allais2018a}) to the \picalc{} for the first time.
 The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
@@ -229,7 +221,7 @@ Ultimately, we can exploit this formalisation as a unified framework for type sa
   \item \textbf{Fully mechanised formalisation and type safety proofs}:
     \autoref{type-safety} presents the type safety properties of our \picalc{} with leftovers.
     Leftover typing for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and generalises the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
-    We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{renaming} (\autoref{thm:renaming}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
+    We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
 
     The formalisation of the \picalc{} with leftovers has been fully mechanised in Agda%
 \begin{anonsuppress}
@@ -477,7 +469,7 @@ We distinguish between channels that are created inside of the process ($\constr
 
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
-After this renaming, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:renaming-unused} in \autoref{app:lemmas} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
+After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:substitution-unused} in \autoref{app:lemmas} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
@@ -967,12 +959,12 @@ states that applying structural congruence rules to a well typed process preserv
 .
 \end{proof}
 
-\subparagraph*{Renaming}
-\autoref{thm:renaming-generalization} proves a generalised version of renaming, where the renaming $\subst{P}{j}{i}$ is on any variable $i$.
-\autoref{thm:renaming} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
+\subparagraph*{Substitution}
+\autoref{thm:substitution-generalization} proves a generalised version of substitution, where the substitition $\subst{P}{j}{i}$ is on any variable $i$.
+\autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
-\begin{nitheorem}[Generalised renaming]
-  \label{thm:renaming-generalization}
+\begin{nitheorem}[Generalised substitution]
+  \label{thm:substitution-generalization}
   Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   Then, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
   \begin{multicols}{2}
@@ -985,12 +977,12 @@ states that applying structural congruence rules to a well typed process preserv
   \end{multicols}
   Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
   Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
-  Then renaming $i$ to $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
+  Then substituting $i$ to $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
 \end{nitheorem}
 
 \begin{proof}[Proof (Sketch)]
   By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  Full details are found in \autoref{app:renaming-generalization}.
+  Full details are found in \autoref{app:substitution-generalization}.
   \begin{itemize}
    \item
      Constructor $\PO$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
@@ -1034,7 +1026,7 @@ states that applying structural congruence rules to a well typed process preserv
       \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
     \end{tikzpicture}
     \caption{
-      Diagrammatic representation of the $\comp{}{}$ case for renaming.
+      Diagrammatic representation of the $\comp{}{}$ case for substitution.
       Continuous lines represent known facts, dotted lines proof obligations.
     }
     \label{fig:subst}
@@ -1064,20 +1056,20 @@ states that applying structural congruence rules to a well typed process preserv
     \end{tikzpicture}
     \caption{
       Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
-      This approach makes composing typing derivations before and after renaming more difficult.
+      This approach makes composing typing derivations before and after subsitution more difficult.
     }
     \label{fig:subst-alternative}
 \end{figure}
 
-\begin{nitheorem}[Renaming]
-  \label{thm:renaming}
+\begin{nitheorem}[Substitution]
+  \label{thm:substitution}
   Let $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
-  Then, we can rename the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
+  Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
 \end{nitheorem}
 \begin{proof}[Proof (Sketch)]
   We use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
-  Then, we use these to apply \autoref{thm:renaming-generalization}.
+  Then, we use these to apply \autoref{thm:substitution-generalization}.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -1104,7 +1096,7 @@ In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}
   \hfill{}\\
   \begin{itemize}
     \item
-    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), renaming (\autoref{thm:renaming}) and strengthening (\autoref{thm:strengthening}).
+    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
   
     \item
     Case $\constr{par}$: by induction on the process that is being reduced.
