@@ -180,7 +180,7 @@ Recently, an encoding of session types into linear types \cite{DardhaGS12,Dardha
 This encoding not only has theoretical benefits in terms of the expressivity of session types and the reusability of theoretical results from the linear \picalc{}, but is useful in practice too.
 The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}, and it also allows us to use the linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be built.
 
-\emph{In this paper we present the first full mechanisation in Agda of a \picalc{} with linear, graded and shared types, all under a common unified framework.}
+\emph{We present the first full mechanisation in Agda of a \picalc{} with linear, graded and shared types, all under a common unified framework.}
 
 We do so by defining a specification for an algebra on \emph{multiplicities} (how many times a channel can be used) and use it to apply leftover typing (following Allais \cite{Allais2018a}) to the \picalc{} for the first time.
 The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
@@ -773,11 +773,11 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \begin{example}[Variable reference]
   \autoref{lst:channels} types a variable reference under a linear algebra.
   \begin{lstlisting}[label=lst:channels,mathescape,numbers=left,caption=Typing variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.]
-_ : $\contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
-_ = $\suc \constr{0}$
+$\_ \; : \; \contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
+$\_ \; = \; \suc \constr{0}$
 
-_ : $\contains{\constr{[]} \comma \channel{\unit}{\li}} {\constr{[]} \comma \lio} {\constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo}$
-_ = $\constr{0}$
+$\_ \; : \; \contains{\constr{[]} \comma \channel{\unit}{\li}} {\constr{[]} \comma \lio} {\constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo}$
+$\_ \; = \; \constr{0}$
   \end{lstlisting}
   The underscore \_ introduces an anonymous declaration immediately followed by its definition.
   We must show that the variable at position $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $\constr{[]} \comma \channel{\unit}{\li} \comma \unit$ and a usage context $\constr{[]} \comma \lio \comma \lio$.
@@ -814,19 +814,19 @@ _ = $\constr{0}$
   
     \inferrule
         {\stacked{
-            chan_i : \contains{\gamma \hspace{1.2em}}{\Gamma \hspace{1.3em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
-            cont \hspace{0.6em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{4.6em}}{\Theta \comma \lz}}}
+            chan_i : \contains{\gamma \hspace{1.0em}}{\Gamma \hspace{1.0em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
+            cont \hspace{0.5em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{4.2em}}{\Theta \comma \lz}}}
         {\recv{chan_i}{} cont : \types{\gamma}{\Gamma}{\recv{i}{}P}{\Theta}}
   
     \inferrule
         {\stacked{
-            chan_i : \contains{\gamma}{\Gamma \hspace{0.2em}}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
-            loc_j \hspace{0.8em} : \contains{\gamma}{\Delta}{j}{t \hspace{3.2em}}{x \hspace{0.3em}}{\Xi} \\\\
-            cont \hspace{0.6em} : \types{\gamma}{\Xi \hspace{0.3em}}{P\hspace{4.8em}}{\Theta}}}
+            chan_i : \contains{\gamma}{\Gamma \hspace{0.1em}}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
+            loc_j \hspace{0.7em} : \contains{\gamma}{\Delta}{j}{t \hspace{2.8em}}{x \hspace{0.2em}}{\Xi} \\\\
+            cont \hspace{0.5em} : \types{\gamma}{\Xi}{\hspace{0.4em}P\hspace{4.0em}}{\Theta}}}
         {\send{chan_i}{loc_j} cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
   
     \inferrule
-    {l \hspace{0.3em} : \types{\gamma}{\Gamma \hspace{0.2em}}{P}{\Delta} \\\\
+    {l : \types{\gamma}{\Gamma}{P\hspace{0.3em}}{\Delta} \\\\
      r : \types{\gamma}{\Delta}{Q}{\Xi}}
     {\comp{l}{r} : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
   \end{mathpar}
@@ -859,17 +859,34 @@ _ = $\constr{0}$
   We use $\func{\omega}$ as a shortcut for $\one \comma \one$ in an algebra of shared types.
 
   \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing two processes that send parts of one channel over another.]
-$\func{P}$ : $\Process_{\suc \suc \constr{0}}$
-$\func{P}$ = $\comp{(\new{} \; (\send{\suc \; \constr{0}} {\constr{0}} \send{\constr{0}}{\suc \; \suc \; \constr{0}} \PO))}{\recv{\constr{0}}{\recv{\constr{0}}{}} \PO}$
+  $\func{sync} \; : \; \forall \{n\} \to \Var_n \to \Var_n \to \Var_n \to \Process_n$
+  $\func{sync} \; i0 \; i1 \; o \; =$
+    $\recv{i0}{} \recv{(\suc \; i1)}{} \send{(\suc \suc \; o)}{\suc \constr{0}} \send{(\suc \suc \; o)}{\constr{0}} \PO$
 
-$\func{\gamma}$ : $\PreCtx_{\suc \suc \constr{0}}$
-$\func{\gamma}$ = $\constr{[]} \comma \unit \comma \channel{\channel{\unit}{\func{\omega}}}{\li}$
+  $\func{send} \; : \; \forall \{n\} \to \Var_n \to \Process_n$
+  $\func{send} \; c \; = \new{} (\send{\suc c}{\constr{0}} \PO)$
 
-$\func{\vdash P}$ : $\forall \{n\} \to \types{\func{\gamma}}{\constr{[]} \comma \func{\omega} \comma (\suc n \comma \suc n)}{\func{P}}{\constr{[]} \comma \func{\omega} \comma (n \comma n)}$
-$\func{\vdash P}$ = $\comp{(\new \; \unit \; \func{\omega} \; \one \; (\send{\suc \; \constr{0}}{\constr{0}} \; \send{\constr{0}}{\suc \; \suc \; \constr{0}} \PO))} {\recv{\constr{0}}{} \; \recv{\constr{0}}{} \PO}$
+  $\func{recv} \; : \; \forall \{n\} \to \Var_n \to \Process_n$
+  $\func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO)$
 
-$\func{\vdash PP}$ : $\types{\constr{[]} \comma \unit}{\constr{[]} \comma \func{\omega}}{\new{} \comp{\func{P}}{\func{P}}}{\constr{[]} \comma \func{\omega}}$
-$\func{\vdash PP}$ = $\new \; \channel{\unit}{\func{\omega}} \; \li \; (\suc \suc \constr{0}) \; (\comp{\vdash P}{\vdash P})$
+  $\func{example} \; : \; \Process_{\constr{0}}$
+  $\func{example} \; = \new{} ( \func{send} \; \constr{0}$
+           $\comp{}{ \new{} ( \func{send} \; \constr{0} }$
+             $\comp{}{ \new{} ( \func{recv} \; \constr{0} }$
+               $\comp{}{ \func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) }$
+
+
+  $\func{\_} \; : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}}$
+  $\func{\_} = \new{} \; \channel{\unit}{\omega} \; \lz \; 1$
+    $( (\send{\suc \constr{0}}{\constr{0}} \PO)$
+    $\comp{}{ \new{} \; \channel{\unit}{\omega} \; \lz \; 1 }$
+      $( (\send{\suc \constr{0}}{\constr{0}} \PO)$
+      $\comp{}{ \new{} \; \channel{\unit}{\omega} \; \lz \; 2 }$
+        $( (\recv{\constr{0}}{} (\recv{\suc \constr{0}}{} \PO))$
+        $\comp{}{( ( \recv{\suc (\suc \constr{0}))}{}}$
+          $( \recv{\suc (\suc \constr{0}))}{}$
+          $( \send{\suc (\suc \constr{0}))}{\suc \constr{0}}$
+          $( \send{\suc (\suc \constr{0}))}{\constr{0}} \PO))))$
   \end{lstlisting}
 
   Notice that the \emph{only} differences between the definition of the untyped process $\func{P}$ and its typing derivation are the extra type annotations that accompany scope restriction.

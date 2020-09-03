@@ -3,7 +3,7 @@
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Bool using (Bool; true; false)
 open import Data.Unit using (⊤; tt)
-open import Data.Fin using (zero; suc) renaming (#_ to #'_)
+open import Data.Fin using (Fin; zero; suc) renaming (#_ to #'_)
 open import Data.Product using (_,_)
 open import Data.Vec using (Vec; []; _∷_)
 open import Data.Vec.Relation.Unary.All using (All; []; _∷_)
@@ -162,6 +162,39 @@ module Shared-Graded-Linear where
 
   ⊢P∥P : [] -, 𝟙 ；[ [] -, sha ] [] -, ω∙ ⊢ ν (P ∥ P) ▹ ε
   ⊢P∥P = ν C[ 𝟙 ； ω∙ ] ℓᵢ 2 (⊢P ∥ ⊢P)
+
+  sync : ∀ {n} → Fin n → Fin n → Fin n → Scoped n
+  sync i0 i1 o =
+    i0 ⦅⦆
+    suc i1 ⦅⦆
+    suc (suc o) ⟨ suc zero ⟩
+    suc (suc o) ⟨ zero ⟩ 𝟘
+
+  send : ∀ {n} → Fin n → Scoped n
+  send c = ν (suc c ⟨ zero ⟩ 𝟘)
+
+  recv : ∀ {n} → Fin n → Scoped n
+  recv c = c ⦅⦆ (suc c ⦅⦆ 𝟘)
+
+  example : Scoped 0
+  example = ν ( send zero
+              ∥ ν ( send zero
+                  ∥ ν ( recv zero
+                      ∥ sync (#' 2) (#' 1) (#' 0))))
+
+
+  _ : [] ； [] ⊢ example ▹ []
+  _ = ν C[ 𝟙 ； ω∙ ] {lin} ℓ∅ {gra} 1
+        ( ν 𝟙 {sha} ω∙ {lin} 0∙ (there here ⟨ here ⟩ 𝟘)
+        ∥ ν C[ 𝟙 ； ω∙ ] {lin} ℓ∅ {gra} 1
+          ( ν 𝟙 {sha} ω∙ {lin} 0∙ (there here ⟨ here ⟩ 𝟘)
+          ∥ ν C[ 𝟙 ； ω∙ ] {lin} ℓ∅ {gra} 2
+            ( (here ⦅⦆ (there here ⦅⦆ 𝟘))
+            ∥ ( (there (there here)) ⦅⦆
+                (there (there here)) ⦅⦆
+                (there (there here)) ⟨ there here ⟩
+                (there (there here)) ⟨ here ⟩ 𝟘
+                ))))
 
 module Linear where
   QUANTIFIERS : Algebras
