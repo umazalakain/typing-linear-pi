@@ -96,14 +96,14 @@ _ = _ , stop scope-end
 
 
 module Shared-Graded-Linear where
-  data Usage : Set where
-    sha gra lin : Usage
+  data Grading : Set where
+    sha gra lin : Grading
 
   pattern 0∙ = false
   pattern 1∙ = true
 
   QUANTIFIERS : Algebras
-  Algebras.Idx QUANTIFIERS = Usage
+  Algebras.Idx QUANTIFIERS = Grading
   Algebras.∃Idx QUANTIFIERS = sha
   Algebras.Usage QUANTIFIERS sha = ⊤
   Algebras.Usage QUANTIFIERS gra = ℕ
@@ -170,31 +170,44 @@ module Shared-Graded-Linear where
     suc (suc o) ⟨ suc zero ⟩
     suc (suc o) ⟨ zero ⟩ 𝟘
 
-  send : ∀ {n} → Fin n → Scoped n
-  send c = ν (suc c ⟨ zero ⟩ 𝟘)
+  send : ∀ {n} → Fin n → Fin n → Scoped n
+  send c v = c ⟨ v ⟩ 𝟘
 
   recv : ∀ {n} → Fin n → Scoped n
   recv c = c ⦅⦆ (suc c ⦅⦆ 𝟘)
 
   example : Scoped 0
-  example = ν ( send zero
-              ∥ ν ( send zero
+  example = ν ( ν (send (suc zero) zero)
+              ∥ ν ( ν (send (suc zero) zero)
                   ∥ ν ( recv zero
                       ∥ sync (#' 2) (#' 1) (#' 0))))
 
 
+  ⊢-send : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type}
+         → γ -, C[ t ； ℓ∅ ] -, t ；[ idxs -, gra -, lin ] Γ -, (1 , 1) -, ℓ∅ ⊢ send (suc zero) zero ▹ Γ -, (1 , 0) -, ℓ∅
+  ⊢-send = (there here ⟨ here ⟩ 𝟘)
+
+  ⊢-recv : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type}
+         → γ -, (C[_；_] {idx = lin} t ℓ∅) ；[ idxs -, gra ] Γ -, (2 , 2) ⊢ recv zero ▹ Γ -, (0 , 2)
+  ⊢-recv = here ⦅⦆ (there here ⦅⦆ 𝟘)
+
+  ⊢-sync : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type}
+         → γ -, C[_；_] {idx = lin} t ℓ∅ -, C[ t ； ℓ∅ ] -, C[ t ； ℓ∅ ]
+         ；[ idxs -, gra -, gra -, gra ]
+         Γ -, (1 , 0) -, (1 , 0) -, (0 , 2) ⊢ sync (#' 2) (#' 1) (#' 0) ▹ Γ -, (0 , 0) -, (0 , 0) -, (0 , 0)
+  ⊢-sync = (there (there here)) ⦅⦆
+           (there (there here)) ⦅⦆
+           (there (there here)) ⟨ there here ⟩
+           (there (there here)) ⟨ here ⟩ 𝟘
+
   _ : [] ； [] ⊢ example ▹ []
-  _ = ν C[ 𝟙 ； ω∙ ] {lin} ℓ∅ {gra} 1
-        ( ν 𝟙 {sha} ω∙ {lin} 0∙ (there here ⟨ here ⟩ 𝟘)
-        ∥ ν C[ 𝟙 ； ω∙ ] {lin} ℓ∅ {gra} 1
-          ( ν 𝟙 {sha} ω∙ {lin} 0∙ (there here ⟨ here ⟩ 𝟘)
-          ∥ ν C[ 𝟙 ； ω∙ ] {lin} ℓ∅ {gra} 2
-            ( (here ⦅⦆ (there here ⦅⦆ 𝟘))
-            ∥ ( (there (there here)) ⦅⦆
-                (there (there here)) ⦅⦆
-                (there (there here)) ⟨ there here ⟩
-                (there (there here)) ⟨ here ⟩ 𝟘
-                ))))
+  _ = ν _ _ _
+        ( ν _ _ _ ⊢-send
+        ∥ ν _ _ _
+          ( ν _ {sha} _ _ ⊢-send
+          ∥ ν C[ 𝟙 ； _ ] _ _
+            ( ⊢-recv
+            ∥ ⊢-sync )))
 
 module Linear where
   QUANTIFIERS : Algebras

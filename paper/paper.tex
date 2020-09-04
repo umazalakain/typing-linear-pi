@@ -854,50 +854,71 @@ $\_ \; = \; \constr{0}$
 \end{nidefinition}
 
 \begin{example}[Typing derivation]
-  \label{example-derivations}
-  In \autoref{lst:derivation} we illustrate a typing derivation using shared, graded and linear types.
-  We use $\func{\omega}$ as a shortcut for $\one \comma \one$ in an algebra of shared types.
+\label{example-derivations}
 
-  \begin{lstlisting}[label=lst:derivation,mathescape,numbers=left,caption=Typing two processes that send parts of one channel over another.]
-  $\func{sync} \; : \; \forall \{n\} \to \Var_n \to \Var_n \to \Var_n \to \Process_n$
-  $\func{sync} \; i0 \; i1 \; o \; =$
-    $\recv{i0}{} \recv{(\suc \; i1)}{} \send{(\suc \suc \; o)}{\suc \constr{0}} \send{(\suc \suc \; o)}{\constr{0}} \PO$
+We present an example with four parallel processes: two processes that send data over a channel; one that receives data over a channel twice; and a fourth process that sticks the previous processes together and synchronizes them.
 
-  $\func{send} \; : \; \forall \{n\} \to \Var_n \to \Process_n$
-  $\func{send} \; c \; = \new{} (\send{\suc c}{\constr{0}} \PO)$
+We start by defining the process doing the synchronization.
+This process sequentially receives data on both input channels and then sends on the output channel both pieces of received data.
+For simplicity, when we type this process we instantiate it to variable references and usage annotations.
+We expect both input channels to be graded and capable of performing input once.
+The output channel must be capable of performing output twice.
+Notice that the well-typedness proof has no choice but to blindly follow the syntax.
 
-  $\func{recv} \; : \; \forall \{n\} \to \Var_n \to \Process_n$
-  $\func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO)$
+\begin{flalign*}
+& \func{sync} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
+& \func{sync} \; in0 \; in1 \; out \; &&= \\
+& && \recv{in0}{} \\
+& && \recv{(\suc \; in1)}{} \\
+& && \send{(\suc \suc \; out)}{\suc \constr{0}} \\
+& && \send{(\suc \suc \; out)}{\constr{0}} \PO \\
+\end{flalign*}
+\begin{flalign*}
+& \func{\vdash sync} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (1 \comma 0) \comma (1 \comma 0) \comma (0 \comma 2)\\ & &&}{\func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (0 \comma 0) \comma (0 \comma 0) \comma (0 \comma 0)} & \\
+& \func{\vdash sync} && = \\
+& && \recv{\suc \suc \constr{0}}{} \\
+& && \recv{\suc \suc \constr{0}}{} \\
+& && \send{\suc \suc \constr{0}}{\suc \constr{0}} \\
+& && \send{\suc \suc \constr{0}}{\constr{0}} \PO \\
+\end{flalign*}
 
-  $\func{example} \; : \; \Process_{\constr{0}}$
-  $\func{example} \; = \new{} ( \func{send} \; \constr{0}$
-           $\comp{}{ \new{} ( \func{send} \; \constr{0} }$
-             $\comp{}{ \new{} ( \func{recv} \; \constr{0} }$
-               $\comp{}{ \func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) }$
+Next, we define the processes doing the input and output.
+This time too, we instantiate them to concrete variable references for typing.
 
+\begin{flalign*}
+& \func{recv} \; : \; \Var_n \to \Process_n & \\
+& \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO) \\
+& \\
+& \func{\vdash recv} \; \types{\gamma \comma \channel{t}{\lz}}{\Gamma \comma (2 , 2)}{\func{recv} \; \constr{0}}{\Gamma \comma (0 \comma 2)} & \\
+& \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
+& \\
+& \func{send} \; : \; \Var_n \to \Var_n \to \Process_n & \\
+& \func{send} \; c \; v \; = \send{c}{v} \PO \\
+& \\
+& \func{\vdash send} \; \types{\gamma \comma \channel{t}{\lz} \comma t}{\Gamma \comma (1 , 1) \comma \lz}{\func{send} \; (\suc \constr{0}) \; \constr{0}}{\Gamma \comma (1 \comma 0)\comma \lz} & \\
+& \func{\vdash send} \; = \; \send{(\suc \constr{0})}{\constr{0}} \PO
+\end{flalign*}
 
-  $\func{\_} \; : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}}$
-  $\func{\_} = \new{} \; \channel{\unit}{\omega} \; \lz \; 1$
-    $( (\send{\suc \constr{0}}{\constr{0}} \PO)$
-    $\comp{}{ \new{} \; \channel{\unit}{\omega} \; \lz \; 1 }$
-      $( (\send{\suc \constr{0}}{\constr{0}} \PO)$
-      $\comp{}{ \new{} \; \channel{\unit}{\omega} \; \lz \; 2 }$
-        $( (\recv{\constr{0}}{} (\recv{\suc \constr{0}}{} \PO))$
-        $\comp{}{( ( \recv{\suc (\suc \constr{0}))}{}}$
-          $( \recv{\suc (\suc \constr{0}))}{}$
-          $( \send{\suc (\suc \constr{0}))}{\suc \constr{0}}$
-          $( \send{\suc (\suc \constr{0}))}{\constr{0}} \PO))))$
-  \end{lstlisting}
+Finally, we put the four processes together in parallel.
+It is here that the well-typedness proof must make a choice as to what types and usage annotations to instantiate new channels with.
+In this case, these types and usage annotations were determined by the types of the previous subproofs, and we can thus omit most of them with $\_$ and have Agda find them.
+We use $\func{\omega}$ as a shortcut for $\one \comma \one$ in an algebra of shared types.
 
-  Notice that the \emph{only} differences between the definition of the untyped process $\func{P}$ and its typing derivation are the extra type annotations that accompany scope restriction.
-  This extra information demands a (limited) choice.
-  To type $\func{P}$, we need a channel over which we can transmit another channel.
-  We therefore create a new channel with usage annotations $\one \comma \one$ capable of transmitting data of type $\channel{\unit}{\func{\omega}}$, and declare (with $\li$) that we only transmit input capabilities over it (line 9).
-  The left-hand process (line 3) is typed following its syntax (line 10).
-  For the right-hand (lines 4-5) we need the channel that is going to be sent (lines 11-12).
-  The type $\unit$ of this channel is entirely determined by the type $\channel{\unit}{\func{\omega}}$ of the channel over which it is going to be transmitted.
-  Its usage annotation is $\one \comma \one$: we will transmit $\one \comma \zero$ and save $\zero \comma \one$ for the continuation process.
-  
+\begin{flalign*}
+& \func{example} && : \; \Process_{\constr{0}} & \\
+& \func{example} && = \new{} ( ( \new{} (\func{send} \; \suc \constr{0} \; \constr{0})) \\
+& && \comp{}{ \new{} ( (\new{} (\func{send} \; \suc \constr{0} \; \constr{0} })) \\
+& && \comp{}{ \new{} ( \func{recv} \; \constr{0} } \\
+& && \comp{}{ \func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
+\end{flalign*}
+\begin{flalign*}
+& \func{\vdash example} && : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}} & \\
+& \func{\vdash example} && = \new{} \; \_ \; \_ \; \_ \; (( \new{} \; \_ \; \_ \; \_ \; \func{\vdash send}) \\
+& && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; (( \new{} \; \_ \; \_ \; \_ \; \func{\vdash send}) \\
+& && \comp{}{ \new{} \; \channel{\unit}{\func{\omega}} \; \_ \; \_ } \; ( \func{\vdash recv} \\
+& && \comp{}{ \func{\vdash sync} }))) \\
+\end{flalign*}
+
 \end{example}
 
 
