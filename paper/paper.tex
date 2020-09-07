@@ -230,6 +230,64 @@ and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 .
 \end{enumerate}
 
+\begin{example}[Example process]
+\label{example-process}
+
+We present an example that highlights the ways in which graded types can be used to prevent mistakes in the definition of \picalc{} processes.
+The syntax uses Bruijn indices as variable references and is introduced in detail in \autoref{syntax}.
+In short: $\new{} P$ creates a new channel and makes it available at index $0$ in $P$; $\comp{P}{Q}$ composes $P$ and $Q$ in parallel; $\recv{x}{}P$ receives along channel $x$ and makes the data available at index $0$ in $P$; and $\send{x}{y}{P}$ sends $y$ over channel $x$ and continues with $P$.
+Both variable references and processes are indexed by the number of free variables they can refer to (for any natural number $n$, $\Var_n$ and $\Process_n$, respectively).
+For the sake of clarity, we define the example subprocesses separately and parametrise them by the channels on which they operate.
+
+\begin{figure}[h]
+  \tiny
+  \centering
+  \begin{tikzpicture}[draw,circle]
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=orange] (send-x) at (0,2)   {$\func{send} \, x$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=orange] (send-y) at (2,2)   {$\func{send} \, y$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=green] (recv-z) at (4,2)   {$\func{recv} \, z$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown,align=center] (sync) at (2,0)   {$\func{sync}$\\$ \, x \, y \, z$};
+
+    \draw[->] (send-x) -- node[left] {$x$} (sync);
+    \draw[->] (send-y) -- node[right] {$y$} (sync);
+    \draw[->] (sync.35) -- node[right] {$z$} (recv-z.240);
+    \draw[->] (sync) -- (recv-z);
+  \end{tikzpicture}
+  \caption{Four communicating processes composed in parallel.}
+  \label{fig:example-process}
+\end{figure}
+
+The example contains four processes that are composed in parallel: two of them send data over a channel; one receives data twice; the fourth sticks together and synchronizes the previous processes (\autoref{fig:example-process}).
+The process doing the synchronisation first receives on both input channels and then sends the received data along the output channel.
+Thanks for linear and graded types, the processes below have their interactions safely restricted: the usage annotation $(0 \comma 1)$ on channel $c$ (no input, output once) restricts what both $\func{send}$ subprocesses can do; and $(2 \comma 0)$ (input twice, no output) restricts what $\func{send}$ can do.
+Dually, the remaining annotations $(1 \comma 0)$, $(1 \comma 0)$ and $(0 \comma 2)$ are given to the subprocess $\func{sync}$.
+We use these types to give a suitable typing derivation in \autoref{example-derivation}.
+
+\begin{flalign*}
+& \func{recv} \; : \; \Var_n \to \Process_n & \\
+& \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO) \\
+& \\
+& \func{send} \; : \; \Var_n \to \Process_n & \\
+& \func{send} \; c = \new{} \send{\suc c}{\constr{0}} \PO \\
+\end{flalign*}
+\begin{flalign*}
+& \func{sync} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
+& \func{sync} \; in0 \; in1 \; out \; &&= \\
+& && \recv{in0}{} \\
+& && \recv{(\suc \; in1)}{} \\
+& && \send{(\suc \suc \; out)}{\suc \constr{0}} \\
+& && \send{(\suc \suc \; out)}{\constr{0}} \PO \\
+\end{flalign*}
+\begin{flalign*}
+& \func{example} && : \; \Process_{\constr{0}} & \\
+& \func{example} && = \new{} ( \func{send} \; \constr{0} \\
+& && \comp{}{ \new{} ( \func{send} \; \constr{0} } \\
+& && \comp{}{ \new{} ( \func{recv} \; \constr{0} } \\
+& && \comp{}{ \func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
+\end{flalign*}
+
+\end{example}
+
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -568,7 +626,7 @@ We then use pairs of multiplicities as usage annotations for channels.
 \end{nidefinition}
 
 \autoref{fig:algebra-instances} sketches the implementation of linear, graded and shared types as instances of our usage algebra.
-Their use in typing derivations is illustrated in \autoref{example-derivations}.
+Their use in typing derivations is illustrated in \autoref{example-derivation}.
 
 \begin{figure}[h]
 \begin{tabular}{l | l | l}
@@ -854,7 +912,7 @@ $\_ \; = \; \constr{0}$
 \end{nidefinition}
 
 \begin{example}[Typing derivation]
-\label{example-derivations}
+\label{example-derivation}
 
 We present an example with four parallel processes: two processes that send data over a channel; one that receives data over a channel twice; and a fourth process that sticks the previous processes together and synchronizes them.
 
@@ -865,14 +923,6 @@ We expect both input channels to be graded and capable of performing input once.
 The output channel must be capable of performing output twice.
 Notice that the well-typedness proof has no choice but to blindly follow the syntax.
 
-\begin{flalign*}
-& \func{sync} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
-& \func{sync} \; in0 \; in1 \; out \; &&= \\
-& && \recv{in0}{} \\
-& && \recv{(\suc \; in1)}{} \\
-& && \send{(\suc \suc \; out)}{\suc \constr{0}} \\
-& && \send{(\suc \suc \; out)}{\constr{0}} \PO \\
-\end{flalign*}
 \begin{flalign*}
 & \func{\vdash sync} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (1 \comma 0) \comma (1 \comma 0) \comma (0 \comma 2)\\ & &&}{\func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (0 \comma 0) \comma (0 \comma 0) \comma (0 \comma 0)} & \\
 & \func{\vdash sync} && = \\
@@ -886,14 +936,8 @@ Next, we define the processes doing the input and output.
 This time too, we instantiate them to concrete variable references for typing.
 
 \begin{flalign*}
-& \func{recv} \; : \; \Var_n \to \Process_n & \\
-& \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO) \\
-& \\
 & \func{\vdash recv} \; \types{\gamma \comma \channel{t}{\lz}}{\Gamma \comma (2 , 2)}{\func{recv} \; \constr{0}}{\Gamma \comma (0 \comma 2)} & \\
 & \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
-& \\
-& \func{send} \; : \; \Var_n \to \Var_n \to \Process_n & \\
-& \func{send} \; c \; v \; = \send{c}{v} \PO \\
 & \\
 & \func{\vdash send} \; \types{\gamma \comma \channel{t}{\lz} \comma t}{\Gamma \comma (1 , 1) \comma \lz}{\func{send} \; (\suc \constr{0}) \; \constr{0}}{\Gamma \comma (1 \comma 0)\comma \lz} & \\
 & \func{\vdash send} \; = \; \send{(\suc \constr{0})}{\constr{0}} \PO
@@ -904,13 +948,6 @@ It is here that the well-typedness proof must make a choice as to what types and
 In this case, these types and usage annotations were determined by the types of the previous subproofs, and we can thus omit most of them with $\_$ and have Agda find them.
 We use $\func{\omega}$ as a shortcut for $\one \comma \one$ in an algebra of shared types.
 
-\begin{flalign*}
-& \func{example} && : \; \Process_{\constr{0}} & \\
-& \func{example} && = \new{} ( ( \new{} (\func{send} \; \suc \constr{0} \; \constr{0})) \\
-& && \comp{}{ \new{} ( (\new{} (\func{send} \; \suc \constr{0} \; \constr{0} })) \\
-& && \comp{}{ \new{} ( \func{recv} \; \constr{0} } \\
-& && \comp{}{ \func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
-\end{flalign*}
 \begin{flalign*}
 & \func{\vdash example} && : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}} & \\
 & \func{\vdash example} && = \new{} \; \_ \; \_ \; \_ \; (( \new{} \; \_ \; \_ \; \_ \; \func{\vdash send}) \\
