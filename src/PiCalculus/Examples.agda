@@ -170,44 +170,41 @@ module Shared-Graded-Linear where
     suc (suc o) ⟨ suc zero ⟩
     suc (suc o) ⟨ zero ⟩ 𝟘
 
-  send : ∀ {n} → Fin n → Fin n → Scoped n
-  send c v = c ⟨ v ⟩ 𝟘
+  send : ∀ {n} → Fin n → Scoped n
+  send c = ν (suc c ⟨ zero ⟩ 𝟘)
 
   recv : ∀ {n} → Fin n → Scoped n
   recv c = c ⦅⦆ (suc c ⦅⦆ 𝟘)
 
   example : Scoped 0
-  example = ν ( ν (send (suc zero) zero)
-              ∥ ν ( ν (send (suc zero) zero)
+  example = ν ( (send zero)
+              ∥ ν ( (send zero)
                   ∥ ν ( recv zero
                       ∥ sync (#' 2) (#' 1) (#' 0))))
 
 
-  ⊢-send : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type}
-         → γ -, C[ t ； ℓ∅ ] -, t ；[ idxs -, gra -, lin ] Γ -, (1 , 1) -, ℓ∅ ⊢ send (suc zero) zero ▹ Γ -, (1 , 0) -, ℓ∅
-  ⊢-send = (there here ⟨ here ⟩ 𝟘)
+  ⊢-send : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {k l}
+         → γ -, C[_；_] {idx = lin} (C[_；_] {idx = sha} 𝟙 ω∙) ℓ∅ ；[ idxs -, gra ] Γ -, (k , suc l) ⊢ send zero ▹ Γ -, (k , l)
+  ⊢-send = ν _ _ 0∙ (there here ⟨ here ⟩ 𝟘)
 
-  ⊢-recv : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type}
-         → γ -, (C[_；_] {idx = lin} t ℓ∅) ；[ idxs -, gra ] Γ -, (2 , 2) ⊢ recv zero ▹ Γ -, (0 , 2)
+  ⊢-recv : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type} {k l}
+         → γ -, (C[_；_] {idx = lin} t ℓ∅) ；[ idxs -, gra ] Γ -, (suc (suc l) , k) ⊢ recv zero ▹ Γ -, (l , k)
   ⊢-recv = here ⦅⦆ (there here ⦅⦆ 𝟘)
 
-  ⊢-sync : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type}
+  ⊢-sync : ∀ {n} {γ : PreCtx n} {idxs : Idxs n} {Γ : Ctx idxs} {t : Type} {lx rx ly ry lz rz}
          → γ -, C[_；_] {idx = lin} t ℓ∅ -, C[ t ； ℓ∅ ] -, C[ t ； ℓ∅ ]
          ；[ idxs -, gra -, gra -, gra ]
-         Γ -, (1 , 0) -, (1 , 0) -, (0 , 2) ⊢ sync (#' 2) (#' 1) (#' 0) ▹ Γ -, (0 , 0) -, (0 , 0) -, (0 , 0)
+         Γ -, (suc lx , rx) -, (suc ly , ry) -, (lz , suc (suc rz)) ⊢ sync (#' 2) (#' 1) (#' 0) ▹ Γ -, (lx , rx) -, (ly , ry) -, (lz , rz)
   ⊢-sync = (there (there here)) ⦅⦆
            (there (there here)) ⦅⦆
            (there (there here)) ⟨ there here ⟩
            (there (there here)) ⟨ here ⟩ 𝟘
 
   _ : [] ； [] ⊢ example ▹ []
-  _ = ν _ _ _
-        ( ν _ _ _ ⊢-send
-        ∥ ν _ _ _
-          ( ν _ {sha} _ _ ⊢-send
-          ∥ ν C[ 𝟙 ； _ ] _ _
-            ( ⊢-recv
-            ∥ ⊢-sync )))
+  _ = ν _ _ _ ( ⊢-send
+    ∥ ν _ _ _ ( ⊢-send
+    ∥ ν _ _ _ ( ⊢-recv
+    ∥ ⊢-sync )))
 
 module Linear where
   QUANTIFIERS : Algebras

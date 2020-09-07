@@ -259,8 +259,8 @@ For the sake of clarity, we define the example subprocesses separately and param
 
 The example contains four processes that are composed in parallel: two of them send data over a channel; one receives data twice; the fourth sticks together and synchronizes the previous processes (\autoref{fig:example-process}).
 The process doing the synchronisation first receives on both input channels and then sends the received data along the output channel.
-Thanks for linear and graded types, the processes below have their interactions safely restricted: the usage annotation $(0 \comma 1)$ on channel $c$ (no input, output once) restricts what both $\func{send}$ subprocesses can do; and $(2 \comma 0)$ (input twice, no output) restricts what $\func{send}$ can do.
-Dually, the remaining annotations $(1 \comma 0)$, $(1 \comma 0)$ and $(0 \comma 2)$ are given to the subprocess $\func{sync}$.
+Thanks for linear and graded types, the processes below have their interactions safely restricted: both $\func{send}$ processes consume $0$ input and $1$ output multiplicities; $\func{recv}$ consumes $2$ input and $0$ output multiplicities.
+Dually, the process $\func{sync}$ consumes one input multiplicity on the channels shared with $\func{send}$, and two output multiplicities on the channel shared with $\func{recv}$.
 We use these types to give a suitable typing derivation in \autoref{example-derivation}.
 
 \begin{flalign*}
@@ -914,33 +914,28 @@ $\_ \; = \; \constr{0}$
 \begin{example}[Typing derivation]
 \label{example-derivation}
 
-We present an example with four parallel processes: two processes that send data over a channel; one that receives data over a channel twice; and a fourth process that sticks the previous processes together and synchronizes them.
+We provide an example typing derivation for the processes defined in \autoref{example-process}.
+For the sake of simplicity, we instantiate these processes with concrete variable references before typing them.
 
-We start by defining the process doing the synchronization.
-This process sequentially receives data on both input channels and then sends on the output channel both pieces of received data.
-For simplicity, when we type this process we instantiate it to variable references and usage annotations.
+\begin{flalign*}
+  & \func{\vdash send} \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}}{\Gamma \comma (l \comma \suc r)}{\func{send} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
+  & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO \\
+  & \\
+  & \func{\vdash recv} \; \types{\gamma \comma \channel{t}{\lz}}{\Gamma \comma (\suc \suc l \comma r)}{\func{recv} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
+  & \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
+\end{flalign*}
+
 We expect both input channels to be graded and capable of performing input once.
 The output channel must be capable of performing output twice.
 Notice that the well-typedness proof has no choice but to blindly follow the syntax.
 
 \begin{flalign*}
-& \func{\vdash sync} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (1 \comma 0) \comma (1 \comma 0) \comma (0 \comma 2)\\ & &&}{\func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (0 \comma 0) \comma (0 \comma 0) \comma (0 \comma 0)} & \\
+& \func{\vdash sync} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
 & \func{\vdash sync} && = \\
 & && \recv{\suc \suc \constr{0}}{} \\
 & && \recv{\suc \suc \constr{0}}{} \\
 & && \send{\suc \suc \constr{0}}{\suc \constr{0}} \\
 & && \send{\suc \suc \constr{0}}{\constr{0}} \PO \\
-\end{flalign*}
-
-Next, we define the processes doing the input and output.
-This time too, we instantiate them to concrete variable references for typing.
-
-\begin{flalign*}
-& \func{\vdash recv} \; \types{\gamma \comma \channel{t}{\lz}}{\Gamma \comma (2 , 2)}{\func{recv} \; \constr{0}}{\Gamma \comma (0 \comma 2)} & \\
-& \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
-& \\
-& \func{\vdash send} \; \types{\gamma \comma \channel{t}{\lz} \comma t}{\Gamma \comma (1 , 1) \comma \lz}{\func{send} \; (\suc \constr{0}) \; \constr{0}}{\Gamma \comma (1 \comma 0)\comma \lz} & \\
-& \func{\vdash send} \; = \; \send{(\suc \constr{0})}{\constr{0}} \PO
 \end{flalign*}
 
 Finally, we put the four processes together in parallel.
@@ -950,9 +945,9 @@ We use $\func{\omega}$ as a shortcut for $\one \comma \one$ in an algebra of sha
 
 \begin{flalign*}
 & \func{\vdash example} && : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}} & \\
-& \func{\vdash example} && = \new{} \; \_ \; \_ \; \_ \; (( \new{} \; \_ \; \_ \; \_ \; \func{\vdash send}) \\
-& && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; (( \new{} \; \_ \; \_ \; \_ \; \func{\vdash send}) \\
-& && \comp{}{ \new{} \; \channel{\unit}{\func{\omega}} \; \_ \; \_ } \; ( \func{\vdash recv} \\
+& \func{\vdash example} && = \new{} \; \_ \; \_ \; \_ \; ( \func{\vdash send} \\
+& && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash send} \\
+& && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash recv} \\
 & && \comp{}{ \func{\vdash sync} }))) \\
 \end{flalign*}
 
