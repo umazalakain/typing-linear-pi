@@ -1032,7 +1032,7 @@ We can now put these processes together and omit specifying the types of the cha
 \label{type-safety}
 \subsection{Auxiliary Results}
 
-\subparagraph*{Framing}
+\paragraph*{Framing}
 asserts that the well-typedness of a process is independent of its leftover resources.
 
 \begin{nitheorem}[Framing]
@@ -1044,7 +1044,7 @@ asserts that the well-typedness of a process is independent of its leftover reso
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
 
-\subparagraph*{Weakening}
+\paragraph*{Weakening}
 states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
 \begin{nitheorem}[Weakening]
@@ -1054,7 +1054,7 @@ Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simp
   $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
 \end{nitheorem}
 
-\subparagraph*{Strengthening}
+\paragraph*{Strengthening}
 states that removing an unused variable preserves the well-typedness of a process.
 Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
 \begin{nitheorem}[Strengthening]
@@ -1068,7 +1068,7 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
   The \emph{unusedness} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
 % \end{remark}
 
-\subparagraph*{Exchange}
+\paragraph*{Exchange}
 of two variables preserves the well-typedness of a process.
 We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to exchange types in typing contexts and usage annotations in usage contexts.
 \begin{nitheorem}[Exchange]
@@ -1087,7 +1087,7 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
 \end{proof}
 
 \subsection{Towards Subject Reduction}
-\subparagraph*{Subject Congruence}
+\paragraph*{Subject Congruence}
 states that applying structural congruence rules to a well typed process preserves its well-typedness.
 
 \begin{nitheorem}[Subject congruence]
@@ -1097,15 +1097,31 @@ states that applying structural congruence rules to a well typed process preserv
 
 \begin{proof}[Proof (Sketch)]
   The proof is by induction on \textsc{Equals} $\eq{}$.
-  For the nontrivial base cases and their symmetric variants, we apply a combination of \autoref{thm:framing}, \autoref{thm:strengthening}, \autoref{thm:weakening} and \autoref{thm:exchange}.
-  Further details can be found in \autoref{app:struct} and the full proof in%
+  Here we only consider those cases that are not purely inductive: the base cases for $\constr{struct}$ and their symmetric variants.
 \begin{anonsuppress}
-\cite{Zalakain2020Agda}
+Full proof in \cite{Zalakain2020Agda}.
 \end{anonsuppress}
-.
+  We proceed by induction on \textsc{StructCong} $\eqeq$:
+  \begin{itemize}
+    \item
+      Case $\constr{comp-assoc}$: trivial, as leftover typing is naturally associative.
+    \item
+      Case $\constr{comp-sym}$ for $\comp{P}{Q}$: we use framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of $Q$ to the one of $P$.
+    \item
+      Case $\constr{comp-end}$: trivial, as the typing rule for $\PO$ has the same input and output contexts.
+    \item
+      Case $\constr{scope-end}$: we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
+      In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$.
+    \item
+      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
+      In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
+    \item
+      Case $\constr{scope-comm}$:
+      we use exchange (\autoref{thm:exchange}), and for the reverse direction exchange and \autoref{lm:exchange-exchange} to show that exchanging two elements in $P$ twice leaves $P$ unchanged. \qedhere
+  \end{itemize}
 \end{proof}
 
-\subparagraph*{Substitution}
+\paragraph*{Substitution}
 \autoref{thm:substitution-generalization} proves a generalised version of substitution, where the substitition $\subst{P}{j}{i}$ is on any variable $i$.
 \autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
@@ -1224,7 +1240,7 @@ states that applying structural congruence rules to a well typed process preserv
   We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
 % \end{note}
 
-\subparagraph*{Subject Reduction}
+\paragraph*{Subject Reduction}
 states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
 

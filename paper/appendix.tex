@@ -79,41 +79,6 @@
   By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
 \end{proof}
 
-\section{Structural Congruence}
-\label{app:struct}
-
-Subject congruence states that applying structural congruence rules to a well typed process preserves its well-typedness.
-\begin{nitheorem}[Subject congruence]
-  \label{thm:subject-congruence1}
-  If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-\end{nitheorem}
-
-\begin{proof}[Proof (Sketch)]
-  The proof is by induction on \textsc{Equals} $\eq{}$.
-  Here we only consider the nontrivial base cases for $\constr{struct}$ and their symmetric variants.
-\begin{anonsuppress}
-Full proof in \cite{Zalakain2020Agda}.
-\end{anonsuppress}
-  We proceed by induction on \textsc{StructCong} $\eqeq$:
-  \begin{itemize}
-    \item
-      Case $\constr{comp-assoc}$: trivial, as leftover typing is naturally associative.
-    \item
-      Case $\constr{comp-sym}$ for $\comp{P}{Q}$: we use framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of $Q$ to the one of $P$.
-    \item
-      Case $\constr{comp-end}$: trivial, as the typing rule for $\PO$ has the same input and output contexts.
-    \item
-      Case $\constr{scope-end}$: we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
-      In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$..
-    \item
-      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
-      In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
-    \item
-      Case $\constr{scope-comm}$:
-      we use exchange (\autoref{thm:exchange}), and for the reverse direction exchange and \autoref{lm:exchange-exchange} to show that exchanging two elements in $P$ twice leaves $P$ unchanged. \qedhere
-  \end{itemize}
-\end{proof}
-
 \section{Substitution}
 \label{app:substitution-generalization}
 
