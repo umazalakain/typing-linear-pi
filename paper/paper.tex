@@ -472,7 +472,6 @@ We define structural congruence in \autoref{structural-congruence} and provide a
 \label{structural-congruence}
 
 We define the base cases of a structural congruence relation \textsc{StructCong} $\eqeq$ in \autoref{fig:struct-cong-base}.
-Its congruent equivalence closure \textsc{Equals} $\eq{}$ is defined in \autoref{app:struct}.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -517,6 +516,73 @@ The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index 
 In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
+We lift the relation \textsc{StrucCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$ as shown in \autoref{fig:struct-cong1}.
+The $\func{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively restriction, composition, input and output.
+The remaining three rules close structural congruence under reflexivity, symmetry and transitivity. 
+The transitivity rule makes it tricky to prove predicates by induction on \textsc{Equals}: Agda cannot immediately see that such doubly recursive calls terminate.
+In order to remedy this, we model the inductive structure syntactically and index \textsc{Equals} by a type \textsc{Rec}.
+
+\begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    { }
+    {\Rec : \Set}
+    \; \textsc{Rec}
+  
+    \inferrule
+    { }
+    {\constr{zero} : \Rec}
+    
+    \inferrule
+    {r : \Rec}
+    {\constr{one} \; r : \Rec}
+  
+    \inferrule
+    {r \; s : \Rec}
+    {\constr{two} \; r \; s : \Rec}
+    
+    \datatype
+    {P \, Q : \Process_n \\ r : \Rec}
+    {P \eq{r} Q : \Set}
+    \; \textsc{Equals}
+  
+    \inferrule
+    {eq : P \eqeq Q}
+    {\constr{struct} \; eq : P \eq{\constr{zero}} Q}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-scope} \; eq : \new P \eq{\constr{one} \; r} \new P'}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-comp} \; eq : \comp{P}{Q} \eq{\constr{one} \; r} \comp{P'}{Q}}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-recv} \; eq : \recv{x}P \eq{\constr{one} \; r} \recv{x}P'}
+  
+    \inferrule
+    {eq : P \eq{r} P'}
+    {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
+  
+    \inferrule
+    { }
+    {\constr{refl} : P \eq{\constr{zero}} P}
+  
+    \inferrule
+    {eq : P \eq{r} Q}
+    {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
+  
+    \inferrule
+    {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
+    {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
+\end{mathpar}
+\caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.}
+\label{fig:struct-cong1}
+\end{figure}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Reduction Relation}
 \label{operational-semantics}
