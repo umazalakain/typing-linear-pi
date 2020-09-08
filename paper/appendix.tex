@@ -35,50 +35,6 @@
   The type $i \type{\not\equiv} x$ unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$.
 \end{nidefinition}
 
-\section{Lemmas}
-\label{app:lemmas}
-
-\begin{nilemma}
-  \label{lm:substitution-unused}
-  For every variables $i$ and $j$, if $i \not\equiv j$ then $\Unused_i (\subst{P}{j}{i})$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:lower-lift}
-  The function $\func{lower}_i \; P \; uP$ has an inverse $\func{lift}_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $\func{lift}_i \; (\func{lower}_i \; P \; uP) \equiv P$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:exchange-exchange}
-  The function $\func{exchange}_i \; P$ is its own inverse: $\func{exchange}_i \; (\func{exchange}_i \; P) \equiv P$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:types-unused}
-  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, if the variable $i$ is unused within $P$, then $\Gamma$ at $i$ is equivalent to $\Xi$ at $i$.
-\end{nilemma}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:comm-capable}
-  Every input usage context $\Gamma$ of a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces by communicating on a channel external to it (that is, $P \reduce{\constr{external} \; i} Q$ for some $Q$) has a multiplicity of at least $\lio$ at index $i$.
-\end{nilemma}
-
-\begin{proof}
-  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
-\end{proof}
-
 \section{Substitution}
 \label{app:substitution-generalization}
 
