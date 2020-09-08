@@ -234,8 +234,8 @@ and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 \label{example-process}
 
 We present an example that highlights the ways in which graded types can be used to prevent mistakes in the definition of \picalc{} processes.
-The syntax uses Bruijn indices as variable references and is introduced in detail in \autoref{syntax}.
-In short: $\new{} P$ creates a new channel and makes it available at index $0$ in $P$; $\comp{P}{Q}$ composes $P$ and $Q$ in parallel; $\recv{x}{}P$ receives along channel $x$ and makes the data available at index $0$ in $P$; and $\send{x}{y}{P}$ sends $y$ over channel $x$ and continues with $P$.
+The syntax uses de Bruijn indices for variables and is introduced in detail in \autoref{syntax}.
+In short: $\new{} P$ creates a new channel and makes it available at index $0$ in the continuation $P$; $\comp{P}{Q}$ composes $P$ and $Q$ in parallel; $\recv{x}{}P$ receives along channel $x$ and makes the data available at index $0$ in the continuation $P$; and $\send{x}{y}{P}$ sends $y$ over channel $x$ and continues with $P$.
 Both variable references and processes are indexed by the number of free variables they can refer to (for any natural number $n$, $\Var_n$ and $\Process_n$, respectively).
 For the sake of clarity, we define the example subprocesses separately and parametrise them by the channels on which they operate.
 
@@ -257,9 +257,9 @@ For the sake of clarity, we define the example subprocesses separately and param
   \label{fig:example-process}
 \end{figure}
 
-The example contains four processes that are composed in parallel: two of them send data over a channel; one receives data twice; the fourth sticks together and synchronizes the previous processes (\autoref{fig:example-process}).
+The example contains four processes that are composed in parallel: two of them send data over a channel; one receives data twice; the fourth sticks together and synchronizes the previous three processes (\autoref{fig:example-process}).
 The process doing the synchronisation first receives on both input channels and then sends the received data along the output channel.
-Thanks for linear and graded types, the processes below have their interactions safely restricted: both $\func{send}$ processes consume $0$ input and $1$ output multiplicities; $\func{recv}$ consumes $2$ input and $0$ output multiplicities.
+Thanks to linear and graded types, the processes below can have their interactions safely restricted: both $\func{send}$ processes consume $0$ input and $1$ output multiplicities; $\func{recv}$ consumes $2$ input and $0$ output multiplicities.
 Dually, the process $\func{sync}$ consumes one input multiplicity on the channels shared with $\func{send}$, and two output multiplicities on the channel shared with $\func{recv}$.
 We use these types to give a suitable typing derivation in \autoref{example-derivation}.
 
@@ -917,17 +917,27 @@ $\_ \; = \; \constr{0}$
 We provide an example typing derivation for the processes defined in \autoref{example-process}.
 For the sake of simplicity, we instantiate these processes with concrete variable references before typing them.
 
+The $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$.
+After receiving twice, the process ends, so we should not be left with unused multiplicities: $u$ needs to be $\lz$.
+We will use graded types to keep track of the exact number of times communication happens.
+Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
+Once the types are given, the typing derivation is completely syntax directed.
+
+The $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$.
+We instantiate the type of transmitted data $t$ to $\channel{\unit}{\func{\omega}}$, as that is something we can construct.
+As by the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
+We will transmit once, thus using a single output multiplicity, and leave the rest as leftovers.
+
 \begin{flalign*}
-  & \func{\vdash send} \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}}{\Gamma \comma (l \comma \suc r)}{\func{send} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
-  & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO \\
-  & \\
   & \func{\vdash recv} \; \types{\gamma \comma \channel{t}{\lz}}{\Gamma \comma (\suc \suc l \comma r)}{\func{recv} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
   & \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
+  & \\
+  & \func{\vdash send} \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}}{\Gamma \comma (l \comma \suc r)}{\func{send} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
+  & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO \\
 \end{flalign*}
 
-We expect both input channels to be graded and capable of performing input once.
-The output channel must be capable of performing output twice.
-Notice that the well-typedness proof has no choice but to blindly follow the syntax.
+Dually, the process doing the synchronisation expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
+The typing derivation here is uniquely determined by the type and syntax of the process.
 
 \begin{flalign*}
 & \func{\vdash sync} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
@@ -938,10 +948,7 @@ Notice that the well-typedness proof has no choice but to blindly follow the syn
 & && \send{\suc \suc \constr{0}}{\constr{0}} \PO \\
 \end{flalign*}
 
-Finally, we put the four processes together in parallel.
-It is here that the well-typedness proof must make a choice as to what types and usage annotations to instantiate new channels with.
-In this case, these types and usage annotations were determined by the types of the previous subproofs, and we can thus omit most of them with $\_$ and have Agda find them.
-We use $\func{\omega}$ as a shortcut for $\one \comma \one$ in an algebra of shared types.
+We can now put these processes together and omit specifying the types of the channels that they share: Agda can infer them from the types of the processes.
 
 \begin{flalign*}
 & \func{\vdash example} && : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}} & \\
