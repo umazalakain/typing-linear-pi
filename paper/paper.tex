@@ -993,15 +993,15 @@ $\_ \; = \; \constr{0}$
 We provide an example typing derivation for the processes defined in \autoref{example-process}.
 For the sake of simplicity, we instantiate these processes with concrete variable references before typing them.
 
-The $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$.
-After receiving twice, the process ends, so we should not be left with unused multiplicities: $u$ needs to be $\lz$.
+The $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
+After receiving twice, the process ends, and we should not be left with any unused multiplicities: $u$ needs to be $\lz$.
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
 Once the types are given, the typing derivation is completely syntax directed.
 
-The $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$.
-We instantiate the type of transmitted data $t$ to $\channel{\unit}{\func{\omega}}$, as that is something we can construct.
-As by the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
+The $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
+We instantiate $t$ (the type of data that we transmit) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
+As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
 We will transmit once, thus using a single output multiplicity, and leave the rest as leftovers.
 
 \begin{flalign*}
@@ -1024,7 +1024,8 @@ The typing derivation here is uniquely determined by the type and syntax of the 
 & && \send{\suc \suc \constr{0}}{\constr{0}} \PO \\
 \end{flalign*}
 
-We can now put these processes together and omit specifying the types of the channels that they share: Agda can infer them from the types of the processes.
+We can now put these processes together.
+Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
 
 \begin{flalign*}
 & \func{\vdash example} && : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}} & \\
