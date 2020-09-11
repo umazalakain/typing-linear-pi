@@ -143,12 +143,11 @@ The authors would also like to thank the anonymous referees fortheir valuable co
 \begin{abstract}
   The \picalc{} is a computational model for communication and concurrency.
   The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
-  It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, including \emph{session types} \cite{H93,THK94,HVK98}.
+  It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, such as \emph{session types} \cite{H93,THK94,HVK98}.
 
-  We present an untyped syntax and semantics for the \picalc{}.
-  We provide a resource-aware type system parametrised by a set of multiplicity algebras.
-  This allows the user to mix \emph{linear}, \emph{graded} and \emph{shared} types.
-  We use leftover typing \cite{Allais2018a} to encode our typing rules, thus avoiding the ubiquitous context splitting proofs so common in type systems for linear calculi.
+  We present an untyped syntax and semantics for the \picalc{}, on top of which we provide a resource-aware type system parametrised by a set of multiplicity algebras.
+  This allows the user to mix \emph{linear}, \emph{graded} and \emph{shared} types, under the same unified framework.
+  We use leftover typing \cite{Allais2018a} to encode our typing rules, thus avoiding the ubiquitous context splitting proofs, which are mandatory when dealing with linear type systems.
   We provide a framing theorem, and generalise the weakening and strengthening theorems, and use them to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 %
