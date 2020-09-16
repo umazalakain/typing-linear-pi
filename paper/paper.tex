@@ -235,19 +235,19 @@ For the sake of clarity, we will define the four subprocesses in our system sepa
   \label{fig:example-process}
 \end{figure}
 
-The receiver process $R$, defined below, receives data twice on a channel $c$ and then terminates.
+The receiver process $R$, defined below and instantiated as $\func{recv} \; z$, receives data twice on a channel $c$ and then terminates.
 \begin{flalign*}
   & \func{recv} \; : \; \Var_n \to \Process_n & \\
   & \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO) \\
 \end{flalign*}
 
-The sender processes $S_1$ and $S_2$, defined below, create a new channel that acts as the data that is being sent, send it over the channel $c$, and then terminate.
+The sender processes $S_1$ and $S_2$, defined below and instantiated as $\func{send} \; x$ and $\func{send} \; y$, create a new channel that acts as the data that is being sent, send it over the channel $c$, and then terminate.
 \begin{flalign*}
   & \func{send} \; : \; \Var_n \to \Process_n & \\
   & \func{send} \; c = \new{} \send{\suc c}{\constr{0}} \PO \\
 \end{flalign*}
 
-The courier process $C$, defined below, sequentially receives on the two input channels $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $out$.
+The courier process $C$, defined below and instantiated as $\func{carry} \; x \; y \; z$, sequentially receives on the two input channels $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $out$.
 \begin{flalign*}
   & \func{carry} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
   & \func{carry} \; in0 \; in1 \; out \; &&= \\
@@ -266,8 +266,6 @@ The result is the process defined below.
   & && \comp{}{ \new{} ( \func{recv} \; \constr{0} } \\
   & && \comp{}{ \func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
 \end{flalign*}
-
-[ALIGN FIG AND PROCESSES IN PARTICULAR send c and send x,y in THE FIGURE]
 
 We continue this example and provide typing derivations for these processes in \autoref{leftover-typing}.
 We use \textbf{shared types} for the type of data that is being sent over these channels, and \textbf{linear types} for its usage annotations.
