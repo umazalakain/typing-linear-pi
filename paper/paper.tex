@@ -194,7 +194,7 @@ The user is able to choose any mix of algebras for the type system --- as long a
 This allows for linear, graded and shared types to be mixed in the same type system.
 Ultimately, we can exploit this formalisation as a unified framework for type-safe distributed modelling and programming using a variety of type systems, and build on top of it more advanced types, theories and languages.
 
-\begin{example}[The courier system, label=exa:cont]
+\begin{example}[The courier system]
 \label{example-process}
 
 We present an example that highlights the ways in which linear, graded and shared types can be used to prevent errors in the definition of \picalc{} processes.
@@ -1011,7 +1011,7 @@ $\_ \; = \; \constr{0}$
   By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide an extrinsic proof of context split.
 \end{nidefinition}
 
-\begin{example}[Typing derivation, continues=exa:cont]
+\begin{example}[Typing derivation, continues=example-process]
 \label{example-derivation}
 
 We provide an example typing derivation for the processes defined in \autoref{example-process}.
