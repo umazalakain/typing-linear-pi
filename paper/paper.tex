@@ -26,11 +26,10 @@
 % Newline inside table
 \usepackage{makecell}
 
-% Fix autoref's example treatment 
+% Continue examples later on
+\usepackage{thmtools}
 \newtheorem{example}{Example}
-\newcommand{\exampleautorefname}{Example}
-\newcommand{\nitheoremautorefname}{Theorem}
-\newcommand{\nidefinitionautorefname}{Definition}
+\renewcommand\thmcontinues[1]{Continued}
 
 % Do not use italics in definitions and theorems
 \theoremstyle{definition}
@@ -39,9 +38,10 @@
 \newtheorem{nilemma}{Lemma}
 \renewcommand{\nidefinitionautorefname}{Definition}%
 \renewcommand{\nitheoremautorefname}{Theorem}%
-\newcommand{\nilemmaautorefname}{Lemma}%
+\renewcommand{\nilemmaautorefname}{Lemma}%
 \renewcommand{\sectionautorefname}{\S}%
 \renewcommand{\subsectionautorefname}{\S}%
+\renewcommand{\exampleautorefname}{Example}
 
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
@@ -177,7 +177,7 @@ Later on, linearity inspired unique types, as in Clean \cite{BarendsenS96} and o
 Linearity also influenced the $\pi$-calculus.
 Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
 %
-Meanwhile, linearity acquired a different flavour with the rise of \emph{session types} \cite{H93,THK94,HVK98}, a formalism used in communication-centric programming, where linearity ensures that a channel is owned by exactly one communicating participant --- the channel itself may be used multiple times, in particular by following its session type.
+Meanwhile, linearity acquired a different flavour with the rise of \emph{session types} \cite{H93,THK94,HVK98}, a formalism used in communication-centric programming, where linearity ensures that a channel is owned by exactly one communicating participant --- the channel itself may be used multiple times, as specified by its session type.
 Linearity in session types is the key ingredient that guarantees communication safety and session fidelity.
 
 In recent years, an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17} has pushed the linear \picalc{} \cite{KPT96} into the spotlight again.
@@ -194,17 +194,17 @@ The user is able to choose any mix of algebras for the type system --- as long a
 This allows for linear, graded and shared types to be mixed in the same type system.
 Ultimately, we can exploit this formalisation as a unified framework for type-safe distributed modelling and programming using a variety of type systems, and build on top of it more advanced types, theories and languages.
 
-\begin{example}[The courier system]
+\begin{example}[The courier system, label=exa:cont]
 \label{example-process}
 
 We present an example that highlights the ways in which linear, graded and shared types can be used to prevent errors in the definition of \picalc{} processes.
 
-A courier system consists of three roles: a sender, who wants to send a package; a receiver, who receives the package sent by the sender and a courier, who carries the package from the sender to the receiver.
+A courier system consists of three roles: a sender, who wants to send a package; a receiver, who receives the package sent by the sender; and a courier, who carries the package from the sender to the receiver.
 Our courier system consists of four \picalc{} processes composed in parallel:
 two sender processes, $S_1$ and $S_2$, sending data over channels $x$ and $y$, respectively;
 one receiver process, $R$, which receives the data from each of the senders;
-and finally a courier process $C$, which synchronises communication among the previous three process and
-first receives data from $S_1$ and $S_2$ on its input channels, respectively $x$ and $y$ and then sends the received data to $R$ along its output channel $z$.
+and a courier process $C$, which synchronises communication among the previous three process.
+The courier process $C$ first receives data from $S_1$ and $S_2$ on its input channels $x$ and $y$, respectively, and then sends the received data to $R$ along its output channel $z$.
 A graphical representation of the courier system is given in \autoref{fig:example-process}.
 
 Let us now consider the $\pi$-calculus process behind the courier system.
@@ -224,7 +224,7 @@ For the sake of clarity, we will define the four subprocesses in our system sepa
     \node[draw,circle,fill opacity=0.3,text opacity=1,fill=orange] (send-x) at (0,2)   {$\func{send} \, x$};
     \node[draw,circle,fill opacity=0.3,text opacity=1,fill=orange] (send-y) at (2,2)   {$\func{send} \, y$};
     \node[draw,circle,fill opacity=0.3,text opacity=1,fill=green] (recv-z) at (4,2)   {$\func{recv} \, z$};
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=blue,align=center] (sync) at (2,0)   {$\func{cour}$\\$ \, x \, y \, z$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=blue,align=center] (sync) at (2,0)   {$\func{carry}$\\$ \, x \, y \, z$};
 
     \draw[->] (send-x) -- node[left] {$x$} (sync);
     \draw[->] (send-y) -- node[right] {$y$} (sync);
@@ -235,40 +235,45 @@ For the sake of clarity, we will define the four subprocesses in our system sepa
   \label{fig:example-process}
 \end{figure}
 
-The receiver process $R$ is defined as follows:
+The receiver process $R$, defined below, receives data twice on a channel $c$ and then terminates.
 \begin{flalign*}
   & \func{recv} \; : \; \Var_n \to \Process_n & \\
   & \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO) \\
 \end{flalign*}
 
-The sender processes sender processes $S_1$ and $S_2$ are defined as follows:
+The sender processes $S_1$ and $S_2$, defined below, create a new channel that acts as the data that is being sent, send it over the channel $c$, and then terminate.
 \begin{flalign*}
   & \func{send} \; : \; \Var_n \to \Process_n & \\
   & \func{send} \; c = \new{} \send{\suc c}{\constr{0}} \PO \\
 \end{flalign*}
 
-The courier process $C$ is defined as follows:
+The courier process $C$, defined below, sequentially receives on the two input channels $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $out$.
 \begin{flalign*}
-  & \func{cour} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
-  & \func{cour} \; in0 \; in1 \; out \; &&= \\
+  & \func{carry} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
+  & \func{carry} \; in0 \; in1 \; out \; &&= \\
   & && \recv{in0}{} \\
   & && \recv{(\suc \; in1)}{} \\
   & && \send{(\suc \suc \; out)}{\suc \constr{0}} \\
   & && \send{(\suc \suc \; out)}{\constr{0}} \PO \\
 \end{flalign*}
+
+Finally, we fit these processes together and create three communication channels: the first shared between the sender $S_1$ and the courier $C$, the second between the sender $S_2$ and the courier $C$, and the third between the receiver $R$ and the courier $C$.
+The result is the process defined below.
 \begin{flalign*}
-  & \func{courier} && : \; \Process_{\constr{0}} & \\
-  & \func{courier} && = \new{} ( \func{send} \; \constr{0} \\
+  & \func{system} && : \; \Process_{\constr{0}} & \\
+  & \func{system} && = \new{} ( \func{send} \; \constr{0} \\
   & && \comp{}{ \new{} ( \func{send} \; \constr{0} } \\
   & && \comp{}{ \new{} ( \func{recv} \; \constr{0} } \\
-  & && \comp{}{ \func{cour} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
+  & && \comp{}{ \func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
 \end{flalign*}
+
 [ALIGN FIG AND PROCESSES IN PARTICULAR send c and send x,y in THE FIGURE]
-[COMMENT ON THE PROCESSES AND WHAT THEY DO]
-[EXPLAIN HERE WHAT IS TYPED WITH LIN, GRADED AND SHARED]
-Thanks to linear and graded types, the above processes can have their interactions safely restricted: both $\func{send}$ processes consume $0$ input and $1$ output multiplicities; $\func{recv}$ consumes $2$ input and $0$ output multiplicities.
-Dually, the process $\func{cour}$ consumes one input multiplicity on the shared channels with $\func{send}$, respectively $x$ and $y$ in \autoref{fig:example-process} and two output multiplicities on the channel shared with $\func{recv}$, channel $z$ in \autoref{fig:example-process}.
-We use these types to give a suitable typing derivation in \autoref{example-derivation} (\autoref{leftover-typing}).
+
+We continue this example by providing typing derivations for these processes in \autoref{leftover-typing}.
+We use graded types for the usage annotations of the communication channels $x$, $y$, and $z$: both processes $\func{send} \; x$ and $\func{send} \; y$ consume $1$ output multiplicity; $\func{recv} \; z$ consumes $2$ input multiplicities.
+Dually, the process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$ and $y$, and two output multiplicities on $z$.
+
+[TODO: type of data being transmitted]
 \end{example}
 
 \subsection{Contributions}
@@ -1009,7 +1014,7 @@ $\_ \; = \; \constr{0}$
   By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide an extrinsic proof of context split.
 \end{nidefinition}
 
-\begin{example}[Typing derivation]
+\begin{example}[Typing derivation, continues=exa:cont]
 \label{example-derivation}
 
 We provide an example typing derivation for the processes defined in \autoref{example-process}.
@@ -1038,8 +1043,8 @@ Dually, the process doing the synchronisation expects input multiplicities for t
 The typing derivation here is uniquely determined by the type and syntax of the process.
 
 \begin{flalign*}
-& \func{\vdash sync} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{sync} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
-& \func{\vdash sync} && = \\
+& \func{\vdash carry} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
+& \func{\vdash carry} && = \\
 & && \recv{\suc \suc \constr{0}}{} \\
 & && \recv{\suc \suc \constr{0}}{} \\
 & && \send{\suc \suc \constr{0}}{\suc \constr{0}} \\
@@ -1050,11 +1055,11 @@ We can now put these processes together.
 Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
 
 \begin{flalign*}
-& \func{\vdash example} && : \; \types{\constr{[]}}{\constr{[]}}{\func{example}}{\constr{[]}} & \\
-& \func{\vdash example} && = \new{} \; \_ \; \_ \; \_ \; ( \func{\vdash send} \\
+& \func{\vdash system} && : \; \types{\constr{[]}}{\constr{[]}}{\func{system}}{\constr{[]}} & \\
+& \func{\vdash system} && = \new{} \; \_ \; \_ \; \_ \; ( \func{\vdash send} \\
 & && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash send} \\
 & && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash recv} \\
-& && \comp{}{ \func{\vdash sync} }))) \\
+& && \comp{}{ \func{\vdash carry} }))) \\
 \end{flalign*}
 
 \end{example}
