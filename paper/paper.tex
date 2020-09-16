@@ -231,7 +231,7 @@ For the sake of clarity, we will define the four subprocesses in our system sepa
     \draw[->] (sync.35) -- node[right] {$z$} (recv-z.240);
     \draw[->] (sync) -- (recv-z);
   \end{tikzpicture}
-  \caption{The courier system: two senders $S_1$ and $S_2$, one receiver $R$ and one courier $C$.}
+  \caption{The courier system: two \textcolor{orange}{senders} $S_1$ and $S_2$, one \textcolor{green}{receiver} $R$ and one \textcolor{blue}{courier} $C$.}
   \label{fig:example-process}
 \end{figure}
 
@@ -269,11 +269,10 @@ The result is the process defined below.
 
 [ALIGN FIG AND PROCESSES IN PARTICULAR send c and send x,y in THE FIGURE]
 
-We continue this example by providing typing derivations for these processes in \autoref{leftover-typing}.
-We use graded types for the usage annotations of the communication channels $x$, $y$, and $z$: both processes $\func{send} \; x$ and $\func{send} \; y$ consume $1$ output multiplicity; $\func{recv} \; z$ consumes $2$ input multiplicities.
+We continue this example and provide typing derivations for these processes in \autoref{leftover-typing}.
+We use \textbf{shared types} for the type of data that is being sent over these channels, and \textbf{linear types} for its usage annotations.
+We use \textbf{graded types} for the usage annotations of the communication channels $x$, $y$, and $z$ themselves: both processes $\func{send} \; x$ and $\func{send} \; y$ consume $1$ output multiplicity; $\func{recv} \; z$ consumes $2$ input multiplicities.
 Dually, the process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$ and $y$, and two output multiplicities on $z$.
-
-[TODO: type of data being transmitted]
 \end{example}
 
 \subsection{Contributions}
