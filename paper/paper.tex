@@ -1405,6 +1405,8 @@ They distill their typing rules even further by modelling the supply and demand 
 Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq  --- in Coq de Bruijn indices are not as popular as in Agda or Idris because dependent pattern matching is far from straightforward.
 As a use-case, they use their tool to help automate proofs of subject reduction for a type system with session types.
 
+Orchard and Yoshida \cite{OrchardY16} embed a small effectul imperative language into the session-typed \picalc{}, showing that session types are expressive enough to encode effect systems.
+
 Based on contextual type theory \cite{Pientkaa, Pientka}, LINCX \cite{Georges2017} extends the linear logical framework LLF \cite{Cervesato1996} by internalising the notion of bindings and contexts.
 The result is a meta-theory in which HOAS encodings with both linear and dependent types can be described.
 The developer obtains for free an equational theory of substitution and decidable typechecking without having to encode context splits within the object language.
