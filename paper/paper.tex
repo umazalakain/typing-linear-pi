@@ -214,7 +214,7 @@ The \courier{} process $C$ first receives data from $S_1$ and $S_2$ on its input
 A graphical representation of the courier system is given in \autoref{fig:example-process}.
 
 We will now define the courier system as \picalc{} processes.
-In our framework, the syntax of \picalc{} processes adopts de Bruijn indices \cite{deBruijn1972} for channel names and variables and is introduced in detail in \autoref{syntax}.
+In our framework, the syntax of \picalc{} processes adopts \emph{de Bruijn indices} \cite{deBruijn1972, Dybjer1994} for channel names and variables and is introduced in detail in \autoref{syntax}.
 In short, for the purposes of this example:
 process $\new{} P$ creates a new channel and makes it available at index $0$ in the continuation process $P$;
 $\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel; process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
@@ -293,44 +293,41 @@ Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input 
 \begin{enumerate}
 \item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
  \begin{itemize}
-   \item \textbf{Syntax}: \autoref{syntax} uses type level \emph{de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it.
-     For convenience, the user can convert from and to a syntax with names.
-     These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
+   \item \textbf{Syntax}: we use type level {de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
+   For convenience and readability, the user can convert from and to a syntax using channel names (\autoref{from_to_deBruijn}).
+   These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
    
-   \item \textbf{Semantics}: \autoref{semantics} provides an operational semantics for the \picalc{}, prior to any typing.
+   \item \textbf{Semantics}: we provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
    This operational semantics is defined as a reduction relation on processes (\autoref{operational-semantics}).
-   The reduction relation tracks at the type level the channel the communication occurs on, so that this information can later be used to state subject reduction --- aka type preservation (\autoref{thm:subject-reduction}).
-   The reduction relation is defined modulo structural congruence (\autoref{structural-congruence}) --- a relation that acts as a quotient type that removes unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
+   The reduction relation tracks at the type level the channel on which communication occurs. This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
+   The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
  \end{itemize}
   
   \item \textbf{Leftover typing for the \picalc{} with support for linear, graded and shared types}:
-  \autoref{type-system} provides the type system for a resource-aware \picalc{}.
+  we present our type system for a resource-aware \picalc{} in \autoref{type-system}.
   \begin{itemize}
     \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
     Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra --- linear types, graded types and shared types all satisfy these algebraic laws.
 
     Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
-    This allows for type systems combining linear, graded and shared types.
+    This allows for type systems combining linear, graded and shared types under the same framework.
     
     \item \textbf{Leftover typing}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
     This approach adds a leftover usage context to the typing judgements.
     Typing derivations take the resources of their input usage context, consume some of them, and leave the remaining as leftovers in the output usage context.
-
-    Leftover typing \textbf{makes top-down context splits unnecessary}, allows for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and makes it possible to generalise the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
+    Leftover typing \textbf{makes top-down context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
   \end{itemize}
 
-  \item \textbf{Fully mechanised formalisation and type safety proofs}:
-    \autoref{type-safety} presents the type safety properties of our \picalc{} with leftovers.
-    Leftover typing for a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and generalises the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
-    We use these to prove \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove \emph{subject reduction} (\autoref{thm:subject-reduction}).  
+  \item \textbf{Fully mechanised formalisation and type safety results}:
+    The formalisation of the \picalc{} with leftovers typing, from syntax to semantics and the type system, has been fully mechanised in Agda.
 
-    The formalisation of the \picalc{} with leftovers has been fully mechanised in Agda%
+    We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
+    We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
+    We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
+\end{enumerate}
 \begin{anonsuppress}
 and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 \end{anonsuppress}
-.
-\end{enumerate}
-
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -442,7 +439,7 @@ We index processes according to their \emph{depth}: for all naturals $n$, a proc
 Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within to refer to one more thing.
 
 \subsection{From names to de Bruijn indices and back}
-
+\label{from_to_deBruijn}
 In order to demonstrate the correspondence between an encoding that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
 
 \begin{example}
