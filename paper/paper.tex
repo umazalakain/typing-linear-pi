@@ -196,69 +196,83 @@ Ultimately, we can exploit this formalisation as a unified framework for type-sa
 
 \begin{example}[The courier system]
 \label{example-process}
+\newcommand{\sender}{\textcolor{brown}{sender}}
+\newcommand{\receiver}{\textcolor{purple}{receiver}}
+\newcommand{\courier}{\textcolor{cyan}{courier}}
 
-We present an example that highlights the ways in which linear, graded and shared types can be used to prevent errors in the definition of \picalc{} processes.
+We present an example that highlights the ways in which linear, graded and shared types can be used to prevent errors in a concurrent and distributed system defined by \picalc{} processes in parallel.
 
-A courier system consists of three roles: a sender, who wants to send a package; a receiver, who receives the package sent by the sender; and a courier, who carries the package from the sender to the receiver.
-Our courier system consists of four \picalc{} processes composed in parallel:
-two sender processes, $S_1$ and $S_2$, sending data over channels $x$ and $y$, respectively;
-one receiver process, $R$, which receives the data from each of the senders;
-and a courier process $C$, which synchronises communication among the previous three process.
-The courier process $C$ first receives data from $S_1$ and $S_2$ on its input channels $x$ and $y$, respectively, and then sends the received data to $R$ along its output channel $z$.
+A courier system consists of three roles:
+a \sender{}, who wants to send a package;
+a \receiver{}, who receives the package sent by the sender;
+and a \courier{}, who carries the package from the sender to the receiver.
+Our courier system is defined by four \picalc{} processes in parallel inhabiting the above three roles:
+we have two \sender{} processes, $S_1$ and $S_2$, sending data over channels $x$ and $y$, respectively;
+one \receiver{} process, $R$, which receives the data sent from each of the senders--hence receives twice;
+and a \courier{} process $C$, which synchronises communication among $S_1$, $S_2$ and $R$.
+The \courier{} process $C$ first receives data from $S_1$ and $S_2$ on its input channels $x$ and $y$, respectively, and then sends the received data to $R$ along its output channel $z$.
 A graphical representation of the courier system is given in \autoref{fig:example-process}.
 
-Let us now consider the $\pi$-calculus process behind the courier system.
-The syntax of \picalc{} processes adopts de Bruijn indices \cite{deBruijn1972} for channel names and variables and is introduced in detail in \autoref{syntax}.
+We will now define the courier system as \picalc{} processes.
+In our framework, the syntax of \picalc{} processes adopts de Bruijn indices \cite{deBruijn1972} for channel names and variables and is introduced in detail in \autoref{syntax}.
 In short, for the purposes of this example:
 process $\new{} P$ creates a new channel and makes it available at index $0$ in the continuation process $P$;
 $\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel; process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
 process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
-Both variable references and processes are indexed by the number of free variables they can refer to, respectively, $\Var_n$ and $\Process_n$, for any natural number $n$.
+Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the number $n$ of free variables they can refer to, for any natural number $n$.
 
-For the sake of clarity, we will define the four subprocesses in our system separately and parametrise them by the channels on which they operate.
+For the sake of clarity, we will define the four subprocesses in our courier system separately and parametrise them by the channels on which they operate.
 
 \begin{figure}[t]
   \small
   \centering
   \begin{tikzpicture}[draw,circle]
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=orange] (send-x) at (0,2)   {$\func{send} \, x$};
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=orange] (send-y) at (2,2)   {$\func{send} \, y$};
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=darkgray] (recv-z) at (4,2)   {$\func{recv} \, z$};
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=blue,align=center] (sync) at (2,0)   {$\func{carry}$\\$ \, x \, y \, z$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown] (send-x) at (0,2)   {$\func{send} \, x$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown] (send-y) at (2,2)   {$\func{send} \, y$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=purple] (recv-z) at (4,2)   {$\func{recv} \, z$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=cyan,align=center] (sync) at (2,0)   {$\func{carry}$\\$ \, x \, y \, z$};
 
     \draw[->] (send-x) -- node[left] {$x$} (sync);
     \draw[->] (send-y) -- node[right] {$y$} (sync);
     \draw[->] (sync.35) -- node[right] {$z$} (recv-z.240);
     \draw[->] (sync) -- (recv-z);
   \end{tikzpicture}
-  \caption{The courier system: two \textcolor{orange}{senders} $S_1$ and $S_2$, one \textcolor{darkgray}{receiver} $R$ and one \textcolor{blue}{courier} $C$.}
+  \caption{The courier system: two \sender{} $S_1$ and $S_2$, one \receiver{} $R$ and one \courier{} $C$.}
   \label{fig:example-process}
 \end{figure}
 
-The receiver process $R$, defined below and instantiated as $\func{recv} \; z$, receives data twice on a channel $c$ and then terminates.
-\begin{flalign*}
-  & \func{recv} \; : \; \Var_n \to \Process_n & \\
-  & \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO) \\
-\end{flalign*}
+Each of the roles \sender{}, \receiver{} and \courier{} is defined as a function respectively, $\func{send}, \func{recv}$ and $\func{carry}$ with signature $\Var_n \to \Process_n$.
 
-The sender processes $S_1$ and $S_2$, defined below and instantiated as $\func{send} \; x$ and $\func{send} \; y$, create a new channel that acts as the data that is being sent, send it over the channel $c$, and then terminate.
+The \sender{} role is defined below.
+The \sender{} creates a new channel $\new{} \suc c$ denoting the data to be sent, and sends it over channel $c$, and then terminates, denoted by $\P0$.
 \begin{flalign*}
   & \func{send} \; : \; \Var_n \to \Process_n & \\
-  & \func{send} \; c = \new{} \send{\suc c}{\constr{0}} \PO \\
+  & \func{send} \; c = \new{} \send{\suc c}{\constr{0}} \PO
 \end{flalign*}
+Each \sender{} process $S_1$ and $S_2$ will  be an instantiation of $\func{send} \; c$.
+In particular
+$S_1$ will be defined as $\func{send} \; x$ and $S_2$ as $\func{send} \; y$, where data is sent over channels $x$ and $y$, respectively (see \autoref{fig:example-process}).
 
-The courier process $C$, defined below and instantiated as $\func{carry} \; x \; y \; z$, sequentially receives on the two input channels $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $out$.
+The \receiver{} role is defined below, where $\func{recv} \; c \;$ receives data \emph{twice} on a channel $c$ and then terminates with $\PO$.
+\begin{flalign*}
+  & \func{recv} \; : \; \Var_n \to \Process_n & \\
+  & \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO)
+\end{flalign*}
+The \receiver{} process $R$ will be instantiated as $\func{recv} \; z$, where $z$ is the channel used to receive data from the \courier{} (see \autoref{fig:example-process}).
+
+The \courier{} role is defined below.
 \begin{flalign*}
   & \func{carry} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
   & \func{carry} \; in0 \; in1 \; out \; &&= \\
   & && \recv{in0}{} \\
   & && \recv{(\suc \; in1)}{} \\
   & && \send{(\suc \suc \; out)}{\suc \constr{0}} \\
-  & && \send{(\suc \suc \; out)}{\constr{0}} \PO \\
+  & && \send{(\suc \suc \; out)}{\constr{0}} \PO
 \end{flalign*}
+The \courier{} process $C$ will be instantiated as $\func{carry} \; x \; y \; z$, which sequentially receives on the two input channels $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $out$. Here channels $x,y,z$ instantiate respectively $in0,in1,out$.
 
-Finally, we fit these processes together and create three communication channels: the first shared between the sender $S_1$ and the courier $C$, the second between the sender $S_2$ and the courier $C$, and the third between the receiver $R$ and the courier $C$.
-The result is the process defined below.
+Finally, we compose these processes together and create three communication channels: the first channel is shared between the \sender{} $S_1$ and the \courier{} $C$, the second between the \sender{} $S_2$ and the \courier{} $C$, and the third between the \receiver{} $R$ and the \courier{} $C$.
+The result is the courier systems defined below.
 \begin{flalign*}
   & \func{system} && : \; \Process_{\constr{0}} & \\
   & \func{system} && = \new{} ( \func{send} \; \constr{0} \\
@@ -267,10 +281,12 @@ The result is the process defined below.
   & && \comp{}{ \func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
 \end{flalign*}
 
-We continue this example and provide typing derivations for these processes in \autoref{leftover-typing}.
-We use \textbf{shared types} for the type of data that is being sent over these channels, and \textbf{linear types} for its usage annotations.
-We use \textbf{graded types} for the usage annotations of the communication channels $x$, $y$, and $z$ themselves: both processes $\func{send} \; x$ and $\func{send} \; y$ consume $1$ output multiplicity; $\func{recv} \; z$ consumes $2$ input multiplicities.
-Dually, the process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$ and $y$, and two output multiplicities on $z$.
+In order to type the courier system we will use all three typing disciplines: linear, graded and shared typing.
+We will continue this example and provide the typing derivations in \autoref{leftover-typing}.
+We use \textbf{shared types} to type the data that is being sent from the \sender{} processes to the \receiver{};
+we use \textbf{linear types} for the usage annotations of [FILL IN, NOT CLEAR BEFORE];
+and finally, we use \textbf{graded types} for the usage annotations of the communication channels $x$, $y$, and $z$: the \sender{} processes $\func{send} \; x$ and $\func{send} \; y$ each consume $1$ output multiplicity and the \receiver{} process $\func{recv} \; z$ consumes $2$ input multiplicities, as it receives twice on channel $z$.
+Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$ and one input multiplicity on $y$, and two output multiplicities on $z$.
 \end{example}
 
 \subsection{Contributions}
