@@ -28,7 +28,6 @@
 
 % Continue examples later on
 \usepackage{thmtools}
-\newtheorem{example}{Example}
 \renewcommand\thmcontinues[1]{Continued}
 
 % Do not use italics in definitions and theorems
@@ -36,6 +35,7 @@
 \newtheorem{nidefinition}{Definition}
 \newtheorem{nitheorem}{Theorem}
 \newtheorem{nilemma}{Lemma}
+\newtheorem{example}{Example}
 \renewcommand{\nidefinitionautorefname}{Definition}%
 \renewcommand{\nitheoremautorefname}{Theorem}%
 \renewcommand{\nilemmaautorefname}{Lemma}%
@@ -419,7 +419,7 @@ $\type{TYPES}$ are blue and uppercased, with indices as subscripts, $\constr{con
   \label{fig:syntax}
 \end{figure}
 
-The syntax of the \picalc{} \cite{Sangio01} adopting channel names is given by the $\Raw$ grammar in \autoref{fig:syntax-names}.
+The syntax of the \picalc{} \cite{Sangio01} using channel names is given by the $\Raw$ grammar in \autoref{fig:syntax-names}.
 Channel names and variables range over $x,y,z$ in $\Name$ and processes over $P,Q,R$ in $\Raw$.
 
 Process $\PO$ denotes the terminated process, where no further communications can occur.
@@ -450,33 +450,26 @@ When we translate into de Bruijn indices we keep the original binder names aroun
 The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 Named references within the process are substituted with their corresponding de Bruijn index.
 We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such proof term.
-\begin{equation*}
-  \begin{aligned}
+\begin{alignat*}{2}
     &\func{fromRaw} && : (ctx : \Names_n) \; (P : \Raw) \\
-    &               && \to \WellScoped \; ctx \; P \to \Process_n \\
-  \end{aligned}
-\end{equation*}
+    &               && \to \WellScoped \; ctx \; P \to \Process_n
+\end{alignat*}
 
 \paragraph{From de Bruijn indices to names}
 The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 As some widely-used languages do, this translation function produces unique variable names.
 These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{<n>}$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
 \begin{equation*}
-  \begin{aligned}
     \func{toRaw} : (ctx : \Names_n) \to \Process_n \to \Raw
-  \end{aligned}
 \end{equation*}
 
 \begin{example}[$\func{fromRaw}$ and $\func{toRaw}$]
   \begin{figure}[t]
-    \small
-    \begin{equation*}
-      \begin{aligned}
-        &P = (\new{x} ) && (\comp {\recv{x}{x} && \send{x}{z} && \PO} {(\new{y}) && (\send{x}{y} && \recv{y}{y} && \PO)}) \\
-        &Q = \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
-        &R = (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)}) \\
-      \end{aligned}
-    \end{equation*}
+    \begin{alignat*}{7}
+      &P = (\new{x} ) && (\comp {\recv{x}{x} && \send{x}{z} && \PO} {(\new{y}) && (\send{x}{y} && \recv{y}{y} && \PO)}) \\
+      &Q = \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
+      &R = (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)})
+    \end{alignat*}
     \caption{From names to de Bruijn indices}
     \label{fig:conversion}
     \end{figure}
@@ -484,7 +477,6 @@ These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{
 
   Process $P$ uses names $x,y,z$ and it is translated via the conversion function $\func{fromRaw}$ into process $Q$, which uses de Bruijn indices.
   Process $Q$ is then translated via $\func{toRaw}$ into process $R$, which follows the \emph{Barendregt convention}\footnote{The Barendregt variable convention states that all bound variables/names in a process are distinct among each other and from the free variables/names.} and is $\alpha$-equivalent to the original process $P$.
-  [ADJUST SPACING OF THE EXAMPLE IN FIG 5]
 \end{example}
 
 In the following we present the main results that our conversion functions satisfy.
@@ -498,7 +490,7 @@ In the following we present the main results that our conversion functions satis
 \end{nilemma}
 
 \begin{nilemma}
-  Translating from de Bruijn indices to names and back via via $\func{fromRaw} \circ \func{toRaw}$ results in the same process modulo internal variable name hints.
+  Translating from de Bruijn indices to names and back via $\func{fromRaw} \circ \func{toRaw}$ results in the same process modulo internal variable name hints.
 \end{nilemma}
 
 \begin{nilemma}
