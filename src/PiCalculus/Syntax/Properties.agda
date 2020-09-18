@@ -1,33 +1,34 @@
 {-# OPTIONS --safe --without-K #-}
 
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong; cong₂; subst; trans)
+open import Relation.Nullary.Decidable using (True; from-yes)
+open import Relation.Nullary.Negation using (¬?; contradiction)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Function using (_∘_)
 open import Relation.Nullary using (yes; no)
 
-open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Empty using (⊥)
 open import Data.Product using (_×_; _,_; Σ-syntax; proj₁; proj₂)
-open import Data.Fin.Base using (Fin; zero; suc)
+open import Data.Fin.Base as Fin using (Fin; zero; suc)
 open import Data.Unit using (⊤; tt)
 
-import Data.List.Base as List
+open import Data.List.Base as List using (List; []; _∷_; [_])
 import Data.List.Properties as Listₚ
+import Data.Char.Properties as Charₚ
+import Data.Digit as Digit
 import Data.List.Membership.Propositional as ∈ₗ
-import Data.Nat.Base as ℕ
+import Data.List.Membership.Propositional.Properties as ∈ₗₚ
+open import Data.Nat.Base as ℕ using (ℕ; zero; suc)
 import Data.Nat.Properties as ℕₚ
-import Data.String.Base as String
+import Data.Nat.Show as ℕₛ
+import Data.Nat.Show.Properties as ℕₛₚ
+open import Data.String.Base as String using (String)
 import Data.Product.Properties as Productₚ
-import Data.Vec.Base as Vec
-import Data.Vec.Relation.Unary.Any as Any
+open import Data.Vec.Base as Vec using ([]; _∷_; Vec)
+import Data.Vec.Properties as Vecₚ
+open import Data.Vec.Relation.Unary.Any as Any using (here; there)
 import Data.Vec.Membership.Propositional as ∈ᵥ
 import Data.Vec.Membership.Propositional.Properties as ∈ᵥₚ
-import Data.String.Properties as Stringₚ
-
-open Vec using ([]; _∷_; Vec)
-open String using (String)
-open ℕ using (ℕ; zero; suc)
-open Any using (here; there)
-open List using (List; []; _∷_; [_])
 
 open import PiCalculus.Syntax
 open Raw
@@ -35,7 +36,6 @@ open Scoped
 open Conversion
 
 open import PiCalculus.Utils
-open AllAcc using ([]; _∷_)
 
 module PiCalculus.Syntax.Properties where
 
@@ -55,46 +55,44 @@ module _ where
   toName∘fromName (here px) = sym px
   toName∘fromName (there x∈ctx) = toName∘fromName x∈ctx
 
-  postulate
-    -- PR agda accepted, landing in 2.6.2 https://github.com/agda/agda/pull/4790
-    fromList-injective : ∀ a b → String.fromList a ≡ String.fromList b → a ≡ b
-
   -- The circum (^) is not a decimal character
-  ^∉DECIMALS : '^' ∈ᵥ.∉ ℕₛ.DECIMALS
-  ^∉DECIMALS (there (there (there (there (there (there (there (there (there (there ()))))))))))
+  ^∉DECIMALS : '^' ∈ᵥ.∉ Digit.digitChars
+  ^∉DECIMALS = from-yes (¬? (Any.any? ('^' Charₚ.≟_) Digit.digitChars))
 
-  -- In <name>^<natural> the <natural> does not contain ^, therefore toString is injective
-  toString-injective : (x y : Name × ℕ) → toString x ≡ toString y → x ≡ y
-  toString-injective (nx , cx) (ny , cy) eq = cong₂ _,_ strip-toList strip-toDecimalChars
+  module _ (base : ℕ) {2≤base : True (2 ℕₚ.≤? base)} {base≤16 : True (base ℕₚ.≤? 16)} where
+    charsInBase∈digitChars : ∀ n c → c ∈ₗ.∈ ℕₛ.charsInBase base {2≤base} {base≤16} n → c ∈ᵥ.∈ Digit.digitChars
+    charsInBase∈digitChars n c i with ∈ₗₚ.∈-map⁻ Digit.showDigit i
+    charsInBase∈digitChars n c i | d , _ , refl = ∈ᵥₚ.∈-lookup (Fin.inject≤ d _) Digit.digitChars
+
+  -- In <name>^<natural> the <natural> does not contain ^, therefore toChars is injective
+  toChars-injective : (x y : Name × ℕ) → toChars x ≡ toChars y → x ≡ y
+  toChars-injective (nx , cx) (ny , cy) eq = cong₂ _,_ cancel-names (ℕₛₚ.charsInBase-injective 10 cx cy count-repr)
     where
-      strip-fromList = fromList-injective (toCharList (nx , cx)) (toCharList (ny , cy)) eq
-      count-repr = ListInv.inv-++ʳ (String.toList nx) (String.toList ny) '^'
-                                  (^∉DECIMALS ∘ (ℕₛ.∈toDigitChars⇒∈digitChars cx '^'))
-                                  (^∉DECIMALS ∘ (ℕₛ.∈toDigitChars⇒∈digitChars cy '^'))
-                                  strip-fromList
-      strip-toDecimalChars = ℕₛ.toDigitChars-injective cx cy count-repr
-      cancel-names = Listₚ.++-cancelʳ (String.toList nx) (String.toList ny)
-                                      (subst (λ ● → String.toList nx List.++ ('^' ∷ ●) ≡ _)
-                                            count-repr strip-fromList)
-      strip-toList = Stringₚ.toList-injective nx ny cancel-names
-
+      count-repr = ListInv.inv-++ʳ nx ny '^'
+                                   (^∉DECIMALS ∘ charsInBase∈digitChars 10 cx '^')
+                                   (^∉DECIMALS ∘ charsInBase∈digitChars 10 cy '^')
+                                   eq
+      cancel-names = Listₚ.++-cancelʳ nx ny
+                                      (subst (λ ● → nx List.++ ('^' ∷ ●) ≡ _)
+                                            count-repr eq)
 
   -- A fresh variable name created from inspecting a context cannot be in that context
-  fresh-∉' : ∀ m name (xs : Ctx n) → toString (name , m ℕ.+ (count name xs)) ∈ᵥ.∉ apply xs
-  fresh-∉' m name (x ∷ xs) (here seq) with x Stringₚ.≟ name
-  ... | yes refl = ℕₚ.m≢1+n+m _ (begin
+  fresh-∉' : ∀ m name (xs : Ctx n) → toChars (name , m ℕ.+ (count name xs)) ∈ᵥ.∉ apply xs
+  fresh-∉' m name (x ∷ xs) (here seq) with Listₚ.≡-dec Charₚ._≟_ name x
+  fresh-∉' m name (x ∷ xs) (here seq) | yes refl = ℕₚ.m≢1+n+m _ (begin
     count name xs
-      ≡˘⟨ Productₚ.,-injectiveʳ (toString-injective (name , m ℕ.+ suc (count name xs)) (name , count name xs) seq) ⟩
+      ≡˘⟨ Productₚ.,-injectiveʳ (toChars-injective (name , m ℕ.+ suc (count name xs)) (name , count name xs) seq) ⟩
     m ℕ.+ suc (count name xs)
       ≡⟨ ℕₚ.+-suc m _ ⟩
     suc m ℕ.+ count name xs
       ∎)
-  ... | no ¬q = ¬q (Productₚ.,-injectiveˡ (sym (toString-injective (name , m ℕ.+ count name xs) (x , count x xs) seq)))
-  fresh-∉' m name (x ∷ xs) (there ∈ps) with x Stringₚ.≟ name
+  fresh-∉' m name (x ∷ xs) (here seq) | no ¬q = contradiction
+    (Productₚ.,-injectiveˡ (toChars-injective (name , m ℕ.+ count name xs) (x , count x xs) seq)) ¬q
+  fresh-∉' m name (x ∷ xs) (there ∈ps) with Listₚ.≡-dec Charₚ._≟_ name x
   fresh-∉' m name (x ∷ xs) (there ∈ps) | yes refl rewrite ℕₚ.+-suc m (count name xs) = fresh-∉' (suc m) name _ ∈ps
   fresh-∉' m name (x ∷ xs) (there ∈ps) | no ¬q = fresh-∉' m name _ ∈ps
 
-  fresh-∉ : ∀ name (xs : Ctx n) → toString (name , count name xs) ∈ᵥ.∉ apply xs
+  fresh-∉ : ∀ name (xs : Ctx n) → toChars (name , count name xs) ∈ᵥ.∉ apply xs
   fresh-∉ name xs = fresh-∉' zero name xs
 
   -- Translating from de Bruijn to names results in a well-scoped process

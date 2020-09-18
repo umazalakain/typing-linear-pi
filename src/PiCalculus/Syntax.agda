@@ -1,11 +1,12 @@
 {-# OPTIONS --safe --without-K #-}
 
-open import Data.String.Base using (String)
+open import Data.Char.Base using (Char)
+open import Data.List.Base using (List; []; _∷_)
 
 module PiCalculus.Syntax where
 
 Name : Set
-Name = String
+Name = List Char
 
 module Raw where
   infixr 20 _∥_
@@ -53,9 +54,12 @@ module Conversion where
 
     import Data.Vec.Base as Vec
     import Data.Char.Base as Char
+    import Data.Char.Properties as Charₚ
     import Data.List.Base as List
+    import Data.List.Properties as Listₚ
     import Data.String.Base as String
     import Data.String.Properties as Stringₚ
+    import Data.Nat.Show as ℕₛ
     import Data.Vec.Membership.DecPropositional as DecPropositional
 
     open import Data.Empty using (⊥)
@@ -69,12 +73,8 @@ module Conversion where
     open import Data.Vec.Relation.Unary.Any using (here; there)
 
     open Vec using (Vec; []; _∷_)
-    open List using (List; []; _∷_)
 
-    _∈?_ = DecPropositional._∈?_ Stringₚ._≟_
-
-    import PiCalculus.Utils
-    module ℕₛ = PiCalculus.Utils.ℕₛ
+    _∈?_ = DecPropositional._∈?_ (Listₚ.≡-dec Charₚ._≟_)
 
     variable
       n m : ℕ
@@ -83,16 +83,13 @@ module Conversion where
   Ctx = Vec Name
 
   count : Name → Ctx n → ℕ
-  count name = Vec.sum ∘ Vec.map ((if_then 1 else 0) ∘ isYes ∘ (Stringₚ._≟ name))
+  count name = Vec.count (Listₚ.≡-dec Charₚ._≟_ name)
 
-  toCharList : Name × ℕ → List Char.Char
-  toCharList (x , i) = String.toList x List.++ ('^' ∷ ℕₛ.toDigitChars 10 i)
-
-  toString : Name × ℕ → Name
-  toString = String.fromList ∘ toCharList
+  toChars : Name × ℕ → List Char.Char
+  toChars (x , i) = x List.++ ('^' ∷ ℕₛ.charsInBase 10 i)
 
   repr : ∀ x (xs : Vec Name n) → Name
-  repr x xs = toString (x , (count x xs))
+  repr x xs = toChars (x , (count x xs))
 
   apply : Ctx n → Ctx n
   apply [] = []

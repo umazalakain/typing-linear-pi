@@ -1,5 +1,7 @@
 {-# OPTIONS --safe #-} -- --without-K #-}
 
+import Data.String.Base as String
+{-# BUILTIN FROMSTRING String.toList #-}
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Bool using (Bool; true; false)
 open import Data.Unit using (⊤; tt)
