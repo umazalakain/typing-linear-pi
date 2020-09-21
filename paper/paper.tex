@@ -107,6 +107,11 @@
 \newcommand{\eq}[1]{\, \type{\simeq}_{#1} \,}
 \newcommand{\eqeq}{\, \type{\cong} \,}
 
+% Example
+\newcommand{\sender}{\textcolor{brown}{sender}}
+\newcommand{\receiver}{\textcolor{purple}{receiver}}
+\newcommand{\courier}{\textcolor{cyan}{courier}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title[$\pi$ with leftovers: a mechanisation in Agda]{$\pi$ with leftovers: \\ a mechanisation in Agda}
 \author{Uma Zalakain}
@@ -196,9 +201,6 @@ Ultimately, we can exploit this formalisation as a unified framework for type-sa
 
 \begin{example}[The courier system]
 \label{example-process}
-\newcommand{\sender}{\textcolor{brown}{sender}}
-\newcommand{\receiver}{\textcolor{purple}{receiver}}
-\newcommand{\courier}{\textcolor{cyan}{courier}}
 
 We present an example that highlights the ways in which linear, graded and shared types can be used to prevent errors in a concurrent and distributed system defined by \picalc{} processes in parallel.
 
@@ -705,11 +707,11 @@ We provide a type system for a resource-aware \picalc{} in \autoref{leftover-typ
 \label{multiplicities}
 
 In the linear \picalc{} each channel has an input and an output \emph{capability}, and each capability has a given \emph{multiplicity} of 0 (exhausted) or 1 (available).
-We generalise over this notion of multiplicities by defining an algebra for them that is satisfied by linear, graded and shared types alike.
-We then use pairs of multiplicities as usage annotations for channels.
+We generalise over this notion by defining an algebra for multiplicities that is satisfied by linear, graded and shared types alike.
+We then use pairs of multiplicities as usage annotations for a channel's input and output capabilities.
 
 \begin{nidefinition}[Usage algebra]
-  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$, that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational resoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
+  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$ that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational reasoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal} (so that new resources cannot arbitrarily spring into life).
   It has an element $\one$ that is used to count inputs and outputs.
   \autoref{fig:multiplicities} models such an algebra as a record $\Algebra_C$ on a carrier $C$.
@@ -826,7 +828,7 @@ The former are preserved throughout typing derivations; the latter are transform
 The unit type $\unit$ serves as a proof of inhabitance for types.
 The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
 The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
-This notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output, respectively \cite{K07}.
+This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output, respectively \cite{K07}.
 
 A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
 
@@ -881,7 +883,7 @@ We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approac
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as an input to another typing derivation.
 
-Typing judgments for linear calculi typically carry a single context of usage annotations and thus the typing rules require frequent top-down proofs of context splitting --- e.g., the typing rule for parallel composition would look as follows:
+Typing judgments for linear calculi typically carry a single context of usage annotations and thus the typing rules require frequent top-down proofs of context splitting --- e.g., the typing rule for parallel composition would look like:
 \begin{mathpar}
   \inferrule
   {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
@@ -892,7 +894,7 @@ This is rather cumbersome: for input and output, the proof of context split carr
 
 Leftover typing solves this problem by inverting the flow of information so that \textbf{the typing derivations of the subprocesses determine the context split}.
 As a result, usage information is threaded bottom-up through the typing derivation, and top-down context split proofs are no longer needed.
-In addition to this, it allows a \emph{framing} (\autoref{thm:framing}) theorem to be stated, and for the \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems to acquire a more general form.
+In addition, it allows \emph{framing} (\autoref{thm:framing}) to be stated, and \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) to acquire a more general form.
 
 Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
 Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
@@ -1011,17 +1013,17 @@ $\_ \; = \; \constr{0}$
   The scope restriction in rule $\new$ expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ of what is being transmitted; and the multiplicity $y$ given to the channel itself.
   This multiplicity $y$ is used for both input and output, so that they are balanced.
   The continuation process $P$ is provided with the new channel with usage annotation $y \comma y$, which it must completely exhaust.
-
+%
   The input process in rule $\recv{}{}$ requires a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
   Note that the index $i$ is used in the syntax of the typed process.
   We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
-
+%
   Similarly to input, the output process in rule $\send{}{}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
   We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of the channel $chan_i$.
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
-  
+%
   Parallel composition in rule $\comp{}{}$ uses the leftovers of the left-hand process to type the right-hand process.
   By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide an extrinsic proof of context split.
 \end{nidefinition}
@@ -1029,16 +1031,16 @@ $\_ \; = \; \constr{0}$
 \begin{example}[Typing derivation, continues=example-process]
 \label{example-derivation}
 
-We provide an example typing derivation for the processes defined in \autoref{example-process}.
+We provide the typing derivation for the courier system defined in \autoref{example-process}.
 For the sake of simplicity, we instantiate these processes with concrete variable references before typing them.
 
-The $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
+The \receiver{} defined by the $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
 After receiving twice, the process ends, and we should not be left with any unused multiplicities: $u$ needs to be $\lz$.
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
 Once the types are given, the typing derivation is completely syntax directed.
 
-The $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
+The \sender{} defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
 We instantiate $t$ (the type of data that we transmit) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
 As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
 We will transmit once, thus using a single output multiplicity, and leave the rest as leftovers.
@@ -1051,7 +1053,7 @@ We will transmit once, thus using a single output multiplicity, and leave the re
   & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO \\
 \end{flalign*}
 
-Dually, the process doing the synchronisation expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
+Dually, the \courier{} defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
 The typing derivation here is uniquely determined by the type and syntax of the process.
 
 \begin{flalign*}
@@ -1063,7 +1065,7 @@ The typing derivation here is uniquely determined by the type and syntax of the 
 & && \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
 \end{flalign*}
 
-We can now put these processes together.
+We can now put these processes together to type the courier system.
 Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
 
 \begin{flalign*}
