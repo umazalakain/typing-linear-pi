@@ -247,7 +247,7 @@ The \sender{} role is defined below.
 The \sender{} creates a new channel $\new{} \suc c$ denoting the data to be sent, and sends it over channel $c$, and then terminates, denoted by $\P0$.
 \begin{flalign*}
   & \func{send} \; : \; \Var_n \to \Process_n & \\
-  & \func{send} \; c = \new{} \send{\suc c}{\constr{0}} \PO
+  & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO
 \end{flalign*}
 Each \sender{} process $S_1$ and $S_2$ will  be an instantiation of $\func{send} \; c$.
 In particular
@@ -256,7 +256,7 @@ $S_1$ will be defined as $\func{send} \; x$ and $S_2$ as $\func{send} \; y$, whe
 The \receiver{} role is defined below, where $\func{recv} \; c \;$ receives data \emph{twice} on a channel $c$ and then terminates with $\PO$.
 \begin{flalign*}
   & \func{recv} \; : \; \Var_n \to \Process_n & \\
-  & \func{recv} \; c \; = \recv{c}{} (\recv{\suc c} \PO)
+  & \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)} \PO
 \end{flalign*}
 The \receiver{} process $R$ will be instantiated as $\func{recv} \; z$, where $z$ is the channel used to receive data from the \courier{} (see \autoref{fig:example-process}).
 
@@ -1060,10 +1060,10 @@ The typing derivation here is uniquely determined by the type and syntax of the 
 \begin{flalign*}
 & \func{\vdash carry} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
 & \func{\vdash carry} && = \\
-& && \recv{\suc \suc \constr{0}}{} \\
-& && \recv{\suc \suc \constr{0}}{} \\
-& && \send{\suc \suc \constr{0}}{\suc \constr{0}} \\
-& && \send{\suc \suc \constr{0}}{\constr{0}} \PO \\
+& && \recv{(\suc \suc \constr{0})}{} \\
+& && \recv{(\suc \suc \constr{0})}{} \\
+& && \send{(\suc \suc \constr{0})}{\suc \constr{0}} \\
+& && \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
 \end{flalign*}
 
 We can now put these processes together.
