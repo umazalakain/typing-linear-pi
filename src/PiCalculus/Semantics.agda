@@ -120,20 +120,20 @@ module PiCalculus.Semantics where
   (x ⦅⦆ P)    [ i ↦ j ] = (x [ i ↦ j ]') ⦅⦆ (P [ suc i ↦ suc j ])
   (x ⟨ y ⟩ P) [ i ↦ j ] = (x [ i ↦ j ]') ⟨ y [ i ↦ j ]' ⟩ (P [ i ↦ j ])
 
-  renameFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
-  renameFin-unused {i = i} x i≢j  with i Finₚ.≟ x
-  renameFin-unused {i = i} x i≢j | true because _ = i≢j
-  renameFin-unused {i = i} x i≢j | false because ofⁿ ¬p = ¬p
+  substFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
+  substFin-unused {i = i} x i≢j  with i Finₚ.≟ x
+  substFin-unused {i = i} x i≢j | true because _ = i≢j
+  substFin-unused {i = i} x i≢j | false because ofⁿ ¬p = ¬p
 
-  rename-unused : {i j : Fin (suc n)}
+  subst-unused : {i j : Fin (suc n)}
                → i ≢ j
                → (P : Scoped (suc n))
                → Unused i (P [ i ↦ j ])
-  rename-unused i≢j 𝟘 = tt
-  rename-unused i≢j (ν P) = rename-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  rename-unused i≢j (P ∥ Q) = rename-unused i≢j P , rename-unused i≢j Q
-  rename-unused i≢j (x ⦅⦆ P) = renameFin-unused x i≢j , rename-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  rename-unused i≢j (x ⟨ y ⟩ P) = renameFin-unused x i≢j , renameFin-unused y i≢j , rename-unused i≢j P
+  subst-unused i≢j 𝟘 = tt
+  subst-unused i≢j (ν P) = subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
+  subst-unused i≢j (P ∥ Q) = subst-unused i≢j P , subst-unused i≢j Q
+  subst-unused i≢j (x ⦅⦆ P) = substFin-unused x i≢j , subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
+  subst-unused i≢j (x ⟨ y ⟩ P) = substFin-unused x i≢j , substFin-unused y i≢j , subst-unused i≢j P
 
   data Channel : ℕ → Set where
     internal : ∀ {n}         → Channel n
@@ -152,7 +152,7 @@ module PiCalculus.Semantics where
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
 
     comm : {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
-         → let uP' = rename-unused (λ ()) P
+         → let uP' = subst-unused (λ ()) P
          in ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}

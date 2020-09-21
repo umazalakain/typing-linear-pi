@@ -13,7 +13,7 @@ import PiCalculus.LinearTypeSystem.Framing
 import PiCalculus.LinearTypeSystem.Weakening
 import PiCalculus.LinearTypeSystem.Exchange
 import PiCalculus.LinearTypeSystem.Strengthening
-import PiCalculus.LinearTypeSystem.Renaming
+import PiCalculus.LinearTypeSystem.Substitution
 import PiCalculus.LinearTypeSystem.SubjectCongruence
 import PiCalculus.LinearTypeSystem.SubjectReduction
 import PiCalculus.Examples

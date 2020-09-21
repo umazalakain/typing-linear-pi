@@ -43,10 +43,10 @@ lift-lower i (x ⟨ y ⟩ P) (i≢x , i≢y , uP)
   | Finₚ.punchIn-punchOut i≢x
   | Finₚ.punchIn-punchOut i≢y = refl
 
-renameFin-suc : (i j x : Fin n) → (suc x) [ suc i ↦ suc j ]' ≡ suc (x [ i ↦ j ]')
-renameFin-suc i j x with i Finₚ.≟ x
-renameFin-suc i j x | yes p = refl
-renameFin-suc i j x | no ¬p = refl
+substFin-suc : (i j x : Fin n) → (suc x) [ suc i ↦ suc j ]' ≡ suc (x [ i ↦ j ]')
+substFin-suc i j x with i Finₚ.≟ x
+substFin-suc i j x | yes p = refl
+substFin-suc i j x | no ¬p = refl
 
 exchangeFin-suc : (i : Fin n) (x : Fin (suc n)) → suc (exchangeFin i x) ≡ exchangeFin (suc i) (suc x)
 exchangeFin-suc i x with Fin.inject₁ i Finₚ.≟ x

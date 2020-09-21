@@ -33,7 +33,7 @@ open import PiCalculus.LinearTypeSystem.ContextLemmas Ω
 open import PiCalculus.LinearTypeSystem.Framing Ω
 open import PiCalculus.LinearTypeSystem.Weakening Ω
 open import PiCalculus.LinearTypeSystem.Strengthening Ω
-open import PiCalculus.LinearTypeSystem.Renaming Ω
+open import PiCalculus.LinearTypeSystem.Substitution Ω
 open import PiCalculus.LinearTypeSystem.SubjectCongruence Ω
 
 SubjectReduction : Set
@@ -103,8 +103,8 @@ subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , 
 subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) | refl = ⊢P' ∥ ⊢Q
   where ⊢P' = ⊢P
             |> align (suc x) (suc x') (suc Γ'⇒Γ)
-            |> ⊢-rename y
-            |> ⊢-strengthen zero (rename-unused (λ ()) P)
+            |> ⊢-subst y
+            |> ⊢-strengthen zero (subst-unused (λ ()) P)
 subject-reduction Γ'⇒Γ (par P→P') (⊢P ∥ ⊢Q) = subject-reduction Γ'⇒Γ P→P' ⊢P ∥ ⊢Q
 subject-reduction {idx = idx} refl (res_ {c = internal} P→Q) (ν t m μ ⊢P)
   = ν t m μ (subject-reduction {idx = idx} refl P→Q ⊢P)
