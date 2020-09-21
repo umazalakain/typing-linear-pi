@@ -202,26 +202,25 @@ Ultimately, we can exploit this formalisation as a unified framework for type-sa
 
 We present an example that highlights the ways in which linear, graded and shared types can be used to prevent errors in a concurrent and distributed system defined by \picalc{} processes in parallel.
 
-A courier system consists of three roles:
+A courier system consists of three \emph{roles}:
 a \sender{}, who wants to send a package;
 a \receiver{}, who receives the package sent by the sender;
 and a \courier{}, who carries the package from the sender to the receiver.
-Our courier system is defined by four \picalc{} processes in parallel inhabiting the above three roles:
+
+Our courier system (given in \autoref{fig:example-process}) is defined by four \picalc{} processes in parallel instantiating the above three roles:
 we have two \sender{} processes, $S_1$ and $S_2$, sending data over channels $x$ and $y$, respectively;
-one \receiver{} process, $R$, which receives the data sent from each of the senders--hence receives twice;
+one \receiver{} process, $R$, which receives over channel $z$ the data sent from each of the senders--hence receives twice;
 and a \courier{} process $C$, which synchronises communication among $S_1$, $S_2$ and $R$.
 The \courier{} process $C$ first receives data from $S_1$ and $S_2$ on its input channels $x$ and $y$, respectively, and then sends the received data to $R$ along its output channel $z$.
-A graphical representation of the courier system is given in \autoref{fig:example-process}.
+
 
 We will now define the courier system as \picalc{} processes.
-In our framework, the syntax of \picalc{} processes adopts \emph{de Bruijn indices} \cite{deBruijn1972, Dybjer1994} for channel names and variables and is introduced in detail in \autoref{syntax}.
+In our work, the syntax of \picalc{} processes adopts \emph{de Bruijn indices} \cite{deBruijn1972} for channel names and variables (details in \autoref{syntax}).
 In short, for the purposes of this example:
 process $\new{} P$ creates a new channel and makes it available at index $0$ in the continuation process $P$;
 $\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel; process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
 process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
 Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the number $n$ of free variables they can refer to, for any natural number $n$.
-
-For the sake of clarity, we will define the four subprocesses in our courier system separately and parametrise them by the channels on which they operate.
 
 \begin{figure}[t]
   \small
@@ -240,27 +239,29 @@ For the sake of clarity, we will define the four subprocesses in our courier sys
   \caption{The courier system: two \sender{} $S_1$ and $S_2$, one \receiver{} $R$ and one \courier{} $C$.}
   \label{fig:example-process}
 \end{figure}
+For the sake of clarity, we will define the four subprocesses in our courier system separately and parametrise them by the channels on which they operate.
+Each roles \sender{}, \receiver{} and \courier{} is defined as a function respectively, $\func{send}, \func{recv}$ and $\func{carry}$ with signature $\Var_n \to \Process_n$.
 
-Each of the roles \sender{}, \receiver{} and \courier{} is defined as a function respectively, $\func{send}, \func{recv}$ and $\func{carry}$ with signature $\Var_n \to \Process_n$.
-
-The \sender{} role is defined below.
-The \sender{} creates a new channel $\new{} \suc c$ denoting the data to be sent, and sends it over channel $c$, and then terminates, denoted by $\P0$.
+The \sender{} \emph{role} is defined below.
+The \sender{} creates a new channel $\new{} \suc c$ denoting the data to be sent, and sends it over channel $c$, and then terminates, denoted by process $\PO$.
 \begin{flalign*}
   & \func{send} \; : \; \Var_n \to \Process_n & \\
   & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO
 \end{flalign*}
-Each \sender{} process $S_1$ and $S_2$ will  be an instantiation of $\func{send} \; c$.
-In particular
-$S_1$ will be defined as $\func{send} \; x$ and $S_2$ as $\func{send} \; y$, where data is sent over channels $x$ and $y$, respectively (see \autoref{fig:example-process}).
+Each \sender{} \emph{process} $S_1$ and $S_2$ is an instantiation of $\func{send} \; c$.
+In particular,
+$S_1$ is defined as $\func{send} \; x$ and $S_2$ as $\func{send} \; y$, where data is sent over channels $x$ and $y$, respectively (see \autoref{fig:example-process}).
 
 The \receiver{} role is defined below, where $\func{recv} \; c \;$ receives data \emph{twice} on a channel $c$ and then terminates with $\PO$.
 \begin{flalign*}
   & \func{recv} \; : \; \Var_n \to \Process_n & \\
   & \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)} \PO
 \end{flalign*}
-The \receiver{} process $R$ will be instantiated as $\func{recv} \; z$, where $z$ is the channel used to receive data from the \courier{} (see \autoref{fig:example-process}).
+The \receiver{} process $R$ is defined as  $\func{recv} \; z$, with channel $z$ instantiating $c$, which is the channel used to receive data from \courier{} (see \autoref{fig:example-process}).
 
 The \courier{} role is defined below.
+The \courier{} process $C$ is defined as $\func{carry} \; x \; y \; z$.
+It sequentially receives on the two input channels $x$ and $y$ -- instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$ -- instantiating $out$ (see \autoref{fig:example-process}).
 \begin{flalign*}
   & \func{carry} \; : \; \Var_n && \to \Var_n \to \Var_n \to \Process_n & \\
   & \func{carry} \; in0 \; in1 \; out \; &&= \\
@@ -269,7 +270,6 @@ The \courier{} role is defined below.
   & && \send{(\suc \suc \; out)}{\suc \constr{0}} \\
   & && \send{(\suc \suc \; out)}{\constr{0}} \PO
 \end{flalign*}
-The \courier{} process $C$ will be instantiated as $\func{carry} \; x \; y \; z$, which sequentially receives on the two input channels $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $out$. Here channels $x,y,z$ instantiate respectively $in0,in1,out$.
 
 Finally, we compose these processes together and create three communication channels: the first channel is shared between the \sender{} $S_1$ and the \courier{} $C$, the second between the \sender{} $S_2$ and the \courier{} $C$, and the third between the \receiver{} $R$ and the \courier{} $C$.
 The result is the courier systems defined below.
@@ -283,9 +283,8 @@ The result is the courier systems defined below.
 
 In order to type the courier system we will use all three typing disciplines: linear, graded and shared typing.
 We will continue this example and provide the typing derivations in \autoref{leftover-typing}.
-We use \textbf{shared types} to type the data that is being sent from the \sender{} processes to the \receiver{};
-we use \textbf{linear types} for the usage annotations of [FILL IN, NOT CLEAR BEFORE];
-and finally, we use \textbf{graded types} for the usage annotations of the communication channels $x$, $y$, and $z$: the \sender{} processes $\func{send} \; x$ and $\func{send} \; y$ each consume $1$ output multiplicity and the \receiver{} process $\func{recv} \; z$ consumes $2$ input multiplicities, as it receives twice on channel $z$.
+We use \textbf{linear types} for the \emph{usage annotations} of data and \textbf{shared types} for the \emph{data} itself that is being sent from the \sender{} processes to the \receiver{}.
+We use \textbf{graded types} for the usage annotations of the communication channels $x$, $y$, and $z$: the \sender{} processes $\func{send} \; x$ and $\func{send} \; y$ each consume $1$ output multiplicity and the \receiver{} process $\func{recv} \; z$ consumes $2$ input multiplicities, as it receives twice on channel $z$.
 Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$ and one input multiplicity on $y$, and two output multiplicities on $z$.
 \end{example}
 
@@ -298,7 +297,7 @@ Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input 
    These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
    
    \item \textbf{Semantics}: we provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
-   This operational semantics is defined as a reduction relation on processes (\autoref{operational-semantics}).
+   Thanks to our well-scoped grammar  (\autoref{syntax}), the operational semantics is defined on \emph{the totality of the syntax} as a reduction relation on processes (\autoref{operational-semantics}).
    The reduction relation tracks at the type level the channel on which communication occurs. This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
    The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
  \end{itemize}
@@ -351,7 +350,7 @@ and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 \end{figure}
 
 \autoref{fig:notation} illustrates the notation used in this paper.
-Data type definitions ($\type{\N}$) use double inference lines and index-free synonyms (\textsc{Nat}) as rule names (for ease of reference).
+Data type definitions ($\type{\N}$) use double inference lines and index-free synonyms (\textsc{Nat}) as rule names for ease of reference.
 Constructors ($\constr{0}$ and $\suc$) are given as inference rules.
 We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda: premises become argument types and conclusions return types.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
@@ -470,12 +469,12 @@ These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{
       &Q = \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
       &R = (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)})
     \end{alignat*}
-    \caption{From names to de Bruijn indices}
+    \caption{From names to de Bruijn indices and back}
     \label{fig:conversion}
     \end{figure}
-  We illustrate the conversion functions from names to de Bruijn indices $\func{fromRaw}$ and back $\func{toRaw}$ with three processes $P,Q,R$ given in \autoref{fig:conversion}.
+  We illustrate the conversion functions from names to de Bruijn indices $(\func{fromRaw}$) and back ($\func{toRaw}$) with three processes $P,Q,R$  in \autoref{fig:conversion}.
 
-  Process $P$ uses names $x,y,z$ and it is translated via the conversion function $\func{fromRaw}$ into process $Q$, which uses de Bruijn indices.
+  Process $P$ uses names $x,y,z$ and is translated via the conversion function $\func{fromRaw}$ into process $Q$, which uses de Bruijn indices.
   Process $Q$ is then translated via $\func{toRaw}$ into process $R$, which follows the \emph{Barendregt convention}\footnote{The Barendregt variable convention states that all bound variables/names in a process are distinct among each other and from the free variables/names.} and is $\alpha$-equivalent to the original process $P$.
 \end{example}
 
@@ -555,15 +554,14 @@ We define the base cases of a structural congruence relation \textsc{StructCong}
 
 The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as being the neutral element of parallel composition, respectively.
 The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
-
 In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$ (see \autoref{app:definitions}).
 The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index greater than $i$.
 In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
 We lift the relation \textsc{StrucCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$ as shown in \autoref{fig:struct-cong1}.
-The $\func{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively restriction, composition, input and output.
-The remaining three rules close structural congruence under reflexivity, symmetry and transitivity. 
+The $\constr{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively scope restriction, parallel composition, input and output.
+The remaining three rules close structural congruence under reflexivity, symmetry and transitivity, respectively. 
 The transitivity rule makes it tricky to prove predicates by induction on \textsc{Equals}: Agda cannot immediately see that such doubly recursive calls terminate.
 In order to remedy this, we model the inductive structure syntactically and index \textsc{Equals} by a type \textsc{Rec}.
 
@@ -634,8 +632,8 @@ In order to remedy this, we model the inductive structure syntactically and inde
 
 The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs (\autoref{fig:reduction}).
 We keep track of channel $c$ so we can state subject reduction (\autoref{thm:subject-reduction}).
-We distinguish between channels that are created inside of the process ($\constr{internal}$) and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable).
 
+We distinguish between channels that are created inside of the process ($\constr{internal}$), and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable.
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
 After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:substitution-unused} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
@@ -650,9 +648,8 @@ Reduction is closed under parallel composition (rule $\constr{par}$), restrictio
   By structural induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-In $\constr{res}$, we use $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
-This $\func{dec}$ function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
-
+Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
+This function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
 
 \begin{figure}[h]
 \begin{mathpar}
@@ -744,7 +741,7 @@ We then use pairs of multiplicities as usage annotations for channels.
 \end{nidefinition}
 
 \autoref{fig:algebra-instances} sketches the implementation of linear, graded and shared types as instances of our usage algebra.
-Their use in typing derivations is illustrated in \autoref{example-derivation}.
+Their use in typing derivations is illustrated in \autoref{example-derivation} (Continued).
 
 \begin{figure}[h]
 \begin{tabular}{l | l | l}
