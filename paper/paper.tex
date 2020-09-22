@@ -142,7 +142,7 @@
 \begin{acks}
 We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.
 
-The authors would also like to thank the anonymous referees fortheir valuable comments and helpful suggestions. This work is supported by the \grantsponsor{UKEPSRC}{UK EPSRC}{} grant \grantnum{UKEPSRC}{EP/K034413/1} ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the \grantsponsor{EUHORIZON}{EU HORIZON 2020 MSCA RISE}{} project \grantnum{EUHORIZON}{778233} ``Behavioural Application Program Interfaces'' (BehAPI).
+The authors would also like to thank the anonymous referees for their valuable comments and helpful suggestions. This work is supported by the \grantsponsor{UKEPSRC}{UK EPSRC}{} grant \grantnum{UKEPSRC}{EP/K034413/1} ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the \grantsponsor{EUHORIZON}{EU HORIZON 2020 MSCA RISE}{} project \grantnum{EUHORIZON}{778233} ``Behavioural Application Program Interfaces'' (BehAPI).
 \end{acks}
 
 \begin{abstract}
@@ -1408,8 +1408,10 @@ Their separation logic is based on a partial commutative monoid that need not be
 Their typing rules preserve the balance between supply and demand, and are extremely elegant.
 They distill their typing rules even further by modelling the supply and demand market as a state monad.
 
+\begin{anonsuppress}
 In her master's thesis, Zalakain uses a HOAS to embed a session-typed \picalc{} in Coq \cite{Zalakain2019}.
 Channel type polymorphism (preventing channels from being constructed out of thin air) and a process-traversing predicate ensure that channels are used linearly --- subject reduction is then shown to preserve this predicate.
+\end{anonsuppress}
 
 \paragraph{Other Work}
 
