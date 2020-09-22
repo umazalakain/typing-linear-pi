@@ -838,7 +838,7 @@ A \emph{typing context} (last two rows of \autoref{fig:prectx}) is a length-inde
   A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to an existing context $\Gamma$.
 
   We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
-  Henceforth, we use $\lz$ to denote the pair $0 \comma 0$ for a channel which cannot be used any further, $\li$ for the pair $1 \comma 0$ for a channel to be used in input exactly once, $\lo$ for $0 \comma 1$ for a channel to be used in output exactly once, and $\lio$ for $1 \comma 1$, for a channel to be used exactly once in input and exactly once in output.
+  Henceforth, we use $\lz$ to denote the multiplicity pair $0 \comma 0$, $\li$ for the pair $1 \comma 0$, $\lo$ for $0 \comma 1$, and $\lio$ for $1 \comma 1$.
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 
   \begin{figure}[h]
@@ -940,6 +940,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)}$ on pairs of multiplicities and an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with the same underlying context of indices.
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
+  Note that the remaining context $\Gamma$ is preserved unused as a leftover.
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
   We use the \emph{computability} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
@@ -954,7 +955,7 @@ $\_ \; = \; \suc \constr{0}$
 $\_ \; : \; \contains{\constr{[]} \comma \channel{\unit}{\li}} {\constr{[]} \comma \lio} {\constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo}$
 $\_ \; = \; \constr{0}$
   \end{lstlisting}
-  The underscore \_ introduces an anonymous declaration immediately followed by its definition.
+  In Agda, the underscore \_ introduces an anonymous declaration immediately followed by its definition.
   We must show that the variable at position $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $\constr{[]} \comma \channel{\unit}{\li} \comma \unit$ and a usage context $\constr{[]} \comma \lio \comma \lio$.
   The \textsc{VarRef} constructors we must use are completely determined by $\suc \; \constr{0}$ in the type.
   The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output, the result is the obligation on line 4.
@@ -1016,16 +1017,16 @@ $\_ \; = \; \constr{0}$
 %
   The input process in rule $\recv{}{}$ requires a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
   Note that the index $i$ is used in the syntax of the typed process.
-  We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ at index $\constr{0}$.
+  We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ --- at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
 %
   Similarly to input, the output process in rule $\send{}{}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
-  We use the leftover context $\Delta$ to type the continuation process, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of the channel $chan_i$.
+  We use the leftover context $\Delta$ to type the transmitted data, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of the channel $chan_i$.
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
 %
   Parallel composition in rule $\comp{}{}$ uses the leftovers of the left-hand process to type the right-hand process.
-  By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide an extrinsic proof of context split.
+  By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide a top-down proof of context split.
 \end{nidefinition}
 
 \begin{example}[Typing derivation, continues=example-process]
@@ -1047,7 +1048,8 @@ Once the types are given, the typing derivation is completely syntax directed.
 The \sender{} defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
 We instantiate $t$ (the type of data that the \sender{} sends) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
 As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
-We will transmit once, thus using a single output multiplicity, and leave the rest as leftovers.
+We will transmit once, thus use a single output multiplicity, and leave the rest as leftovers.
+Agda can uniquely determine the arguments required by the $\new{}$ constructor, and thus we can omit them using underscores.
 \begin{flalign*}
   & \func{\vdash send} \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}}{\Gamma \comma (l \comma \suc r)}{\func{send} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
   & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
@@ -1108,13 +1110,9 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let $i$ be a variable not in $P$, such that $\Unused_i \; P$.
-  Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P}{\func{del}_i \; \Xi}$.
+  Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
+  Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
-
-% \begin{remark}
-  Notice that the \emph{unused} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
-% \end{remark}
 
 \paragraph*{Exchange}
 This property states that the exchange of two variables preserves the well-typedness of a process.
@@ -1137,7 +1135,7 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
 \subsection{Towards Subject Reduction}
 \paragraph*{Subject Congruence}
 This property states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
-To prove this result, we must first introduce lemmas that establish that some syntactic manipulations can be inverted (\autoref{lm:lower-lift}, \autoref{lm:exchange-exchange}) and how unused variables relate to the preservation of leftovers (\autoref{lm:types-unused}).
+To prove this result, we must first introduce lemmas that establish that certain syntactic manipulations can be inverted (\autoref{lm:lower-lift}, \autoref{lm:exchange-exchange}) and how unused variables relate to the preservation of leftovers (\autoref{lm:types-unused}).
 
 \begin{nilemma}
   \label{lm:lower-lift}
