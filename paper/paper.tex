@@ -1398,11 +1398,9 @@ As Gay does \cite{Gay2001}, context splits are given extrinsically, and exhauste
 The runtime semantics are given as an intrinsically typed CEK machine with a global context of session-typed channels.
 
 In their recent paper, Ciccone and Padovani mechanise a dependently-typed linear \picalc{} in Agda \cite{Ciccone}.
-They do so by leveraging Agda's dependent types to provide a dependently-typed interpretation of messages.
-Contexts contain not only types, but also the messages that inhabit their corresponding interpretation in Agda.
-To avoid linearity violations, the interpretation of channel types is erased --- they are only present in the context of the typing judgment.
-They model message input as a dependent function abstraction in Agda, and as a result are able to encode message predicates, branching, and variable-length conversations.
-They use the concrete set of multiplicities $0$, $1$, $\omega$, define a partial algebra on contexts and require user-provided proofs of context split.
+Their intrinsic encoding allows them to leverage Agda's dependent types to provide a dependently-typed interpretation of messages --- to avoid linearity violations the interpretation of channel types is erased.
+Message input is modeled as a dependent function in Agda, and as a result message predicates, branching, and variable-length conversations can be encoded.
+In contrast to our work, their algebra is on the multiplicities $0$, $1$, $\omega$, and top-down context splitting proofs must be provided.
 
 In another recent work, Rouvoet et al. provide an intrinsic type system for a \lambdacalc{} with session types \cite{Rouvoet2020}.
 They use proof relevant separation logic and a notion of a supply and demand \emph{market} to make context splits transparent to the user.
