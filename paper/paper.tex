@@ -153,7 +153,7 @@ The authors would also like to thank the anonymous referees fortheir valuable co
   We present an untyped syntax and semantics for the \picalc{}, on top of which we provide a resource-aware type system parametrised by a set of multiplicity algebras.
   This allows the user to mix \emph{linear}, \emph{graded} and \emph{shared} types, under the same unified framework.
   We use leftover typing \cite{Allais2018a} to encode our typing rules, thus avoiding the ubiquitous context splitting proofs common when dealing with linear type systems.
-  We provide a framing theorem, and generalise the weakening and strengthening theorems, and use them to prove subject congruence.
+  We provide a framing theorem, generalise the weakening and strengthening theorems, and use them to prove subject congruence.
   We show that the type system is stable under substitution and prove subject reduction.
 %
   Our formalisation is fully mechanised in Agda.
@@ -177,12 +177,12 @@ These make the \picalc{} a fully-fledged tool for modelling and verifying concur
 In the early '90s, \emph{linear types} for (functional) programming languages \cite{Wadler90,Bernardy2018} were introduced, following J.-Y. Girard's development of linear logic \cite{Girard87}.
 Linear type systems guarantee that resources are used \emph{exactly once}.
 Enforcing this ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
-Later on, linearity inspired unique types, as in Clean \cite{BarendsenS96} and ownership types, as in Rust \cite{MatsakisK14}.
+Later on, linearity also inspired unique types, as in Clean \cite{BarendsenS96}, and ownership types, as in Rust \cite{MatsakisK14}.
 
-Linearity also influenced the $\pi$-calculus.
+Linearity influenced the $\pi$-calculus as well.
 Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
 %
-Meanwhile, linearity acquired a different flavour with the rise of \emph{session types} \cite{H93,THK94,HVK98}, a formalism used in communication-centric programming, where linearity ensures that a channel is owned by exactly one communicating participant --- the channel itself may be used multiple times, as specified by its session type.
+Meanwhile, linearity acquired a different flavour with the rise of \emph{session types} \cite{H93,THK94,HVK98}, a formalism used in communication-centric programming where linearity ensures that a channel is owned by exactly one communicating participant --- the channel itself may be used multiple times, as specified by its session type.
 Linearity in session types is the key ingredient that guarantees communication safety and session fidelity.
 
 In recent years, an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17} has pushed the linear \picalc{} \cite{KPT96} into the spotlight again.
@@ -211,7 +211,7 @@ and a \courier{}, who carries the package from the sender to the receiver.
 
 Our courier system (given in \autoref{fig:example-process}) is defined by four \picalc{} processes in parallel instantiating the above three roles:
 we have two \sender{} processes, $S_1$ and $S_2$, sending data over channels $x$ and $y$, respectively;
-one \receiver{} process, $R$, which receives over channel $z$ the data sent from each of the senders--hence receives twice;
+one \receiver{} process, $R$, which receives over channel $z$ the data sent from each of the senders -- hence receives twice;
 and a \courier{} process $C$, which synchronises communication among $S_1$, $S_2$ and $R$.
 The \courier{} process $C$ first receives data from $S_1$ and $S_2$ on its input channels $x$ and $y$, respectively, and then sends the received data to $R$ along its output channel $z$.
 
@@ -222,30 +222,30 @@ In short, for the purposes of this example:
 process $\new{} P$ creates a new channel and makes it available at index $0$ in the continuation process $P$;
 $\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel; process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
 process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
-Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the number $n$ of free variables they can refer to, for any natural number $n$.
+Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the number $n$ of free variables they can refer to.
 
 \begin{figure}[t]
   \small
   \centering
   \begin{tikzpicture}[draw,circle]
     \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown] (send-x) at (0,2)   {$\func{send} \, x$};
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown] (send-y) at (2,2)   {$\func{send} \, y$};
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=purple] (recv-z) at (4,2)   {$\func{recv} \, z$};
-    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=cyan,align=center] (sync) at (2,0)   {$\func{carry}$\\$ \, x \, y \, z$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown] (send-y) at (0,0)   {$\func{send} \, y$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=purple] (recv-z) at (4,1)   {$\func{recv} \, z$};
+    \node[draw,circle,fill opacity=0.3,text opacity=1,fill=cyan,align=center] (sync) at (2,1)   {$\func{carry}$\\$ \, x \, y \, z$};
 
-    \draw[->] (send-x) -- node[left] {$x$} (sync);
-    \draw[->] (send-y) -- node[right] {$y$} (sync);
-    \draw[->] (sync.35) -- node[right] {$z$} (recv-z.240);
+    \draw[->] (send-x) -- node[above] {$x$} (sync);
+    \draw[->] (send-y) -- node[below] {$y$} (sync);
+    \draw[->] (sync.10) -- node[above] {$z$} (recv-z.170);
     \draw[->] (sync) -- (recv-z);
   \end{tikzpicture}
   \caption{The courier system: two \sender{} $S_1$ and $S_2$, one \receiver{} $R$ and one \courier{} $C$.}
   \label{fig:example-process}
 \end{figure}
 For the sake of clarity, we will define the four subprocesses in our courier system separately and parametrise them by the channels on which they operate.
-Each roles \sender{}, \receiver{} and \courier{} is defined as a function respectively, $\func{send}, \func{recv}$ and $\func{carry}$ with signature $\Var_n \to \Process_n$.
+Each role \sender{}, \receiver{} and \courier{} is defined as a function respectively, $\func{send}, \func{recv}$ and $\func{carry}$.
 
 The \sender{} \emph{role} is defined below.
-The \sender{} creates a new channel $\new{} \suc c$ denoting the data to be sent, and sends it over channel $c$, and then terminates, denoted by process $\PO$.
+The \sender{} creates a new channel to be sent as data, and sends it over channel $c$, and then terminates, denoted by process $\PO$.
 \begin{flalign*}
   & \func{send} \; : \; \Var_n \to \Process_n & \\
   & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO
@@ -287,7 +287,7 @@ In order to type the courier system we will use all three typing disciplines: li
 We will continue this example and provide the typing derivations in \autoref{leftover-typing}.
 We use \textbf{linear types} for the \emph{usage annotations} of data and \textbf{shared types} for the \emph{data} itself that is being sent from the \sender{} processes to the \receiver{}.
 We use \textbf{graded types} for the usage annotations of the communication channels $x$, $y$, and $z$: the \sender{} processes $\func{send} \; x$ and $\func{send} \; y$ each consume $1$ output multiplicity and the \receiver{} process $\func{recv} \; z$ consumes $2$ input multiplicities, as it receives twice on channel $z$.
-Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$ and one input multiplicity on $y$, and two output multiplicities on $z$.
+Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$, one input multiplicity on $y$, and two output multiplicities on $z$.
 \end{example}
 
 \subsection{Contributions}
@@ -320,7 +320,7 @@ Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input 
   \end{itemize}
 
   \item \textbf{Fully mechanised formalisation and type safety results}:
-    The formalisation of the \picalc{} with leftovers typing, from syntax to semantics and the type system, has been fully mechanised in Agda.
+    The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda.
 
     We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
     We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
@@ -354,7 +354,7 @@ and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 \autoref{fig:notation} illustrates the notation used in this paper.
 Data type definitions ($\type{\N}$) use double inference lines and index-free synonyms (\textsc{Nat}) as rule names for ease of reference.
 Constructors ($\constr{0}$ and $\suc$) are given as inference rules.
-We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda: premises become argument types and conclusions return types.
+We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda: inference rules become type constructors, premises become argument types and conclusions return types.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned in type definitions but omitted by constructors.
 
@@ -421,13 +421,13 @@ $\type{TYPES}$ are blue and uppercased, with indices as subscripts, $\constr{con
 \end{figure}
 
 The syntax of the \picalc{} \cite{Sangio01} using channel names is given by the $\Raw$ grammar in \autoref{fig:syntax-names}.
-Channel names and variables range over $x,y,z$ in $\Name$ and processes over $P,Q,R$ in $\Raw$.
 
+Channel names and variables range over $x,y,z$ in $\Name$ and processes over $P,Q,R$ in $\Raw$.
 Process $\PO$ denotes the terminated process, where no further communications can occur.
 Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
 Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
 Processes $\recv{x}{y} P$ and $\send{x}{y} P$ denote respectively, the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
-Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only process constructs which introduce bound names --- $x$ and $y$ in $P$, respectively.
+Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs that introduce bound names --- $x$ and $y$ in $P$, respectively.
 
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: they are not inherently well scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
@@ -450,7 +450,7 @@ In order to demonstrate the correspondence between an \picalc{} that uses names 
 When we translate into de Bruijn indices we keep the original binder names around --- they will serve as name hints for when we translate back.
 The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 Named references within the process are substituted with their corresponding de Bruijn index.
-We demand that the original process is well scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such proof term.
+We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such a proof term.
 \begin{alignat*}{2}
     &\func{fromRaw} && : (ctx : \Names_n) \; (P : \Raw) \\
     &               && \to \WellScoped \; ctx \; P \to \Process_n
@@ -483,11 +483,11 @@ These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{
 In the following we present the main results that our conversion functions satisfy.
 
 \begin{nilemma}
-  Translating from de Bruijn indices to names via $\func{fromRaw}$ results in a well-scoped process.
+  Translating from de Bruijn indices to names via $\func{toRaw}$ results in a well-scoped process.
 \end{nilemma}
 
 \begin{nilemma}
-  Translating from de Bruijn indices to names via $\func{toRaw}$ results in a process with no shadowed variables.
+  Translating from de Bruijn indices to names via $\func{toRaw}$ results in a process that follows the \emph{Barendregt convention}.
 \end{nilemma}
 
 \begin{nilemma}
@@ -565,7 +565,7 @@ We lift the relation \textsc{StrucCong} $\eqeq{}$ and close it under equivalence
 The $\constr{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively scope restriction, parallel composition, input and output.
 The remaining three rules close structural congruence under reflexivity, symmetry and transitivity, respectively. 
 The transitivity rule makes it tricky to prove predicates by induction on \textsc{Equals}: Agda cannot immediately see that such doubly recursive calls terminate.
-In order to remedy this, we model the inductive structure syntactically and index \textsc{Equals} by a type \textsc{Rec}.
+In order to remedy this, we model the recursive call structure syntactically and index \textsc{Equals} by a type \textsc{Rec}.
 
 \begin{figure}[h]
   \begin{mathpar}
