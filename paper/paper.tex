@@ -430,7 +430,7 @@ Processes $\recv{x}{y} P$ and $\send{x}{y} P$ denote respectively, the input and
 Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only process constructs which introduce bound names --- $x$ and $y$ in $P$, respectively.
 
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
-Names are cumbersome to mechanise: they are not inherently well-scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
+Names are cumbersome to mechanise: they are not inherently well scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
 To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 
@@ -450,7 +450,7 @@ In order to demonstrate the correspondence between an \picalc{} that uses names 
 When we translate into de Bruijn indices we keep the original binder names around --- they will serve as name hints for when we translate back.
 The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 Named references within the process are substituted with their corresponding de Bruijn index.
-We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such proof term.
+We demand that the original process is well scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such proof term.
 \begin{alignat*}{2}
     &\func{fromRaw} && : (ctx : \Names_n) \; (P : \Raw) \\
     &               && \to \WellScoped \; ctx \; P \to \Process_n
@@ -1371,7 +1371,7 @@ This allows one to talk about ill-typed terms, and defers the proof of subject r
 To the best of our knowledge, leftover typing makes its appearance in 1994, when Ian Mackie first uses it to formulate intuitionistic linear logic \cite{Mackie}.
 Allais \cite{Allais2018a} uses leftover typing to mechanise in Agda a bidirectional type system for the linear \lambdacalc{}.
 He proves type preservation and provides a decision procedure for type checking and type inference.
-In this paper, we follow Allais \cite{Allais2018a} and apply leftover typing to the \picalc{}.
+In this paper, we follow Allais \cite{Allais2018a} and apply leftover typing to the \picalc{} for the first time.
 We generalise the usage algebra, leading to linear, graded and shared type systems.
 Drawing from quantitative type theory (by McBride and Atkey \cite{McBride2016, Atkey2018}), in our work we too are able to talk about fully consumed resources --- e.g., we can transmit $\lz$ multiplicities of a fully exhausted channel.
 
@@ -1382,12 +1382,12 @@ We remove the demand for context splits, preserve the ability to talk about cons
 
 Orchard et al. introduce Granule \cite{Orchard}, a fully-fledged functional language with graded modal types, linear types, indexed types and polymorphism.
 Modalities include exact usages, security levels and intervals; resource algebras are pre-ordered semirings with partial addition.
-They provide bidirectional typing rules, and show the type safety of their semantics.
+The authors provide bidirectional typing rules, and show the type safety of their semantics.
 
-The work by Goto et al. \cite{Goto2016a} is, to the best of our knowledge, the first formalisation of session types to come along with a mechanised proof of type safety (in Coq).
+The work by Goto et al. \cite{Goto2016a} is, to the best of our knowledge, the first formalisation of session types which comes along with a mechanised proof of type safety in Coq.
 The authors extend session types with polymorphism and pattern matching.
 They use a locally-nameless encoding for variable references, a syntax prior to types, and an LTS semantics that encodes session-typed processes into the \picalc{}.
-Their type system uses reordering of contexts and extrinsic context splits. 
+Their type system uses reordering of contexts and extrinsic context splits, whether they are not needed in our work. 
 
 \paragraph{Intrinsic Encodings}
  
@@ -1428,7 +1428,7 @@ Further work on mechanising the \picalc{} \cite{Henry-Gerard1999, Honsell2001a, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Conclusion and Future Work}
 
-In this paper we provide a well scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
+In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
 As a result, theorems like framing, weakening and strengthening can now we stated for the linear \picalc{}.
 Our work is fully mechanised in around 1500 lines of code in Agda%
