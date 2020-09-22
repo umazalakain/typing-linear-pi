@@ -498,7 +498,7 @@ In the following we present the main results that our conversion functions satis
   Translating from names to de Bruijn indices and back via $\func{toRaw} \circ \func{fromRaw}$ results in the same process modulo $\alpha$-conversion.
 \end{nilemma}
 
-\begin{proof}[Proof (Sketch)]
+\begin{proof}[Proof]
   All the above results are proved by induction on \textsc{Process} and \textsc{Var} (\autoref{fig:syntax}).
   Complete details can be found in our mechanisation in Agda%
 \begin{anonsuppress}
@@ -714,7 +714,7 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$ that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational reasoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal} (so that new resources cannot arbitrarily spring into life).
   It has an element $\one$ that is used to count inputs and outputs.
-  \autoref{fig:multiplicities} models such an algebra as a record $\Algebra_C$ on a carrier $C$.
+  \autoref{fig:multiplicities} defines such an algebra as a record $\Algebra_C$ on a carrier $C$.
 
   \begin{figure}[h]
   \begin{equation*}
@@ -784,7 +784,7 @@ We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts 
 The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
 
 \begin{nidefinition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
-  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) (\autoref{fig:prectx}).
+  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) (first two rows of \autoref{fig:prectx}).
   
   \begin{figure}[h]
   \begin{mathpar}
@@ -823,21 +823,21 @@ The former are preserved throughout typing derivations; the latter are transform
   \caption{Types and length-indexed typing contexts.}
   \label{fig:prectx}
   \end{figure}
-\end{nidefinition}
-
 The unit type $\unit$ serves as a proof of inhabitance for types.
 The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
 The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
-This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input and output, respectively \cite{K07}.
+This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input $i$ and output $o$ capabilities, respectively \cite{K07}.
 
-A \emph{typing context} (last row in \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
+A \emph{typing context} (last two rows of \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
+\end{nidefinition}
+
 
 \begin{nidefinition}[\textsc{Ctx}: usage contexts]
   A \emph{usage context} is a context $\Ctx_{idxs}$ of pairs of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
 
   A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to an existing context $\Gamma$.
 
-  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ tuple of input and output multiplicities, respectively.
+  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
   Henceforth, we use $\lz$ to denote the pair $0 \comma 0$ for a channel which cannot be used any further, $\li$ for the pair $1 \comma 0$ for a channel to be used in input exactly once, $\lo$ for $0 \comma 1$ for a channel to be used in output exactly once, and $\lio$ for $1 \comma 1$, for a channel to be used exactly once in input and exactly once in output.
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 
@@ -1034,70 +1034,66 @@ $\_ \; = \; \constr{0}$
 We provide the typing derivation for the courier system defined in \autoref{example-process}.
 For the sake of simplicity, we instantiate these processes with concrete variable references before typing them.
 
-The \receiver{} defined by the $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
+The \receiver{} defined by the $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
 After receiving twice, the process ends, and we should not be left with any unused multiplicities: $u$ needs to be $\lz$.
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
 Once the types are given, the typing derivation is completely syntax directed.
-
-The \sender{} defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
-We instantiate $t$ (the type of data that we transmit) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
-As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
-We will transmit once, thus using a single output multiplicity, and leave the rest as leftovers.
-
 \begin{flalign*}
   & \func{\vdash recv} \; \types{\gamma \comma \channel{t}{\lz}}{\Gamma \comma (\suc \suc l \comma r)}{\func{recv} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
-  & \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
-  & \\
+  & \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO
+\end{flalign*}
+
+The \sender{} defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
+We instantiate $t$ (the type of data that the \sender{} sends) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
+As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
+We will transmit once, thus using a single output multiplicity, and leave the rest as leftovers.
+\begin{flalign*}
   & \func{\vdash send} \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}}{\Gamma \comma (l \comma \suc r)}{\func{send} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
-  & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO \\
+  & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
 \end{flalign*}
 
 Dually, the \courier{} defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
 The typing derivation here is uniquely determined by the type and syntax of the process.
-
 \begin{flalign*}
 & \func{\vdash carry} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
 & \func{\vdash carry} && = \\
 & && \recv{(\suc \suc \constr{0})}{} \\
 & && \recv{(\suc \suc \constr{0})}{} \\
 & && \send{(\suc \suc \constr{0})}{\suc \constr{0}} \\
-& && \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
+& && \send{(\suc \suc \constr{0})}{\constr{0}} \PO
 \end{flalign*}
 
-We can now put these processes together to type the courier system.
+We can now compose these processes in parallel and type the courier system.
 Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
-
 \begin{flalign*}
 & \func{\vdash system} && : \; \types{\constr{[]}}{\constr{[]}}{\func{system}}{\constr{[]}} & \\
 & \func{\vdash system} && = \new{} \; \_ \; \_ \; \_ \; ( \func{\vdash send} \\
 & && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash send} \\
 & && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash recv} \\
-& && \comp{}{ \func{\vdash carry} }))) \\
+& && \comp{}{ \func{\vdash carry} })))
 \end{flalign*}
-
 \end{example}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type Safety}
 \label{type-safety}
 \subsection{Auxiliary Results}
+We will start this section with auxiliary results which are needed to prove two main theorems: subject congruence (\autoref{thm:subject-congruence}) and subject reduction (\autoref{thm:subject-reduction}) for our \picalc{} with leftovers.
 
 \paragraph*{Framing}
-asserts that the well-typedness of a process is independent of its leftover resources.
+This property asserts that the well-typedness of a process is independent of its leftover resources.
 
 \begin{nitheorem}[Framing]
   \label{thm:framing}
   Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
   Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
-
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
 
 \paragraph*{Weakening}
-states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+This property states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
@@ -1107,7 +1103,7 @@ Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simp
 \end{nitheorem}
 
 \paragraph*{Strengthening}
-states that removing an unused variable preserves the well-typedness of a process.
+This property states that removing an unused variable preserves the well-typedness of a process.
 Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
@@ -1117,11 +1113,11 @@ Let $\func{del}_i$ delete the element at position $i$ from a context --- for sim
 \end{nitheorem}
 
 % \begin{remark}
-  The \emph{unusedness} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
+  Notice that the \emph{unused} predicate cannot depend on the preservation of usage annotations by a process: the process could preserve such annotations, yet sent a $\lz$ usage of those variables over a channel.
 % \end{remark}
 
 \paragraph*{Exchange}
-of two variables preserves the well-typedness of a process.
+This property states that the exchange of two variables preserves the well-typedness of a process.
 We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to exchange types in typing contexts and usage annotations in usage contexts.
 \begin{nitheorem}[Exchange]
   \label{thm:exchange}
@@ -1129,7 +1125,7 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
   Then, $\types{\func{exchange}_i \; \gamma}{\func{exchange}_i \; \Gamma}{\allowbreak \func{exchange}_i \; P}{\func{exchange}_i \; \Xi}$.
 \end{nitheorem}
 
-\begin{proof}[Proof (Sketch)]
+\begin{proof}[Proof]
   All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
   For details, refer to our mechanisation in Agda%
 \begin{anonsuppress}
@@ -1140,8 +1136,8 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
 
 \subsection{Towards Subject Reduction}
 \paragraph*{Subject Congruence}
-states that applying structural congruence rules to a well typed process preserves its well-typedness.
-We must first introduce lemmas that establish that some syntactic manipulations can be inverted and how unused variables relate to the preservation of leftovers.
+This property states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
+To prove this result, we must first introduce lemmas that establish that some syntactic manipulations can be inverted (\autoref{lm:lower-lift}, \autoref{lm:exchange-exchange}) and how unused variables relate to the preservation of leftovers (\autoref{lm:types-unused}).
 
 \begin{nilemma}
   \label{lm:lower-lift}
@@ -1174,7 +1170,7 @@ We are now in a position to prove subject congruence.
   If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
-\begin{proof}[Proof (Sketch)]
+\begin{proof}[Proof]
   The proof is by induction on \textsc{Equals} $\eq{}$.
   Here we only consider those cases that are not purely inductive: the base cases for $\constr{struct}$ and their symmetric variants.
 \begin{anonsuppress}
@@ -1201,8 +1197,9 @@ Full proof in \cite{Zalakain2020Agda}.
 \end{proof}
 
 \paragraph*{Substitution}
-\autoref{thm:substitution-generalization} proves a generalised version of substitution, where the substitition $\subst{P}{j}{i}$ is on any variable $i$.
-\autoref{thm:substitution} instantiates the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
+This result is key to proving subject reduction.
+In \autoref{thm:substitution-generalization} we prove a generalised version of substitution, where the substitition $\subst{P}{j}{i}$ is on any variable $i$.
+Then, in \autoref{thm:substitution} we instantiate the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
 \begin{nitheorem}[Generalised substitution]
   \label{thm:substitution-generalization}
@@ -1221,9 +1218,9 @@ Full proof in \cite{Zalakain2020Agda}.
   Then substituting $i$ to $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
 \end{nitheorem}
 
-\begin{proof}[Proof (Sketch)]
+\begin{proof}[Proof]
   By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  Full details are found in \autoref{app:substitution-generalization}.
+  Full proof can be found in \autoref{app:substitution-generalization}.
   \begin{itemize}
    \item
      Constructor $\PO$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
@@ -1304,12 +1301,12 @@ Full proof in \cite{Zalakain2020Agda}.
 
 \begin{nitheorem}[Substitution]
   \label{thm:substitution}
-  Let $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
+  Let process $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
   Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
 \end{nitheorem}
-\begin{proof}[Proof (Sketch)]
-  We use framing to derive $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$.
+\begin{proof}[Proof]
+  For $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$, we use framing to derive them.
   Then, we use these to apply \autoref{thm:substitution-generalization}.
 \end{proof}
 
@@ -1320,9 +1317,10 @@ Full proof in \cite{Zalakain2020Agda}.
 % \end{note}
 
 \paragraph*{Subject Reduction}
-states that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
+Finally we are ready to present our main result, stating  that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
+The relation between the typing contexts used to type $P$ and $Q$ will be explained in \autoref{thm:subject-reduction}.
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
-We first introduce a helper lemma:
+We first introduce an auxiliary lemma:
 
 \begin{nilemma}
   \label{lm:comm-capable}
@@ -1342,9 +1340,8 @@ We first introduce a helper lemma:
   \end{itemize}
 \end{nitheorem}
 
-\begin{proof}[Proof (Sketch)]
-  By induction on $P \reduce{c} Q$.
-  \hfill{}\\
+\begin{proof}[Proof]
+  By induction on $P \reduce{c} Q$. For the full details refer to our mechanisation in Agda.  
   \begin{itemize}
     \item
     Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
