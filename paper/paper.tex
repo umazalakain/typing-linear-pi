@@ -1,5 +1,4 @@
-\documentclass[sigplan,10pt,anonymous,review]{acmart}
-\settopmatter{printfolios=true,printccs=false,printacmref=false}
+\documentclass[]{lipics-v2019}
 
 \usepackage[utf8]{inputenc}
 \usepackage{url}
@@ -35,13 +34,13 @@
 \newtheorem{nidefinition}{Definition}
 \newtheorem{nitheorem}{Theorem}
 \newtheorem{nilemma}{Lemma}
-\newtheorem{example}{Example}
+% \newtheorem{example}{Example}
 \renewcommand{\nidefinitionautorefname}{Definition}%
 \renewcommand{\nitheoremautorefname}{Theorem}%
 \renewcommand{\nilemmaautorefname}{Lemma}%
 \renewcommand{\sectionautorefname}{\S}%
 \renewcommand{\subsectionautorefname}{\S}%
-\renewcommand{\exampleautorefname}{Example}
+% \renewcommand{\exampleautorefname}{Example}
 
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
@@ -113,17 +112,12 @@
 \newcommand{\courier}{\textcolor{cyan}{courier}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title[$\pi$ with leftovers: a mechanisation in Agda]{$\pi$ with leftovers: \\ a mechanisation in Agda}
-\author{Uma Zalakain}
-\affiliation{University of Glasgow, Scotland}
-\email{u.zalakain.1@research.gla.ac.uk}
-\orcid{https://orcid.org/0000-0002-3268-9338}{}
-\author{Ornela Dardha}
-\affiliation{University of Glasgow, Scotland}
-\email{ornela.dardha@glasgow.ac.uk}
-\orcid{https://orcid.org/0000-0001-9927-7875}{}
+\title{$\pi$ with leftovers: \\ a mechanisation in Agda}
+\titlerunning{$\pi$ with leftovers: a mechanisation in Agda}
+\author{Uma Zalakain}{University of Glasgow, Scotland}{u.zalakain.1@research.gla.ac.uk}{https://orcid.org/0000-0002-3268-9338}{}
+\author{Ornela Dardha}{University of Glasgow, Scotland}{ornela.dardha@glasgow.ac.uk}{https://orcid.org/0000-0001-9927-7875}{}
 \keywords{pi-calculus, linear types, leftover typing, concurrency, mechanisation, Agda}
-\setcopyright{acmlicensed}
+\Copyright{U. Zalakain, and O. Dardha}
 \ccsdesc[300]{Theory of computation~Process calculi}
 % \supplement{\url{https://github.com/umazalakain/typing-linear-pi}}
 \begin{CCSXML}
@@ -139,11 +133,11 @@
 
 \begin{document}
 
-\begin{acks}
-We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.
+\acknowledgements{We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.}
 
-The authors would also like to thank the anonymous referees for their valuable comments and helpful suggestions. This work is supported by the \grantsponsor{UKEPSRC}{UK EPSRC}{} grant \grantnum{UKEPSRC}{EP/K034413/1} ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the \grantsponsor{EUHORIZON}{EU HORIZON 2020 MSCA RISE}{} project \grantnum{EUHORIZON}{778233} ``Behavioural Application Program Interfaces'' (BehAPI).
-\end{acks}
+\funding{The authors would also like to thank the anonymous referees for their valuable comments and helpful suggestions. This work is supported by the UK EPSRC grant EP/K034413/1 ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233 ``Behavioural Application Program Interfaces'' (BehAPI).}
+
+\maketitle
 
 \begin{abstract}
   The \picalc{} is a computational model for communication and concurrency.
@@ -158,8 +152,6 @@ The authors would also like to thank the anonymous referees for their valuable c
 %
   Our formalisation is fully mechanised in Agda.
 \end{abstract}
-
-\maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -320,15 +312,12 @@ Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input 
   \end{itemize}
 
   \item \textbf{Fully mechanised formalisation and type safety results}:
-    The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda.
+    The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 
     We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
     We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
     We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
 \end{enumerate}
-\begin{anonsuppress}
-and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
-\end{anonsuppress}
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -446,7 +435,7 @@ Every time we go under a binder, we increase the index of the continuation proce
 \label{from_to_deBruijn}
 In order to demonstrate the correspondence between an \picalc{} that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
 
-\paragraph{From names to de Bruijn indices}
+\paragraph*{From names to de Bruijn indices}
 When we translate into de Bruijn indices we keep the original binder names around --- they will serve as name hints for when we translate back.
 The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 Named references within the process are substituted with their corresponding de Bruijn index.
@@ -456,7 +445,7 @@ We demand that the original process is well-scoped: that all its free variable n
     &               && \to \WellScoped \; ctx \; P \to \Process_n
 \end{alignat*}
 
-\paragraph{From de Bruijn indices to names}
+\paragraph*{From de Bruijn indices to names}
 The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 As some widely-used languages do, this translation function produces unique variable names.
 These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{<n>}$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
@@ -500,11 +489,7 @@ In the following we present the main results that our conversion functions satis
 
 \begin{proof}[Proof]
   All the above results are proved by induction on \textsc{Process} and \textsc{Var} (\autoref{fig:syntax}).
-  Complete details can be found in our mechanisation in Agda%
-\begin{anonsuppress}
-in \cite{Zalakain2020Agda}
-\end{anonsuppress}
-.
+  Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
 \end{proof}
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1125,11 +1110,7 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
 
 \begin{proof}[Proof]
   All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
-  For details, refer to our mechanisation in Agda%
-\begin{anonsuppress}
-\cite{Zalakain2020Agda}
-\end{anonsuppress}
-.
+  For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
 
 \subsection{Towards Subject Reduction}
@@ -1171,9 +1152,7 @@ We are now in a position to prove subject congruence.
 \begin{proof}[Proof]
   The proof is by induction on \textsc{Equals} $\eq{}$.
   Here we only consider those cases that are not purely inductive: the base cases for $\constr{struct}$ and their symmetric variants.
-\begin{anonsuppress}
-Full proof in \cite{Zalakain2020Agda}.
-\end{anonsuppress}
+  Full proof in \cite{Zalakain2020Agda}.
   We proceed by induction on \textsc{StructCong} $\eqeq$:
   \begin{itemize}
     \item
@@ -1361,7 +1340,7 @@ We first introduce an auxiliary lemma:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
 
-\paragraph{Extrinsic Encodings}
+\paragraph*{Extrinsic Encodings}
 
 Extrinsic encodings define a syntax (often well-scoped) and a runtime semantics prior to any type system.
 This allows one to talk about ill-typed terms, and defers the proof of subject reduction to a later stage.
@@ -1387,7 +1366,7 @@ The authors extend session types with polymorphism and pattern matching.
 They use a locally-nameless encoding for variable references, a syntax prior to types, and an LTS semantics that encodes session-typed processes into the \picalc{}.
 Their type system uses reordering of contexts and extrinsic context splits, whether they are not needed in our work. 
 
-\paragraph{Intrinsic Encodings}
+\paragraph*{Intrinsic Encodings}
  
 Intrinsic encodings merge syntax and type system.
 As a result, one can only ever talk about well-typed terms, and the reduction relation by construction carries a proof of subject reduction.
@@ -1408,12 +1387,10 @@ Their separation logic is based on a partial commutative monoid that need not be
 Their typing rules preserve the balance between supply and demand, and are extremely elegant.
 They distill their typing rules even further by modelling the supply and demand market as a state monad.
 
-\begin{anonsuppress}
 In her master's thesis, Zalakain uses a HOAS to embed a session-typed \picalc{} in Coq \cite{Zalakain2019}.
 Channel type polymorphism (preventing channels from being constructed out of thin air) and a process-traversing predicate ensure that channels are used linearly --- subject reduction is then shown to preserve this predicate.
-\end{anonsuppress}
 
-\paragraph{Other Work}
+\paragraph*{Other Work}
 
 Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq  --- in Coq de Bruijn indices are not as popular as in Agda or Idris because dependent pattern matching is far from straightforward.
 As a use-case, they use their tool to help automate proofs of subject reduction for a type system with session types.
@@ -1432,11 +1409,7 @@ Further work on mechanising the \picalc{} \cite{Henry-Gerard1999, Honsell2001a, 
 In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
 As a result, theorems like framing, weakening and strengthening can now we stated for the linear \picalc{}.
-Our work is fully mechanised in around 1850 lines of code in Agda%
-\begin{anonsuppress}
-\cite{Zalakain2020Agda}
-\end{anonsuppress}
-.
+Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
 As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
 We intend to add support for products, sum types and recursion to both our syntax and our type system.
