@@ -6,6 +6,7 @@
 \usepackage{mathbbol}
 \usepackage{mathtools}
 \usepackage{hyperref}
+\usepackage{todonotes}
 
 % Two column itemize
 \usepackage{multicol}
@@ -159,8 +160,7 @@
 We live in a concurrent and distributed world where any given state is often interactively computed by a myriad of parties --- people, machines, processors, services, networks.
 As humans, we aim to model, build, and predict such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
 
-The \picalc{} \cite{MilnerPW92,Milner99} is the most successful computational model for communication and concurrency.
-It abstracts over the details of concurrent processing and boils the interactions down to the sending and receiving of data over communication channels.
+The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
 Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
 The \picalc{} is at the basis of the design and implementation of programming languages for concurrency, such as Pict \cite{PierceT00} and more recently Go \footnote{https://golang.org}.
 At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, types for liveness properties, such as deadlock freedom, livelock freedom or termination, and most notably, session types.
@@ -171,6 +171,8 @@ Linear type systems guarantee that resources are used \emph{exactly once}.
 Enforcing this ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
 Later on, linearity also inspired unique types, as in Clean \cite{BarendsenS96}, and ownership types, as in Rust \cite{MatsakisK14}.
 
+\todo{introduce shared and graded types sooner}
+\todo{too much on session types}
 Linearity influenced the $\pi$-calculus as well.
 Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
 %
@@ -181,15 +183,148 @@ In recent years, an encoding of session types into linear types \cite{DardhaGS12
 This encoding not only has theoretical benefits in terms of the expressivity of session types and the reusability of theoretical results from the linear \picalc{}, but is useful in practice too.
 The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}, thus allowing to use the target linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be defined and implemented.
 
-In this paper we present \emph{the first full mechanisation in Agda of a \picalc{} with linear, graded and shared types, all under a common unified framework.}
+In this paper we make the following contributions:
 
-While linear types are useful for resource-aware programming, graded and shared types are useful for a more flexible and 
-mainstream programming.
+\todo{complete}
+\begin{enumerate}
+  \item We use \textbf{type-level {de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax for \picalc{} processes that is well-scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
 
-We define a specification for an algebra on \emph{multiplicities} --- how many times a channel can be used --- and use it to apply \emph{leftover typing} for the first time to the \picalc{}, along the lines of Allais \cite{Allais2018a}.
-The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
-This allows for linear, graded and shared types to be mixed in the same type system.
-Ultimately, we can exploit this formalisation as a unified framework for type-safe distributed modelling and programming using a variety of type systems, and build on top of it more advanced types, theories and languages.
+  \item We \textbf{abstract our type system over a set of resource-aware usage algebras}:
+    The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
+    This allows for linear, graded and shared types to be mixed in the same type system.
+    While linear types are useful for resource-aware programming, graded and shared types are useful for a more flexible and mainstream programming.
+
+  \item We \textbf{apply leftover typing to the \picalc{} and prove type preservation for the resulting type system} along the lines of Allais \cite{Allais2018a}.
+\end{enumerate}
+
+
+
+\subsection{Summary}
+\todo{shorten}
+\begin{enumerate}
+\item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
+ \begin{itemize}
+   \item \textbf{Syntax}: we use type level {de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
+   For convenience and readability, the user can convert from and to a syntax using channel names (\autoref{from_to_deBruijn}).
+   These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
+   
+   \item \textbf{Semantics}: we provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
+   Thanks to our well-scoped grammar  (\autoref{syntax}), the operational semantics is defined on \emph{the totality of the syntax} as a reduction relation on processes (\autoref{operational-semantics}).
+   The reduction relation tracks at the type level the channel on which communication occurs. This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
+   The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
+ \end{itemize}
+  
+  \item \textbf{Leftover typing for the \picalc{} with support for linear, graded and shared types}:
+  we present our type system for a resource-aware \picalc{} in \autoref{type-system}.
+  \begin{itemize}
+    \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
+    Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra --- linear types, graded types and shared types all satisfy these algebraic laws.
+
+    Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
+    This allows for type systems combining linear, graded and shared types under the same framework.
+    
+    \item \textbf{Leftover typing}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
+    This approach adds a leftover usage context to the typing judgements.
+    Typing derivations take the resources of their input usage context, consume some of them, and leave the remaining as leftovers in the output usage context.
+    Leftover typing \textbf{makes top-down context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
+  \end{itemize}
+
+  \item \textbf{Fully mechanised formalisation and type safety results}:
+    The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
+
+    We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
+    We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
+    We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
+\end{enumerate}
+
+\subsection{Notation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    { }
+    {\type{\N} : \Set}
+    \; \textsc{Nat}
+
+    \inferrule
+    { }
+    {\constr{0} : \type{\N}}
+
+    \inferrule
+    {n : \type{\N}}
+    {\suc n : \type{\N}}
+  \end{mathpar}
+  \caption{Notation used in this paper.}
+  \label{fig:notation}
+\end{figure}
+
+\autoref{fig:notation} illustrates the notation used in this paper.
+Data type definitions ($\type{\N}$) use double inference lines and index-free synonyms (\textsc{Nat}) as rule names for ease of reference.
+Constructors ($\constr{0}$ and $\suc$) are given as inference rules.
+We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda: inference rules become type constructors, premises become argument types and conclusions return types.
+Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
+Implicit arguments are mentioned in type definitions but omitted by constructors.
+
+We use colours to further distinguish the different entities in this paper.
+$\type{TYPES}$ are blue and uppercased, with indices as subscripts, $\constr{constructors}$ are orange, $\func{functions}$ are teal, variables are black, and some constructor names are overloaded --- and disambiguated by context.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Syntax}
+\label{syntax}
+
+\begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    {n : \N}
+    {\Var_n : \Set}
+    \; \textsc{Var}
+
+    \inferrule
+    {n : \N}
+    {\constr{0} : \Var_{\suc n}}
+
+    \inferrule
+    {x : \Var_n}
+    {\suc x : \Var_{\suc n}}
+
+    \datatype
+    {n : \N}
+    {\Process_n : \Set}
+    \; \textsc{Process}
+  \end{mathpar}
+
+  \begin{equation*}
+    \begin{aligned}
+      \Process_n ::=& \; \PO_n               &&\text{(inaction)}   \\ 
+      |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
+      |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)} \\ 
+      |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
+      |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
+    \end{aligned}
+  \end{equation*}
+  \caption{Well-scoped grammar with type-level de Bruijn indices.}
+  \label{fig:syntax}
+\end{figure}
+
+
+In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
+Names are cumbersome to mechanise: they are not inherently well scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
+To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
+That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
+
+A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
+References outside of that range are meaningless.
+It is useful to rule out these ill-scoped terms syntactically.
+In \autoref{fig:syntax} --- which presents the syntax of the \picalc{} using de Bruijn indices --- we do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
+We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
+Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within to refer to one more thing.
+
+\todo{adapt to de bruijn}
+Process $\PO$ denotes the terminated process, where no further communications can occur.
+Process $\new{}\; P$ creates a new channel bound with scope $P$.
+Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
+Processes $\recv{x}{} P$ and $\send{x}{y} P$ denote respectively, the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
+Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs that introduce bound names --- $x$ and $y$ in $P$, respectively.
 
 \begin{example}[The courier system]
 \label{example-process}
@@ -282,216 +417,6 @@ We use \textbf{graded types} for the usage annotations of the communication chan
 Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$, one input multiplicity on $y$, and two output multiplicities on $z$.
 \end{example}
 
-\subsection{Contributions}
-\begin{enumerate}
-\item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
- \begin{itemize}
-   \item \textbf{Syntax}: we use type level {de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
-   For convenience and readability, the user can convert from and to a syntax using channel names (\autoref{from_to_deBruijn}).
-   These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
-   
-   \item \textbf{Semantics}: we provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
-   Thanks to our well-scoped grammar  (\autoref{syntax}), the operational semantics is defined on \emph{the totality of the syntax} as a reduction relation on processes (\autoref{operational-semantics}).
-   The reduction relation tracks at the type level the channel on which communication occurs. This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
-   The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
- \end{itemize}
-  
-  \item \textbf{Leftover typing for the \picalc{} with support for linear, graded and shared types}:
-  we present our type system for a resource-aware \picalc{} in \autoref{type-system}.
-  \begin{itemize}
-    \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
-    Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra --- linear types, graded types and shared types all satisfy these algebraic laws.
-
-    Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
-    This allows for type systems combining linear, graded and shared types under the same framework.
-    
-    \item \textbf{Leftover typing}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
-    This approach adds a leftover usage context to the typing judgements.
-    Typing derivations take the resources of their input usage context, consume some of them, and leave the remaining as leftovers in the output usage context.
-    Leftover typing \textbf{makes top-down context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
-  \end{itemize}
-
-  \item \textbf{Fully mechanised formalisation and type safety results}:
-    The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
-
-    We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
-    We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
-    We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
-\end{enumerate}
-
-\subsection{Notation}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-    { }
-    {\type{\N} : \Set}
-    \; \textsc{Nat}
-
-    \inferrule
-    { }
-    {\constr{0} : \type{\N}}
-
-    \inferrule
-    {n : \type{\N}}
-    {\suc n : \type{\N}}
-  \end{mathpar}
-  \caption{Notation used in this paper.}
-  \label{fig:notation}
-\end{figure}
-
-\autoref{fig:notation} illustrates the notation used in this paper.
-Data type definitions ($\type{\N}$) use double inference lines and index-free synonyms (\textsc{Nat}) as rule names for ease of reference.
-Constructors ($\constr{0}$ and $\suc$) are given as inference rules.
-We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda: inference rules become type constructors, premises become argument types and conclusions return types.
-Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
-Implicit arguments are mentioned in type definitions but omitted by constructors.
-
-We use colours to further distinguish the different entities in this paper.
-$\type{TYPES}$ are blue and uppercased, with indices as subscripts, $\constr{constructors}$ are orange, $\func{functions}$ are teal, variables are black, and some constructor names are overloaded --- and disambiguated by context.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Syntax}
-\label{syntax}
-
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-    { }
-    {\Raw : \Set}
-    \; \textsc{Raw}
-  \end{mathpar}
-
-  \begin{equation*}
-    \begin{aligned}
-      \Raw ::= &\; \PO              &&\text{(inaction)}    \\ 
-      |& \; (\new{\Name}) \; \Raw         &&\text{(restriction)} \\ 
-      |& \; \comp{\Raw}{\Raw}       &&\text{(parallel)}    \\ 
-      |& \; \recv{\Name}{\Name}\Raw &&\text{(input)}       \\ 
-      |& \; \send{\Name}{\Name}\Raw &&\text{(output)}      \\
-    \end{aligned}
-  \end{equation*}
-  \caption{Grammar with names.}
-  \label{fig:syntax-names}
-\end{figure}
-
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-    {n : \N}
-    {\Var_n : \Set}
-    \; \textsc{Var}
-
-    \inferrule
-    {n : \N}
-    {\constr{0} : \Var_{\suc n}}
-
-    \inferrule
-    {x : \Var_n}
-    {\suc x : \Var_{\suc n}}
-
-    \datatype
-    {n : \N}
-    {\Process_n : \Set}
-    \; \textsc{Process}
-  \end{mathpar}
-
-  \begin{equation*}
-    \begin{aligned}
-      \Process_n ::=& \; \PO_n               &&\text{(inaction)}   \\ 
-      |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
-      |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)} \\ 
-      |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
-      |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
-    \end{aligned}
-  \end{equation*}
-  \caption{Well-scoped grammar with type-level de Bruijn indices.}
-  \label{fig:syntax}
-\end{figure}
-
-The syntax of the \picalc{} \cite{Sangio01} using channel names is given by the $\Raw$ grammar in \autoref{fig:syntax-names}.
-
-Channel names and variables range over $x,y,z$ in $\Name$ and processes over $P,Q,R$ in $\Raw$.
-Process $\PO$ denotes the terminated process, where no further communications can occur.
-Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
-Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
-Processes $\recv{x}{y} P$ and $\send{x}{y} P$ denote respectively, the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
-Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs that introduce bound names --- $x$ and $y$ in $P$, respectively.
-
-In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
-Names are cumbersome to mechanise: they are not inherently well scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
-To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
-That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
-
-A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
-References outside of that range are meaningless.
-It is useful to rule out these ill-scoped terms syntactically.
-In \autoref{fig:syntax} --- which presents the syntax of the \picalc{} using de Bruijn indices --- we do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
-We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
-Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within to refer to one more thing.
-
-
-\subsection{From names to de Bruijn indices and back}
-\label{from_to_deBruijn}
-In order to demonstrate the correspondence between an \picalc{} that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
-
-\paragraph*{From names to de Bruijn indices}
-When we translate into de Bruijn indices we keep the original binder names around --- they will serve as name hints for when we translate back.
-The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
-Named references within the process are substituted with their corresponding de Bruijn index.
-We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such a proof term.
-\begin{alignat*}{2}
-    &\func{fromRaw} && : (ctx : \Names_n) \; (P : \Raw) \\
-    &               && \to \WellScoped \; ctx \; P \to \Process_n
-\end{alignat*}
-
-\paragraph*{From de Bruijn indices to names}
-The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
-As some widely-used languages do, this translation function produces unique variable names.
-These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{<n>}$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
-\begin{equation*}
-    \func{toRaw} : (ctx : \Names_n) \to \Process_n \to \Raw
-\end{equation*}
-
-\begin{example}[$\func{fromRaw}$ and $\func{toRaw}$]
-  \begin{figure}[t]
-    \begin{alignat*}{7}
-      &P = (\new{x} ) && (\comp {\recv{x}{x} && \send{x}{z} && \PO} {(\new{y}) && (\send{x}{y} && \recv{y}{y} && \PO)}) \\
-      &Q = \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
-      &R = (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)})
-    \end{alignat*}
-    \caption{From names to de Bruijn indices and back}
-    \label{fig:conversion}
-    \end{figure}
-  We illustrate the conversion functions from names to de Bruijn indices $(\func{fromRaw}$) and back ($\func{toRaw}$) with three processes $P,Q,R$  in \autoref{fig:conversion}.
-
-  Process $P$ uses names $x,y,z$ and is translated via the conversion function $\func{fromRaw}$ into process $Q$, which uses de Bruijn indices.
-  Process $Q$ is then translated via $\func{toRaw}$ into process $R$, which follows the \emph{Barendregt convention}\footnote{The Barendregt variable convention states that all bound variables/names in a process are distinct among each other and from the free variables/names.} and is $\alpha$-equivalent to the original process $P$.
-\end{example}
-
-In the following we present the main results that our conversion functions satisfy.
-
-\begin{nilemma}
-  Translating from de Bruijn indices to names via $\func{toRaw}$ results in a well-scoped process.
-\end{nilemma}
-
-\begin{nilemma}
-  Translating from de Bruijn indices to names via $\func{toRaw}$ results in a process that follows the \emph{Barendregt convention}.
-\end{nilemma}
-
-\begin{nilemma}
-  Translating from de Bruijn indices to names and back via $\func{fromRaw} \circ \func{toRaw}$ results in the same process modulo internal variable name hints.
-\end{nilemma}
-
-\begin{nilemma}
-  Translating from names to de Bruijn indices and back via $\func{toRaw} \circ \func{fromRaw}$ results in the same process modulo $\alpha$-conversion.
-\end{nilemma}
-
-\begin{proof}[Proof]
-  All the above results are proved by induction on \textsc{Process} and \textsc{Var} (\autoref{fig:syntax}).
-  Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
-\end{proof}
-  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Operational Semantics}
 \label{semantics}
@@ -1364,7 +1289,7 @@ The authors provide bidirectional typing rules, and show the type safety of thei
 The work by Goto et al. \cite{Goto2016a} is, to the best of our knowledge, the first formalisation of session types which comes along with a mechanised proof of type safety in Coq.
 The authors extend session types with polymorphism and pattern matching.
 They use a locally-nameless encoding for variable references, a syntax prior to types, and an LTS semantics that encodes session-typed processes into the \picalc{}.
-Their type system uses reordering of contexts and extrinsic context splits, whether they are not needed in our work. 
+Their type system uses reordering of contexts and extrinsic context splits, which are not needed in our work. 
 
 \paragraph*{Intrinsic Encodings}
  
@@ -1387,12 +1312,9 @@ Their separation logic is based on a partial commutative monoid that need not be
 Their typing rules preserve the balance between supply and demand, and are extremely elegant.
 They distill their typing rules even further by modelling the supply and demand market as a state monad.
 
-In her master's thesis, Zalakain uses a HOAS to embed a session-typed \picalc{} in Coq \cite{Zalakain2019}.
-Channel type polymorphism (preventing channels from being constructed out of thin air) and a process-traversing predicate ensure that channels are used linearly --- subject reduction is then shown to preserve this predicate.
-
 \paragraph*{Other Work}
 
-Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq  --- in Coq de Bruijn indices are not as popular as in Agda or Idris because dependent pattern matching is far from straightforward.
+Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq, where de Bruijn indices are not as popular as in Agda or Idris.
 As a use-case, they use their tool to help automate proofs of subject reduction for a type system with session types.
 
 Orchard and Yoshida \cite{OrchardY16} embed a small effectul imperative language into the session-typed \picalc{}, showing that session types are expressive enough to encode effect systems.
@@ -1408,7 +1330,7 @@ Further work on mechanising the \picalc{} \cite{Henry-Gerard1999, Honsell2001a, 
 
 In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
-As a result, theorems like framing, weakening and strengthening can now we stated for the linear \picalc{}.
+As a result, theorems like framing, weakening and strengthening can now be stated for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
 As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.

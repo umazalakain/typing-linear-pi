@@ -1,4 +1,97 @@
 %% Appendix
+
+\section{From names to de Bruijn indices and back}
+\label{from_to_deBruijn}
+
+\begin{figure}[h]
+  \begin{mathpar}
+    \datatype
+    { }
+    {\Raw : \Set}
+    \; \textsc{Raw}
+  \end{mathpar}
+
+  \begin{equation*}
+    \begin{aligned}
+      \Raw ::= &\; \PO              &&\text{(inaction)}    \\ 
+      |& \; (\new{\Name}) \; \Raw         &&\text{(restriction)} \\ 
+      |& \; \comp{\Raw}{\Raw}       &&\text{(parallel)}    \\ 
+      |& \; \recv{\Name}{\Name}\Raw &&\text{(input)}       \\ 
+      |& \; \send{\Name}{\Name}\Raw &&\text{(output)}      \\
+    \end{aligned}
+  \end{equation*}
+  \caption{Grammar with names.}
+  \label{fig:syntax-names}
+\end{figure}
+
+The syntax of the \picalc{} \cite{Sangio01} using channel names is given by the $\Raw$ grammar in \autoref{fig:syntax-names}.
+
+Channel names and variables range over $x,y,z$ in $\Name$ and processes over $P,Q,R$ in $\Raw$.
+Process $\PO$ denotes the terminated process, where no further communications can occur.
+Process $(\new{}x)\; P$ creates a new channel $x$ bound with scope $P$.
+Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
+Processes $\recv{x}{y} P$ and $\send{x}{y} P$ denote respectively, the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
+Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs that introduce bound names --- $x$ and $y$ in $P$, respectively.
+
+In order to demonstrate the correspondence between an \picalc{} that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
+
+\paragraph*{From names to de Bruijn indices}
+When we translate into de Bruijn indices we keep the original binder names around --- they will serve as name hints for when we translate back.
+The translation function $\func{fromRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
+Named references within the process are substituted with their corresponding de Bruijn index.
+We demand that the original process is well-scoped: that all its free variable names appear in $ctx$ --- this is decidable and we therefore automate the construction of such a proof term.
+\begin{alignat*}{2}
+    &\func{fromRaw} && : (ctx : \Names_n) \; (P : \Raw) \\
+    &               && \to \WellScoped \; ctx \; P \to \Process_n
+\end{alignat*}
+
+\paragraph*{From de Bruijn indices to names}
+The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
+As some widely-used languages do, this translation function produces unique variable names.
+These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{<n>}$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
+\begin{equation*}
+    \func{toRaw} : (ctx : \Names_n) \to \Process_n \to \Raw
+\end{equation*}
+
+\begin{example}[$\func{fromRaw}$ and $\func{toRaw}$]
+  \begin{figure}[t]
+    \begin{alignat*}{7}
+      &P = (\new{x} ) && (\comp {\recv{x}{x} && \send{x}{z} && \PO} {(\new{y}) && (\send{x}{y} && \recv{y}{y} && \PO)}) \\
+      &Q = \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
+      &R = (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)})
+    \end{alignat*}
+    \caption{From names to de Bruijn indices and back}
+    \label{fig:conversion}
+    \end{figure}
+  We illustrate the conversion functions from names to de Bruijn indices $(\func{fromRaw}$) and back ($\func{toRaw}$) with three processes $P,Q,R$  in \autoref{fig:conversion}.
+
+  Process $P$ uses names $x,y,z$ and is translated via the conversion function $\func{fromRaw}$ into process $Q$, which uses de Bruijn indices.
+  Process $Q$ is then translated via $\func{toRaw}$ into process $R$, which follows the \emph{Barendregt convention}\footnote{The Barendregt variable convention states that all bound variables/names in a process are distinct among each other and from the free variables/names.} and is $\alpha$-equivalent to the original process $P$.
+\end{example}
+
+In the following we present the main results that our conversion functions satisfy.
+
+\begin{nilemma}
+  Translating from de Bruijn indices to names via $\func{toRaw}$ results in a well-scoped process.
+\end{nilemma}
+
+\begin{nilemma}
+  Translating from de Bruijn indices to names via $\func{toRaw}$ results in a process that follows the \emph{Barendregt convention}.
+\end{nilemma}
+
+\begin{nilemma}
+  Translating from de Bruijn indices to names and back via $\func{fromRaw} \circ \func{toRaw}$ results in the same process modulo internal variable name hints.
+\end{nilemma}
+
+\begin{nilemma}
+  Translating from names to de Bruijn indices and back via $\func{toRaw} \circ \func{fromRaw}$ results in the same process modulo $\alpha$-conversion.
+\end{nilemma}
+
+\begin{proof}[Proof]
+  All the above results are proved by induction on \textsc{Process} and \textsc{Var} (\autoref{fig:syntax}).
+  Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
+\end{proof}
+  
 \section{Definitions}
 \label{app:definitions}
 
