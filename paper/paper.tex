@@ -181,17 +181,18 @@ The encoding has been used as a technique to implement session types in mainstre
 \todo{go back to linear \picalc{}}
 
 In this paper we make the following contributions:
-
-\todo{complete}
 \begin{enumerate}
-  \item We use \textbf{type-level {de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax for \picalc{} processes that is well-scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
+  \item We use \textbf{type-level {de Bruijn indices} \cite{deBruijn1972, Dybjer1994} to introduce a syntax for \picalc{} processes that is well-scoped by construction}:
+    Every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
+    \todo{Do Ciccone \& Padovani also use type level de Bruijn indices?}
 
-  \item We \textbf{abstract our type system over a set of resource-aware usage algebras}:
+  \item We \textbf{parametrise our type system over a set of resource-aware usage algebras}:
+    A \emph{usage algebra} is defined as a ternary relation that is \emph{partial}, \emph{deterministic}, \emph{cancellative}, \emph{associative} and \emph{commutative}.
     The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
     This allows for linear, graded and shared types to be mixed in the same type system.
-    While linear types are useful for resource-aware programming, graded and shared types are useful for a more flexible and mainstream programming.
 
-  \item We \textbf{apply leftover typing to the \picalc{} and prove type preservation for the resulting type system} along the lines of Allais \cite{Allais2018a}.
+  \item We \textbf{apply leftover typing to the \picalc{} and prove type preservation for the resulting type system}:
+    \todo{along the lines of Allais \cite{Allais2018a}.
 \end{enumerate}
 
 
