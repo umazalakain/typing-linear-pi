@@ -157,14 +157,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-We live in a concurrent and distributed world where any given state is often interactively computed by a myriad of parties --- people, machines, processors, services, networks.
-As humans, we aim to model, build, and predict such interactive systems; as mathematicians, abstraction is our tool of choice to do so.
-
 The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
 Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
 The \picalc{} is at the basis of the design and implementation of programming languages for concurrency, such as Pict \cite{PierceT00} and more recently Go \footnote{https://golang.org}.
-At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, types for liveness properties, such as deadlock freedom, livelock freedom or termination, and most notably, session types.
-These make the \picalc{} a fully-fledged tool for modelling and verifying concurrent and distributed systems.
+At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, session types, and types for liveness properties, such as deadlock freedom, livelock freedom or termination.
+These make of the \picalc{} a fully-fledged tool for modelling and verifying concurrent and distributed systems.
 
 In the early '90s, \emph{linear types} for (functional) programming languages \cite{Wadler90,Bernardy2018} were introduced, following J.-Y. Girard's development of linear logic \cite{Girard87}.
 Linear type systems guarantee that resources are used \emph{exactly once}.
@@ -172,16 +169,16 @@ Enforcing this ``no duplicating'' and ``no discarding'' of resources via lineari
 Later on, linearity also inspired unique types, as in Clean \cite{BarendsenS96}, and ownership types, as in Rust \cite{MatsakisK14}.
 
 \todo{introduce shared and graded types sooner}
-\todo{too much on session types}
+
 Linearity influenced the $\pi$-calculus as well.
 Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
 %
-Meanwhile, linearity acquired a different flavour with the rise of \emph{session types} \cite{H93,THK94,HVK98}, a formalism used in communication-centric programming where linearity ensures that a channel is owned by exactly one communicating participant --- the channel itself may be used multiple times, as specified by its session type.
+With the rise of session types \cite{H93,THK94,HVK98} linearity acquired a different flavour: linearity ensures that each channel endpoint is owned by exactly one communicating participant, even though the channel itself may be used multiple times, as specified by its session type.
 Linearity in session types is the key ingredient that guarantees communication safety and session fidelity.
 
 In recent years, an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17} has pushed the linear \picalc{} \cite{KPT96} into the spotlight again.
-This encoding not only has theoretical benefits in terms of the expressivity of session types and the reusability of theoretical results from the linear \picalc{}, but is useful in practice too.
 The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}, thus allowing to use the target linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be defined and implemented.
+\todo{go back to linear \picalc{}}
 
 In this paper we make the following contributions:
 
