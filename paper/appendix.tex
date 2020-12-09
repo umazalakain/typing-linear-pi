@@ -92,42 +92,6 @@ In the following we present the main results that our conversion functions satis
   Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
 \end{proof}
   
-\section{Definitions}
-\label{app:definitions}
-
-\begin{nidefinition}
-  A variable $i$ is unused in $P$ ($\Unused_i \; P$) if it appears in none of its inputs and none of its outputs.
-
-  \begin{mathpar}
-    \datatype
-    {i : \Var_n \\ P : \Process_n}
-    {\Unused_i \; P}
-    \; \textsc{Unused}
-    
-    \inferrule
-    { }
-    {\Unused_i \; \PO}
-
-    \inferrule
-    {\Unused_{\suc i} \; P}
-    {\Unused_i \; \new{}P}
-
-    \inferrule
-    {\Unused_i \; P \\ \Unused_i \; Q}
-    {\Unused_i \; \comp{P}{Q}}
-
-    \inferrule
-    {i \type{\not\equiv} x \\ \Unused_{\suc i} \; P}
-    {\Unused_i \; \recv{x}{} P}
-
-    \inferrule
-    {i \type{\not\equiv} x \\ i \type{\not\equiv} y \\ \Unused_i \; P}
-    {\Unused_i \; \send{x}{y} P}
-  \end{mathpar}
-
-  The type $i \type{\not\equiv} x$ unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$.
-\end{nidefinition}
-
 \section{Substitution}
 \label{app:substitution-generalization}
 

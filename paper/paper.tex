@@ -464,10 +464,46 @@ We define the base cases of a structural congruence relation \textsc{StructCong}
 
 The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as being the neutral element of parallel composition, respectively.
 The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
-In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$ (see \autoref{app:definitions}).
+In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$ (see \autoref{def:unused}).
 The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index greater than $i$.
 In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
+
+\begin{nidefinition}
+  \label{def:unused}
+  A variable $i$ is unused in $P$ ($\Unused_i \; P$) if it appears in none of its inputs and none of its outputs.
+  \todo{should we have this as a figure instead?}
+
+  \begin{mathpar}
+    \datatype
+    {i : \Var_n \\ P : \Process_n}
+    {\Unused_i \; P}
+    \; \textsc{Unused}
+    
+    \inferrule
+    { }
+    {\Unused_i \; \PO}
+
+    \inferrule
+    {\Unused_{\suc i} \; P}
+    {\Unused_i \; \new{}P}
+
+    \inferrule
+    {\Unused_i \; P \\ \Unused_i \; Q}
+    {\Unused_i \; \comp{P}{Q}}
+
+    \inferrule
+    {i \type{\not\equiv} x \\ \Unused_{\suc i} \; P}
+    {\Unused_i \; \recv{x}{} P}
+
+    \inferrule
+    {i \type{\not\equiv} x \\ i \type{\not\equiv} y \\ \Unused_i \; P}
+    {\Unused_i \; \send{x}{y} P}
+  \end{mathpar}
+
+  The type $i \type{\not\equiv} x$ unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$.
+\end{nidefinition}
+
   
 We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$ as shown in \autoref{fig:struct-cong1}.
 The $\constr{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively scope restriction, parallel composition, input and output.
