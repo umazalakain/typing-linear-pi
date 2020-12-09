@@ -192,7 +192,7 @@ In this paper we make the following contributions:
     This allows for linear, graded and shared types to be mixed in the same type system.
 
   \item We \textbf{apply leftover typing to the \picalc{} and prove type preservation for the resulting type system}:
-    \todo{along the lines of Allais \cite{Allais2018a}.
+    \todo{along the lines of Allais \cite{Allais2018a}}.
 \end{enumerate}
 
 
@@ -469,7 +469,7 @@ The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index 
 In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
   
-We lift the relation \textsc{StrucCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$ as shown in \autoref{fig:struct-cong1}.
+We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$ as shown in \autoref{fig:struct-cong1}.
 The $\constr{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively scope restriction, parallel composition, input and output.
 The remaining three rules close structural congruence under reflexivity, symmetry and transitivity, respectively. 
 The transitivity rule makes it tricky to prove predicates by induction on \textsc{Equals}: Agda cannot immediately see that such doubly recursive calls terminate.
@@ -550,17 +550,6 @@ After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- a
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
-\begin{nilemma}
-  \label{lm:substitution-unused}
-  For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
-This function saturates at $\constr{internal}$: wrapping an internally reducing process with a binder will result in an internally reducing process.
-
 \begin{figure}[h]
 \begin{mathpar}
   \datatype
@@ -600,6 +589,26 @@ This function saturates at $\constr{internal}$: wrapping an internally reducing 
 \caption{Operational semantics indexed by the channel over which reduction occurs.}
 \label{fig:reduction}
 \end{figure}
+
+Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
+It is defined as follows:
+\begin{equation*}
+  \begin{aligned}
+    & \func{dec} : \Channel_(\suc n) && \to \Channel_n \\
+    & \func{dec} \; \constr{internal}                 && \hookrightarrow \constr{internal} \\
+    & \func{dec} \; (\constr{external} \; \constr{0}) && \hookrightarrow \constr{internal} \\
+    & \func{dec} \; (\constr{external} \; (\suc n))   && \hookrightarrow \constr{external} \; n \\
+  \end{aligned}
+\end{equation*}
+\todo{introduce $\hookrightarrow$ notation?}
+
+\begin{nilemma}
+  \label{lm:substitution-unused}
+  For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resource-aware Type System}
