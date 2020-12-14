@@ -71,21 +71,21 @@ These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{
 
 In the following we present the main results that our conversion functions satisfy.
 
-\begin{lemma}
+\begin{nilemma}
   Translating from de Bruijn indices to names via $\func{toRaw}$ results in a well-scoped process.
-\end{lemma}
+\end{nilemma}
 
-\begin{lemma}
+\begin{nilemma}
   Translating from de Bruijn indices to names via $\func{toRaw}$ results in a process that follows the \emph{Barendregt convention}.
-\end{lemma}
+\end{nilemma}
 
-\begin{lemma}
+\begin{nilemma}
   Translating from de Bruijn indices to names and back via $\func{fromRaw} \circ \func{toRaw}$ results in the same process modulo internal variable name hints.
-\end{lemma}
+\end{nilemma}
 
-\begin{lemma}
+\begin{nilemma}
   Translating from names to de Bruijn indices and back via $\func{toRaw} \circ \func{fromRaw}$ results in the same process modulo $\alpha$-conversion.
-\end{lemma}
+\end{nilemma}
 
 \begin{proof}[Proof]
   All the above results are proved by induction on \textsc{Process} and \textsc{Var} (\autoref{fig:syntax}).
@@ -95,7 +95,7 @@ In the following we present the main results that our conversion functions satis
 \section{Substitution}
 \label{app:substitution-generalization}
 
-\begin{theorem}[Generalised substitution]
+\begin{nitheorem}[Generalised substitution]
   \label{thm:subst-generalization1}
   Let process $P$ be well-typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   The substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
@@ -113,7 +113,7 @@ In the following we present the main results that our conversion functions satis
   Let $\Delta$ have a usage annotation $\lz$ at position $i$, so that all consumption from $m$ to $n$ must happen in $P$.
   Then substituting $i$ to $j$ in $P$ will be well-typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
   Refer to \autoref{fig:subst} for a diagramatic representation.
-\end{theorem}
+\end{nitheorem}
 
 \begin{proof}[Proof]
   By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.

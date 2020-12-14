@@ -27,21 +27,16 @@
 \usepackage{makecell}
 
 % Continue examples later on
-\usepackage{thmtools}
-\renewcommand\thmcontinues[1]{Continued}
+% \usepackage{thmtools}
+% \renewcommand\thmcontinues[1]{Continued}
 
 % Do not use italics in definitions and theorems
-% \theoremstyle{definition}
-% \newtheorem{definition}{Definition}
-% \newtheorem{theorem}{Theorem}
-% \newtheorem{lemma}{Lemma}
-% % \newtheorem{example}{Example}
-% \renewcommand{\definitionautorefname}{Definition}%
-% \renewcommand{\theoremautorefname}{Theorem}%
-% \renewcommand{\lemmaautorefname}{Lemma}%
-% \renewcommand{\sectionautorefname}{\S}%
-% \renewcommand{\subsectionautorefname}{\S}%
-% \renewcommand{\exampleautorefname}{Example}
+\spnewtheorem{nidefinition}[definition]{Definition}{\bfseries}{}
+\spnewtheorem{nilemma}[lemma]{Lemma}{\bfseries}{}
+\spnewtheorem{nitheorem}[theorem]{Theorem}{\bfseries}{}
+
+\renewcommand{\sectionautorefname}{\S}%
+\renewcommand{\subsectionautorefname}{\S}%
 
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
@@ -138,7 +133,6 @@
 \begin{abstract}
   \todo{the only references here are to session types}
   \todo{fix acknowledgments}
-  \todo{fix lemma, definition, theorem, example envs}
   The \picalc{} is a computational model for communication and concurrency.
   The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
   It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, such as \emph{session types} \cite{H93,THK94,HVK98}.
@@ -469,7 +463,7 @@ The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index 
 In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
 
-\begin{definition}
+\begin{nidefinition}
   \label{def:unused}
   A variable $i$ is unused in $P$ ($\Unused_i \; P$) if it appears in none of its inputs and none of its outputs.
   \todo{should we have this as a figure instead?}
@@ -502,7 +496,7 @@ In all the above, $i$ is incremented every time we go under a binder.
   \end{mathpar}
 
   The type $i \type{\not\equiv} x$ unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$.
-\end{definition}
+\end{nidefinition}
 
   
 We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$ as shown in \autoref{fig:struct-cong1}.
@@ -638,10 +632,10 @@ It is defined as follows:
 \end{equation*}
 \todo{introduce $\hookrightarrow$ notation?}
 
-\begin{lemma}
+\begin{nilemma}
   \label{lm:substitution-unused}
   For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
-\end{lemma}
+\end{nilemma}
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
@@ -663,7 +657,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra for multiplicities that is satisfied by linear, graded and shared types alike.
 We then use pairs of multiplicities as usage annotations for a channel's input and output capabilities.
 
-\begin{definition}[Usage algebra]
+\begin{nidefinition}[Usage algebra]
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$ that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational reasoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal} (so that new resources cannot arbitrarily spring into life).
   It has an element $\one$ that is used to count inputs and outputs.
@@ -693,7 +687,7 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
   }
   \label{fig:multiplicities}
   \end{figure}
-\end{definition}
+\end{nidefinition}
 
 \autoref{fig:algebra-instances} sketches the implementation of linear, graded and shared types as instances of our usage algebra.
 Their use in typing derivations is illustrated in \autoref{example-derivation} (Continued).
@@ -717,7 +711,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivation} (
 \label{contexts}
 
 We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system with leftovers (\autoref{leftover-typing}).
-\begin{definition}[Indexed set of usage algebras]
+\begin{nidefinition}[Indexed set of usage algebras]
   An \emph{indexed set of usage algebras} is a type $\Idx$ of indices that is nonempty ($\type{\exists IDX}$) together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras of the corresponding type (\autoref{fig:indexed-multiplicities}).
   \begin{figure}[h]
     \begin{equation*}
@@ -731,12 +725,13 @@ We use indexed sets of usage algebras to allow several usage algebras to coexist
     \caption{Indexed set of usage algebras.}
     \label{fig:indexed-multiplicities}
   \end{figure}
-\end{definition}
+\end{nidefinition}
 
 We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts ($\Ctx$ in \autoref{fig:ctx}) separate.
 The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
 
-\begin{definition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
+\todo{definition captions reset textsc}
+\begin{nidefinition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
   A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) (first two rows of \autoref{fig:prectx}).
   
   \begin{figure}[h]
@@ -782,10 +777,10 @@ The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and wh
 This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input $i$ and output $o$ capabilities, respectively \cite{K07}.
 
 A \emph{typing context} (last two rows of \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
-\end{definition}
+\end{nidefinition}
 
 
-\begin{definition}[\textsc{Ctx}: usage contexts]
+\begin{nidefinition}[\textsc{Ctx}: usage contexts]
   A \emph{usage context} is a context $\Ctx_{idxs}$ of pairs of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
 
   A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to an existing context $\Gamma$.
@@ -826,7 +821,7 @@ A \emph{typing context} (last two rows of \autoref{fig:prectx}) is a length-inde
   \caption{Length-indexed context of carrier indices with a context of usage annotations on top.}
   \label{fig:ctx}
   \end{figure}
-\end{definition}
+\end{nidefinition}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing with Leftovers}
@@ -856,7 +851,7 @@ The \textbf{typing judgement for variables} $\contains{\gamma}{\Gamma}{i}{t}{y}{
 The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
 
-\begin{definition}[\textsc{VarRef}: typing variable references]
+\begin{nidefinition}[\textsc{VarRef}: typing variable references]
   \label{def:varref}
 
   The \textsc{VarRef} typing relation for variable references is presented in \autoref{fig:variable-references}.
@@ -897,7 +892,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
   We use the \emph{computability} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
-\end{definition}
+\end{nidefinition}
 
 \begin{example}[Variable reference]
   \autoref{lst:channels} types a variable reference under a linear algebra.
@@ -915,7 +910,7 @@ $\_ \; = \; \constr{0}$
   The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- we use $\func{\cdot-compute^r}$ to fulfill this proof obligation automatically.
 \end{example}
 
-\begin{definition}[\textsc{Types}: typing processes]
+\begin{nidefinition}[\textsc{Types}: typing processes]
   \label{def:types}
 
   The \textsc{Types} typing relation for \picalc{} processes is presented in \autoref{fig:types}.
@@ -980,7 +975,7 @@ $\_ \; = \; \constr{0}$
 %
   Parallel composition in rule $\comp{}{}$ uses the leftovers of the left-hand process to type the right-hand process.
   By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide a top-down proof of context split.
-\end{definition}
+\end{nidefinition}
 
 \begin{example}[Typing derivation, continues=example-process]
 \label{example-derivation}
@@ -1039,42 +1034,42 @@ We will start this section with auxiliary results which are needed to prove two 
 \paragraph*{Framing}
 This property asserts that the well-typedness of a process is independent of its leftover resources.
 
-\begin{theorem}[Framing]
+\begin{nitheorem}[Framing]
   \label{thm:framing}
   Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
   Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
   Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
   Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
-\end{theorem}
+\end{nitheorem}
 
 \paragraph*{Weakening}
 This property states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
 Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
-\begin{theorem}[Weakening]
+\begin{nitheorem}[Weakening]
   \label{thm:weakening}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
   $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
-\end{theorem}
+\end{nitheorem}
 
 \paragraph*{Strengthening}
 This property states that removing an unused variable preserves the well-typedness of a process.
 Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
-\begin{theorem}[Strengthening]
+\begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
   Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
-\end{theorem}
+\end{nitheorem}
 
 \paragraph*{Exchange}
 This property states that the exchange of two variables preserves the well-typedness of a process.
 We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to exchange types in typing contexts and usage annotations in usage contexts.
-\begin{theorem}[Exchange]
+\begin{nitheorem}[Exchange]
   \label{thm:exchange}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then, $\types{\func{exchange}_i \; \gamma}{\func{exchange}_i \; \Gamma}{\allowbreak \func{exchange}_i \; P}{\func{exchange}_i \; \Xi}$.
-\end{theorem}
+\end{nitheorem}
 
 \begin{proof}[Proof]
   All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
@@ -1086,36 +1081,36 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
 This property states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
 To prove this result, we must first introduce lemmas that establish that certain syntactic manipulations can be inverted (\autoref{lm:lower-lift}, \autoref{lm:exchange-exchange}) and how unused variables relate to the preservation of leftovers (\autoref{lm:types-unused}).
 
-\begin{lemma}
+\begin{nilemma}
   \label{lm:lower-lift}
   The function $\func{lower}_i \; P \; uP$ has an inverse $\func{lift}_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $\func{lift}_i \; (\func{lower}_i \; P \; uP) \equiv P$.
-\end{lemma}
+\end{nilemma}
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\begin{lemma}
+\begin{nilemma}
   \label{lm:exchange-exchange}
   The function $\func{exchange}_i \; P$ is its own inverse: $\func{exchange}_i \; (\func{exchange}_i \; P) \equiv P$.
-\end{lemma}
+\end{nilemma}
 \begin{proof}
   By structural induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
-\begin{lemma}
+\begin{nilemma}
   \label{lm:types-unused}
   For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, if the variable $i$ is unused within $P$, then $\Gamma$ at $i$ is equivalent to $\Xi$ at $i$.
-\end{lemma}
+\end{nilemma}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
 \end{proof}
 
 We are now in a position to prove subject congruence.
 
-\begin{theorem}[Subject congruence]
+\begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
   If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-\end{theorem}
+\end{nitheorem}
 
 \begin{proof}[Proof]
   The proof is by induction on \textsc{Equals} $\eq{}$.
@@ -1146,7 +1141,7 @@ This result is key to proving subject reduction.
 In \autoref{thm:substitution-generalization} we prove a generalised version of substitution, where the substitition $\subst{P}{j}{i}$ is on any variable $i$.
 Then, in \autoref{thm:substitution} we instantiate the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
-\begin{theorem}[Generalised substitution]
+\begin{nitheorem}[Generalised substitution]
   \label{thm:substitution-generalization}
   Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   Then, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
@@ -1161,7 +1156,7 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
   Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
   Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
   Then substituting $i$ to $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
-\end{theorem}
+\end{nitheorem}
 
 \begin{proof}[Proof]
   By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
@@ -1244,12 +1239,12 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
     \label{fig:subst-alternative}
 \end{figure}
 
-\begin{theorem}[Substitution]
+\begin{nitheorem}[Substitution]
   \label{thm:substitution}
   Let process $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
   Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
   Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
-\end{theorem}
+\end{nitheorem}
 \begin{proof}[Proof]
   For $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$, we use framing to derive them.
   Then, we use these to apply \autoref{thm:substitution-generalization}.
@@ -1267,23 +1262,23 @@ The relation between the typing contexts used to type $P$ and $Q$ will be explai
 In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
 We first introduce an auxiliary lemma:
 
-\begin{lemma}
+\begin{nilemma}
   \label{lm:comm-capable}
   Every input usage context $\Gamma$ of a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces by communicating on a channel external (that is, $P \reduce{\constr{external} \; i} Q$ for some $Q$) has a multiplicity of at least $\lio$ at index $i$.
-\end{lemma}
+\end{nilemma}
 
 \begin{proof}
   By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
 \end{proof}
 
-\begin{theorem}[Subject reduction]
+\begin{nitheorem}[Subject reduction]
   \label{thm:subject-reduction}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
   \begin{itemize}
     \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
     \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
   \end{itemize}
-\end{theorem}
+\end{nitheorem}
 
 \begin{proof}[Proof]
   By induction on $P \reduce{c} Q$. For the full details refer to our mechanisation in Agda.  
