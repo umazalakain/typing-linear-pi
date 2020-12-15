@@ -110,7 +110,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{
   $\pi$ with leftovers: \\ a mechanisation in Agda
-  \thanks{The authors would also like to thank the anonymous referees for their valuable comments and helpful suggestions. This work is supported by the UK EPSRC grant EP/K034413/1 ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233 ``Behavioural Application Program Interfaces'' (BehAPI).}
+  \thanks{
+    The authors would also like to thank the anonymous referees for their valuable comments and helpful suggestions.
+    We further want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their work and thoughts.
+    This work is supported by the UK EPSRC grant EP/K034413/1 ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233 ``Behavioural Application Program Interfaces'' (BehAPI).}
 }
 \titlerunning{$\pi$ with leftovers: a mechanisation in Agda}
 \author{
@@ -131,103 +134,125 @@
 \maketitle
 
 \begin{abstract}
-  \todo{the only references here are to session types}
-  \todo{fix acknowledgments}
-  The \picalc{} is a computational model for communication and concurrency.
-  The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
-  It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, such as \emph{session types} \cite{H93,THK94,HVK98}.
-
-  We present an untyped syntax and semantics for the \picalc{}, on top of which we provide a resource-aware type system parametrised by a set of multiplicity algebras.
-  This allows the user to mix \emph{linear}, \emph{graded} and \emph{shared} types, under the same unified framework.
-  We use leftover typing \cite{Allais2018a} to encode our typing rules, thus avoiding the ubiquitous context splitting proofs common when dealing with linear type systems.
-  We provide a framing theorem, generalise the weakening and strengthening theorems, and use them to prove subject congruence.
-  We show that the type system is stable under substitution and prove subject reduction.
+%  \todo{the only references here are to session types}
+%  The \picalc{} is a computational model for communication and concurrency.
+%  The \emph{linear} \picalc{} is a typed version of the \picalc{} where channels must be used exactly once.
+%  It is an underlying theoretical and practical framework on top of which more advanced types and theories can be built, such as \emph{session types} \cite{H93,THK94,HVK98}.
 %
-  Our formalisation is fully mechanised in Agda.
-
+%  We present an untyped syntax and semantics for the \picalc{}, on top of which we provide a resource-aware type system parametrised by a set of multiplicity algebras.
+%  This allows the user to mix \emph{linear}, \emph{graded} and \emph{shared} types, under the same unified framework.
+%  We use leftover typing \cite{Allais2018a} to encode our typing rules, thus avoiding the ubiquitous context splitting proofs common when dealing with linear type systems.
+%  We provide a framing theorem, generalise the weakening and strengthening theorems, and use them to prove subject congruence.
+%  We show that the type system is stable under substitution and prove subject reduction.
+%%
+%  Our formalisation is fully mechanised in Agda.
+%
   \keywords{Pi-calculus \and Linear types \and Leftover typing \and Concurrency \and Mechanisation \and Agda}
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
-Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
-The \picalc{} is at the basis of the design and implementation of programming languages for concurrency, such as Pict \cite{PierceT00} and more recently Go \footnote{https://golang.org}.
-At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, session types, and types for liveness properties, such as deadlock freedom, livelock freedom or termination.
-These make of the \picalc{} a fully-fledged tool for modelling and verifying concurrent and distributed systems.
+Recent years have seen an increase in the efforts to mechanise resource-aware process algebras \todo{cite}.
+A resource-aware type system needs to keep track of what resources are used in which parts of the program.
+To do so, the standard approach is to use context splits\todo{cite}: a typing rule for a term with multiple subterms will require an extra arguments that specifies what resources to allocate to each of the subterms.
+The typing derivations for the subterms must then use the entirety of resources allocated to them.
+A key observation here is that each subterm already \emph{knows} about the resources it needs, especially if these are linear.
+\emph{Context splits do little more than repeat information that is already contained in the subterms.}
+Moreover, it is impossible to provide typing derivations for the subterms until after the context splits have been provided.
+On top of that, because in their usual presentation context splits are binary, a typing rule for a term with $n$ subterms requires $n - 1$ context splits, which adds to the clutter of the type system.
 
-In the early '90s, \emph{linear types} for (functional) programming languages \cite{Wadler90,Bernardy2018} were introduced, following J.-Y. Girard's development of linear logic \cite{Girard87}.
-Linear type systems guarantee that resources are used \emph{exactly once}.
-Enforcing this ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
-Later on, linearity also inspired unique types, as in Clean \cite{BarendsenS96}, and ownership types, as in Rust \cite{MatsakisK14}.
+An alternative approach is to using context splits is using leftover typing \todo{cite}.
+Leftover typing changes the form of the typing judgments themselves by including a second output \emph{leftover} context that contains the resources that were unused by the term.
+As a result, typing rules can now \emph{thread the resources through} subterms without the need of context splits.
+Each subterm uses the resources it needs, and leaves the rest for its siblings.
+The first subterm in this chain of resources immediately knows about the resources it has available.
 
-\todo{introduce shared and graded types sooner}
-
-Linearity influenced the $\pi$-calculus as well.
-Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
-%
-With the rise of session types \cite{H93,THK94,HVK98} linearity acquired a different flavour: linearity ensures that each channel endpoint is owned by exactly one communicating participant, even though the channel itself may be used multiple times, as specified by its session type.
-Linearity in session types is the key ingredient that guarantees communication safety and session fidelity.
-
-In recent years, an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17} has pushed the linear \picalc{} \cite{KPT96} into the spotlight again.
-The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}, thus allowing to use the target linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be defined and implemented.
-\todo{go back to linear \picalc{}}
-
-In this paper we make the following contributions:
-\begin{enumerate}
-  \item We use \textbf{type-level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax for \picalc{} processes that is well-scoped by construction}:
-    Every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
-    \todo{Do Ciccone \& Padovani also use type level de Bruijn indices?}
-
-  \item We \textbf{parametrise our type system over a set of resource-aware usage algebras}:
-    A \emph{usage algebra} is defined as a ternary relation that is \emph{partial}, \emph{deterministic}, \emph{cancellative}, \emph{associative} and \emph{commutative}.
-    The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
-    This allows for linear, graded and shared types to be mixed in the same type system.
-
-  \item We \textbf{apply leftover typing to the \picalc{} and prove type preservation for the resulting type system}:
-    \todo{along the lines of Allais \cite{Allais2018a}}.
-\end{enumerate}
+Leftover typing has been used to formulate intuitionistic linear logic \todo{cite} and to mechanise the linear \lambdacalc.
+We make two main contributions in this paper:
+\begin{itemize}
+  \item We use \textbf{leftover typing to type a resource-aware \picalc{} and prove subject reduction}.
+  \item We \textbf{generalise the resource counting to a set of usage algebras that can be mixed within the same type system}.
+\end{itemize}
 
 
-
-\subsection{Summary}
-\todo{shorten}
-\begin{enumerate}
-\item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
- \begin{itemize}
-   \item \textbf{Syntax}: we use type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
-   For convenience and readability, the user can convert from and to a syntax using channel names (\autoref{from_to_deBruijn}).
-   These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
-   
-   \item \textbf{Semantics}: we provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
-   Thanks to our well-scoped grammar  (\autoref{syntax}), the operational semantics is defined on \emph{the totality of the syntax} as a reduction relation on processes (\autoref{operational-semantics}).
-   The reduction relation tracks at the type level the channel on which communication occurs. This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
-   The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
- \end{itemize}
-  
-  \item \textbf{Leftover typing for the \picalc{} with support for linear, graded and shared types}:
-  we present our type system for a resource-aware \picalc{} in \autoref{type-system}.
-  \begin{itemize}
-    \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
-    Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra --- linear types, graded types and shared types all satisfy these algebraic laws.
-
-    Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
-    This allows for type systems combining linear, graded and shared types under the same framework.
-    
-    \item \textbf{Leftover typing}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
-    This approach adds a leftover usage context to the typing judgements.
-    Typing derivations take the resources of their input usage context, consume some of them, and leave the remaining as leftovers in the output usage context.
-    Leftover typing \textbf{makes top-down context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
-  \end{itemize}
-
-  \item \textbf{Fully mechanised formalisation and type safety results}:
-    The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
-
-    We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
-    We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
-    We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
-\end{enumerate}
+% The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
+% Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
+% The \picalc{} is at the basis of the design and implementation of programming languages for concurrency, such as Pict \cite{PierceT00} and more recently Go \footnote{https://golang.org}.
+% At the state-of-the-art, the \picalc{} features a wide plethora of types \cite{K07}: basic types, linear types, session types, and types for liveness properties, such as deadlock freedom, livelock freedom or termination.
+% These make of the \picalc{} a fully-fledged tool for modelling and verifying concurrent and distributed systems.
+% 
+% In the early '90s, \emph{linear types} for (functional) programming languages \cite{Wadler90,Bernardy2018} were introduced, following J.-Y. Girard's development of linear logic \cite{Girard87}.
+% Linear type systems guarantee that resources are used \emph{exactly once}.
+% Enforcing this ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
+% Later on, linearity also inspired unique types, as in Clean \cite{BarendsenS96}, and ownership types, as in Rust \cite{MatsakisK14}.
+% 
+% \todo{introduce shared and graded types sooner}
+% 
+% Linearity influenced the $\pi$-calculus as well.
+% Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
+% %
+% With the rise of session types \cite{H93,THK94,HVK98} linearity acquired a different flavour: linearity ensures that each channel endpoint is owned by exactly one communicating participant, even though the channel itself may be used multiple times, as specified by its session type.
+% Linearity in session types is the key ingredient that guarantees communication safety and session fidelity.
+% 
+% In recent years, an encoding of session types into linear types \cite{DardhaGS12,Dardha14,DardhaGS17} has pushed the linear \picalc{} \cite{KPT96} into the spotlight again.
+% The encoding has been used as a technique to implement session types in mainstream programming languages such as OCaml \cite{Padovani17} and Scala \cite{ScalasY16,ScalasDHY17}, thus allowing to use the target linear \picalc{} as an underlying theoretical and practical framework on top of which session types can be defined and implemented.
+% \todo{go back to linear \picalc{}}
+% 
+% In this paper we make the following contributions:
+% \begin{enumerate}
+%   \item We use \textbf{type-level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax for \picalc{} processes that is well-scoped by construction}:
+%     Every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
+%     \todo{Do Ciccone \& Padovani also use type level de Bruijn indices?}
+% 
+%   \item We \textbf{parametrise our type system over a set of resource-aware usage algebras}:
+%     A \emph{usage algebra} is defined as a ternary relation that is \emph{partial}, \emph{deterministic}, \emph{cancellative}, \emph{associative} and \emph{commutative}.
+%     The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
+%     This allows for linear, graded and shared types to be mixed in the same type system.
+% 
+%   \item We \textbf{apply leftover typing to the \picalc{} and prove type preservation for the resulting type system}:
+%     \todo{along the lines of Allais \cite{Allais2018a}}.
+% \end{enumerate}
+% 
+% 
+% 
+% \subsection{Summary}
+% \todo{shorten}
+% \begin{enumerate}
+% \item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
+%  \begin{itemize}
+%    \item \textbf{Syntax}: we use type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
+%    For convenience and readability, the user can convert from and to a syntax using channel names (\autoref{from_to_deBruijn}).
+%    These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
+%    
+%    \item \textbf{Semantics}: we provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
+%    Thanks to our well-scoped grammar  (\autoref{syntax}), the operational semantics is defined on \emph{the totality of the syntax} as a reduction relation on processes (\autoref{operational-semantics}).
+%    The reduction relation tracks at the type level the channel on which communication occurs. This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
+%    The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
+%  \end{itemize}
+%   
+%   \item \textbf{Leftover typing for the \picalc{} with support for linear, graded and shared types}:
+%   we present our type system for a resource-aware \picalc{} in \autoref{type-system}.
+%   \begin{itemize}
+%     \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
+%     Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra --- linear types, graded types and shared types all satisfy these algebraic laws.
+% 
+%     Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
+%     This allows for type systems combining linear, graded and shared types under the same framework.
+%     
+%     \item \textbf{Leftover typing}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
+%     This approach adds a leftover usage context to the typing judgements.
+%     Typing derivations take the resources of their input usage context, consume some of them, and leave the remaining as leftovers in the output usage context.
+%     Leftover typing \textbf{makes top-down context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
+%   \end{itemize}
+% 
+%   \item \textbf{Fully mechanised formalisation and type safety results}:
+%     The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
+% 
+%     We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
+%     We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
+%     We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
+% \end{enumerate}
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1376,10 +1401,6 @@ We intend to add support for products, sum types and recursion to both our synta
 Orthogonally, making our typing rules bidirectional would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
-
-\section*{Acknowledgments}
-
-We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their thoughts, patience, work, education and camaraderie.
 
 \bibliographystyle{splncs04}
 \bibliography{paper}
