@@ -172,9 +172,28 @@ Leftover typing has been used to formulate intuitionistic linear logic \todo{cit
 We make two main contributions in this paper:
 \begin{itemize}
   \item We use \textbf{leftover typing to type a resource-aware \picalc{} and prove subject reduction}.
+    Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
+    Leftover typing \textbf{makes context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
+    
   \item We \textbf{generalise the resource counting to a set of usage algebras that can be mixed within the same type system}.
+    The user can provide \emph{resource-aware} algebras that are then applied to the type system (\autoref{multiplicities}).
+    Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra.
+    Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
+    This allows for type systems combining linear, graded (exact number of times $n$) and shared (free to reuse and dicard) types under the same framework.
 \end{itemize}
 
+We start by using type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
+We then provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
+This operational semantics is defined as a reduction relation on processes (\autoref{operational-semantics}).
+The reduction relation tracks at the type level the channel on which communication occurs.
+This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
+The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
+
+We then introduce an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
+Finally, we present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
+we have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
+We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
+The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 
 % The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
 % Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
