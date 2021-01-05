@@ -1,4 +1,6 @@
 \documentclass[]{llncs}
+% TODO: get rid of page numbers
+\pagestyle{plain}
 
 \usepackage[utf8]{inputenc}
 \usepackage{url}
@@ -7,6 +9,7 @@
 \usepackage{mathtools}
 \usepackage{hyperref}
 \usepackage{todonotes}
+
 
 % Two column itemize
 \usepackage{multicol}
@@ -261,31 +264,27 @@ The formalisation of the \picalc{} with leftover typing, from the syntax to the 
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-    { }
-    {\type{\N} : \Set}
-    \; \textsc{Nat}
 
-    \inferrule
-    { }
-    {\constr{0} : \type{\N}}
-
-    \inferrule
-    {n : \type{\N}}
-    {\suc n : \type{\N}}
-  \end{mathpar}
-  \caption{Notation used in this paper.}
-  \label{fig:notation}
-\end{figure}
-
-\autoref{fig:notation} illustrates the notation used in this paper.
+We briefly illustrate the notation used in this paper.
 Data type definitions ($\type{\N}$) use double inference lines and index-free synonyms (\textsc{Nat}) as rule names for ease of reference.
 Constructors ($\constr{0}$ and $\suc$) are given as inference rules.
 We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda: inference rules become type constructors, premises become argument types and conclusions return types.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned in type definitions but omitted by constructors.
+\begin{mathpar}
+  \datatype
+  { }
+  {\type{\N} : \Set}
+  \; \textsc{Nat}
+
+  \inferrule
+  { }
+  {\constr{0} : \type{\N}}
+
+  \inferrule
+  {n : \type{\N}}
+  {\suc n : \type{\N}}
+\end{mathpar}
 
 We use colours to further distinguish the different entities in this paper.
 $\type{TYPES}$ are blue and uppercased, with indices as subscripts, $\constr{constructors}$ are orange, $\func{functions}$ are teal, variables are black, and some constructor names are overloaded --- and disambiguated by context.
@@ -293,41 +292,6 @@ $\type{TYPES}$ are blue and uppercased, with indices as subscripts, $\constr{con
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax}
 \label{syntax}
-
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-    {n : \N}
-    {\Var_n : \Set}
-    \; \textsc{Var}
-
-    \inferrule
-    {n : \N}
-    {\constr{0} : \Var_{\suc n}}
-
-    \inferrule
-    {x : \Var_n}
-    {\suc x : \Var_{\suc n}}
-
-    \datatype
-    {n : \N}
-    {\Process_n : \Set}
-    \; \textsc{Process}
-  \end{mathpar}
-
-  \begin{equation*}
-    \begin{aligned}
-      \Process_n ::=& \; \PO                &&\text{(inaction)}   \\ 
-      |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
-      |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)} \\ 
-      |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
-      |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
-    \end{aligned}
-  \end{equation*}
-  \caption{Well-scoped grammar with type-level de Bruijn indices.}
-  \label{fig:syntax}
-\end{figure}
-
 
 In order to mechanise the \picalc{} syntax in Agda, we need to deal with bound names in continuation processes.
 Names are cumbersome to mechanise: they are not inherently well scoped, one has to deal with alpha-conversion, and inserting new variables into a context entails proving that their names differ from all other names in context.
@@ -337,9 +301,39 @@ That is, binders no longer introduce names; terms at different \emph{depths} use
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
 References outside of that range are meaningless.
 It is useful to rule out these ill-scoped terms syntactically.
-In \autoref{fig:syntax} --- which presents the syntax of the \picalc{} using de Bruijn indices --- we do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
+We do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
 Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within to refer to one more thing.
+\begin{mathpar}
+  \datatype
+  {n : \N}
+  {\Var_n : \Set}
+  \; \textsc{Var}
+
+  \inferrule
+  {n : \N}
+  {\constr{0} : \Var_{\suc n}}
+
+  \inferrule
+  {x : \Var_n}
+  {\suc x : \Var_{\suc n}}
+
+  \datatype
+  {n : \N}
+  {\Process_n : \Set}
+  \; \textsc{Process}
+\end{mathpar}
+
+\begin{equation*}
+  \begin{aligned}
+    \Process_n ::=& \; \PO                &&\text{(inaction)}   \\ 
+    |& \; \new{} \Process_{\suc n}         &&\text{(restriction)}          \\ 
+    |& \; \comp{\Process_n}{\Process_n}    &&\text{(parallel)} \\ 
+    |& \; \recv{\Var_n}{}\Process_{\suc n} &&\text{(input)}                \\ 
+    |& \; \send{\Var_n}{\Var_n}\Process_n  &&\text{(output)}                  
+  \end{aligned}
+\end{equation*}
+
 
 \todo{adapt to de bruijn}
 Process $\PO$ denotes the terminated process, where no further communications can occur.
@@ -372,10 +366,8 @@ process $\new{} P$ creates a new channel and makes it available at index $0$ in 
 $\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel; process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
 process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
 Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the number $n$ of free variables they can refer to.
-
-\begin{figure}[t]
+\begin{center}
   \small
-  \centering
   \begin{tikzpicture}[draw,circle]
     \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown] (send-x) at (0,2)   {$\func{send} \, x$};
     \node[draw,circle,fill opacity=0.3,text opacity=1,fill=brown] (send-y) at (0,0)   {$\func{send} \, y$};
@@ -387,9 +379,8 @@ Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the 
     \draw[->] (sync.10) -- node[above] {$z$} (recv-z.170);
     \draw[->] (sync) -- (recv-z);
   \end{tikzpicture}
-  \caption{The courier system: two \sender{} $S_1$ and $S_2$, one \receiver{} $R$ and one \courier{} $C$.}
-  \label{fig:example-process}
-\end{figure}
+\end{center}
+
 For the sake of clarity, we will define the four subprocesses in our courier system separately and parametrise them by the channels on which they operate.
 Each role \sender{}, \receiver{} and \courier{} is defined as a function respectively, $\func{send}, \func{recv}$ and $\func{carry}$.
 
@@ -451,9 +442,7 @@ We define structural congruence in \autoref{structural-congruence} and provide a
 \subsection{Structural Congruence}
 \label{structural-congruence}
 
-We define the base cases of a structural congruence relation \textsc{StructCong} $\eqeq$ in \autoref{fig:struct-cong-base}.
-
-\begin{figure}[h]
+We define the base cases of a structural congruence relation \textsc{StructCong} $\eqeq$ as follows:
 \begin{mathpar}
   \datatype
   { }
@@ -484,9 +473,6 @@ We define the base cases of a structural congruence relation \textsc{StructCong}
   { }
   {\constr{scope-comm} : \new \new P \eqeq \new \new \func{exchange}_{\constr{0}} \; P}
 \end{mathpar}
-\caption{Base cases of structural congruence.}
-\label{fig:struct-cong-base}
-\end{figure}
 
 The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as being the neutral element of parallel composition, respectively.
 The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
@@ -498,8 +484,6 @@ In all the above, $i$ is incremented every time we go under a binder.
 \begin{nidefinition}
   \label{def:unused}
   A variable $i$ is unused in $P$ ($\Unused_i \; P$) if it appears in none of its inputs and none of its outputs.
-  \todo{should we have this as a figure instead?}
-
   \begin{mathpar}
     \datatype
     {i : \Var_n \\ P : \Process_n}
@@ -536,83 +520,69 @@ The $\constr{cong-}$* rules define structural congruence under a context $\mathc
 The remaining three rules close structural congruence under reflexivity, symmetry and transitivity, respectively. 
 The transitivity rule makes it tricky to prove predicates by induction on \textsc{Equals}: Agda cannot immediately see that such doubly recursive calls terminate.
 In order to remedy this, we model the recursive call structure syntactically and index \textsc{Equals} by a type \textsc{Rec}.
+\begin{mathpar}
+  \datatype
+  { }
+  {\Rec : \Set}
+  \; \textsc{Rec}
 
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-    { }
-    {\Rec : \Set}
-    \; \textsc{Rec}
-  
-    \inferrule
-    { }
-    {\constr{zero} : \Rec}
-    
-    \inferrule
-    {r : \Rec}
-    {\constr{one} \; r : \Rec}
-  
-    \inferrule
-    {r \; s : \Rec}
-    {\constr{two} \; r \; s : \Rec}
-    
-    \datatype
-    {P \, Q : \Process_n \\ r : \Rec}
-    {P \eq{r} Q : \Set}
-    \; \textsc{Equals}
-  
-    \inferrule
-    {eq : P \eqeq Q}
-    {\constr{struct} \; eq : P \eq{\constr{zero}} Q}
-  
-    \inferrule
-    {eq : P \eq{r} P'}
-    {\constr{cong-scope} \; eq : \new P \eq{\constr{one} \; r} \new P'}
-  
-    \inferrule
-    {eq : P \eq{r} P'}
-    {\constr{cong-comp} \; eq : \comp{P}{Q} \eq{\constr{one} \; r} \comp{P'}{Q}}
-  
-    \inferrule
-    {eq : P \eq{r} P'}
-    {\constr{cong-recv} \; eq : \recv{x}{}P \eq{\constr{one} \; r} \recv{x}{}P'}
-  
-    \inferrule
-    {eq : P \eq{r} P'}
-    {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
-  
-    \inferrule
-    { }
-    {\constr{refl} : P \eq{\constr{zero}} P}
-  
-    \inferrule
-    {eq : P \eq{r} Q}
-    {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
-  
-    \inferrule
-    {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
-    {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
+  \inferrule
+  { }
+  {\constr{zero} : \Rec}
+
+  \inferrule
+  {r : \Rec}
+  {\constr{one} \; r : \Rec}
+
+  \inferrule
+  {r \; s : \Rec}
+  {\constr{two} \; r \; s : \Rec}
+
+  \datatype
+  {P \, Q : \Process_n \\ r : \Rec}
+  {P \eq{r} Q : \Set}
+  \; \textsc{Equals}
+
+  \inferrule
+  {eq : P \eqeq Q}
+  {\constr{struct} \; eq : P \eq{\constr{zero}} Q}
+
+  \inferrule
+  {eq : P \eq{r} P'}
+  {\constr{cong-scope} \; eq : \new P \eq{\constr{one} \; r} \new P'}
+
+  \inferrule
+  {eq : P \eq{r} P'}
+  {\constr{cong-comp} \; eq : \comp{P}{Q} \eq{\constr{one} \; r} \comp{P'}{Q}}
+
+  \inferrule
+  {eq : P \eq{r} P'}
+  {\constr{cong-recv} \; eq : \recv{x}{}P \eq{\constr{one} \; r} \recv{x}{}P'}
+
+  \inferrule
+  {eq : P \eq{r} P'}
+  {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
+
+  \inferrule
+  { }
+  {\constr{refl} : P \eq{\constr{zero}} P}
+
+  \inferrule
+  {eq : P \eq{r} Q}
+  {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
+
+  \inferrule
+  {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
+  {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
 \end{mathpar}
-\caption{Structural rewriting rules lifted to a congruent equivalence relation indexed by a recursion tree.}
-\label{fig:struct-cong1}
-\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Reduction Relation}
 \label{operational-semantics}
 
-The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs (\autoref{fig:reduction}).
+The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs.
 We keep track of channel $c$ so we can state subject reduction (\autoref{thm:subject-reduction}).
-
-We distinguish between channels that are created inside of the process ($\constr{internal}$), and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable.
-In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
-As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
-After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:substitution-unused} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
-Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
---- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
-
-\begin{figure}[h]
 \begin{mathpar}
   \datatype
   {n : \N}
@@ -648,9 +618,13 @@ Reduction is closed under parallel composition (rule $\constr{par}$), restrictio
   {eq : P \eq{} P' \\ red : P' \reduce{c} Q}
   {\constr{struct} \; eq \; red : P \reduce{c} Q}
 \end{mathpar}
-\caption{Operational semantics indexed by the channel over which reduction occurs.}
-\label{fig:reduction}
-\end{figure}
+
+We distinguish between channels that are created inside of the process ($\constr{internal}$), and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable.
+In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
+As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
+After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:substitution-unused} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
+Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
+--- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 
 Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
 It is defined as follows:
@@ -693,9 +667,10 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$ that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational reasoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal} (so that new resources cannot arbitrarily spring into life).
   It has an element $\one$ that is used to count inputs and outputs.
-  \autoref{fig:multiplicities} defines such an algebra as a record $\Algebra_C$ on a carrier $C$.
-
-  \begin{figure}[h]
+  Below we define such an algebra as a record $\Algebra_C$ on a carrier $C$.
+  We use $\forall$ for universal quantification.
+  The dependent product $\type{\exists}$ uses the value of its first argument in the type of its second.
+  The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.
   \begin{equation*}
   \begin{aligned}
     &\zero                   &:{} &                 &        & C \\
@@ -711,20 +686,11 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
     &                        &    &                  &        & \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
   \end{aligned}
   \end{equation*}
-  \caption{
-    Usage algebra $\Algebra_C$ on a carrier $C$.
-    We use $\forall$ for universal quantification.
-    The dependent product $\type{\exists}$ uses the value of its first argument in the type of its second.
-    The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.
-  }
-  \label{fig:multiplicities}
-  \end{figure}
 \end{nidefinition}
 
-\autoref{fig:algebra-instances} sketches the implementation of linear, graded and shared types as instances of our usage algebra.
+We sketch the implementation of linear, graded and shared types as instances of our usage algebra below.
 Their use in typing derivations is illustrated in \autoref{example-derivation} (Continued).
-
-\begin{figure}[h]
+\begin{center}
 \begin{tabular}{l | l | l}
   & carrier & operation \\
   \hline
@@ -734,9 +700,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivation} (
   \hline
   \textbf{shared} & $\constr{\omega} \, : \, \type{Sha}$ & $\op{\constr{\omega}}{\constr{\omega}}{\constr{\omega}}$ \\
 \end{tabular}
-\caption{Example instances of $\Usage$ and a ternary relation that satisfies our $\Algebra$ interface.}
-\label{fig:algebra-instances}
-\end{figure}
+\end{center}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Typing Contexts}
@@ -744,29 +708,22 @@ Their use in typing derivations is illustrated in \autoref{example-derivation} (
 
 We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system with leftovers (\autoref{leftover-typing}).
 \begin{nidefinition}[Indexed set of usage algebras]
-  An \emph{indexed set of usage algebras} is a type $\Idx$ of indices that is nonempty ($\type{\exists IDX}$) together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras of the corresponding type (\autoref{fig:indexed-multiplicities}).
-  \begin{figure}[h]
-    \begin{equation*}
-      \begin{aligned}
-        &\Idx               &:{} &\Set \\
-        &\type{\exists IDX} &:{} &\Idx \\
-        &\Usage             &:{} &\Idx \to \Set \\
-        &\type{ALGEBRAS}    &:{} &(idx : \Idx) \to \Algebra_{\Usage_{idx}}
-      \end{aligned}
-    \end{equation*}
-    \caption{Indexed set of usage algebras.}
-    \label{fig:indexed-multiplicities}
-  \end{figure}
+  An \emph{indexed set of usage algebras} is a type $\Idx$ of indices that is nonempty ($\type{\exists IDX}$) together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras of the corresponding type.
+  \begin{equation*}
+    \begin{aligned}
+      &\Idx               &:{} &\Set \\
+      &\type{\exists IDX} &:{} &\Idx \\
+      &\Usage             &:{} &\Idx \to \Set \\
+      &\type{ALGEBRAS}    &:{} &(idx : \Idx) \to \Algebra_{\Usage_{idx}}
+    \end{aligned}
+  \end{equation*}
 \end{nidefinition}
 
-We keep typing contexts ($\PreCtx$, in \autoref{fig:prectx}) and usage contexts ($\Ctx$ in \autoref{fig:ctx}) separate.
-The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
-
 \todo{definition captions reset textsc}
+We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
+The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
 \begin{nidefinition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
-  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) (first two rows of \autoref{fig:prectx}).
-  
-  \begin{figure}[h]
+  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) (first two constructors below).
   \begin{mathpar}
     \datatype
     { }
@@ -800,28 +757,19 @@ The former are preserved throughout typing derivations; the latter are transform
             {\gamma : \PreCtx_n \\ t : \Type}
             {\gamma \comma t : \PreCtx_{\suc n}}
   \end{mathpar}
-  \caption{Types and length-indexed typing contexts.}
-  \label{fig:prectx}
-  \end{figure}
-The unit type $\unit$ serves as a proof of inhabitance for types.
-The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
-The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
-This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input $i$ and output $o$ capabilities, respectively \cite{K07}.
 
-A \emph{typing context} (last two rows of \autoref{fig:prectx}) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$.
+  The unit type $\unit$ serves as a proof of inhabitance for types.
+  The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
+  The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
+  This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input $i$ and output $o$ capabilities, respectively \cite{K07}.
+
+  A \emph{typing context} (last two rules above) is a length-indexed list of types, and is either empty $[]$ or the result of appending a type $t$ to an existing context $\gamma$r
 \end{nidefinition}
 
 
 \begin{nidefinition}[\textsc{Ctx}: usage contexts]
-  A \emph{usage context} is a context $\Ctx_{idxs}$ of pairs of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$ (\autoref{fig:ctx}).
-
+  A \emph{usage context} is a context $\Ctx_{idxs}$ of pairs of usage annotations that is indexed by a length-indexed context of indices $\Idxs_n$.
   A usage context is either empty $[]$ or the result or appending a usage annotation $x$ to an existing context $\Gamma$.
-
-  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
-  Henceforth, we use $\lz$ to denote the multiplicity pair $0 \comma 0$, $\li$ for the pair $1 \comma 0$, $\lo$ for $0 \comma 1$, and $\lio$ for $1 \comma 1$.
-  This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
-
-  \begin{figure}[h]
   \begin{mathpar}
     \datatype
     {n : \N}
@@ -840,7 +788,6 @@ A \emph{typing context} (last two rows of \autoref{fig:prectx}) is a length-inde
     {idxs : \Idxs_n}
     {\Ctx_{idxs} : \Set}
     \; \textsc{Ctx}
-  
     
     \inferrule
         { }
@@ -850,9 +797,10 @@ A \emph{typing context} (last two rows of \autoref{fig:prectx}) is a length-inde
         {\Gamma : \Ctx_{idxs} \\ x : \Usage_{idx} ^{\func{2}}}
         {\Gamma \comma x : \Ctx_{idxs \comma idx}}
   \end{mathpar}
-  \caption{Length-indexed context of carrier indices with a context of usage annotations on top.}
-  \label{fig:ctx}
-  \end{figure}
+
+  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
+  Henceforth, we use $\lz$ to denote the multiplicity pair $0 \comma 0$, $\li$ for the pair $1 \comma 0$, $\lo$ for $0 \comma 1$, and $\lio$ for $1 \comma 1$.
+  This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{nidefinition}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -887,9 +835,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \begin{nidefinition}[\textsc{VarRef}: typing variable references]
   \label{def:varref}
 
-  The \textsc{VarRef} typing relation for variable references is presented in \autoref{fig:variable-references}.
-
-  \begin{figure}[h]
+  The \textsc{VarRef} typing relation for variable references is presented below.
   \begin{mathpar}
     \mprset{sep=0.5em}
   
@@ -914,17 +860,14 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
     {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
     {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
   \end{mathpar}
-  \caption{Typing rules for variable references.}
-  \label{fig:variable-references}
-  \end{figure}
-
-  We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)}$ on pairs of multiplicities and an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with the same underlying context of indices.
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
   Note that the remaining context $\Gamma$ is preserved unused as a leftover.
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
   We use the \emph{computability} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
   The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
+
+  We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)}$ on pairs of multiplicities and an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with the same underlying context of indices.
 \end{nidefinition}
 
 \begin{example}[Variable reference]
@@ -946,10 +889,8 @@ $\_ \; = \; \constr{0}$
 \begin{nidefinition}[\textsc{Types}: typing processes]
   \label{def:types}
 
-  The \textsc{Types} typing relation for \picalc{} processes is presented in \autoref{fig:types}.
-  For convenience, we reuse the constructor names introduced for the syntax in \autoref{fig:syntax}.
-  
-  \begin{figure}[h]
+  The \textsc{Types} typing relation for \picalc{} processes is presented below.
+  For convenience, we reuse the constructor names introduced for the syntax in \autoref{syntax}.
   \begin{mathpar}
     \datatype{
       \gamma : \PreCtx_n \\
@@ -987,9 +928,6 @@ $\_ \; = \; \constr{0}$
      r : \types{\gamma}{\Delta}{Q}{\Xi}}
     {\comp{l}{r} : \types{\gamma}{\Gamma}{\comp{P}{Q}}{\Xi}}
   \end{mathpar}
-  \caption{Leftover typing for a resource-aware type system.}
-  \label{fig:types}
-  \end{figure}
 
   The inaction process in rule $\PO$ does not change usage annotations.
   The scope restriction in rule $\new$ expects three arguments: the type $t$ of data being transmitted; the usage annotation $x$ of what is being transmitted; and the multiplicity $y$ given to the channel itself.
