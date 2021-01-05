@@ -160,14 +160,13 @@ The typing derivations for the subterms must then use the entirety of the resour
 A key observation here is that each subterm already \emph{knows} about the resources it needs.
 \emph{Context splits contain usage information already defined in the subterms.}
 Moreover, the subterms cannot be typed until the context splits have been defined.
-On top of that, context splits are usually binary, and thus typing rules with $n$ subterms require $n - 1$ context splits, which considerably clutters the type system.
+On top of that, using binary context splits means that typing rules with $n$ subterms require $n - 1$ context splits, which considerably clutters the type system.
 
 An alternative approach to using context splits is using leftover typing \todo{cite}.
-Leftover typing changes the shape of the typing judgments by including a second \emph{leftover} output context that contains the resources that were not used by the term.
-As a result, typing rules \emph{thread the resources through} subterms without the need of context splits.
-Each subterm uses the resources it needs, and leaves the rest for its siblings.
-The first subterm in this chain of resources immediately knows about the resources it has available.
-Below we present two alternative typing rules for process composition in the linear \picalc{}: the one on the left uses context splits, the one on the right leftover typing.
+Leftover typing changes the shape of the typing judgments and includes a second \emph{leftover} output context that contains the resources that were not used by the term.
+As a result, typing rules \emph{thread the resources through} subterms without needing context splits: each subterm uses the resources it needs, and leaves the rest for its siblings.
+The first subterm in this chain of resources immediately knows what resources it has available.
+Below we present two alternative typing rules for process composition in the linear \picalc{}: the one on the left uses context splits, while the one on the right uses leftover typing.
 \begin{mathpar}
   \inferrule
   {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
@@ -185,6 +184,7 @@ We make two main contributions in this paper:
     Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
     Leftover typing \textbf{makes context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
     \todo{revise paragraph}
+    \todo{add context around the picalc{}}
     
   \item We \textbf{generalise resource counting to a set of usage algebras that can be mixed within the same type system}.
     The user can provide \emph{resource-aware} algebras that are then applied to the type system (\autoref{multiplicities}).
