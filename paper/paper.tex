@@ -155,16 +155,16 @@
 
 Recent years have seen an increase in the efforts to mechanise resource-aware process algebras \todo{cite}.
 A resource-aware type system needs to keep track of what resources are used in which parts of the program.
-To do so, the standard approach is to use context splits\todo{cite}: a typing rule for a term with multiple subterms will require an extra arguments that specifies what resources to allocate to each of the subterms.
-The typing derivations for the subterms must then use the entirety of resources allocated to them.
-A key observation here is that each subterm already \emph{knows} about the resources it needs, especially if these are linear.
-\emph{Context splits do little more than repeat information that is already contained in the subterms.}
-Moreover, it is impossible to provide typing derivations for the subterms until after the context splits have been provided.
-On top of that, because in their usual presentation context splits are binary, a typing rule for a term with $n$ subterms requires $n - 1$ context splits, which adds to the clutter of the type system.
+To do so, the standard approach is to use context splits\todo{cite}: typing rules for terms with multiple subterms use a side condition that specifies what resources to allocate to each of the subterms.
+The typing derivations for the subterms must then use the entirety of the resources allocated to them.
+A key observation here is that each subterm already \emph{knows} about the resources it needs.
+\emph{Context splits contain usage information already defined in the subterms.}
+Moreover, the subterms cannot be typed until the context splits have been defined.
+On top of that, context splits are usually binary, and thus typing rules with $n$ subterms require $n - 1$ context splits, which considerably clutters the type system.
 
-An alternative approach is to using context splits is using leftover typing \todo{cite}.
-Leftover typing changes the form of the typing judgments themselves by including a second output \emph{leftover} context that contains the resources that were unused by the term.
-As a result, typing rules can now \emph{thread the resources through} subterms without the need of context splits.
+An alternative approach to using context splits is using leftover typing \todo{cite}.
+Leftover typing changes the shape of the typing judgments by including a second \emph{leftover} output context that contains the resources that were not used by the term.
+As a result, typing rules \emph{thread the resources through} subterms without the need of context splits.
 Each subterm uses the resources it needs, and leaves the rest for its siblings.
 The first subterm in this chain of resources immediately knows about the resources it has available.
 
@@ -174,12 +174,13 @@ We make two main contributions in this paper:
   \item We use \textbf{leftover typing to type a resource-aware \picalc{} and prove subject reduction}.
     Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
     Leftover typing \textbf{makes context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
+    \todo{revise paragraph}
     
-  \item We \textbf{generalise the resource counting to a set of usage algebras that can be mixed within the same type system}.
+  \item We \textbf{generalise resource counting to a set of usage algebras that can be mixed within the same type system}.
     The user can provide \emph{resource-aware} algebras that are then applied to the type system (\autoref{multiplicities}).
     Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra.
-    Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
-    This allows for type systems combining linear, graded (exact number of times $n$) and shared (free to reuse and dicard) types under the same framework.
+    Multiple algebras can be mixed in the type system --- usage contexts keep information about what algebra to for each type (\autoref{contexts}).
+    In particular, this allows for type systems combining linear, graded (exact number of times $n$) and shared (free to reuse and dicard) types under the same framework.
 \end{itemize}
 
 We start by using type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
@@ -189,9 +190,9 @@ The reduction relation tracks at the type level the channel on which communicati
 This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
 The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
-We then introduce an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
+We then define an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
 Finally, we present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
-we have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
+We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
 We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
 The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 
