@@ -167,6 +167,16 @@ Leftover typing changes the shape of the typing judgments by including a second 
 As a result, typing rules \emph{thread the resources through} subterms without the need of context splits.
 Each subterm uses the resources it needs, and leaves the rest for its siblings.
 The first subterm in this chain of resources immediately knows about the resources it has available.
+Below we present two alternative typing rules for process composition in the linear \picalc{}: the one on the left uses context splits, the one on the right leftover typing.
+\begin{mathpar}
+  \inferrule
+  {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
+  {\Gamma \; \type{\vdash} \; \comp{P}{Q}}
+
+  \inferrule
+  {\Gamma \; \type{\vdash} \; P \; \type{\triangleright} \; \Delta \\ \Delta \; \type{\vdash} \; P \; \type{\triangleright} \; \Xi}
+  {\Gamma \; \type{\vdash} \; \comp{P}{Q} \; \type{\triangleright} \; \Xi}
+\end{mathpar}
 
 Leftover typing has been used to formulate intuitionistic linear logic \todo{cite} and to mechanise the linear \lambdacalc.
 We make two main contributions in this paper:
@@ -877,6 +887,7 @@ This output context contains the \emph{leftovers} (the unused multiplicities) of
 These leftovers can then be used as an input to another typing derivation.
 
 Typing judgments for linear calculi typically carry a single context of usage annotations and thus the typing rules require frequent top-down proofs of context splitting --- e.g., the typing rule for parallel composition would look like:
+\todo{we have this in th intro already}
 \begin{mathpar}
   \inferrule
   {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
