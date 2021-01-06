@@ -102,7 +102,7 @@
 \newcommand{\Channel}{\type{CHANNEL}}
 \newcommand{\Rec}{\type{REC}}
 \newcommand{\Algebra}{\type{ALGEBRA}}
-\newcommand{\eq}[1]{\, \type{\simeq}_{#1} \,}
+\newcommand{\eq}{\, \type{\simeq} \,}
 \newcommand{\eqeq}{\, \type{\cong} \,}
 
 % Example
@@ -432,62 +432,43 @@ In all the above, $i$ is incremented every time we go under a binder.
 We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$.
 The $\constr{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively scope restriction, parallel composition, input and output.
 The remaining three rules close structural congruence under reflexivity, symmetry and transitivity, respectively. 
-The transitivity rule makes it tricky to prove predicates by induction on \textsc{Equals}: Agda cannot immediately see that such doubly recursive calls terminate.
-In order to remedy this, we model the recursive call structure syntactically and index \textsc{Equals} by a type \textsc{Rec}.
 \begin{mathpar}
   \datatype
-  { }
-  {\Rec : \Set}
-  \; \textsc{Rec}
-
-  \inferrule
-  { }
-  {\constr{zero} : \Rec}
-
-  \inferrule
-  {r : \Rec}
-  {\constr{one} \; r : \Rec}
-
-  \inferrule
-  {r \; s : \Rec}
-  {\constr{two} \; r \; s : \Rec}
-
-  \datatype
   {P \, Q : \Process_n \\ r : \Rec}
-  {P \eq{r} Q : \Set}
+  {P \eq Q : \Set}
   \; \textsc{Equals}
 
   \inferrule
   {eq : P \eqeq Q}
-  {\constr{struct} \; eq : P \eq{\constr{zero}} Q}
+  {\constr{struct} \; eq : P \eq Q}
 
   \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-scope} \; eq : \new P \eq{\constr{one} \; r} \new P'}
+  {eq : P \eq P'}
+  {\constr{cong-scope} \; eq : \new P \eq \new P'}
 
   \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-comp} \; eq : \comp{P}{Q} \eq{\constr{one} \; r} \comp{P'}{Q}}
+  {eq : P \eq P'}
+  {\constr{cong-comp} \; eq : \comp{P}{Q} \eq \comp{P'}{Q}}
 
   \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-recv} \; eq : \recv{x}{}P \eq{\constr{one} \; r} \recv{x}{}P'}
+  {eq : P \eq P'}
+  {\constr{cong-recv} \; eq : \recv{x}{}P \eq \recv{x}{}P'}
 
   \inferrule
-  {eq : P \eq{r} P'}
-  {\constr{cong-send} \; eq : \send{x}{y}P \eq{\constr{one} \; r} \send{x}{y}P'}
+  {eq : P \eq P'}
+  {\constr{cong-send} \; eq : \send{x}{y}P \eq \send{x}{y}P'}
 
   \inferrule
   { }
-  {\constr{refl} : P \eq{\constr{zero}} P}
+  {\constr{refl} : P \eq P}
 
   \inferrule
-  {eq : P \eq{r} Q}
-  {\constr{sym} \; eq : Q \eq{\constr{one} \; r} P}
+  {eq : P \eq Q}
+  {\constr{sym} \; eq : Q \eq P}
 
   \inferrule
-  {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
-  {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
+  {eq_1 : P \eq Q \\ \; eq_2 : Q \eq R}
+  {\constr{trans} \; eq_1 \; eq_2 : P \eq R}
 \end{mathpar}
 \end{nidefinition}
 
@@ -540,6 +521,15 @@ As a result of that communication, the continuation of the input process $P$ has
 After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:substitution-unused} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
+\todo{why do we not apply structural congruence on both sides?}
+
+\begin{nilemma}
+  \label{lm:substitution-unused}
+  For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
 
 Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
 It is defined as follows:
@@ -551,15 +541,7 @@ It is defined as follows:
     & \func{dec} \; (\constr{external} \; (\suc n))   && \hookrightarrow \constr{external} \; n \\
   \end{aligned}
 \end{equation*}
-\todo{as inference rules, better}
-
-\begin{nilemma}
-  \label{lm:substitution-unused}
-  For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
+\todo{introduce function definition syntax, fix alignment}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resource-aware Type System}
