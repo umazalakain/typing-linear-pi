@@ -200,6 +200,7 @@ We make two main contributions in this paper:
     Multiple algebras can be mixed in the type system --- usage contexts keep information about what algebra to for each type (\autoref{contexts}).
     In particular, this allows for type systems combining linear (use exactly once), graded (exact number of times $n$) and shared (free to reuse and discard) types under the same framework.
 \end{itemize}
+\todo{mention we don't support recursion, why}
 
 We start by using type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
 We then provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
@@ -213,54 +214,6 @@ Finally, we present the type safety results of our \picalc{} with leftovers in \
 We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
 We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
 The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
-
-% \todo{introduce shared and graded types sooner}
-%   \item We use \textbf{type-level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax for \picalc{} processes that is well-scoped by construction}:
-%     Every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
-%     \todo{Do Ciccone \& Padovani also use type level de Bruijn indices?}
-% 
-%   \item We \textbf{parametrise our type system over a set of resource-aware usage algebras}:
-%     A \emph{usage algebra} is defined as a ternary relation that is \emph{partial}, \emph{deterministic}, \emph{cancellative}, \emph{associative} and \emph{commutative}.
-%     The user is able to choose any mix of algebras for the type system --- as long as they comply with the specification.
-%     This allows for linear, graded and shared types to be mixed in the same type system.
-% 
-%   \item We \textbf{apply leftover typing to the \picalc{} and prove type preservation for the resulting type system}:
-%     \todo{along the lines of Allais \cite{Allais2018a}}.
-% \end{enumerate}
-% \item \textbf{Formalisation of the syntax and the semantics of the \picalc{}}:
-%  \begin{itemize}
-%    \item \textbf{Syntax}: we use type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
-%    For convenience and readability, the user can convert from and to a syntax using channel names (\autoref{from_to_deBruijn}).
-%    These conversion functions are shown to be inverses of one another up to $\alpha$-conversion.
-%    
-%    \item \textbf{Semantics}: we provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
-%    Thanks to our well-scoped grammar  (\autoref{syntax}), the operational semantics is defined on \emph{the totality of the syntax} as a reduction relation on processes (\autoref{operational-semantics}).
-%    The reduction relation tracks at the type level the channel on which communication occurs. This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
-%    The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
-%  \end{itemize}
-%   
-%   \item \textbf{Leftover typing for the \picalc{} with support for linear, graded and shared types}:
-%   we present our type system for a resource-aware \picalc{} in \autoref{type-system}.
-%   \begin{itemize}
-%     \item \textbf{Algebras on multiplicities}: The user can provide \emph{resource-aware} algebras, which are then applied to the type system (\autoref{multiplicities}).
-%     Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra --- linear types, graded types and shared types all satisfy these algebraic laws.
-% 
-%     Multiple algebras can be simultaneously used in a single type system --- usage contexts keep information about what algebra to use on which element (\autoref{contexts}).
-%     This allows for type systems combining linear, graded and shared types under the same framework.
-%     
-%     \item \textbf{Leftover typing}: Our type system uses \emph{leftover typing} to model the resource-aware \picalc{} (\autoref{leftover-typing}).
-%     This approach adds a leftover usage context to the typing judgements.
-%     Typing derivations take the resources of their input usage context, consume some of them, and leave the remaining as leftovers in the output usage context.
-%     Leftover typing \textbf{makes top-down context splits unnecessary}, allows for \emph{framing} (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) for the \picalc{}.
-%   \end{itemize}
-% 
-%   \item \textbf{Fully mechanised formalisation and type safety results}:
-%     The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
-% 
-%     We present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
-%     We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
-%     We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
-% \end{enumerate}
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -299,10 +252,9 @@ To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, wher
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
-References outside of that range are meaningless.
-It is useful to rule out these ill-scoped terms syntactically.
+References outside of that range are meaningless, and it is useful to rule them out syntactically.
 We do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
-We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains variables that can refer to $n$ distinct elements.
+We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains free variables that can refer to $n$ distinct elements.
 Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within to refer to one more thing.
 \begin{mathpar}
   \datatype
@@ -334,38 +286,19 @@ Every time we go under a binder, we increase the index of the continuation proce
   \end{aligned}
 \end{equation*}
 
-
-\todo{adapt to de bruijn}
-Process $\PO$ denotes the terminated process, where no further communications can occur.
-Process $\new{}\; P$ creates a new channel bound with scope $P$.
-Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
-Processes $\recv{x}{} P$ and $\send{x}{y} P$ denote respectively, the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
-Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs that introduce bound names --- $x$ and $y$ in $P$, respectively.
+Process $\PO$ denotes the terminated process, where no further communications can occur;
+process $\new{} P$ creates a new channel and binds it at index $0$ in the continuation process $P$;
+$\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel;
+process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
+process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
 
 \begin{example}[The courier system]
 \label{example-process}
 
-We present an example that highlights the ways in which linear, graded and shared types can be used to prevent errors in a concurrent and distributed system defined by \picalc{} processes in parallel.
-
-A courier system consists of three \emph{roles}:
+As an example use of this syntax, we present a courier system that consists of three \emph{roles}:
 a \sender{}, who wants to send a package;
 a \receiver{}, who receives the package sent by the sender;
 and a \courier{}, who carries the package from the sender to the receiver.
-
-Our courier system (given in \autoref{fig:example-process}) is defined by four \picalc{} processes in parallel instantiating the above three roles:
-we have two \sender{} processes, $S_1$ and $S_2$, sending data over channels $x$ and $y$, respectively;
-one \receiver{} process, $R$, which receives over channel $z$ the data sent from each of the senders -- hence receives twice;
-and a \courier{} process $C$, which synchronises communication among $S_1$, $S_2$ and $R$.
-The \courier{} process $C$ first receives data from $S_1$ and $S_2$ on its input channels $x$ and $y$, respectively, and then sends the received data to $R$ along its output channel $z$.
-
-
-We will now define the courier system as \picalc{} processes.
-In our work, the syntax of \picalc{} processes adopts \emph{de Bruijn indices} \cite{deBruijn1972} for channel names and variables (details in \autoref{syntax}).
-In short, for the purposes of this example:
-process $\new{} P$ creates a new channel and makes it available at index $0$ in the continuation process $P$;
-$\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel; process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
-process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
-Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the number $n$ of free variables they can refer to.
 \begin{center}
   \small
   \begin{tikzpicture}[draw,circle]
@@ -381,42 +314,49 @@ Both variable references $\Var_n$ and processes $\Process_n$ are indexed by the 
   \end{tikzpicture}
 \end{center}
 
-For the sake of clarity, we will define the four subprocesses in our courier system separately and parametrise them by the channels on which they operate.
-Each role \sender{}, \receiver{} and \courier{} is defined as a function respectively, $\func{send}, \func{recv}$ and $\func{carry}$.
+\todo{the colors are confusing: function color for send recv carry, individual colors for sender receiver and carrier}
+Our courier system is defined by four \picalc{} processes composed in parallel instantiating the above three roles:
+we have two \sender{} processes, $\func{send} \, x$ and $\func{send} \, y$, sending data over channels $x$ and $y$, respectively;
+one \receiver{} process, $\func{recv} \, z$, which receives over channel $z$ the data sent from each of the senders -- hence receives twice;
+and a \courier{} process $\func{carry} \, x \, y \, z$, which synchronises communication among the senders and the receiver.
+The \courier{} process first receives data from the two senders along its input channels $x$ and $y$, and then sends the two received bits of data to the receiver along its output channel $z$.
 
-The \sender{} \emph{role} is defined below.
-The \sender{} creates a new channel to be sent as data, and sends it over channel $c$, and then terminates, denoted by process $\PO$.
+The \sender{} and \receiver{} \emph{roles} are defined below, parametrised by the channels on which they operate.
+The \sender{} creates a new channel to be sent as data, and sends it over channel $c$, and then terminates.
+Each \sender{} process $\func{send} \, x$ and $\func{send} \, y$ is an instantiation of $\func{send} \, c$.
+The \receiver{} receives data \emph{twice} on a channel $c$ and then terminates.
+The \receiver{} process $\func{recv} \, z$ is an instantiation of $\func{recv} \, c$.
+\todo{get rid of vertical space}
+\begin{minipage}[t]{0.5\textwidth}
 \begin{flalign*}
   & \func{send} \; : \; \Var_n \to \Process_n & \\
   & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO
 \end{flalign*}
-Each \sender{} \emph{process} $S_1$ and $S_2$ is an instantiation of $\func{send} \; c$.
-In particular,
-$S_1$ is defined as $\func{send} \; x$ and $S_2$ as $\func{send} \; y$, where data is sent over channels $x$ and $y$, respectively (see \autoref{fig:example-process}).
-
-The \receiver{} role is defined below, where $\func{recv} \; c \;$ receives data \emph{twice} on a channel $c$ and then terminates with $\PO$.
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
 \begin{flalign*}
   & \func{recv} \; : \; \Var_n \to \Process_n & \\
   & \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)} \PO
 \end{flalign*}
-The \receiver{} process $R$ is defined as  $\func{recv} \; z$, with channel $z$ instantiating $c$, which is the channel used to receive data from \courier{} (see \autoref{fig:example-process}).
+\end{minipage}
 
-The \courier{} role is defined below.
-The \courier{} process $C$ is defined as $\func{carry} \; x \; y \; z$.
-It sequentially receives on the two input channels $x$ and $y$ -- instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$ -- instantiating $out$ (see \autoref{fig:example-process}).
-$$
-\func{carry} \; : \; \Var_n \to \Var_n \to \Var_n \to \Process_n
-$$
-\begin{alignat}{5}
-  \func{carry} \; in0 \; in1 \; out \; &&= \\
-  \recv{in0 &&}{} \\
-  \recv{(\suc \; in1) &&}{} \\
-  \send{(\suc \suc \; out) &&}{\suc \constr{0}} \\
-  \send{(\suc \suc \; out) &&}{\constr{0}} \PO
-\end{alignat}
-
-Finally, we compose these processes together and create three communication channels: the first channel is shared between the \sender{} $S_1$ and the \courier{} $C$, the second between the \sender{} $S_2$ and the \courier{} $C$, and the third between the \receiver{} $R$ and the \courier{} $C$.
-The result is the courier systems defined below.
+The \courier{} role is defined below as $\func{carry} \; x \; y \; z$.
+It sequentially receives on the two input channels $x$ and $y$ -- instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$ -- instantiating $out$.
+Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one \sender{} and the \courier{}, the second between the other \sender{} and the \courier{}, and the third between the \receiver{}  and the \courier{}.
+The result is the courier $\func{system}$ defined below.
+\begin{minipage}[t]{0.5\textwidth}
+\begin{flalign*}
+  \func{carry} \; : \; \Var_n \to \Var_n \to \Var_n \to \Process_n%
+\end{flalign*}%
+\begin{flalign*}
+  & \func{carry} \; in0 \; in1 \; out \; &&= \\
+  & && \recv{in0 &&}{} \\
+  & && \recv{(\suc \; in1) &&}{} \\
+  & && \send{(\suc \suc \; out) &&}{\suc \constr{0}} \\
+  & && \send{(\suc \suc \; out) &&}{\constr{0}} \PO
+\end{flalign*}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
 \begin{flalign*}
   & \func{system} && : \; \Process_{\constr{0}} & \\
   & \func{system} && = \new{} ( \func{send} \; \constr{0} \\
@@ -424,12 +364,11 @@ The result is the courier systems defined below.
   & && \comp{}{ \new{} ( \func{recv} \; \constr{0} } \\
   & && \comp{}{ \func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
 \end{flalign*}
+\end{minipage}
+\todo{fix}
 
-In order to type the courier system we will use all three typing disciplines: linear, graded and shared typing.
-We will continue this example and provide the typing derivations in \autoref{leftover-typing}.
-We use \textbf{linear types} for the \emph{usage annotations} of data and \textbf{shared types} for the \emph{data} itself that is being sent from the \sender{} processes to the \receiver{}.
-We use \textbf{graded types} for the usage annotations of the communication channels $x$, $y$, and $z$: the \sender{} processes $\func{send} \; x$ and $\func{send} \; y$ each consume $1$ output multiplicity and the \receiver{} process $\func{recv} \; z$ consumes $2$ input multiplicities, as it receives twice on channel $z$.
-Dually, the \courier{} process $\func{carry} \; x \; y \; z$ consumes one input multiplicity on $x$, one input multiplicity on $y$, and two output multiplicities on $z$.
+We continue this example and by providing typing derivations for these processes in \autoref{leftover-typing}.
+There we use a mix of linear, graded and shared typing to type check $\func{system}$.
 \end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
