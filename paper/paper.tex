@@ -374,13 +374,20 @@ There we use a mix of linear, graded and shared typing to type check $\func{syst
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Operational Semantics}
 \label{semantics}
-Thanks to our well-scoped grammar in \autoref{fig:syntax}, the semantics of our language can now be defined on the totality of the syntax.
+Thanks to our well-scoped grammar in \autoref{syntax}, the semantics of our language can now be defined on the totality of the syntax.
 We define structural congruence in \autoref{structural-congruence} and provide a reduction relation in \autoref{operational-semantics}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Structural Congruence}
 \label{structural-congruence}
 
+\begin{nidefinition}
+  \label{def:unused}
+  We consider a variable $i$ to be unused in $P$ ($\Unused_i \; P$) if none of the inputs nor the outputs refer to it.
+  $Unused_i \; P$ is defined as a recursive predicate on $P$, incrementing $i$ every time we go under a binder, and using $i \type{\not\equiv} x$ ( which unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$) to compare variables.
+\end{nidefinition}
+
+\begin{nidefinition}
 We define the base cases of a structural congruence relation \textsc{StructCong} $\eqeq$ as follows:
 \begin{mathpar}
   \datatype
@@ -415,46 +422,14 @@ We define the base cases of a structural congruence relation \textsc{StructCong}
 
 The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as being the neutral element of parallel composition, respectively.
 The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
-In $\constr{scope-ext}$ the type $\Unused_i \; Q$ is an inductive proof asserting that the variable index $i$ does not appear neither in the inputs nor in the outputs of $Q$ (see \autoref{def:unused}).
+In $\constr{scope-ext}$ the side condition $\Unused_i \; Q$ makes sure that $i$ is unused in $Q$ (see \autoref{def:unused}).
 The function $\func{lower}_i \; Q \; uQ$ traverses $Q$ decrementing every index greater than $i$.
 In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of type $\allowbreak \Process_{\suc \suc n}$) and swaps variable references $i$ and $\suc i$.
 In all the above, $i$ is incremented every time we go under a binder.
-
-\begin{nidefinition}
-  \label{def:unused}
-  A variable $i$ is unused in $P$ ($\Unused_i \; P$) if it appears in none of its inputs and none of its outputs.
-  \begin{mathpar}
-    \datatype
-    {i : \Var_n \\ P : \Process_n}
-    {\Unused_i \; P}
-    \; \textsc{Unused}
-    
-    \inferrule
-    { }
-    {\Unused_i \; \PO}
-
-    \inferrule
-    {\Unused_{\suc i} \; P}
-    {\Unused_i \; \new{}P}
-
-    \inferrule
-    {\Unused_i \; P \\ \Unused_i \; Q}
-    {\Unused_i \; \comp{P}{Q}}
-
-    \inferrule
-    {i \type{\not\equiv} x \\ \Unused_{\suc i} \; P}
-    {\Unused_i \; \recv{x}{} P}
-
-    \inferrule
-    {i \type{\not\equiv} x \\ i \type{\not\equiv} y \\ \Unused_i \; P}
-    {\Unused_i \; \send{x}{y} P}
-  \end{mathpar}
-
-  The type $i \type{\not\equiv} x$ unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$.
 \end{nidefinition}
 
-  
-We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$ as shown in \autoref{fig:struct-cong1}.
+\begin{nidefinition}
+We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$.
 The $\constr{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively scope restriction, parallel composition, input and output.
 The remaining three rules close structural congruence under reflexivity, symmetry and transitivity, respectively. 
 The transitivity rule makes it tricky to prove predicates by induction on \textsc{Equals}: Agda cannot immediately see that such doubly recursive calls terminate.
@@ -514,6 +489,7 @@ In order to remedy this, we model the recursive call structure syntactically and
   {eq_1 : P \eq{r} Q \\ \; eq_2 : Q \eq{s} R}
   {\constr{trans} \; eq_1 \; eq_2 : P \eq{\constr{two} \; r \; s} R}
 \end{mathpar}
+\end{nidefinition}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -575,7 +551,7 @@ It is defined as follows:
     & \func{dec} \; (\constr{external} \; (\suc n))   && \hookrightarrow \constr{external} \; n \\
   \end{aligned}
 \end{equation*}
-\todo{introduce $\hookrightarrow$ notation?}
+\todo{as inference rules, better}
 
 \begin{nilemma}
   \label{lm:substitution-unused}
