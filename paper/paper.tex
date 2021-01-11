@@ -704,26 +704,16 @@ The former are preserved throughout typing derivations; the latter are transform
 \subsection{Typing with Leftovers}
 \label{leftover-typing}
 
-We use \emph{leftover typing} \cite{Allais2018a} for our type system, an approach that, in addition to the usual typing context $\PreCtx_n$ and (input) usage context $\Ctx_{idxs}$, adds an extra \emph{(output) usage context} $\Ctx_{idxs}$ to the typing rules.
+We present a resource-aware type system for the \picalc{} based on \emph{leftover typing} \cite{Allais2018a}, a technique that, in addition to the usual typing context $\PreCtx_n$ and (input) usage context $\Ctx_{idxs}$, adds an extra \emph{(output) usage context} $\Ctx_{idxs}$ to the typing rules.
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
-These leftovers can then be used as an input to another typing derivation.
+These leftovers can then be used as input to another typing derivation.
 
-Typing judgments for linear calculi typically carry a single context of usage annotations and thus the typing rules require frequent top-down proofs of context splitting --- e.g., the typing rule for parallel composition would look like:
-\todo{we have this in th intro already}
-\begin{mathpar}
-  \inferrule
-  {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
-  {\Gamma \; \type{\vdash} \; \comp{P}{Q}}
-\end{mathpar}
-Input requires a similar context split; output requires two such context splits.
-This is rather cumbersome: for input and output, the proof of context split carries \emph{exactly} the same information as the typing rule for variables; for parallel composition it means that the typing derivations of both subprocesses will have no context information whatsoever until the context split is determined.
+Leftover typing inverts the information flow concerning usage annotations so that it is the typing derivations of subprocesses which determine how resources are allocated.
+As a result, context split proofs are no longer necessary.
+Leftover typing also allows \emph{framing} (\autoref{thm:framing}) to be stated, and \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) to acquire a more general form.
 
-Leftover typing solves this problem by inverting the flow of information so that \textbf{the typing derivations of the subprocesses determine the context split}.
-As a result, usage information is threaded bottom-up through the typing derivation, and top-down context split proofs are no longer needed.
-In addition, it allows \emph{framing} (\autoref{thm:framing}) to be stated, and \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) to acquire a more general form.
-
-Our type system with leftovers is composed of two typing relations: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
-Both relations are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
+Our type system is composed of two typing judgments: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
+Both judgments are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
 
 The \textbf{typing judgement for variables} $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ in typing context $\gamma$ is of type $t$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftovers $\Delta$''.
 The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
