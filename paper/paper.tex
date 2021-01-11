@@ -111,13 +111,7 @@
 \newcommand{\courier}{\textcolor{cyan}{courier}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{
-  $\pi$ with leftovers: \\ a mechanisation in Agda
-  \thanks{
-    The authors would also like to thank the anonymous referees for their valuable comments and helpful suggestions.
-    We further want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their work and thoughts.
-    This work is supported by the UK EPSRC grant EP/K034413/1 ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233 ``Behavioural Application Program Interfaces'' (BehAPI).}
-}
+\title{$\pi$ with leftovers: \\ a mechanisation in Agda}
 \titlerunning{$\pi$ with leftovers: a mechanisation in Agda}
 \author{
   Uma Zalakain\inst{1}\orcidID{0000-0002-3268-9338}
@@ -129,6 +123,9 @@
   \and
   University of Glasgow, Scotland \\ \email{ornela.dardha@glasgow.ac.uk}
 }
+% Support
+% This work is supported by the UK EPSRC grant EP/K034413/1 ``From Data Types to Session Types: A Basis for Concurrency and Distribution'' (ABCD), and by the EU HORIZON 2020 MSCA RISE project 778233 ``Behavioural Application Program Interfaces'' (BehAPI).}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 \begin{document}
@@ -1230,6 +1227,11 @@ We intend to add support for products, sum types and recursion to both our synta
 Orthogonally, making our typing rules bidirectional would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section*{Acknowledgments}
+
+We further want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their work and thoughts.
 
 \bibliographystyle{splncs04}
 \bibliography{paper}
