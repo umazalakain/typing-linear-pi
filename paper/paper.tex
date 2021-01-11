@@ -758,19 +758,15 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \end{nidefinition}
 
 \begin{example}[Variable reference]
-  \autoref{lst:channels} types a variable reference under a linear algebra.
-  \begin{lstlisting}[label=lst:channels,xleftmargin=15pt,mathescape,numbers=left,caption=Typing variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.]
-$\_ \; : \; \contains{\constr{[]} \comma \channel{\unit}{\li} \comma \unit} {\constr{[]} \comma \lio \comma \lio} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo \comma \lio}$
-$\_ \; = \; \suc \constr{0}$
-
-$\_ \; : \; \contains{\constr{[]} \comma \channel{\unit}{\li}} {\constr{[]} \comma \lio} {\constr{0}} {\channel{\unit}{\li}} {\li} {\constr{[]} \comma \lo}$
-$\_ \; = \; \constr{0}$
-  \end{lstlisting}
-  In Agda, the underscore \_ introduces an anonymous declaration immediately followed by its definition.
-  We must show that the variable at position $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $\constr{[]} \comma \channel{\unit}{\li} \comma \unit$ and a usage context $\constr{[]} \comma \lio \comma \lio$.
-  The \textsc{VarRef} constructors we must use are completely determined by $\suc \; \constr{0}$ in the type.
-  The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output, the result is the obligation on line 4.
-  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- we use $\func{\cdot-compute^r}$ to fulfill this proof obligation automatically.
+  We type a variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.
+  \begin{flalign*}
+  & \func{egVar} \; : \; \contains{(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)} {\constr{[]} \comma \lio \comma \lio)} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {(\constr{[]} \comma \lo \comma \lio)}\\
+  & \func{egVar} \; = \; \suc \constr{0}
+  \end{flalign*}
+  We must show that the variable with index $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)$ and a usage context $(\constr{[]} \comma \lio \comma \lio)$.
+  The \textsc{VarRef} constructors that we must use are completely determined by the variable index $\suc \; \constr{0}$ in the type.
+  The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
+  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- we use $\func{\cdot-compute^r}$ to automatically fulfill this proof obligation.
 \end{example}
 
 \begin{nidefinition}[\textsc{Types}: typing processes]
