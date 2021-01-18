@@ -423,46 +423,7 @@ In all the above, $i$ is incremented every time we go under a binder.
 
 \begin{nidefinition}
 We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$.
-The $\constr{cong-}$* rules define structural congruence under a context $\mathcal{C}[\cdot]$ \cite{Sangio01}, respectively scope restriction, parallel composition, input and output.
-The remaining three rules close structural congruence under reflexivity, symmetry and transitivity, respectively. 
-\begin{mathpar}
-  \datatype
-  {P \, Q : \Process_n \\ r : \Rec}
-  {P \eq Q : \Set}
-  \; \textsc{Equals}
-
-  \inferrule
-  {eq : P \eqeq Q}
-  {\constr{struct} \; eq : P \eq Q}
-
-  \inferrule
-  {eq : P \eq P'}
-  {\constr{cong-scope} \; eq : \new P \eq \new P'}
-
-  \inferrule
-  {eq : P \eq P'}
-  {\constr{cong-comp} \; eq : \comp{P}{Q} \eq \comp{P'}{Q}}
-
-  \inferrule
-  {eq : P \eq P'}
-  {\constr{cong-recv} \; eq : \recv{x}{}P \eq \recv{x}{}P'}
-
-  \inferrule
-  {eq : P \eq P'}
-  {\constr{cong-send} \; eq : \send{x}{y}P \eq \send{x}{y}P'}
-
-  \inferrule
-  { }
-  {\constr{refl} : P \eq P}
-
-  \inferrule
-  {eq : P \eq Q}
-  {\constr{sym} \; eq : Q \eq P}
-
-  \inferrule
-  {eq_1 : P \eq Q \\ \; eq_2 : Q \eq R}
-  {\constr{trans} \; eq_1 \; eq_2 : P \eq R}
-\end{mathpar}
+The relation \textsc{Equals} is structurally congruent under a context $\mathcal{C}[\cdot]$ \cite{Sangio01} and is reflexive, symmetric and transitive. 
 \end{nidefinition}
 
 
