@@ -103,6 +103,7 @@ module _ where
   toRaw-WellScoped ctx (P ∥ Q) = toRaw-WellScoped ctx P , toRaw-WellScoped ctx Q
   toRaw-WellScoped ctx ((x ⦅⦆ P) ⦃ name ⦄) = ∈ᵥₚ.∈-lookup _ _ , toRaw-WellScoped (name ∷ ctx) P
   toRaw-WellScoped ctx (x ⟨ y ⟩ P) = ∈ᵥₚ.∈-lookup _ _ , ∈ᵥₚ.∈-lookup _ _ , toRaw-WellScoped ctx P
+  toRaw-WellScoped ctx (! P) = toRaw-WellScoped ctx P
 
   -- Translating from de Bruijn to names results in no shadowed variables
 
@@ -112,15 +113,17 @@ module _ where
   toRaw-NotShadowed ctx (P ∥ Q) = toRaw-NotShadowed ctx P , toRaw-NotShadowed ctx Q
   toRaw-NotShadowed ctx ((x ⦅⦆ P) ⦃ name ⦄) = fresh-∉ name ctx , toRaw-NotShadowed (name ∷ ctx) P
   toRaw-NotShadowed ctx (x ⟨ y ⟩ P) = toRaw-NotShadowed ctx P
+  toRaw-NotShadowed ctx (! P) = toRaw-NotShadowed ctx P
 
   -- Translating from de Bruijn to names and back results in the same process modulo name hints
 
   data _α-≡_ {n} : Scoped n → Scoped n → Set where
-    inaction : 𝟘 α-≡ 𝟘
-    scope    : P α-≡ Q → ν P ⦃ namex ⦄ α-≡ ν Q ⦃ namey ⦄
-    comp     : P α-≡ Q → R α-≡ S → (P ∥ R) α-≡ (Q ∥ S)
-    input    : P α-≡ Q → (x ⦅⦆ P) ⦃ namex ⦄ α-≡ (x ⦅⦆ Q) ⦃ namey ⦄
-    output   : P α-≡ Q → (x ⟨ y ⟩ P) α-≡ (x ⟨ y ⟩ Q)
+    inaction  : 𝟘 α-≡ 𝟘
+    scope     : P α-≡ Q → ν P ⦃ namex ⦄ α-≡ ν Q ⦃ namey ⦄
+    comp      : P α-≡ Q → R α-≡ S → (P ∥ R) α-≡ (Q ∥ S)
+    input     : P α-≡ Q → (x ⦅⦆ P) ⦃ namex ⦄ α-≡ (x ⦅⦆ Q) ⦃ namey ⦄
+    output    : P α-≡ Q → (x ⟨ y ⟩ P) α-≡ (x ⟨ y ⟩ Q)
+    replicate : P α-≡ Q → (! P) α-≡ (! Q)
 
   fromRaw∘toRaw : (ctx : Ctx n) (P : Scoped n)
                 → fromRaw' (apply ctx) (toRaw ctx P) (toRaw-WellScoped ctx P) α-≡ P
@@ -135,6 +138,7 @@ module _ where
   fromRaw∘toRaw ctx (x ⟨ y ⟩ P)
     rewrite fromName∘toName x (apply ctx) | fromName∘toName y (apply ctx) =
     output (fromRaw∘toRaw ctx P)
+  fromRaw∘toRaw ctx (! P) = replicate (fromRaw∘toRaw ctx P)
 
 
 module _ where
@@ -150,19 +154,21 @@ module _ where
 
   infix 5 _α[_↦_]≡_
   data _α[_↦_]≡_ : Raw → ∀ {n} → Ctx n → Ctx n → Raw → Set where
-    inaction : 𝟘 α[ ks ↦ vs ]≡ 𝟘
-    scope    : P α[ x ∷ ks ↦ y ∷ vs ]≡ Q
-             → ⦅ν x ⦆ P α[ ks ↦ vs ]≡ ⦅ν y ⦆ Q
-    comp     : P α[ ks ↦ vs ]≡ Q
-             → R α[ ks ↦ vs ]≡ S
-             → P ∥ R α[ ks ↦ vs ]≡ Q ∥ S
-    input    : (x , y) ∈² (ks , vs)
-             → P α[ w ∷ ks ↦ z ∷ vs ]≡ Q
-             → x ⦅ w ⦆ P α[ ks ↦ vs ]≡ y ⦅ z ⦆ Q
-    output   : (x , y) ∈² (ks , vs)
-             → (w , z) ∈² (ks , vs)
-             → P α[ ks ↦ vs ]≡ Q
-             → x ⟨ w ⟩ P α[ ks ↦ vs ]≡ (y ⟨ z ⟩ Q)
+    inaction  : 𝟘 α[ ks ↦ vs ]≡ 𝟘
+    scope     : P α[ x ∷ ks ↦ y ∷ vs ]≡ Q
+              → ⦅ν x ⦆ P α[ ks ↦ vs ]≡ ⦅ν y ⦆ Q
+    comp      : P α[ ks ↦ vs ]≡ Q
+              → R α[ ks ↦ vs ]≡ S
+              → P ∥ R α[ ks ↦ vs ]≡ Q ∥ S
+    input     : (x , y) ∈² (ks , vs)
+              → P α[ w ∷ ks ↦ z ∷ vs ]≡ Q
+              → x ⦅ w ⦆ P α[ ks ↦ vs ]≡ y ⦅ z ⦆ Q
+    output    : (x , y) ∈² (ks , vs)
+              → (w , z) ∈² (ks , vs)
+              → P α[ ks ↦ vs ]≡ Q
+              → x ⟨ w ⟩ P α[ ks ↦ vs ]≡ (y ⟨ z ⟩ Q)
+    replicate : P α[ ks ↦ vs ]≡ Q
+              → (! P) α[ ks ↦ vs ]≡ (! Q)
 
   -- Translating a well-scoped process to de Bruijn and back results in the same process
   -- modulo alpha renaming, where the new names in `apply isf` map to the old in `ctx`
@@ -182,3 +188,4 @@ module _ where
     = output (_ , refl , toName∘fromName x∈ctx)
              (_ , refl , toName∘fromName y∈ctx)
              (toRaw∘fromRaw ctx P wsP)
+  toRaw∘fromRaw ctx (! P) wsP = replicate (toRaw∘fromRaw ctx P wsP)

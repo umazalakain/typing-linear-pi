@@ -64,3 +64,4 @@ private
   = ∋-strengthen i i≢x x ⟨ ∋-strengthen i i≢y y ⟩ ⊢-strengthen i uP ⊢P
 ⊢-strengthen {γ = _ -, _} i (uP , uQ) (⊢P ∥ ⊢Q)
   = ⊢-strengthen i uP ⊢P ∥ ⊢-strengthen i uQ ⊢Q
+⊢-strengthen {γ = _ -, _} i uP (! ⊢P) = ! (⊢-strengthen i uP ⊢P)

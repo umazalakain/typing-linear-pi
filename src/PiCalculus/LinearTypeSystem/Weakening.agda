@@ -49,3 +49,4 @@ private
 ⊢-weaken j (⊢P ∥ ⊢Q) = ⊢-weaken j ⊢P ∥ ⊢-weaken j ⊢Q
 ⊢-weaken j (x ⦅⦆ ⊢P) = ∋-weaken j x ⦅⦆ ⊢-weaken (suc j) ⊢P
 ⊢-weaken j (x ⟨ y ⟩ ⊢P) = ∋-weaken j x ⟨ ∋-weaken j y ⟩ ⊢-weaken j ⊢P
+⊢-weaken j (! ⊢P) = ! (⊢-weaken j ⊢P)

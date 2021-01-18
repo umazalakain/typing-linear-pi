@@ -124,5 +124,9 @@ data _；_⊢_▹_ : {idxs : Idxs n} → PreCtx n → Ctx idxs → Scoped n → 
       -------------------
       → γ ； Γ ⊢ P ∥ Q ▹ Ξ
 
+  !_ : γ ； Γ ⊢ P ▹ Γ
+     --------------------
+     → γ ； Γ ⊢ (! P) ▹ Γ
+
 _；[_]_⊢_▹_ : PreCtx n → (idxs : Idxs n) → Ctx idxs → Scoped n → Ctx idxs → Set
 γ ；[ idxs ] Γ ⊢ P ▹ Δ = _；_⊢_▹_ {idxs = idxs} γ Γ P Δ

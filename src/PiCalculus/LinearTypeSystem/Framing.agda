@@ -82,3 +82,6 @@ private
   let PQ≔           = ⊗-comp P≔ Q≔ Γ≔
       _ , P'≔ , Q'≔ = ⊗-assoc Ξ≔ PQ≔
    in ⊢-frame P≔ P'≔ ⊢P ∥ ⊢-frame Q≔ Q'≔ ⊢Q
+⊢-frame Γ≔ Ξ≔ (! ⊢P)
+  rewrite ⊗-uniqueˡ Γ≔ ⊗-idˡ | ⊗-unique Ξ≔ ⊗-idˡ
+  = ! ⊢-frame ⊗-idˡ ⊗-idˡ ⊢P

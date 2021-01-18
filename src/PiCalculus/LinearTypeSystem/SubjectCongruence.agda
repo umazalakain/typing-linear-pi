@@ -56,15 +56,28 @@ comp-comm (⊢P ∥ ⊢Q) | _ , P≔ | _ , Q≔ =
   let _ , (Q'≔ , P'≔) = ⊗-assoc (⊗-comm P≔) Q≔ in
   ⊢-frame Q≔ Q'≔ ⊢Q ∥ ⊢-frame P≔ (⊗-comm P'≔) ⊢P
 
+⊢-unique : {γ ξ : PreCtx n} {idxs : Idxs n} {Γ Ξ Δ : Ctx idxs}
+         → γ ； Γ ⊢ P ▹ Δ
+         → ξ ； Ξ ⊢ P ▹ Δ
+         → Γ ≡ Ξ
+⊢-unique 𝟘 𝟘 = refl
+⊢-unique (ν t m μ Γ⊢) (ν _ _ _ Ξ⊢) = {!⊢-unique Γ⊢ Ξ⊢!}
+⊢-unique (x ⦅⦆ Γ⊢) Ξ⊢ = {!!}
+⊢-unique (x ⟨ x₁ ⟩ Γ⊢) Ξ⊢ = {!!}
+⊢-unique (Γ⊢P ∥ Γ⊢Q) Ξ⊢ = {!!}
+⊢-unique (! Γ⊢) Ξ⊢ = {!!}
+
 subject-cong : SubjectCongruence
 subject-cong (stop comp-assoc) (⊢P ∥ (⊢Q ∥ ⊢R)) = (⊢P ∥ ⊢Q) ∥ ⊢R
 subject-cong (stop comp-symm) (⊢P ∥ ⊢Q) = comp-comm (⊢P ∥ ⊢Q)
 subject-cong (stop comp-end) (⊢P ∥ 𝟘) = ⊢P
+subject-cong (stop replicate) (! ⊢P) = ⊢P ∥ (! ⊢P)
 subject-cong (stop scope-end) (ν t c ._ 𝟘) = 𝟘
 subject-cong (stop (scope-ext u)) (ν t c μ (_∥_ {Δ = _ -, _} ⊢P ⊢Q)) rewrite sym (⊢-unused _ u ⊢P) = ⊢-strengthen zero u ⊢P ∥ ν t c μ ⊢Q
 subject-cong (stop scope-scope-comm) (ν t c μ (ν t₁ c₁ μ₁ ⊢P)) = ν t₁ c₁ μ₁ (ν t c μ (⊢-exchange zero ⊢P))
 subject-cong (cong-symm (stop comp-assoc)) ((⊢P ∥ ⊢Q) ∥ ⊢R) = ⊢P ∥ (⊢Q ∥ ⊢R)
 subject-cong (cong-symm (stop comp-symm)) (⊢P ∥ ⊢Q) = comp-comm (⊢P ∥ ⊢Q)
+subject-cong (cong-symm (stop replicate)) (⊢P ∥ ! !⊢P) = {!! ?!}
 subject-cong (cong-symm (stop comp-end)) ⊢P = ⊢P ∥ 𝟘
 subject-cong (cong-symm (stop scope-end)) 𝟘 = ν 𝟙 {∃Idx} (0∙ , 0∙) {∃Idx} 0∙ 𝟘
 subject-cong (cong-symm (stop (scope-ext u))) (⊢P ∥ (ν t c μ ⊢Q)) = ν t c μ ((subst (λ ● → _ ； _ ⊢ ● ▹ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ∥ ⊢Q)

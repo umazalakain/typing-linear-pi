@@ -19,6 +19,7 @@ module Raw where
     _∥_   : Raw → Raw → Raw
     _⦅_⦆_ : Name → Name → Raw → Raw
     _⟨_⟩_ : Name → Name → Raw → Raw
+    !_    : Raw → Raw
 
 
 module Scoped where
@@ -35,10 +36,11 @@ module Scoped where
 
   data Scoped : ℕ → Set where
     𝟘     : Scoped n
-    ν : Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
+    ν     : Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
     _∥_   : Scoped n → Scoped n → Scoped n
-    _⦅⦆_ : Fin n → Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
+    _⦅⦆_  : Fin n → Scoped (suc n) → ⦃ name : Name ⦄ → Scoped n
     _⟨_⟩_ : Fin n → Fin n → Scoped n → Scoped n
+    !_    : Scoped n → Scoped n
 
 module Conversion where
   private
@@ -101,6 +103,7 @@ module Conversion where
   WellScoped ctx (P ∥ Q) = WellScoped ctx P × WellScoped ctx Q
   WellScoped ctx (x ⦅ y ⦆ P) = (x ∈ ctx) × WellScoped (y ∷ ctx) P
   WellScoped ctx (x ⟨ y ⟩ P) = (x ∈ ctx) × (y ∈ ctx) × WellScoped ctx P
+  WellScoped ctx (! P) = WellScoped ctx P
 
   WellScoped? : (ctx : Ctx n) (P : Raw) → Dec (WellScoped ctx P)
   WellScoped? ctx 𝟘 = yes tt
@@ -108,6 +111,7 @@ module Conversion where
   WellScoped? ctx (P ∥ Q) = WellScoped? ctx P ×-dec WellScoped? ctx Q
   WellScoped? ctx (x ⦅ y ⦆ P) = x ∈? ctx ×-dec WellScoped? (y ∷ ctx) P
   WellScoped? ctx (x ⟨ y ⟩ P) = x ∈? ctx ×-dec y ∈? ctx ×-dec WellScoped? ctx P
+  WellScoped? ctx (! P) = WellScoped? ctx P
 
   NotShadowed : Ctx n → Raw → Set
   NotShadowed ctx 𝟘 = ⊤
@@ -115,6 +119,7 @@ module Conversion where
   NotShadowed ctx (P ∥ Q) = NotShadowed ctx P × NotShadowed ctx Q
   NotShadowed ctx (x ⦅ y ⦆ P) = y ∉ ctx × NotShadowed (y ∷ ctx) P
   NotShadowed ctx (x ⟨ y ⟩ P) = NotShadowed ctx P
+  NotShadowed ctx (! P) = NotShadowed ctx P
 
   NotShadowed? : (ctx : Ctx n) (P : Raw) → Dec (NotShadowed ctx P)
   NotShadowed? ctx 𝟘 = yes tt
@@ -122,6 +127,7 @@ module Conversion where
   NotShadowed? ctx (P ∥ Q) = NotShadowed? ctx P ×-dec NotShadowed? ctx Q
   NotShadowed? ctx (x ⦅ y ⦆ P) = ¬? (y ∈? ctx) ×-dec NotShadowed? (y ∷ ctx) P
   NotShadowed? ctx (x ⟨ y ⟩ P) = NotShadowed? ctx P
+  NotShadowed? ctx (! P) = NotShadowed? ctx P
 
   ∈toFin : ∀ {a} {A : Set a} {x} {xs : Vec A n} → x ∈ xs → Fin n
   ∈toFin (here px) = zero
@@ -137,6 +143,7 @@ module Conversion where
     (∈toFin x∈ctx ⦅⦆ fromRaw' (y ∷ ctx) P wsP) ⦃ y ⦄
   fromRaw' ctx (x ⟨ y ⟩ P) (x∈ctx , y∈ctx , wsP) =
     ∈toFin x∈ctx ⟨ ∈toFin y∈ctx ⟩ fromRaw' ctx P wsP
+  fromRaw' ctx (! P) wdP = ! (fromRaw' ctx P wdP)
 
   fromRaw : (ctx : Ctx n) (P : Raw) → ⦃ _ : True (WellScoped? ctx P) ⦄ → Scoped n
   fromRaw ctx P ⦃ p ⦄ = fromRaw' ctx P (toWitness p)
@@ -153,6 +160,7 @@ module Conversion where
   toRaw ctx (x ⟨ y ⟩ P) =
     let ctx' = apply ctx
     in Vec.lookup ctx' x ⟨ Vec.lookup ctx' y ⟩ toRaw ctx P
+  toRaw ctx (! P) = ! (toRaw ctx P)
 
   map : ∀ {a} (B : Scoped n → Set a) (ctx : Vec Name n) (P : Raw) → Set a
   map B ctx P with WellScoped? ctx P

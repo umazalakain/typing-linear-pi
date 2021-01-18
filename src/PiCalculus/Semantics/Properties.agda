@@ -42,6 +42,7 @@ lift-lower i (x ⟨ y ⟩ P) (i≢x , i≢y , uP)
   rewrite lift-lower i P uP
   | Finₚ.punchIn-punchOut i≢x
   | Finₚ.punchIn-punchOut i≢y = refl
+lift-lower i (! P) uP = cong !_ (lift-lower i P uP)
 
 substFin-suc : (i j x : Fin n) → (suc x) [ suc i ↦ suc j ]' ≡ suc (x [ i ↦ j ]')
 substFin-suc i j x with i Finₚ.≟ x
@@ -111,3 +112,4 @@ exchange-exchange i (ν P) rewrite exchange-exchange (suc i) P = refl
 exchange-exchange i (P ∥ Q) rewrite exchange-exchange i P | exchange-exchange i Q = refl
 exchange-exchange i (x ⦅⦆ P) rewrite exchangeFin-exchangeFin i x | exchange-exchange (suc i) P = refl
 exchange-exchange i (x ⟨ y ⟩ P) rewrite exchangeFin-exchangeFin i x | exchangeFin-exchangeFin i y | exchange-exchange i P = refl
+exchange-exchange i (! P) rewrite exchange-exchange i P = refl

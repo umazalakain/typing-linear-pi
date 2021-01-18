@@ -243,6 +243,7 @@ split-ℓ∅ {i = suc i} (a , _) (b , _) (c , _) eq = split-ℓ∅ a b c eq
       _ , Q≔ = ⊢-⊗ ⊢Q
       _ , PQ≔ , _ = ⊗-assoc⁻¹ P≔ Q≔
    in _ , PQ≔
+⊢-⊗ (! ⊢P) = ⊢-⊗ ⊢P
 
 ctx-insert : (i : Fin (suc n)) → Usage idx ² → Ctx idxs → Ctx (Vec.insert idxs i idx)
 ctx-insert zero xs' Γ = Γ -, xs'

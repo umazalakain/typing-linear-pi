@@ -57,6 +57,7 @@ private
 ⊢-unused i (uP , uQ) (⊢P ∥ ⊢Q) = trans
   (⊢-unused i uP ⊢P)
   (⊢-unused i uQ ⊢Q)
+⊢-unused i uP (! P) = ⊢-unused i uP P
 
 module _ {a} {A : Set a} where
   exchangeᵥ : (i : Fin n) → Vec A (suc n) → Vec A (suc n)
@@ -98,3 +99,4 @@ module _ {a} {A : Set a} where
 ⊢-exchange {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (_⦅⦆_ {Ξ = _ -, _ -, _} x ⊢P) = ∋-exchange i x ⦅⦆ ⊢-exchange (suc i) ⊢P
 ⊢-exchange {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (x ⟨ y ⟩ ⊢P) = ∋-exchange i x ⟨ ∋-exchange i y ⟩ (⊢-exchange i ⊢P)
 ⊢-exchange {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (⊢P ∥ ⊢Q) = ⊢-exchange i ⊢P ∥ ⊢-exchange i ⊢Q
+⊢-exchange {γ = _ -, _ -, _} {Γ = _ -, _ -, _} {Θ = _ -, _ -, _} i (! ⊢P) = ! (⊢-exchange i ⊢P)

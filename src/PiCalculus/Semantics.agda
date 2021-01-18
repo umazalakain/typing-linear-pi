@@ -33,6 +33,7 @@ module PiCalculus.Semantics where
   Unused i (P ∥ Q) = Unused i P × Unused i Q
   Unused i (x ⦅⦆ P) = i ≢ x × Unused (suc i) P
   Unused i (x ⟨ y ⟩ P) = i ≢ x × i ≢ y × Unused i P
+  Unused i (! P) = Unused i P
 
   lift : (i : Fin (suc n)) → Scoped n → Scoped (suc n)
   lift i 𝟘 = 𝟘
@@ -40,6 +41,7 @@ module PiCalculus.Semantics where
   lift i (P ∥ Q) = lift i P ∥ lift i Q
   lift i (x ⦅⦆ P) = Fin.punchIn i x ⦅⦆ lift (suc i) P
   lift i (x ⟨ y ⟩ P) = Fin.punchIn i x ⟨ Fin.punchIn i y ⟩ lift i P
+  lift i (! P) = ! (lift i P)
 
   lower : (i : Fin (suc n)) (P : Scoped (suc n)) → Unused i P → Scoped n
   lower i 𝟘 uP = 𝟘
@@ -47,6 +49,7 @@ module PiCalculus.Semantics where
   lower i (P ∥ Q) (uP , uQ) = lower i P uP ∥ lower i Q uQ
   lower i (x ⦅⦆ P) (i≢x , uP) = Fin.punchOut i≢x ⦅⦆ lower (suc i) P uP
   lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = Fin.punchOut i≢x ⟨ Fin.punchOut i≢y ⟩ lower i P uP
+  lower i (! P) uP = ! (lower i P uP)
 
   notMax : (i : Fin n) (x : Fin (suc n)) → Fin.inject₁ i ≡ x → n ≢ Fin.toℕ x
   notMax i x p n≡x = Finₚ.toℕ-inject₁-≢ i (trans n≡x (sym (cong Fin.toℕ p)))
@@ -64,6 +67,7 @@ module PiCalculus.Semantics where
   exchange i (P ∥ Q) = exchange i P ∥ exchange i Q
   exchange i (x ⦅⦆ P)  = exchangeFin i x ⦅⦆ exchange (suc i) P
   exchange i (x ⟨ y ⟩ P)  = exchangeFin i x ⟨ exchangeFin i y ⟩ exchange i P
+  exchange i (! P)  = ! (exchange i P)
 
   infixl 10 _≈_
   data _≈_ : Scoped n → Scoped n → Set where
@@ -79,6 +83,8 @@ module PiCalculus.Semantics where
               → ν (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (ν Q) ⦃ name ⦄
 
     scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (exchange zero P) ⦃ namex ⦄) ⦃ namey ⦄
+
+    replicate : (! P) ≈ (P ∥ ! P)
 
   data RecTree : Set where
     zero : RecTree
@@ -119,6 +125,7 @@ module PiCalculus.Semantics where
   (P ∥ Q)     [ i ↦ j ] = (P [ i ↦ j ]) ∥ (Q [ i ↦ j ])
   (x ⦅⦆ P)    [ i ↦ j ] = (x [ i ↦ j ]') ⦅⦆ (P [ suc i ↦ suc j ])
   (x ⟨ y ⟩ P) [ i ↦ j ] = (x [ i ↦ j ]') ⟨ y [ i ↦ j ]' ⟩ (P [ i ↦ j ])
+  (! P)       [ i ↦ j ] = P [ i ↦ j ]
 
   substFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
   substFin-unused {i = i} x i≢j  with i Finₚ.≟ x
@@ -134,6 +141,7 @@ module PiCalculus.Semantics where
   subst-unused i≢j (P ∥ Q) = subst-unused i≢j P , subst-unused i≢j Q
   subst-unused i≢j (x ⦅⦆ P) = substFin-unused x i≢j , subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
   subst-unused i≢j (x ⟨ y ⟩ P) = substFin-unused x i≢j , substFin-unused y i≢j , subst-unused i≢j P
+  subst-unused i≢j (! P) = subst-unused i≢j P
 
   data Channel : ℕ → Set where
     internal : ∀ {n}         → Channel n
