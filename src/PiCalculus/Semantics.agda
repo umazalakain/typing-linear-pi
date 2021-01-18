@@ -163,9 +163,10 @@ module PiCalculus.Semantics where
          → P =[ c ]⇒ Q
          → ν P ⦃ name ⦄ =[ dec c ]⇒ ν Q ⦃ name ⦄
 
-    struct : ∀ {c} {P Q P' : Scoped n}
+    struct : ∀ {c} {P P' Q' Q : Scoped n}
            → P ≅⟨ r ⟩ P'
-           → P' =[ c ]⇒ Q
+           → P' =[ c ]⇒ Q'
+           → Q' ≅⟨ r ⟩ Q
            → P =[ c ]⇒ Q
 
   _⇒_ : Scoped n → Scoped n → Set

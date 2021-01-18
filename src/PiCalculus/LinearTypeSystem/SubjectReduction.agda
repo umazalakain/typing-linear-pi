@@ -96,7 +96,7 @@ comm-≥ℓ# (par P→P') (⊢P ∥ ⊢Q) refl = comm-≥ℓ# P→P' ⊢P refl
 comm-≥ℓ# (res_ {c = internal} P→Q) (ν t m μ ⊢P) ()
 comm-≥ℓ# (res_ {c = external zero} P→Q) (ν t m μ ⊢P) ()
 comm-≥ℓ# (res_ {c = external (suc i)} P→Q) (ν t m μ ⊢P) refl = comm-≥ℓ# P→Q ⊢P refl
-comm-≥ℓ# (struct P≅P' P'→Q) ⊢P refl = comm-≥ℓ# P'→Q (subject-cong P≅P' ⊢P) refl
+comm-≥ℓ# (struct P≅P' P'→Q' P'≅Q ) ⊢P refl = comm-≥ℓ# P'→Q' (subject-cong P≅P' ⊢P) refl
 
 subject-reduction : SubjectReduction
 subject-reduction Γ'⇒Γ comm (((_⦅⦆_ {P = P} (tx , x) ⊢P)) ∥ ((tx' , x') ⟨ y ⟩ ⊢Q)) with trans (sym (∋-≡Type tx)) (∋-≡Type tx')
@@ -114,5 +114,5 @@ subject-reduction refl (res_ {c = external zero} P→Q) (ν t m μ ⊢P)
      in ν t m lμ' (subject-reduction (zero (ls , rs')) P→Q ⊢P)
 subject-reduction Γ'⇒Γ (res_ {c = external (suc i)} P→Q) (ν t m μ ⊢P)
   = ν t m μ (subject-reduction (suc Γ'⇒Γ) P→Q ⊢P)
-subject-reduction Γ'⇒Γ (struct P≅P' P'→Q) ⊢P
-  = subject-reduction Γ'⇒Γ P'→Q (subject-cong P≅P' ⊢P)
+subject-reduction Γ'⇒Γ (struct P≅P' P'→Q' Q'≅Q) ⊢P
+  = subject-cong Q'≅Q (subject-reduction Γ'⇒Γ P'→Q' (subject-cong P≅P' ⊢P))

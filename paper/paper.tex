@@ -504,7 +504,7 @@ We keep track of channel $c$ so we can state subject reduction (\autoref{app:typ
   {\constr{res} \; red : \new P \reduce{\func{dec}\; c} \new Q}
 
   \inferrule
-  {eq : P \eq{} P' \\ red : P' \reduce{c} Q}
+  {eq_1 : P \eq{} P' \\ red : P' \reduce{c} Q' \\ eq_2 : Q' \eq{} Q}
   {\constr{struct} \; eq \; red : P \reduce{c} Q}
 \end{mathpar}
 
