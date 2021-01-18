@@ -186,8 +186,7 @@ We make two main contributions in this paper:
 \begin{itemize}
   \item We use \textbf{leftover typing to type a resource-aware \picalc{} and prove subject reduction}.
     Our type system uses leftover typing to model the resource-aware \picalc{} (\autoref{leftover-typing}).
-    In addition to making context splits unnecessary, leftover typing allows for an otherwise unstateable \emph{framing} theorem (\autoref{thm:framing}) to be stated, and makes it possible to generalise \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}).
-    In addition t that, leftover typing is naturally associative, making type safety properties considerably easier to reason about.
+    In addition to making context splits unnecessary, leftover typing allows for a \emph{framing} theorem to be stated and is naturally associative, making type safety properties considerably easier to reason about (\autoref{meta-theory}).
     
   \item We \textbf{generalise resource counting to a set of usage algebras that can be mixed within the same type system}.
     We do not instantiate our type system to only work with linear resources, instead we present an algebra-agnostic type system, and admit a mix of user-defined \emph{resource aware} algebras (\autoref{multiplicities}).
@@ -201,13 +200,12 @@ We start by using type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} 
 We then provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
 This operational semantics is defined as a reduction relation on processes (\autoref{operational-semantics}).
 The reduction relation tracks at the type level the channel on which communication occurs.
-This information is later used to state the subject reduction theorem --- aka type preservation (\autoref{thm:subject-reduction}).
+This information is later used to state the subject reduction theorem --- aka type preservation.
 The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
 We then define an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
 Finally, we present the meta theoretical properties of our \picalc{} with leftovers in \autoref{meta-theory}.
-We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
-We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
+We have fully mechanised a proof of subject reduction, the details of which are found in \autoref{app:type-safety}
 The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 
 \subsection{Notation}
@@ -473,7 +471,7 @@ The remaining three rules close structural congruence under reflexivity, symmetr
 \label{operational-semantics}
 
 The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs.
-We keep track of channel $c$ so we can state subject reduction (\autoref{thm:subject-reduction}).
+We keep track of channel $c$ so we can state subject reduction (\autoref{app:type-safety}).
 \begin{mathpar}
   \datatype
   {n : \N}
@@ -705,7 +703,7 @@ These leftovers can then be used as input to another typing derivation.
 
 Leftover typing inverts the information flow concerning usage annotations so that it is the typing derivations of subprocesses which determine how resources are allocated.
 As a result, context split proofs are no longer necessary.
-Leftover typing also allows \emph{framing} (\autoref{thm:framing}) to be stated, and \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) to acquire a more general form.
+Leftover typing also allows \emph{framing} to be stated, and \emph{weakening} and \emph{strengthening} to acquire a more general form.
 
 Our type system is composed of two typing judgments: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
 Both judgments are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
@@ -891,6 +889,7 @@ This algebraic properties of the algebras allow us to see a typing derivation $\
 
 Leftover typing also allows us to prove a \emph{framing} theorem, which states that arbitrary usage annotations can be added to the input usage context, as long as they are added to the output usage context as well -- it is a way of understanding a typing derivation independently from its unused resources.
 An example use of this is showing that $\constr{comp-comm}$ preserves typing: we use framing to show that in $\comp{P}{Q}$ the typing of $P$ and $Q$ is independent of one another.
+Moreover, leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a more general form, in which variables can freely be added or removed from context regardless of their usage annotation -- as long as this usage annotation is added or removed from the leftover context as well.
 
 We refer to \autoref{app:type-safety} \todo{autoref} for a more detailed account of the mechanised type-safety proofs.
 
