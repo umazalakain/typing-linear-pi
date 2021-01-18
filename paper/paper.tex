@@ -9,7 +9,7 @@
 \usepackage{mathtools}
 \usepackage{hyperref}
 \usepackage{todonotes}
-
+\usepackage{appendix}
 
 % Two column itemize
 \usepackage{multicol}
@@ -40,6 +40,7 @@
 
 \renewcommand{\sectionautorefname}{\S}%
 \renewcommand{\subsectionautorefname}{\S}%
+\renewcommand{\appendixautorefname}{Appendix}
 
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
@@ -135,7 +136,7 @@
 
 \begin{abstract}
   Linear type systems need to keep track of how programs use their resources.
-  The standard approach is to use context splits, side conditions that specify how resources are split across subterms.
+  The standard approach is to use context splits, side conditions that specify how resources are disjointly split across subterms.
   With this approach, context splits echo information that is already present within subterms, which already know about the resources they need.
   An alternative approach is to use leftover typing \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have an additional output usage context: the leftovers.
   With this approach, the leftovers of one typing derivation can be fed as the inputs of the next, threading through linear resources while avoiding context splits.
@@ -204,7 +205,7 @@ This information is later used to state the subject reduction theorem --- aka ty
 The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 
 We then define an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
-Finally, we present the type safety results of our \picalc{} with leftovers in \autoref{type-safety}.
+Finally, we present the meta theoretical properties of our \picalc{} with leftovers in \autoref{meta-theory}.
 We have fully mechanised \emph{framing} (\autoref{thm:framing}), \emph{weakening} (\autoref{thm:weakening}) and \emph{strengthening} (\autoref{thm:strengthening}) theorems.
 We use these results to then prove and mechanise \emph{subject congruence} (\autoref{thm:subject-congruence}), and together with \emph{substitution} (\autoref{thm:substitution}), to prove and mechanise \emph{subject reduction} (\autoref{thm:subject-reduction}).
 The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
@@ -836,23 +837,26 @@ After receiving twice, the process ends, and we should not be left with any unus
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
 Once the types are given, the typing derivation is completely syntax directed.
+\begin{multicols}{2}
 \begin{flalign*}
-  & \func{\vdash recv} \; \types{\gamma \comma \channel{t}{\lz}}{\Gamma \comma (\suc \suc l \comma r)}{\func{recv} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
-  & \func{\vdash recv} \; = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO
+  & \func{\vdash recv} \; && : \; \types{\gamma \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc \suc l \comma r)\\ & &&}{\func{recv} \; \constr{0}\\ & &&}{\Gamma \comma (l \comma r)} & \\
+  & \func{\vdash recv} \; && = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO
 \end{flalign*}
+\begin{flalign*}
+  & \func{\vdash send} \; && : \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}\\ & &&}{\Gamma \comma (l \comma \suc r)\\ & &&}{\func{send} \; \constr{0}\\ & &&}{\Gamma \comma (l \comma r)} & \\
+  & \func{\vdash send} \; && = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
+\end{flalign*}
+\end{multicols}
 
 The \sender{} defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
 We instantiate $t$ (the type of data that the \sender{} sends) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
 As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
 We will transmit once, thus use a single output multiplicity, and leave the rest as leftovers.
 Agda can uniquely determine the arguments required by the $\new{}$ constructor, and thus we can omit them using underscores.
-\begin{flalign*}
-  & \func{\vdash send} \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}}{\Gamma \comma (l \comma \suc r)}{\func{send} \; \constr{0}}{\Gamma \comma (l \comma r)} & \\
-  & \func{\vdash send} \; = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
-\end{flalign*}
 
 Dually, the \courier{} defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
 The typing derivation here is uniquely determined by the type and syntax of the process.
+\begin{multicols}{2}
 \begin{flalign*}
 & \func{\vdash carry} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
 & \func{\vdash carry} && = \\
@@ -861,9 +865,6 @@ The typing derivation here is uniquely determined by the type and syntax of the 
 & && \send{(\suc \suc \constr{0})}{\suc \constr{0}} \\
 & && \send{(\suc \suc \constr{0})}{\constr{0}} \PO
 \end{flalign*}
-
-We can now compose these processes in parallel and type the courier system.
-Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
 \begin{flalign*}
 & \func{\vdash system} && : \; \types{\constr{[]}}{\constr{[]}}{\func{system}}{\constr{[]}} & \\
 & \func{\vdash system} && = \new{} \; \_ \; \_ \; \_ \; ( \func{\vdash send} \\
@@ -871,282 +872,28 @@ Specifying the types of the channels is not required: Agda can infer them from t
 & && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash recv} \\
 & && \comp{}{ \func{\vdash carry} })))
 \end{flalign*}
+\end{multicols}
+
+We can now compose these processes in parallel and type the courier system.
+Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
 \end{example}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Type Safety}
-\label{type-safety}
-\subsection{Auxiliary Results}
-We will start this section with auxiliary results which are needed to prove two main theorems: subject congruence (\autoref{thm:subject-congruence}) and subject reduction (\autoref{thm:subject-reduction}) for our \picalc{} with leftovers.
-
-\paragraph*{Framing}
-This property asserts that the well-typedness of a process is independent of its leftover resources.
-
-\begin{nitheorem}[Framing]
-  \label{thm:framing}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
-  Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
-  Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
-  Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
-\end{nitheorem}
-
-\paragraph*{Weakening}
-This property states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
-Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
-\begin{nitheorem}[Weakening]
-  \label{thm:weakening}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
-  $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
-\end{nitheorem}
-
-\paragraph*{Strengthening}
-This property states that removing an unused variable preserves the well-typedness of a process.
-Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
-\begin{nitheorem}[Strengthening]
-  \label{thm:strengthening} 
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
-  Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
-\end{nitheorem}
-
-\paragraph*{Exchange}
-This property states that the exchange of two variables preserves the well-typedness of a process.
-We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to exchange types in typing contexts and usage annotations in usage contexts.
-\begin{nitheorem}[Exchange]
-  \label{thm:exchange}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, $\types{\func{exchange}_i \; \gamma}{\func{exchange}_i \; \Gamma}{\allowbreak \func{exchange}_i \; P}{\func{exchange}_i \; \Xi}$.
-\end{nitheorem}
-
-\begin{proof}[Proof]
-  All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
-  For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
-\end{proof}
-
-\subsection{Towards Subject Reduction}
-\paragraph*{Subject Congruence}
-This property states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
-To prove this result, we must first introduce lemmas that establish that certain syntactic manipulations can be inverted (\autoref{lm:lower-lift}, \autoref{lm:exchange-exchange}) and how unused variables relate to the preservation of leftovers (\autoref{lm:types-unused}).
-
-\begin{nilemma}
-  \label{lm:lower-lift}
-  The function $\func{lower}_i \; P \; uP$ has an inverse $\func{lift}_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $\func{lift}_i \; (\func{lower}_i \; P \; uP) \equiv P$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:exchange-exchange}
-  The function $\func{exchange}_i \; P$ is its own inverse: $\func{exchange}_i \; (\func{exchange}_i \; P) \equiv P$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-\begin{nilemma}
-  \label{lm:types-unused}
-  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, if the variable $i$ is unused within $P$, then $\Gamma$ at $i$ is equivalent to $\Xi$ at $i$.
-\end{nilemma}
-\begin{proof}
-  By induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
-We are now in a position to prove subject congruence.
-
-\begin{nitheorem}[Subject congruence]
-  \label{thm:subject-congruence}
-  If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-\end{nitheorem}
-
-\begin{proof}[Proof]
-  The proof is by induction on \textsc{Equals} $\eq{}$.
-  Here we only consider those cases that are not purely inductive: the base cases for $\constr{struct}$ and their symmetric variants.
-  Full proof in \cite{Zalakain2020Agda}.
-  We proceed by induction on \textsc{StructCong} $\eqeq$:
-  \begin{itemize}
-    \item
-      Case $\constr{comp-assoc}$: trivial, as leftover typing is naturally associative.
-    \item
-      Case $\constr{comp-sym}$ for $\comp{P}{Q}$: we use framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of $Q$ to the one of $P$.
-    \item
-      Case $\constr{comp-end}$: trivial, as the typing rule for $\PO$ has the same input and output contexts.
-    \item
-      Case $\constr{scope-end}$: we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
-      In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$.
-    \item
-      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
-      In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
-    \item
-      Case $\constr{scope-comm}$:
-      we use exchange (\autoref{thm:exchange}), and for the reverse direction exchange and \autoref{lm:exchange-exchange} to show that exchanging two elements in $P$ twice leaves $P$ unchanged. \qed
-  \end{itemize}
-\end{proof}
-
-\paragraph*{Substitution}
-This result is key to proving subject reduction.
-In \autoref{thm:substitution-generalization} we prove a generalised version of substitution, where the substitition $\subst{P}{j}{i}$ is on any variable $i$.
-Then, in \autoref{thm:substitution} we instantiate the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
-
-\begin{nitheorem}[Generalised substitution]
-  \label{thm:substitution-generalization}
-  Let process $P$ be well typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  Then, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
-  \begin{multicols}{2}
-  \begin{itemize}
-    \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
-    \item $\contains{\gamma}{\Gamma_j}{j}{t}{m}{\Gamma}$
-    \item $\contains{\gamma}{\Psi_i}{i}{t}{n}{\Psi}$
-    \item $\contains{\gamma}{\Psi_j}{j}{t}{n}{\Psi}$
-  \end{itemize}
-  \end{multicols}
-  Let $\Gamma$ and $\Psi$ be such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
-  Let $\Delta$ at position $i$ have usage $\lz$, meaning all consumption from $m$ to $n$ must happen in $P$.
-  Then substituting $i$ to $j$ in $P$ will be well typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
-\end{nitheorem}
-
-\begin{proof}[Proof]
-  By induction on $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  Full proof can be found in \autoref{app:substitution-generalization}.
-  \begin{itemize}
-   \item
-     Constructor $\PO$: observe that $\Gamma_i \equiv \Psi_i$ and thus $\Gamma_j \equiv \Psi_j$.
-   \item
-     Constructor $\new$: we proceed inductively.
-   \item
-     Constructors $\recv{}{}$, $\send{}{}$ and $\comp{}{}$: we must find $\Theta$ in \autoref{fig:subst} and split the diagram along its vertical axis to proceed by induction. \qed
- \end{itemize}
-\end{proof}
-
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture}
-      \node (gamma-i) at (0,4)   {$\Gamma_i$};
-      \node (gamma-m) at (0,2)   {$\Gamma$};
-      \node (gamma-j) at (0,0)   {$\Gamma_j$};
-      \node (xi-i)    at (3,3.5) {$\Xi_i$};
-      \node (theta)   at (3,2.3) {$\Theta$};
-      \node (delta-m) at (3,1.7) {};
-      \node (xi-j)    at (3,0.5) {$\Xi_j$};
-      \node (psi-i)   at (6,3)   {$\Psi_i$};
-      \node (psi-m)   at (6,2)   {$\Psi$};
-      \node (psi-j)   at (6,1)   {$\Psi_j$};
-
-      \draw[-]  (gamma-m) -- (delta-m.center);
-      \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \lz$}(psi-m);
-
-      \draw[->,densely dotted] (gamma-m) -- (theta);
-      \draw[->,densely dotted] (theta) -- (psi-m);
-      
-      \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
-      \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
-      \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
-      \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
-
-      \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
-      \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
-      \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
-      \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
-      \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
-      \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
-    \end{tikzpicture}
-    \caption{
-      Diagrammatic representation of the $\comp{}{}$ case for substitution.
-      Continuous lines represent known facts, dotted lines proof obligations.
-    }
-    \label{fig:subst}
-\end{figure}
-
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture}
-      \node (gamma-i) at (0,2)   {};
-      \node (gamma-m) at (0,1)   {};
-      \node (gamma-j) at (0,0)   {};
-      \node (xi-i)    at (2,3)   {};
-      \node (xi-m)    at (2,2) {};
-      \node (xi-j)    at (2,1)   {};
-      \node (psi-m)   at (4,2) {};
-
-      \draw[->] (gamma-i) -- (xi-j);
-      \draw[->] (gamma-m) -- (xi-j);
-      \draw[->,densely dotted] (gamma-j) -- (xi-j);
-      \draw[->] (gamma-i) -- (gamma-m);
-      \draw[->] (gamma-j) -- (gamma-m);
-      \draw[->] (xi-i)    -- (xi-m);
-      \draw[->] (xi-j)    -- (xi-m);
-      \draw[->] (xi-i)    -- (psi-m);
-      \draw[->] (xi-m)    -- (psi-m);
-      \draw[->,densely dotted] (xi-j)    -- (psi-m);
-    \end{tikzpicture}
-    \caption{
-      Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
-      This approach makes composing typing derivations before and after subsitution more difficult.
-    }
-    \label{fig:subst-alternative}
-\end{figure}
-
-\begin{nitheorem}[Substitution]
-  \label{thm:substitution}
-  Let process $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
-  Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
-  Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
-\end{nitheorem}
-\begin{proof}[Proof]
-  For $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$, we use framing to derive them.
-  Then, we use these to apply \autoref{thm:substitution-generalization}.
-\end{proof}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\section{Meta-Theory} \label{meta-theory}
 
-% \begin{note}
-  We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
-% \end{note}
+We have mechanised subject reduction for our \picalc{} with leftovers in 850 lines of Agda code.
+The meta-theory of resource-aware type systems often needs to reason on typing derivations modulo associativity in the allocation of resources.
+For type systems using context splitting side conditions, this means applying associativity lemmas to recompute context splits; for type systems using leftover typing, this comes naturally \todo{rephrase?}.
+An example use of this is showing that the application of $\constr{comp-asssoc}$ preserves typing: the proof proceeds by deconstructing the input derivation into $\comp{P}{(\comp{Q}{R})}$ and reassembling it as $\comp{(\comp{P}{Q})}{R}$ without the need of any extra reasoning.
 
-\paragraph*{Subject Reduction}
-Finally we are ready to present our main result, stating  that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
-The relation between the typing contexts used to type $P$ and $Q$ will be explained in \autoref{thm:subject-reduction}.
-In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
-We first introduce an auxiliary lemma:
+All the reasoning carried out in our type safety proofs is based on the algebraic properties introduced in \autoref{multiplicities} -- an exception to this is $\func{\cdot -compute^r}$, which is only ever used for the user's convenience.
+This algebraic properties of the algebras allow us to see a typing derivation $\types{\gamma}{\Gamma}{P}{\Delta}$ as a unique \emph{arrow} from $\Gamma$ to $\Delta$, and to freely compose arrows with the same typing context and a matching output and input usage contexts.
 
-\begin{nilemma}
-  \label{lm:comm-capable}
-  Every input usage context $\Gamma$ of a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces by communicating on a channel external (that is, $P \reduce{\constr{external} \; i} Q$ for some $Q$) has a multiplicity of at least $\lio$ at index $i$.
-\end{nilemma}
+Leftover typing also allows us to prove a \emph{framing} theorem, which states that arbitrary usage annotations can be added to the input usage context, as long as they are added to the output usage context as well -- it is a way of understanding a typing derivation independently from its unused resources.
+An example use of this is showing that $\constr{comp-comm}$ preserves typing: we use framing to show that in $\comp{P}{Q}$ the typing of $P$ and $Q$ is independent of one another.
 
-\begin{proof}
-  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
-\end{proof}
+We refer to \autoref{app:type-safety} \todo{autoref} for a more detailed account of the mechanised type-safety proofs.
 
-\begin{nitheorem}[Subject reduction]
-  \label{thm:subject-reduction}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
-  \begin{itemize}
-    \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-    \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
-  \end{itemize}
-\end{nitheorem}
-
-\begin{proof}[Proof]
-  By induction on $P \reduce{c} Q$. For the full details refer to our mechanisation in Agda.  
-  \begin{itemize}
-    \item
-    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
-  
-    \item
-    Case $\constr{par}$: by induction on the process that is being reduced.
-
-    \item
-    Case $\constr{res}$: case split on channel $c$:
-    if $\constr{internal}$ proceed inductively;
-    if $\constr{external}\; \constr{0}$ (i.e. the channel introduced by scope restriction) use \autoref{lm:comm-capable} to subtract $\lio$ from the channel's usage annotation and proceed inductively;
-    if $\constr{external}\; (\suc i)$ proceed inductively.
-
-    \item
-    Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively. \qed
-  \end{itemize}
-\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}

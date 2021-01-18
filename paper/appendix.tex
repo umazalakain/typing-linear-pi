@@ -91,9 +91,122 @@ In the following we present the main results that our conversion functions satis
   All the above results are proved by induction on \textsc{Process} and \textsc{Var} (\autoref{fig:syntax}).
   Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
 \end{proof}
-  
-\section{Substitution}
-\label{app:substitution-generalization}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Type Safety} \label{app:type-safety}
+
+\subsection{Auxiliary Results}
+We will start this section with auxiliary results which are needed to prove two main theorems: subject congruence (\autoref{thm:subject-congruence}) and subject reduction (\autoref{thm:subject-reduction}) for our \picalc{} with leftovers.
+
+\paragraph*{Framing}
+This property asserts that the well-typedness of a process is independent of its leftover resources.
+
+\begin{nitheorem}[Framing]
+  \label{thm:framing}
+  Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
+  Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
+  Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
+  Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
+\end{nitheorem}
+
+\paragraph*{Weakening}
+This property states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
+\begin{nitheorem}[Weakening]
+  \label{thm:weakening}
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
+  $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
+\end{nitheorem}
+
+\paragraph*{Strengthening}
+This property states that removing an unused variable preserves the well-typedness of a process.
+Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
+\begin{nitheorem}[Strengthening]
+  \label{thm:strengthening} 
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
+  Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
+\end{nitheorem}
+
+\paragraph*{Exchange}
+This property states that the exchange of two variables preserves the well-typedness of a process.
+We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to exchange types in typing contexts and usage annotations in usage contexts.
+\begin{nitheorem}[Exchange]
+  \label{thm:exchange}
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Then, $\types{\func{exchange}_i \; \gamma}{\func{exchange}_i \; \Gamma}{\allowbreak \func{exchange}_i \; P}{\func{exchange}_i \; \Xi}$.
+\end{nitheorem}
+
+\begin{proof}[Proof]
+  All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
+  For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
+\end{proof}
+
+\subsection{Towards Subject Reduction}
+\paragraph*{Subject Congruence}
+This property states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
+To prove this result, we must first introduce lemmas that establish that certain syntactic manipulations can be inverted (\autoref{lm:lower-lift}, \autoref{lm:exchange-exchange}) and how unused variables relate to the preservation of leftovers (\autoref{lm:types-unused}).
+
+\begin{nilemma}
+  \label{lm:lower-lift}
+  The function $\func{lower}_i \; P \; uP$ has an inverse $\func{lift}_i \; P$ that increments every $\textsc{Var}$ greater than or equal to $i$, such that $\func{lift}_i \; (\func{lower}_i \; P \; uP) \equiv P$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+
+\begin{nilemma}
+  \label{lm:exchange-exchange}
+  The function $\func{exchange}_i \; P$ is its own inverse: $\func{exchange}_i \; (\func{exchange}_i \; P) \equiv P$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+
+\begin{nilemma}
+  \label{lm:types-unused}
+  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, if the variable $i$ is unused within $P$, then $\Gamma$ at $i$ is equivalent to $\Xi$ at $i$.
+\end{nilemma}
+\begin{proof}
+  By induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+
+We are now in a position to prove subject congruence.
+
+\begin{nitheorem}[Subject congruence]
+  \label{thm:subject-congruence}
+  If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+\end{nitheorem}
+
+\begin{proof}[Proof]
+  The proof is by induction on \textsc{Equals} $\eq{}$.
+  Here we only consider those cases that are not purely inductive: the base cases for $\constr{struct}$ and their symmetric variants.
+  Full proof in \cite{Zalakain2020Agda}.
+  We proceed by induction on \textsc{StructCong} $\eqeq$:
+  \begin{itemize}
+    \item
+      Case $\constr{comp-assoc}$: trivial, as leftover typing is naturally associative.
+    \item
+      Case $\constr{comp-sym}$ for $\comp{P}{Q}$: we use framing (\autoref{thm:framing}) to shift the output context of $P$ to the one of $Q$; and the input context of $Q$ to the one of $P$.
+    \item
+      Case $\constr{comp-end}$: trivial, as the typing rule for $\PO$ has the same input and output contexts.
+    \item
+      Case $\constr{scope-end}$: we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
+      In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$.
+    \item
+      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
+      In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
+    \item
+      Case $\constr{scope-comm}$:
+      we use exchange (\autoref{thm:exchange}), and for the reverse direction exchange and \autoref{lm:exchange-exchange} to show that exchanging two elements in $P$ twice leaves $P$ unchanged. \qed
+  \end{itemize}
+\end{proof}
+
+\paragraph*{Substitution}
+This result is key to proving subject reduction.
+In \autoref{thm:substitution-generalization} we prove a generalised version of substitution, where the substitition $\subst{P}{j}{i}$ is on any variable $i$.
+Then, in \autoref{thm:substitution} we instantiate the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
 \begin{nitheorem}[Generalised substitution]
   \label{thm:subst-generalization1}
@@ -150,4 +263,133 @@ In the following we present the main results that our conversion functions satis
       We construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
       We can now make two inductive calls (on the derivation of $P$ and $Q$) and compose their results.
   \end{itemize}  
+\end{proof}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+      \node (gamma-i) at (0,4)   {$\Gamma_i$};
+      \node (gamma-m) at (0,2)   {$\Gamma$};
+      \node (gamma-j) at (0,0)   {$\Gamma_j$};
+      \node (xi-i)    at (3,3.5) {$\Xi_i$};
+      \node (theta)   at (3,2.3) {$\Theta$};
+      \node (delta-m) at (3,1.7) {};
+      \node (xi-j)    at (3,0.5) {$\Xi_j$};
+      \node (psi-i)   at (6,3)   {$\Psi_i$};
+      \node (psi-m)   at (6,2)   {$\Psi$};
+      \node (psi-j)   at (6,1)   {$\Psi_j$};
+
+      \draw[-]  (gamma-m) -- (delta-m.center);
+      \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \lz$}(psi-m);
+
+      \draw[->,densely dotted] (gamma-m) -- (theta);
+      \draw[->,densely dotted] (theta) -- (psi-m);
+      
+      \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
+      \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
+      \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
+      \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
+
+      \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
+      \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
+      \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
+      \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
+      \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
+      \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
+    \end{tikzpicture}
+    \caption{
+      Diagrammatic representation of the $\comp{}{}$ case for substitution.
+      Continuous lines represent known facts, dotted lines proof obligations.
+    }
+    \label{fig:subst}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+      \node (gamma-i) at (0,2)   {};
+      \node (gamma-m) at (0,1)   {};
+      \node (gamma-j) at (0,0)   {};
+      \node (xi-i)    at (2,3)   {};
+      \node (xi-m)    at (2,2) {};
+      \node (xi-j)    at (2,1)   {};
+      \node (psi-m)   at (4,2) {};
+
+      \draw[->] (gamma-i) -- (xi-j);
+      \draw[->] (gamma-m) -- (xi-j);
+      \draw[->,densely dotted] (gamma-j) -- (xi-j);
+      \draw[->] (gamma-i) -- (gamma-m);
+      \draw[->] (gamma-j) -- (gamma-m);
+      \draw[->] (xi-i)    -- (xi-m);
+      \draw[->] (xi-j)    -- (xi-m);
+      \draw[->] (xi-i)    -- (psi-m);
+      \draw[->] (xi-m)    -- (psi-m);
+      \draw[->,densely dotted] (xi-j)    -- (psi-m);
+    \end{tikzpicture}
+    \caption{
+      Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
+      This approach makes composing typing derivations before and after subsitution more difficult.
+    }
+    \label{fig:subst-alternative}
+\end{figure}
+
+\begin{nitheorem}[Substitution]
+  \label{thm:substitution}
+  Let process $P$ be well typed in $\types{\gamma \comma t}{\Gamma \comma m}{P}{\Psi \comma \lz}$.
+  Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
+  Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
+\end{nitheorem}
+\begin{proof}[Proof]
+  For $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$, we use framing to derive them.
+  Then, we use these to apply \autoref{thm:substitution-generalization}.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+% \begin{note}
+  We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
+% \end{note}
+
+\paragraph*{Subject Reduction}
+Finally we are ready to present our main result, stating  that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
+The relation between the typing contexts used to type $P$ and $Q$ will be explained in \autoref{thm:subject-reduction}.
+In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
+We first introduce an auxiliary lemma:
+
+\begin{nilemma}
+  \label{lm:comm-capable}
+  Every input usage context $\Gamma$ of a well-typed process $\types{\gamma}{\Gamma}{P}{\Delta}$ that reduces by communicating on a channel external (that is, $P \reduce{\constr{external} \; i} Q$ for some $Q$) has a multiplicity of at least $\lio$ at index $i$.
+\end{nilemma}
+
+\begin{proof}
+  By induction on the reduction derivation $P \reduce{\constr{external \; i}}Q$.
+\end{proof}
+
+\begin{nitheorem}[Subject reduction]
+  \label{thm:subject-reduction}
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
+  \begin{itemize}
+    \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+    \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
+  \end{itemize}
+\end{nitheorem}
+
+\begin{proof}[Proof]
+  By induction on $P \reduce{c} Q$. For the full details refer to our mechanisation in Agda.  
+  \begin{itemize}
+    \item
+    Case $\constr{comm}$: we apply framing (\autoref{thm:framing}) (to rearrange the assumptions), substitution (\autoref{thm:substitution}) and strengthening (\autoref{thm:strengthening}).
+  
+    \item
+    Case $\constr{par}$: by induction on the process that is being reduced.
+
+    \item
+    Case $\constr{res}$: case split on channel $c$:
+    if $\constr{internal}$ proceed inductively;
+    if $\constr{external}\; \constr{0}$ (i.e. the channel introduced by scope restriction) use \autoref{lm:comm-capable} to subtract $\lio$ from the channel's usage annotation and proceed inductively;
+    if $\constr{external}\; (\suc i)$ proceed inductively.
+
+    \item
+    Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively. \qed
+  \end{itemize}
 \end{proof}
