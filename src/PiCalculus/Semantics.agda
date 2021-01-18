@@ -2,10 +2,13 @@
 
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; sym; cong)
 open import Relation.Nullary using (_because_; ofʸ; ofⁿ)
+open import Relation.Nullary.Negation using (contradiction)
+open import Function using (_∘_)
 
 open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 open import Data.Nat.Base
+open import Data.Maybe.Base as Maybe using (Maybe; just; nothing)
 open import Data.Bool.Base using (false; true)
 open import Data.Product using (_×_; _,_; ∃-syntax)
 
@@ -23,47 +26,59 @@ module PiCalculus.Semantics where
   private
     variable
       name namex namey : Name
-      n : ℕ
+      n m : ℕ
       P P' Q R : Scoped n
       x y : Fin n
 
-  Unused : ∀ {n} → Fin n → Scoped n → Set
+  -- A renaming (thin x) pushes up everithing x and above
+  thin : Fin (suc n) → Fin n → Fin (suc n)
+  thin zero y = suc y
+  thin (suc x) zero = zero
+  thin (suc x) (suc y) = suc (thin x y)
+
+  -- A renaming (thick x) tries to lower everything above x
+  -- Only succeeds if x itself is not present
+  thick : Fin (suc n) → Fin (suc n) → Maybe (Fin n)
+  thick zero zero = nothing
+  thick zero (suc y) = just y
+  thick {suc n} (suc x) zero = just zero
+  thick {suc n} (suc x) (suc y) = Maybe.map suc (thick x y)
+
+  exchangeFin : Fin n → Fin (suc n) → Fin (suc n)
+  exchangeFin zero zero = suc zero
+  exchangeFin zero (suc zero) = zero
+  exchangeFin zero (suc (suc x)) = suc (suc x)
+  exchangeFin (suc i) zero = zero
+  exchangeFin (suc i) (suc x) = suc (exchangeFin i x)
+
+  _for_ : Fin n → Fin (suc n) → Fin (suc n) → Fin n
+  (x' for x) y = Maybe.fromMaybe x' (thick x y)
+
+  suc-|> : (Fin n → Fin m) → (Fin (suc n) → Fin (suc m))
+  suc-|> f zero = zero
+  suc-|> f (suc x) = suc (f x)
+
+  |> : (Fin n → Fin m) → Scoped n → Scoped m
+  |> f 𝟘 = 𝟘
+  |> f (ν P) = ν (|> (suc-|> f) P)
+  |> f (P ∥ Q) = |> f P ∥ |> f Q
+  |> f (x ⦅⦆ P) = f x ⦅⦆ |> (suc-|> f) P
+  |> f (x ⟨ y ⟩ P) = f x ⟨ f y ⟩ |> f P
+
+  Unused : Fin n → Scoped n → Set
   Unused i 𝟘 = ⊤
   Unused i (ν P) = Unused (suc i) P
   Unused i (P ∥ Q) = Unused i P × Unused i Q
   Unused i (x ⦅⦆ P) = i ≢ x × Unused (suc i) P
   Unused i (x ⟨ y ⟩ P) = i ≢ x × i ≢ y × Unused i P
 
-  lift : (i : Fin (suc n)) → Scoped n → Scoped (suc n)
-  lift i 𝟘 = 𝟘
-  lift i (ν P) = ν (lift (suc i) P)
-  lift i (P ∥ Q) = lift i P ∥ lift i Q
-  lift i (x ⦅⦆ P) = Fin.punchIn i x ⦅⦆ lift (suc i) P
-  lift i (x ⟨ y ⟩ P) = Fin.punchIn i x ⟨ Fin.punchIn i y ⟩ lift i P
-
   lower : (i : Fin (suc n)) (P : Scoped (suc n)) → Unused i P → Scoped n
-  lower i 𝟘 uP = 𝟘
-  lower i (ν P) uP = ν (lower (suc i) P uP)
-  lower i (P ∥ Q) (uP , uQ) = lower i P uP ∥ lower i Q uQ
-  lower i (x ⦅⦆ P) (i≢x , uP) = Fin.punchOut i≢x ⦅⦆ lower (suc i) P uP
-  lower i (x ⟨ y ⟩ P) (i≢x , (i≢y , uP)) = Fin.punchOut i≢x ⟨ Fin.punchOut i≢y ⟩ lower i P uP
-
-  notMax : (i : Fin n) (x : Fin (suc n)) → Fin.inject₁ i ≡ x → n ≢ Fin.toℕ x
-  notMax i x p n≡x = Finₚ.toℕ-inject₁-≢ i (trans n≡x (sym (cong Fin.toℕ p)))
-
-  exchangeFin : Fin n → Fin (suc n) → Fin (suc n)
-  exchangeFin i x with Fin.inject₁ i Fin.≟ x
-  exchangeFin i x | true because ofʸ p = suc (Fin.lower₁ x (notMax i x p))
-  exchangeFin i x | false because _ with (suc i) Fin.≟ x
-  exchangeFin i x | false because _ | true because _ = Fin.inject₁ i
-  exchangeFin i x | false because _ | false because _ = x
-
-  exchange : Fin n → Scoped (suc n) → Scoped (suc n)
-  exchange i 𝟘 = 𝟘
-  exchange i (ν P) = ν (exchange (suc i) P)
-  exchange i (P ∥ Q) = exchange i P ∥ exchange i Q
-  exchange i (x ⦅⦆ P)  = exchangeFin i x ⦅⦆ exchange (suc i) P
-  exchange i (x ⟨ y ⟩ P)  = exchangeFin i x ⟨ exchangeFin i y ⟩ exchange i P
+  lower {n = zero} zero 𝟘 UiP = 𝟘
+  lower {n = zero} zero (ν P) UiP = ν (lower (suc zero) P UiP)
+  lower {n = zero} zero (P ∥ Q) (UiP , UiQ) = lower zero P UiP ∥ lower zero Q UiQ
+  lower {n = zero} zero (zero ⦅⦆ P) (i≢x , UiP) = contradiction refl i≢x
+  lower {n = zero} zero (zero ⟨ y ⟩ P) (i≢x , i≢y , UiP) = contradiction refl i≢x
+  lower {n = suc n} i P UiP = |> (zero for i) P
 
   infixl 10 _≈_
   data _≈_ : Scoped n → Scoped n → Set where
@@ -78,7 +93,7 @@ module PiCalculus.Semantics where
     scope-ext : (u : Unused zero P)
               → ν (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (ν Q) ⦃ name ⦄
 
-    scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (exchange zero P) ⦃ namex ⦄) ⦃ namey ⦄
+    scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (|> (exchangeFin zero) P) ⦃ namex ⦄) ⦃ namey ⦄
 
   data RecTree : Set where
     zero : RecTree
@@ -108,33 +123,6 @@ module PiCalculus.Semantics where
   _≅_ : Scoped n → Scoped n → Set
   P ≅ Q = ∃[ r ] (P ≅⟨ r ⟩ Q)
 
-  _[_↦_]' : Fin n → Fin n → Fin n → Fin n
-  x [ i ↦ j ]' with i Finₚ.≟ x
-  x [ i ↦ j ]' | true because _ = j
-  x [ i ↦ j ]' | false because _ = x
-
-  _[_↦_] : Scoped n → (i j : Fin n) → Scoped n
-  𝟘           [ i ↦ j ] = 𝟘
-  (ν P)       [ i ↦ j ] = ν (P [ suc i ↦ suc j ])
-  (P ∥ Q)     [ i ↦ j ] = (P [ i ↦ j ]) ∥ (Q [ i ↦ j ])
-  (x ⦅⦆ P)    [ i ↦ j ] = (x [ i ↦ j ]') ⦅⦆ (P [ suc i ↦ suc j ])
-  (x ⟨ y ⟩ P) [ i ↦ j ] = (x [ i ↦ j ]') ⟨ y [ i ↦ j ]' ⟩ (P [ i ↦ j ])
-
-  substFin-unused : ∀ {i j} (x : Fin (suc n)) → i ≢ j → i ≢ x [ i ↦ j ]'
-  substFin-unused {i = i} x i≢j  with i Finₚ.≟ x
-  substFin-unused {i = i} x i≢j | true because _ = i≢j
-  substFin-unused {i = i} x i≢j | false because ofⁿ ¬p = ¬p
-
-  subst-unused : {i j : Fin (suc n)}
-               → i ≢ j
-               → (P : Scoped (suc n))
-               → Unused i (P [ i ↦ j ])
-  subst-unused i≢j 𝟘 = tt
-  subst-unused i≢j (ν P) = subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  subst-unused i≢j (P ∥ Q) = subst-unused i≢j P , subst-unused i≢j Q
-  subst-unused i≢j (x ⦅⦆ P) = substFin-unused x i≢j , subst-unused (λ i≡j → i≢j (Finₚ.suc-injective i≡j)) P
-  subst-unused i≢j (x ⟨ y ⟩ P) = substFin-unused x i≢j , substFin-unused y i≢j , subst-unused i≢j P
-
   data Channel : ℕ → Set where
     internal : ∀ {n}         → Channel n
     external : ∀ {n} → Fin n → Channel n
@@ -152,8 +140,9 @@ module PiCalculus.Semantics where
   data _=[_]⇒_ : Scoped n → Channel n → Scoped n → Set where
 
     comm : {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
-         → let uP' = subst-unused (λ ()) P
-         in ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
+         → ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q)
+             =[ external i ]⇒
+           |> (j for zero) P ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'
