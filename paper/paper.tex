@@ -34,7 +34,7 @@
 % \renewcommand\thmcontinues[1]{Continued}
 
 % Do not use italics in definitions and theorems
-\spnewtheorem{nidefinition}[definition]{Definition}{\bfseries}{}
+\spnewtheorem{nidefinition}[definition]{Definition}{}{}
 \spnewtheorem{nilemma}[lemma]{Lemma}{\bfseries}{}
 \spnewtheorem{nitheorem}[theorem]{Theorem}{\bfseries}{}
 
@@ -931,6 +931,23 @@ We intend to add support for products, sum types and recursion to both our synta
 Orthogonally, making our typing rules bidirectional would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
+
+\subsection{On recursion}
+\todo{put somewhere}
+
+Recursion can be added to a resource-algebra-agnostic type system with the following rule:
+\begin{mathpar}
+  \inferrule
+  {\types{\gamma}{\Gamma}{P}{\Gamma}}
+  {\types{\gamma}{\Gamma}{!P}{\Gamma}}
+\end{mathpar}
+That is, if a process consumes no resources (e.g. they are shared), then the process can be executed infinitely many times.
+To show subject congruence, one has to prove that $P \eqeq \comp{P}{!P}$ preserves types in both directions.
+In our setting, that means showing that $\types{\gamma}{\Gamma}{\comp{P}{!P}}{\Delta}$ then $\types{\gamma}{\Gamma}{!P}{\Delta}$.
+Eliminating the hypothesis gives $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{!P}{\Delta}$, eliminating the latter unifies $\Xi$ and $\Delta$ resulting in $\types{\gamma}{\Xi}{P}{\Xi}$.
+To satisfy the goal $\types{\gamma}{\Gamma}{!P}{\Xi}$, one has to show that $\Gamma$ and $\Xi$ are equivalent too.
+Note that the process $P$ does not syntactically restrict the types of the channels created within $P$.
+That means that within the typing derivations $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$ one can create channels that transmit different amounts of data in $\Gamma$ and in $\Xi$, which are then not necessarily the same anymore.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section*{Acknowledgments}
