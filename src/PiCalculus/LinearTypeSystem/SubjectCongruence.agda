@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-} -- --without-K #-}
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; cong; trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; cong; trans; cong₂)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Decidable using (fromWitness)
@@ -45,7 +45,7 @@ SubjectCongruence = {n : ℕ} {γ : PreCtx n} {idxs : Idxs n} {Γ Δ : Ctx idxs}
 
 private
   variable
-    n : ℕ
+    n m : ℕ
     P Q : Scoped n
 
 comp-comm : {γ : PreCtx n} {idxs : Idxs n} {Γ Ξ : Ctx idxs}
@@ -56,16 +56,58 @@ comp-comm (⊢P ∥ ⊢Q) | _ , P≔ | _ , Q≔ =
   let _ , (Q'≔ , P'≔) = ⊗-assoc (⊗-comm P≔) Q≔ in
   ⊢-frame Q≔ Q'≔ ⊢Q ∥ ⊢-frame P≔ (⊗-comm P'≔) ⊢P
 
-⊢-unique : {γ ξ : PreCtx n} {idxs : Idxs n} {Γ Ξ Δ : Ctx idxs}
+import Relation.Binary.HeterogeneousEquality as Heq
+
+dropᵥ : ∀ {a} {A : Set a} (n : ℕ) (xs : Vec A (n ℕ.+ m)) → Vec A m
+dropᵥ zero xs = xs
+dropᵥ (suc n) (x ∷ xs) = dropᵥ n xs
+
+drop : ∀ {a p} {A : Set a} {P : A → Set p}
+     → (n : ℕ) {m : ℕ} {xs : Vec A (n ℕ.+ m)} (ps : All P xs)
+     → All P (dropᵥ n xs)
+drop zero ps = ps
+drop (suc n) {xs = x ∷ xs}(p ∷ ps) = drop n ps
+
+module _ {a p} {A : Set a} {P : A → Set p} where
+  data PHEq : ∀ {m n} {xs : Vec A m} {ys : Vec A n} (pxs : All P xs) (pys : All P ys) → Set p where
+    []  : PHEq [] []
+    _∷_ : ∀ {m n x} {px py : P x} {xs : Vec A m} {ys : Vec A n} {pxs : All P xs} {pys : All P ys}
+          (px∼py : px ≡ py) (pxs∼pys : PHEq pxs pys) →
+          PHEq (px ∷ pxs) (py ∷ pys)
+
+  PHEq-to-≡ : {xs : Vec A n} {pxs : All P xs} {pys : All P xs} → PHEq pxs pys → pxs ≡ pys
+  PHEq-to-≡ [] = refl
+  PHEq-to-≡ (px∼py ∷ pheq) = cong₂ _∷_ px∼py (PHEq-to-≡ pheq)
+
+  PHEq-refl : {xs : Vec A n} {pxs : All P xs} → PHEq pxs pxs
+  PHEq-refl {pxs = []} = []
+  PHEq-refl {pxs = px ∷ pxs} = refl ∷ PHEq-refl
+
+∋-unique : {γ ξ : PreCtx (n ℕ.+ m)} {is js : Idxs (n ℕ.+ m)} {Γ Δ : Ctx is} {Ξ Ω : Ctx js}
+         → {i : Fin (n ℕ.+ m)} {t₁ t₂ : Type} {id jd : Idx} {u₁ : Usage id ²} {u₂ : Usage jd ²}
+         → γ ； Γ ∋[ i ] t₁ ； u₁ ▹ Δ
+         → ξ ； Ξ ∋[ i ] t₂ ； u₂ ▹ Ω
+         → dropᵥ n γ ≡ dropᵥ n ξ
+         → (id ≡ jd → u₁ Heq.≅ u₂)
+         → PHEq (drop n Δ) (drop n Ω)
+         → PHEq (drop n Γ) (drop n Ξ)
+∋-unique {zero} {is = _} {.(_ -, _)} {i = .zero} (zero , zero x) (zero , zero x') refl ueq (refl ∷ eq) rewrite Heq.≅-to-≡ (ueq refl) = ∙²-unique x x' ∷ eq
+∋-unique {zero} {is = is} {js} {i = .(suc _)} (suc fst , suc snd) (suc fst₁ , suc snd₁) refl ueq (px∼py ∷ eq) = px∼py ∷ (∋-unique (fst , snd) (fst₁ , snd₁) refl ueq eq)
+∋-unique {suc n} {i = i} (zero , zero x) (zero , zero x') qe ueq eq = eq
+∋-unique {suc n} {i = i} (suc tx , suc ux) (suc ty , suc uy) = ∋-unique (tx , ux) (ty , uy)
+
+⊢-unique : {γ ξ : PreCtx (n ℕ.+ m)} {is js : Idxs (n ℕ.+ m)} {Γ Δ : Ctx is} {Ξ Ω : Ctx js}
          → γ ； Γ ⊢ P ▹ Δ
-         → ξ ； Ξ ⊢ P ▹ Δ
-         → Γ ≡ Ξ
-⊢-unique 𝟘 𝟘 = refl
-⊢-unique (ν t m μ Γ⊢) (ν _ _ _ Ξ⊢) = {!⊢-unique Γ⊢ Ξ⊢!}
-⊢-unique (x ⦅⦆ Γ⊢) Ξ⊢ = {!!}
-⊢-unique (x ⟨ x₁ ⟩ Γ⊢) Ξ⊢ = {!!}
-⊢-unique (Γ⊢P ∥ Γ⊢Q) Ξ⊢ = {!!}
-⊢-unique (! Γ⊢) Ξ⊢ = {!!}
+         → ξ ； Ξ ⊢ P ▹ Ω
+         → dropᵥ n γ ≡ dropᵥ n ξ
+         → PHEq (drop n Δ) (drop n Ω)
+         → PHEq (drop n Γ) (drop n Ξ)
+⊢-unique 𝟘 𝟘 qe eq = eq
+⊢-unique (ν t m μ Γ⊢) (ν _ _ _ Ξ⊢) = ⊢-unique Γ⊢ Ξ⊢
+⊢-unique (x ⦅⦆ Γ⊢) (x' ⦅⦆ Ξ⊢) qe eq = ∋-unique x x' qe (λ {refl → Heq.refl}) (⊢-unique Γ⊢ Ξ⊢ qe eq)
+⊢-unique (Γx ⟨ Γy ⟩ Γ⊢) (Ξx ⟨ Ξy ⟩ Ξ⊢) qe eq = ∋-unique Γx Ξx qe (λ {refl → Heq.refl}) (∋-unique Γy Ξy qe (λ {refl → {!Heq.refl!}}) {!!})
+⊢-unique (Γ⊢P ∥ Γ⊢Q) (Ξ⊢P ∥ Ξ⊢Q) qe eq = ⊢-unique Γ⊢P Ξ⊢P qe (⊢-unique Γ⊢Q Ξ⊢Q qe eq)
+⊢-unique (! Γ⊢) (! Ξ⊢) = ⊢-unique Γ⊢ Ξ⊢
 
 subject-cong : SubjectCongruence
 subject-cong (stop comp-assoc) (⊢P ∥ (⊢Q ∥ ⊢R)) = (⊢P ∥ ⊢Q) ∥ ⊢R
@@ -77,7 +119,7 @@ subject-cong (stop (scope-ext u)) (ν t c μ (_∥_ {Δ = _ -, _} ⊢P ⊢Q)) re
 subject-cong (stop scope-scope-comm) (ν t c μ (ν t₁ c₁ μ₁ ⊢P)) = ν t₁ c₁ μ₁ (ν t c μ (⊢-exchange zero ⊢P))
 subject-cong (cong-symm (stop comp-assoc)) ((⊢P ∥ ⊢Q) ∥ ⊢R) = ⊢P ∥ (⊢Q ∥ ⊢R)
 subject-cong (cong-symm (stop comp-symm)) (⊢P ∥ ⊢Q) = comp-comm (⊢P ∥ ⊢Q)
-subject-cong (cong-symm (stop replicate)) (⊢P ∥ ! !⊢P) = {!! ?!}
+subject-cong (cong-symm (stop replicate)) (⊢P ∥ ! !⊢P) rewrite PHEq-to-≡ (⊢-unique {n = 0} ⊢P !⊢P refl PHEq-refl) = ! !⊢P
 subject-cong (cong-symm (stop comp-end)) ⊢P = ⊢P ∥ 𝟘
 subject-cong (cong-symm (stop scope-end)) 𝟘 = ν 𝟙 {∃Idx} (0∙ , 0∙) {∃Idx} 0∙ 𝟘
 subject-cong (cong-symm (stop (scope-ext u))) (⊢P ∥ (ν t c μ ⊢Q)) = ν t c μ ((subst (λ ● → _ ； _ ⊢ ● ▹ _) (lift-lower zero _ u) (⊢-weaken zero ⊢P)) ∥ ⊢Q)
