@@ -861,23 +861,23 @@ We refer to \autoref{app:type-safety} \todo{autoref} for a more detailed account
 
 Extrinsic encodings define a syntax (often well-scoped) and a runtime semantics prior to any type system.
 This allows one to talk about ill-typed terms, and defers the proof of subject reduction to a later stage.
-
+%
 To the best of our knowledge, leftover typing makes its appearance in 1994, when Ian Mackie first uses it to formulate intuitionistic linear logic \cite{Mackie}.
 Allais \cite{Allais2018a} uses leftover typing to mechanise in Agda a bidirectional type system for the linear \lambdacalc{}.
 He proves type preservation and provides a decision procedure for type checking and type inference.
 In this paper, we follow Allais \cite{Allais2018a} and apply leftover typing to the \picalc{} for the first time.
 We generalise the usage algebra, leading to linear, graded and shared type systems.
 Drawing from quantitative type theory (by McBride and Atkey \cite{McBride2016,Atkey2018}), in our work we too are able to talk about fully consumed resources --- e.g., we can transmit $\lz$ multiplicities of a fully exhausted channel.
-
+%
 Recent years have seen an increase in the efforts to mechanise resource-aware process algebras, but one of the earliest works is the mechanisation of the linear \picalc{} in Isabelle/HOL by Gay \cite{Gay2001}.
 Gay encodes the \picalc{} with linear and shared types using de Bruijn indices, a reduction relation and a type system posterior to the syntax.
 However, in his work typing rules demand user-provided context splits, and variables with consumed usage annotations are erased from context.
 We remove the demand for context splits, preserve the ability to talk about consumed resources, and adopt a more general usage algebra.
-
+%
 Orchard et al. introduce Granule \cite{Orchard}, a fully-fledged functional language with graded modal types, linear types, indexed types and polymorphism.
 Modalities include exact usages, security levels and intervals; resource algebras are pre-ordered semirings with partial addition.
 The authors provide bidirectional typing rules, and show the type safety of their semantics.
-
+%
 The work by Goto et al. \cite{Goto2016a} is, to the best of our knowledge, the first formalisation of session types which comes along with a mechanised proof of type safety in Coq.
 The authors extend session types with polymorphism and pattern matching.
 They use a locally-nameless encoding for variable references, a syntax prior to types, and an LTS semantics that encodes session-typed processes into the \picalc{}.
@@ -888,16 +888,16 @@ Their type system uses reordering of contexts and extrinsic context splits, whic
 Intrinsic encodings merge syntax and type system.
 As a result, one can only ever talk about well-typed terms, and the reduction relation by construction carries a proof of subject reduction.
 Significantly, by merging the syntax and static semantics of the object language one can fully use the expressive power of the host language.
-
+%
 Thiemann formalises in Agda the MicroSession (minimal GV \cite{Gay2010}) calculus with support for recursion and subtyping \cite{Thiemann2019}.
 As Gay does in \cite{Gay2001}, context splits are given extrinsically, and exhausted resources are removed from typing contexts altogether.
 The runtime semantics are given as an intrinsically typed CEK machine with a global context of session-typed channels.
-
+%
 In their recent paper, Ciccone and Padovani mechanise a dependently-typed linear \picalc{} in Agda \cite{Ciccone}.
 Their intrinsic encoding allows them to leverage Agda's dependent types to provide a dependently-typed interpretation of messages --- to avoid linearity violations the interpretation of channel types is erased.
 Message input is modeled as a dependent function in Agda, and as a result message predicates, branching, and variable-length conversations can be encoded.
 In contrast to our work, their algebra is on the multiplicities $0$, $1$, $\omega$, and top-down context splitting proofs must be provided.
-
+%
 In another recent work, Rouvoet et al. provide an intrinsic type system for a \lambdacalc{} with session types \cite{Rouvoet2020}.
 They use proof relevant separation logic and a notion of a supply and demand \emph{market} to make context splits transparent to the user.
 Their separation logic is based on a partial commutative monoid that need not be deterministic nor cancellative.
@@ -908,21 +908,24 @@ They distill their typing rules even further by modelling the supply and demand 
 
 Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq, where de Bruijn indices are not as popular as in Agda or Idris.
 As a use-case, they use their tool to help automate proofs of subject reduction for a type system with session types.
-
+%
 Orchard and Yoshida \cite{OrchardY16} embed a small effectul imperative language into the session-typed \picalc{}, showing that session types are expressive enough to encode effect systems.
-
+%
 Based on contextual type theory \cite{Pientkaa,Pientka}, LINCX \cite{Georges2017} extends the linear logical framework LLF \cite{Cervesato1996} by internalising the notion of bindings and contexts.
 The result is a meta-theory in which HOAS encodings with both linear and dependent types can be described.
 The developer obtains for free an equational theory of substitution and decidable typechecking without having to encode context splits within the object language.
-
+%
 Further work on mechanising the \picalc{} \cite{Henry-Gerard1999,Honsell2001a,Bengtson2013,Despeyroux2000,Affeldt2008}, focuses on non-linear variations, whereas we present a range of linear, graded and shared types.
 
-\subsection{Conclusions and Future Work}
+\subsubsection*{Conclusions}
 
 In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
 As a result, theorems like framing, weakening and strengthening can now be stated for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
+
+\subsubsection*{Future Work}
+\label{replication}
 
 As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
 We intend to add support for products, sum types and replication to both our syntax and our type system.
@@ -930,8 +933,6 @@ Orthogonally, making our typing rules bidirectional would allow us to provide a 
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
 
-\subsubsection{Replication}
-\label{replication}
 
 Replication can be added to a resource-algebra-agnostic type system with the following rule:
 \begin{mathpar}
