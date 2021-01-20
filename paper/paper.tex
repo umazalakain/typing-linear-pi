@@ -476,7 +476,7 @@ We keep track of channel $c$ so we can state subject reduction (\autoref{app:typ
 We distinguish between channels that are created inside of the process ($\constr{internal}$), and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable.
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
-After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:substitution-unused} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
+After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (and a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$ is constructed).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
@@ -490,15 +490,6 @@ It is defined as follows:
   \end{aligned}
 \end{equation*}
 \end{nidefinition}
-
-\begin{nilemma}
-  \label{lm:substitution-unused}
-  For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resource-aware Type System}
