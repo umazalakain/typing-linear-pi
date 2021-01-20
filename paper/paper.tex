@@ -476,16 +476,6 @@ As a result of that communication, the continuation of the input process $P$ has
 After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (we apply \autoref{lm:substitution-unused} to obtain a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
-\todo{why do we not apply structural congruence on both sides?}
-
-\begin{nilemma}
-  \label{lm:substitution-unused}
-  For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
-\end{nilemma}
-\begin{proof}
-  By structural induction on \textsc{Process} and \textsc{Var}.
-\end{proof}
-
 Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
 It is defined as follows:
 \begin{equation*}
@@ -497,6 +487,15 @@ It is defined as follows:
   \end{aligned}
 \end{equation*}
 \todo{introduce function definition syntax, fix alignment}
+
+\begin{nilemma}
+  \label{lm:substitution-unused}
+  For every variables $i$ and $j$, if $i \type{\not\equiv} j$ then $\Unused_i \allowbreak (\subst{P}{j}{i})$.
+\end{nilemma}
+\begin{proof}
+  By structural induction on \textsc{Process} and \textsc{Var}.
+\end{proof}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Resource-aware Type System}
