@@ -137,11 +137,12 @@
 \begin{abstract}
   Linear type systems need to keep track of how programs use their resources.
   The standard approach is to use context splits, side conditions that specify how resources are disjointly split across subterms.
-  With this approach, context splits echo information which is already present within subterms, thus leading to redundancy.  An alternative approach is to use leftover typing \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have an additional output usage context: the leftovers.
-  With this approach, the leftovers of one typing derivation can be fed as the inputs of the next, threading through linear resources while avoiding context splits.
-  We use this technique to define a type system for a resource-aware \picalc{} \cite{MilnerPW92,Milner99}.
+  With this approach, context splits echo information which is already present within subterms, thus leading to redundancy.  An alternative approach is to use leftover typing \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have also an output usage context: the leftovers.
+  With this approach, the leftovers of one typing derivation are fed as the inputs of the next, threading through linear resources while avoiding context splits.
+  We use this technique to define a type system for a \emph{resource-aware \picalc{}} \cite{MilnerPW92,Milner99}.
   This type system is parametrised over a set of usage algebras that are general enough to encompass shared types (free to reuse and discard), graded types (use an $n$ number of times) and linear types (use exactly once).
-  We provide a framing theorem, generalise the weakening and strengthening theorems, and show subject reduction.
+  In the \picalc{} linear types are of fundamental importance: they ensure the privacy and safety of the communication and avoid race conditions.
+  We provide a framing theorem for our type system, generalise the weakening and strengthening theorems, and show subject reduction.
   Our formalisation is fully mechanised in about 1800 lines of Agda.
 
 %  \keywords{Pi-calculus \and Linear types \and Leftover typing \and Concurrency \and Mechanisation \and Agda}
@@ -150,24 +151,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-%Recent years have seen an increase in the efforts to mechanise linear process algebras \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}
-A linear type system guarantees that resources are used \emph{exactly once}.
-Enforcing this ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
-Such a linear type system needs to keep track of what resources are used in which parts of the program.
-To do so, the standard approach is to use context splits: typing rules for terms with multiple subterms use a side condition that specifies what resources to allocate to each of the subterms.
-The typing derivations for the subterms must then use the entirety of the resources allocated to them.
+The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
+Notably, it features channel mobility: channels themselves are first class values and can be sent and received.
+Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} with linear channel types, where channels have to be used exactly once.
+In this setting, linearity guarantees the lack of race conditions and the privacy and safety of the communication.
+
+A linear type system must keep track of what resources are used in which parts of the program, and guarantee that they are \emph{neither duplicated nor discarded}.
+To do so, the standard approach is to use context splits: typing rules for terms with multiple subterms add an extra a side condition specifying what resources to allocate to each of the subterms.
+The typing derivations for the subterms must then use the entirety of their allocated resources.
 A key observation here is that each subterm already \emph{knows} about the resources it needs.
-\emph{Context splits contain usage information already present in the subterms.}
+\emph{Context splits contain usage information that is already present in the subterms.}
 Moreover, the subterms cannot be typed until the context splits have been defined.
 On top of that, using binary context splits means that typing rules with $n$ subterms require $n - 1$ context splits, which considerably clutters the type system.
+There is a plethora of mechanisations of linear process calculi, all of them follow this approach \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}.
 
-An alternative approach to using context splits is using leftover typing, which has been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
-
-In this paper, we use leftover typing to define a resource-aware type system for the \picalc{}.
-The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
-Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
-%Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
-
+An alternative approach is leftover typing, a technique that has already been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
 Leftover typing changes the shape of the typing judgments and includes a second \emph{leftover} output context that contains the resources that were not used by the term.
 As a result, typing rules \emph{thread the resources through} subterms without needing context splits: each subterm uses the resources it needs, and leaves the rest for its siblings.
 The first subterm in this chain of resources immediately knows what resources it has available.
@@ -182,7 +180,8 @@ Below we present two alternative typing rules for process composition in the lin
   {\Gamma \; \type{\vdash} \; \comp{P}{Q} \; \type{\triangleright} \; \Xi}
 \end{mathpar}
 
-We make the following main contributions in this paper:
+In this paper, we use leftover typing to define a resource-aware type system for the \picalc{}.
+We make the following main contributions:
 \begin{enumerate}
   \item \textbf{Leftover typing for a resource-aware \picalc{}}. Our type system uses leftover typing to model the resource-aware \picalc{} (\autoref{leftover-typing}) and satisfies subject reduction.
     In addition to making context splits unnecessary, leftover typing allows for a \emph{framing} theorem to be stated and is naturally associative, making type safety properties considerably easier to reason about (\autoref{meta-theory}).
