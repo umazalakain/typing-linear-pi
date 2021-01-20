@@ -244,6 +244,8 @@ Names are cumbersome to mechanise: they are not inherently well scoped, one has 
 To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 
+\begin{nidefinition}[\textsc{Var} and \textsc{Process}]
+
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
 References outside of that range are meaningless, and it is useful to rule them out syntactically.
 We do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
@@ -284,6 +286,7 @@ process $\new{} P$ creates a new channel and binds it at index $0$ in the contin
 $\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel;
 process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
 process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
+\end{nidefinition}
 
 \begin{example}[The courier system]
 \label{example-process}
@@ -374,14 +377,14 @@ We define structural congruence in \autoref{structural-congruence} and provide a
 \subsection{Structural Congruence}
 \label{structural-congruence}
 
-\begin{nidefinition}
+\begin{nidefinition}[\textsc{Unused}]
   \label{def:unused}
   We consider a variable $i$ to be unused in $P$ ($\Unused_i \; P$) if none of the inputs nor the outputs refer to it.
   $Unused_i \; P$ is defined as a recursive predicate on $P$, incrementing $i$ every time we go under a binder, and using $i \type{\not\equiv} x$ ( which unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$) to compare variables.
 \end{nidefinition}
 
-\begin{nidefinition}
-We define the base cases of a structural congruence relation \textsc{StructCong} $\eqeq$ as follows:
+\begin{nidefinition}[\textsc{StructCong}]
+We define the base cases of a structural congruence relation $\eqeq$ as follows:
 \begin{mathpar}
   \datatype
   { }
@@ -421,17 +424,18 @@ In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of
 In all the above, $i$ is incremented every time we go under a binder.
 \end{nidefinition}
 
-\begin{nidefinition}
-We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in \textsc{Equals} $\eq{}$.
-The relation \textsc{Equals} is structurally congruent under a context $\mathcal{C}[\cdot]$ \cite{Sangio01} and is reflexive, symmetric and transitive. 
+\begin{nidefinition}[\textsc{Equals}]
+We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in $\eq{}$.
+This relation is structurally congruent under a context $\mathcal{C}[\cdot]$ \cite{Sangio01} and is reflexive, symmetric and transitive. 
 \end{nidefinition}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Reduction Relation}
+\subsection{Operational Semantics}
 \label{operational-semantics}
 
-The operational semantics of the \picalc{} is defined as a reduction relation \textsc{Reduces} $\reduce{c}$ indexed by the channel $c$ on which communication occurs.
+\begin{nidefinition}[\textsc{Reduces}]
+The operational semantics of the \picalc{} is defined as a reduction relation $\reduce{c}$ indexed by the channel $c$ on which communication occurs.
 We keep track of channel $c$ so we can state subject reduction (\autoref{app:type-safety}).
 \begin{mathpar}
   \datatype
@@ -486,6 +490,7 @@ It is defined as follows:
   \end{aligned}
 \end{equation*}
 \todo{introduce function definition syntax, fix alignment}
+\end{nidefinition}
 
 \begin{nilemma}
   \label{lm:substitution-unused}
@@ -513,7 +518,7 @@ In the linear \picalc{} each channel has an input and an output \emph{capability
 We generalise over this notion by defining an algebra for multiplicities that is satisfied by linear, graded and shared types alike.
 We then use pairs of multiplicities as usage annotations for a channel's input and output capabilities.
 
-\begin{nidefinition}[Usage algebra]
+\begin{nidefinition}[\textsc{Algebra}]
   A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$ that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational reasoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal} (so that new resources cannot arbitrarily spring into life).
   It has an element $\one$ that is used to count inputs and outputs.
@@ -557,7 +562,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivation} (
 \label{contexts}
 
 We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system with leftovers (\autoref{leftover-typing}).
-\begin{nidefinition}[Indexed set of usage algebras]
+\begin{nidefinition}[\textsc{Algebras}]
   An \emph{indexed set of usage algebras} is a type $\Idx$ of indices that is nonempty ($\type{\exists IDX}$) together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras of the corresponding type.
   \begin{equation*}
     \begin{aligned}
