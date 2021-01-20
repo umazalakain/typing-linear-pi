@@ -484,12 +484,11 @@ It is defined as follows:
 \begin{equation*}
   \begin{aligned}
     & \func{dec} : \Channel_(\suc n) && \to \Channel_n \\
-    & \func{dec} \; \constr{internal}                 && \hookrightarrow \constr{internal} \\
-    & \func{dec} \; (\constr{external} \; \constr{0}) && \hookrightarrow \constr{internal} \\
-    & \func{dec} \; (\constr{external} \; (\suc n))   && \hookrightarrow \constr{external} \; n \\
+    & \func{dec} \; \constr{internal}                 && = \constr{internal} \\
+    & \func{dec} \; (\constr{external} \; \constr{0}) && = \constr{internal} \\
+    & \func{dec} \; (\constr{external} \; (\suc n))   && = \constr{external} \; n \\
   \end{aligned}
 \end{equation*}
-\todo{introduce function definition syntax, fix alignment}
 \end{nidefinition}
 
 \begin{nilemma}
