@@ -573,7 +573,7 @@ We use indexed sets of usage algebras to allow several usage algebras to coexist
 We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
 The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
 \begin{nidefinition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
-  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$) (first two constructors below).
+  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$).
   \begin{mathpar}
     \datatype
     { }
@@ -598,13 +598,13 @@ The former are preserved throughout typing derivations; the latter are transform
   The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
   This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input $i$ and output $o$ capabilities, respectively \cite{K07}.
 
-  A \emph{typing context} $\PreCtx_n$ is a length-indexed list of types that is either empty $\constr{[]}$ or the result of appending a type $\Type$ to an existing context.
+  A \emph{typing context} $\PreCtx_n$ is a length-indexed list of types that is either empty ($\constr{[]}$) or the result of appending a type $t : \Type$ to an existing context ($\gamma \constr{,} t$).
 \end{nidefinition}
 
 
-\begin{nidefinition}[\textsc{Ctx}: usage contexts]
-  A context of indices $\Idxs_n$ is a length-indexed list that is either empty $\constr{[]}$ or the result of appending an index $\Idx$ to an existing context.
-  A \emph{usage context} is a context $\Ctx_{idxs}$ indexed by a context of indices $\Idxs_n$ that is either empty $\constr{[]}$ or the result or appending a usage annotation pair $\Usage_{idx}^{\func{2}}$ with index $idx$ to an existing context.
+\begin{nidefinition}[\textsc{Idxs} and \textsc{Ctx}: contexts of indices and usage contexts]
+  A context of indices $\Idxs_n$ is a length-indexed list that is either empty ($\constr{[]}$) or the result of appending an index $i : \Idx$ to an existing context ($idxs \constr{,} i$).
+  A \emph{usage context} is a context $\Ctx_{idxs}$ indexed by a context of indices $idxs : \Idxs_n$ that is either empty ($\constr{[]}$) or the result or appending a usage annotation pair $u : \Usage_{idx}^{\func{2}}$ with index $idx : \Idx$ to an existing context ($\Gamma \constr{,} u$).
   We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
   Henceforth, we use $\lz$ to denote the multiplicity pair $0 \comma 0$, $\li$ for the pair $1 \comma 0$, $\lo$ for $0 \comma 1$, and $\lio$ for $1 \comma 1$.
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
