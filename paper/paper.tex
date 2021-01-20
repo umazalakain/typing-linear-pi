@@ -436,7 +436,8 @@ This relation is structurally congruent under a context $\mathcal{C}[\cdot]$ \ci
 
 \begin{nidefinition}[\textsc{Reduces}]
 The operational semantics of the \picalc{} is defined as a reduction relation $\reduce{c}$ indexed by the channel $c$ on which communication occurs.
-We keep track of channel $c$ so we can state subject reduction (\autoref{app:type-safety}).
+We keep track of channel $c$ so we can state subject reduction (\autoref{thm:subject-reduction}).
+
 \begin{mathpar}
   \datatype
   {n : \N}
@@ -483,7 +484,6 @@ Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as w
 It is defined as follows:
 \begin{equation*}
   \begin{aligned}
-    & \func{dec} : \Channel_(\suc n) && \to \Channel_n \\
     & \func{dec} \; \constr{internal}                 && = \constr{internal} \\
     & \func{dec} \; (\constr{external} \; \constr{0}) && = \constr{internal} \\
     & \func{dec} \; (\constr{external} \; (\suc n))   && = \constr{external} \; n \\
@@ -736,7 +736,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide a top-down proof of context split.
 \end{nidefinition}
 
-\begin{example}[Typing derivation, continues=example-process]
+\begin{example}[Typing derivation (Continued)]
 \label{example-derivation}
 
 We provide the typing derivation for the courier system defined in \autoref{example-process}.
