@@ -829,7 +829,6 @@ Strengthening states that removing an unused variable preserves the well-typedne
   Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
 
-\subsubsection{Type Safety}
 Subject congruence states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
 Subject reduction states that a well-typed process that communicates on a channel $c$ (\autoref{operational-semantics}) preserves its well-typedness and consumes $\lio$ from $c$ if $c$ is a channel in the environment.
 
@@ -912,15 +911,14 @@ The developer obtains for free an equational theory of substitution and decidabl
 %
 Further work on mechanising the \picalc{} \cite{Henry-Gerard1999,Honsell2001a,Bengtson2013,Despeyroux2000,Affeldt2008}, focuses on non-linear variations, whereas we present a range of linear, graded and shared types.
 
-\subsubsection*{Conclusions}
+\paragraph*{Conclusions}
 
 In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
 As a result, theorems like framing, weakening and strengthening can now be stated for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
-\subsubsection*{Future Work}
-\label{replication}
+\paragraph*{Future Work}
 
 As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
 We intend to add support for products, sum types and replication to both our syntax and our type system.
