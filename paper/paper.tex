@@ -855,7 +855,7 @@ Subject reduction states that a well-typed process that communicates on a channe
 We refer to \autoref{app:type-safety} \todo{autoref} for a more detailed account of the mechanised type-safety proofs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\section{Related Work}
+\section{Conclusions, Related and Future Work}
 
 \paragraph*{Extrinsic Encodings}
 
@@ -917,8 +917,7 @@ The developer obtains for free an equational theory of substitution and decidabl
 
 Further work on mechanising the \picalc{} \cite{Henry-Gerard1999,Honsell2001a,Bengtson2013,Despeyroux2000,Affeldt2008}, focuses on non-linear variations, whereas we present a range of linear, graded and shared types.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\section{Conclusion and Future Work}
+\subsection{Conclusions and Future Work}
 
 In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
@@ -931,7 +930,7 @@ Orthogonally, making our typing rules bidirectional would allow us to provide a 
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
 
-\subsection{Replication}
+\subsubsection{Replication}
 \label{replication}
 
 Replication can be added to a resource-algebra-agnostic type system with the following rule:
@@ -940,13 +939,11 @@ Replication can be added to a resource-algebra-agnostic type system with the fol
   {\types{\gamma}{\Gamma}{P}{\Gamma}}
   {\types{\gamma}{\Gamma}{!P}{\Gamma}}
 \end{mathpar}
-That is, if a process consumes no resources (e.g. they are shared), then the process can be executed infinitely many times.
-To show subject congruence, one has to prove that $P \eqeq \comp{P}{!P}$ preserves types in both directions.
-In our setting, that means showing that $\types{\gamma}{\Gamma}{\comp{P}{!P}}{\Delta}$ then $\types{\gamma}{\Gamma}{!P}{\Delta}$.
-Eliminating the hypothesis gives $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{!P}{\Delta}$, eliminating the latter unifies $\Xi$ and $\Delta$ resulting in $\types{\gamma}{\Xi}{P}{\Xi}$.
-To satisfy the goal $\types{\gamma}{\Gamma}{!P}{\Xi}$, one has to show that $\Gamma$ and $\Xi$ are equivalent too.
-Note that the process $P$ does not syntactically restrict the types of the channels created within $P$.
-That means that within the typing derivations $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$ one can create channels that transmit different amounts of data in $\Gamma$ and in $\Xi$, which are then not necessarily the same anymore.
+That is, if a process consumes no resources (e.g. because they are shared), then the process can be executed infinitely many times.
+To show subject congruence, one has to prove that $P \eqeq \comp{P}{!P}$ preserves typing in both directions.
+In our setting, that means showing that if $\types{\gamma}{\Gamma}{\comp{P}{!P}}{\Delta}$ then $\types{\gamma}{\Gamma}{!P}{\Delta}$.
+Eliminating the hypothesis gives $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$, where one has to show that $\Gamma$ and $\Xi$ are equivalent.
+However the process $P$ does not syntactically restrict the types of the channels created within $P$: within the typing derivations $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$ one can create channels that transmit different amounts of data in $\Gamma$ and in $\Xi$, which are then not necessarily the same anymore.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section*{Acknowledgments}
