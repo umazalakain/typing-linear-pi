@@ -137,13 +137,12 @@
 \begin{abstract}
   Linear type systems need to keep track of how programs use their resources.
   The standard approach is to use context splits, side conditions that specify how resources are disjointly split across subterms.
-  With this approach, context splits echo information that is already present within subterms, which already know about the resources they need.
-  An alternative approach is to use leftover typing \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have an additional output usage context: the leftovers.
+  With this approach, context splits echo information which is already present within subterms, thus leading to redundancy.  An alternative approach is to use leftover typing \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have an additional output usage context: the leftovers.
   With this approach, the leftovers of one typing derivation can be fed as the inputs of the next, threading through linear resources while avoiding context splits.
   We use this technique to define a type system for a resource-aware \picalc{} \cite{MilnerPW92,Milner99}.
   This type system is parametrised over a set of usage algebras that are general enough to encompass shared types (free to reuse and discard), graded types (use an $n$ number of times) and linear types (use exactly once).
   We provide a framing theorem, generalise the weakening and strengthening theorems, and show subject reduction.
-  Our formalisation is mechanised in about 1800 lines of Agda.
+  Our formalisation is fully mechanised in about 1800 lines of Agda.
 
 %  \keywords{Pi-calculus \and Linear types \and Leftover typing \and Concurrency \and Mechanisation \and Agda}
 \end{abstract}
