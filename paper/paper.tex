@@ -849,12 +849,55 @@ An example use of this is showing that the application of $\constr{comp-asssoc}$
 All the reasoning carried out in our type safety proofs is based on the algebraic properties introduced in \autoref{multiplicities} -- an exception to this is $\func{\cdot -compute^r}$, which is only ever used for the user's convenience.
 This algebraic properties of the algebras allow us to see a typing derivation $\types{\gamma}{\Gamma}{P}{\Delta}$ as a unique \emph{arrow} from $\Gamma$ to $\Delta$, and to freely compose arrows with the same typing context and a matching output and input usage contexts.
 
-Leftover typing also allows us to prove a \emph{framing} theorem, which states that arbitrary usage annotations can be added to the input usage context, as long as they are added to the output usage context as well -- it is a way of understanding a typing derivation independently from its unused resources.
+Leftover typing also allows us to prove a \emph{framing} theorem, which states that arbitrary usage annotations can be added to the input usage context, as long as they are added to the output usage context as well -- one can thus understand a typing derivation independently from its unused resources.
 An example use of this is showing that $\constr{comp-comm}$ preserves typing: we use framing to show that in $\comp{P}{Q}$ the typing of $P$ and $Q$ is independent of one another.
-Moreover, leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a more general form, in which variables can freely be added or removed from context regardless of their usage annotation -- as long as this usage annotation is added or removed from the leftover context as well.
+\begin{nitheorem}[Framing]
+  \label{thm:framing}
+  Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
+  Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
+  Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
+  Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
+\end{nitheorem}
+
+Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a more general form, in which variables can freely be added or removed from context regardless of their usage annotation -- as long as this usage annotation is added or removed from the leftover context as well.
+Weakening states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
+Strengthening states that removing an unused variable preserves the well-typedness of a process.
+
+\begin{nitheorem}[Weakening]
+  \label{thm:weakening}
+  Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
+  $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
+\end{nitheorem}
+
+\begin{nitheorem}[Strengthening]
+  \label{thm:strengthening} 
+  Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
+  Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
+  Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
+\end{nitheorem}
+
+\subsubsection{Type Safety}
+Subject congruence states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
+Subject reduction states that a well-typed process that communicates on a channel $c$ (\autoref{operational-semantics}) preserves its well-typedness and consumes $\lio$ from $c$ if $c$ is a channel in the environment.
+
+\begin{nitheorem}[Subject congruence]
+  \label{thm:subject-congruence}
+  If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+\end{nitheorem}
+
+\begin{nitheorem}[Subject reduction]
+  \label{thm:subject-reduction}
+  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
+  \begin{itemize}
+    \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+    \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
+  \end{itemize}
+\end{nitheorem}
 
 We refer to \autoref{app:type-safety} \todo{autoref} for a more detailed account of the mechanised type-safety proofs.
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Related Work}
