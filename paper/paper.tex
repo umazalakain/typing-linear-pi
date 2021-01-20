@@ -150,7 +150,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Recent years have seen an increase in the efforts to mechanise linear process algebras \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}
+%Recent years have seen an increase in the efforts to mechanise linear process algebras \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}
 A linear type system guarantees that resources are used \emph{exactly once}.
 Enforcing this ``no duplicating'' and ``no discarding'' of resources via linearity allows for resource-aware programming and more efficient implementations \cite{Wadler90}.
 Such a linear type system needs to keep track of what resources are used in which parts of the program.
@@ -161,7 +161,13 @@ A key observation here is that each subterm already \emph{knows} about the resou
 Moreover, the subterms cannot be typed until the context splits have been defined.
 On top of that, using binary context splits means that typing rules with $n$ subterms require $n - 1$ context splits, which considerably clutters the type system.
 
-An alternative approach to using context splits is using leftover typing \cite{Mackie,Allais2018a}.
+An alternative approach to using context splits is using leftover typing, which has been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
+
+In this paper, we use leftover typing to define a resource-aware type system for the \picalc{}.
+The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
+Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
+%Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
+
 Leftover typing changes the shape of the typing judgments and includes a second \emph{leftover} output context that contains the resources that were not used by the term.
 As a result, typing rules \emph{thread the resources through} subterms without needing context splits: each subterm uses the resources it needs, and leaves the rest for its siblings.
 The first subterm in this chain of resources immediately knows what resources it has available.
@@ -176,24 +182,23 @@ Below we present two alternative typing rules for process composition in the lin
   {\Gamma \; \type{\vdash} \; \comp{P}{Q} \; \type{\triangleright} \; \Xi}
 \end{mathpar}
 
-Leftover typing has been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
-In this paper, we use leftover typing to define a resource-aware type system for the \picalc{}.
-The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
-Notably, it features channel mobility: channels themselves are first class values, and can therefore be sent and received.
-Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} where the linear type system restricts the usage of channels to exactly once.
-We make two main contributions in this paper:
-\begin{itemize}
-  \item We use \textbf{leftover typing to type a resource-aware \picalc{} and prove subject reduction}.
-    Our type system uses leftover typing to model the resource-aware \picalc{} (\autoref{leftover-typing}).
+We make the following main contributions in this paper:
+\begin{enumerate}
+  \item \textbf{Leftover typing for a resource-aware \picalc{}}. Our type system uses leftover typing to model the resource-aware \picalc{} (\autoref{leftover-typing}) and satisfies subject reduction.
     In addition to making context splits unnecessary, leftover typing allows for a \emph{framing} theorem to be stated and is naturally associative, making type safety properties considerably easier to reason about (\autoref{meta-theory}).
-    
-  \item We \textbf{generalise resource counting to a set of usage algebras that can be mixed within the same type system}.
+        
+  \item \textbf{Shared, graded and linear unified \picalc{}}.
+  We {generalise resource counting to a set of usage algebras that can be mixed within the same type system}.
     We do not instantiate our type system to only work with linear resources, instead we present an algebra-agnostic type system, and admit a mix of user-defined \emph{resource aware} algebras (\autoref{multiplicities}).
     Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra.
     Multiple algebras can be mixed in the type system --- usage contexts keep information about what algebra to for each type (\autoref{contexts}).
     In particular, this allows for type systems combining linear (use exactly once), graded (exact number of $n$ times) and shared (free to reuse and discard) types under the same framework.
-    We leave adding replication to our type system for future work (\autoref{replication}).
-\end{itemize}
+    Thanks to leftovers, our type system satisfies \emph{weakening} and \emph{strengthening} for the whole framework. In particular, these are stated for the first time for the linear \picalc{}.
+    
+    \item \textbf{Full mechanisation in Agda}. We have fully mechanised a proof of subject reduction, the details of which are found in \autoref{app:type-safety}
+The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}.
+
+\end{enumerate}
 
 We start by using type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
 We then provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
@@ -201,11 +206,8 @@ This operational semantics is defined as a reduction relation on processes (\aut
 The reduction relation tracks at the type level the channel on which communication occurs.
 This information is later used to state the subject reduction theorem --- aka type preservation.
 The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
-
 We then define an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
 Finally, we present the meta theoretical properties of our \picalc{} with leftovers in \autoref{meta-theory}.
-We have fully mechanised a proof of subject reduction, the details of which are found in \autoref{app:type-safety}
-The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}
 
 \subsection{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
