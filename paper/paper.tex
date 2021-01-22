@@ -135,15 +135,15 @@
 \maketitle
 
 \begin{abstract}
-  Linear type systems need to keep track of how programs use their resources.
-  The standard approach is to use context splits, side conditions that specify how resources are disjointly split across subterms.
-  With this approach, context splits echo information which is already present within subterms, thus leading to redundancy.  An alternative approach is to use leftover typing \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have also an output usage context: the leftovers.
-  With this approach, the leftovers of one typing derivation are fed as the inputs of the next, threading through linear resources while avoiding context splits.
-  We use this technique to define a type system for a \emph{resource-aware \picalc{}} \cite{MilnerPW92,Milner99}.
+  Linear type systems must keep track of how programs use their resources.
+  The standard approach is to use \emph{context splits} specifying how resources are disjointly split across subterms.
+  In this approach, context splits echo information which is already present within subterms, thus leading to redundancy.  An alternative approach is to use \emph{leftover typing} \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have also an output usage context: the leftovers.
+  In this approach, the leftovers of one typing derivation are fed as the input of the next, threading through linear resources while avoiding context splits.
+  We use leftover typing to define a type system for a \emph{resource-aware \picalc{}} \cite{MilnerPW92,Milner99}.
   This type system is parametrised over a set of usage algebras that are general enough to encompass shared types (free to reuse and discard), graded types (use an $n$ number of times) and linear types (use exactly once).
-  In the \picalc{} linear types are of fundamental importance: they ensure the privacy and safety of the communication and avoid race conditions.
-  We provide a framing theorem for our type system, generalise the weakening and strengthening theorems, and show subject reduction.
-  Our formalisation is fully mechanised in about 1800 lines of Agda.
+   Linear types are of fundamental importance in the \picalc{}: they ensure privacy and safety of communication and avoid race conditions.
+  We provide a framing theorem for our type system, generalise the weakening and strengthening theorems to include linear types, and prove subject reduction.
+  Our formalisation is fully mechanised in about 1800 lines of Agda \cite{Zalakain2020Agda}.
 
 %  \keywords{Pi-calculus \and Linear types \and Leftover typing \and Concurrency \and Mechanisation \and Agda}
 \end{abstract}
@@ -154,7 +154,7 @@
 The \picalc{} \cite{MilnerPW92,Milner99} is a computational model for communication and concurrency that boils concurrent processing down to the sending and receiving of data over communication channels.
 Notably, it features channel mobility: channels themselves are first class values and can be sent and received.
 Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} with linear channel types, where channels have to be used exactly once.
-In this setting, linearity guarantees the lack of race conditions and the privacy and safety of the communication.
+Linearity guarantees privacy and safety of communication and avoids race conditions.
 
 A linear type system must keep track of what resources are used in which parts of the program, and guarantee that they are \emph{neither duplicated nor discarded}.
 To do so, the standard approach is to use context splits: typing rules for terms with multiple subterms add an extra a side condition specifying what resources to allocate to each of the subterms.
@@ -163,9 +163,8 @@ A key observation here is that each subterm already \emph{knows} about the resou
 \emph{Context splits contain usage information that is already present in the subterms.}
 Moreover, the subterms cannot be typed until the context splits have been defined.
 On top of that, using binary context splits means that typing rules with $n$ subterms require $n - 1$ context splits, which considerably clutters the type system.
-There is a plethora of mechanisations of linear process calculi, all of them follow this approach \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}.
 
-An alternative approach is leftover typing, a technique that has already been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
+An alternative approach is leftover typing, a technique which has been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
 Leftover typing changes the shape of the typing judgments and includes a second \emph{leftover} output context that contains the resources that were not used by the term.
 As a result, typing rules \emph{thread the resources through} subterms without needing context splits: each subterm uses the resources it needs, and leaves the rest for its siblings.
 The first subterm in this chain of resources immediately knows what resources it has available.
@@ -179,8 +178,11 @@ Below we present two alternative typing rules for process composition in the lin
   {\Gamma \; \type{\vdash} \; P \; \type{\triangleright} \; \Delta \\ \Delta \; \type{\vdash} \; P \; \type{\triangleright} \; \Xi}
   {\Gamma \; \type{\vdash} \; \comp{P}{Q} \; \type{\triangleright} \; \Xi}
 \end{mathpar}
+\todo{Ornela: Say something about the rules and why you presented them here. Did you want to convey that the second is so much easier and elegant etc etc?}
 
-In this paper, we use leftover typing to define a resource-aware type system for the \picalc{}.
+In this paper, we use leftover typing for the first time to define a resource-aware type system for the \picalc{} and fully mechanise it in Agda. 
+With regards to mechanisation, all previous work on mechanisation of linear process calculi follows the approach of context splits \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}.
+
 We make the following main contributions:
 \begin{enumerate}
   \item \textbf{Leftover typing for a resource-aware \picalc{}}. Our type system uses leftover typing to model the resource-aware \picalc{} (\autoref{leftover-typing}) and satisfies subject reduction.
@@ -208,7 +210,7 @@ The reduction relation is defined modulo \emph{structural congruence} (\autoref{
 We then define an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
 Finally, we present the meta theoretical properties of our \picalc{} with leftovers in \autoref{meta-theory}.
 
-\subsection{Notation}
+\paragraph{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 We briefly illustrate the notation used in this paper.
@@ -900,8 +902,8 @@ They distill their typing rules even further by modelling the supply and demand 
 
 \paragraph*{Other Work}
 
-Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq, where de Bruijn indices are not as popular as in Agda or Idris.
-As a use-case, they use their tool to help automate proofs of subject reduction for a type system with session types.
+Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq, where de Bruijn indices are less popular than in Agda or Idris.
+They use their tool to help automate proofs of subject reduction for a type system with session types.
 %
 Orchard and Yoshida \cite{OrchardY16} embed a small effectul imperative language into the session-typed \picalc{}, showing that session types are expressive enough to encode effect systems.
 %
@@ -909,25 +911,18 @@ Based on contextual type theory \cite{Pientkaa,Pientka}, LINCX \cite{Georges2017
 The result is a meta-theory in which HOAS encodings with both linear and dependent types can be described.
 The developer obtains for free an equational theory of substitution and decidable typechecking without having to encode context splits within the object language.
 %
-Further work on mechanising the \picalc{} \cite{Henry-Gerard1999,Honsell2001a,Bengtson2013,Despeyroux2000,Affeldt2008}, focuses on non-linear variations, whereas we present a range of linear, graded and shared types.
+Further work on mechanisation of the \picalc{} \cite{Henry-Gerard1999,Honsell2001a,Bengtson2013,Despeyroux2000,Affeldt2008}, focuses on non-linear variations, differently from our range of linear, graded and shared types.
 
-\paragraph*{Conclusions}
+\paragraph*{Conclusions and Future Work}
 
 In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
 We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
 As a result, theorems like framing, weakening and strengthening can now be stated for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
-\paragraph*{Future Work}
-
-As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
-We intend to add support for products, sum types and replication to both our syntax and our type system.
-Orthogonally, making our typing rules bidirectional would allow us to provide a decision procedure for type checking processes in a given set of algebras.
-Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
-Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
-
-
-Replication can be added to a resource-algebra-agnostic type system with the following rule:
+%As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
+%We intend to add support for products, sum types and replication to both our syntax and our type system.
+As future work we intend to expand our framework to include infinite behaviour by adding replication, which can be added to a resource-algebra-agnostic type system with the following rule:
 \begin{mathpar}
   \inferrule
   {\types{\gamma}{\Gamma}{P}{\Gamma}}
@@ -938,11 +933,14 @@ To show subject congruence, one has to prove that $P \eqeq \comp{P}{!P}$ preserv
 In our setting, that means showing that if $\types{\gamma}{\Gamma}{\comp{P}{!P}}{\Delta}$ then $\types{\gamma}{\Gamma}{!P}{\Delta}$.
 Eliminating the hypothesis gives $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$, where one has to show that $\Gamma$ and $\Xi$ are equivalent.
 However the process $P$ does not syntactically restrict the types of the channels created within $P$: within the typing derivations $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$ one can create channels that transmit different amounts of data in $\Gamma$ and in $\Xi$, which are then not necessarily the same anymore.
+Orthogonally, we aim to investigate making our typing rules bidirectional which would allow us to provide a decision procedure for type checking processes in a given set of algebras.
+Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
+Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\section*{Acknowledgments}
+\paragraph*{Acknowledgments}
 
-We further want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their work and thoughts.
+We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their work and thoughts.
 
 \bibliographystyle{splncs04}
 \bibliography{paper}
