@@ -113,11 +113,6 @@
 \newcommand{\eq}{\, \type{\simeq} \,}
 \newcommand{\eqeq}{\, \type{\cong} \,}
 
-% Example
-\newcommand{\sender}{\textcolor{brown}{sender}}
-\newcommand{\receiver}{\textcolor{purple}{receiver}}
-\newcommand{\courier}{\textcolor{cyan}{courier}}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{$\pi$ with leftovers: \\ a mechanisation in Agda}
 \titlerunning{$\pi$ with leftovers: a mechanisation in Agda}
@@ -303,9 +298,9 @@ process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as pr
 \label{example-process}
 
 As an example use of this syntax, we present a courier system that consists of three \emph{roles}:
-a \sender{}, who wants to send a package;
-a \receiver{}, who receives the package sent by the sender;
-and a \courier{}, who carries the package from the sender to the receiver.
+a sender, who wants to send a package;
+a receiver, who receives the package sent by the sender;
+and a courier, who carries the package from the sender to the receiver.
 \begin{center}
   \small
   \begin{tikzpicture}[draw,circle]
@@ -321,26 +316,25 @@ and a \courier{}, who carries the package from the sender to the receiver.
   \end{tikzpicture}
 \end{center}
 
-\todo{the colors are confusing: function color for send recv carry, individual colors for sender receiver and carrier}
 Our courier system is defined by four \picalc{} processes composed in parallel instantiating the above three roles:
-we have two \sender{} processes, $\func{send} \, x$ and $\func{send} \, y$, sending data over channels $x$ and $y$, respectively;
-one \receiver{} process, $\func{recv} \, z$, which receives over channel $z$ the data sent from each of the senders -- hence receives twice;
-and a \courier{} process $\func{carry} \, x \, y \, z$, which synchronises communication among the senders and the receiver.
-The \courier{} process first receives data from the two senders along its input channels $x$ and $y$, and then sends the two received bits of data to the receiver along its output channel $z$.
+we have two sender processes, $\func{send} \, x$ and $\func{send} \, y$, sending data over channels $x$ and $y$, respectively;
+one receiver process, $\func{recv} \, z$, which receives over channel $z$ the data sent from each of the senders -- hence receives twice;
+and a courier process $\func{carry} \, x \, y \, z$, which synchronises communication among the senders and the receiver.
+The courier process first receives data from the two senders along its input channels $x$ and $y$, and then sends the two received bits of data to the receiver along its output channel $z$.
 
-The \sender{} and \receiver{} \emph{roles} are defined below, parametrised by the channels on which they operate.
-The \sender{} creates a new channel to be sent as data, and sends it over channel $c$, and then terminates.
-Each \sender{} process $\func{send} \, x$ and $\func{send} \, y$ is an instantiation of $\func{send} \, c$.
-The \receiver{} receives data \emph{twice} on a channel $c$ and then terminates.
-The \receiver{} process $\func{recv} \, z$ is an instantiation of $\func{recv} \, c$.
+The sender and receiver \emph{roles} are defined below, parametrised by the channels on which they operate.
+The sender creates a new channel to be sent as data, and sends it over channel $c$, and then terminates.
+Each sender process $\func{send} \, x$ and $\func{send} \, y$ is an instantiation of $\func{send} \, c$.
+The receiver receives data \emph{twice} on a channel $c$ and then terminates.
+The receiver process $\func{recv} \, z$ is an instantiation of $\func{recv} \, c$.
 \begin{align*}
   & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO &&
     \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)} \PO
 \end{align*}
 
-The \courier{} role is defined below as $\func{carry} \; x \; y \; z$.
+The courier role is defined below as $\func{carry} \; x \; y \; z$.
 It sequentially receives on the two input channels $x$ and $y$ -- instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$ -- instantiating $out$.
-Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one \sender{} and the \courier{}, the second between the other \sender{} and the \courier{}, and the third between the \receiver{}  and the \courier{}.
+Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one sender and the courier, the second between the other sender and the courier, and the third between the receiver  and the courier.
 The result is the courier $\func{system}$ defined below.
 \begin{align*}
   & \func{carry} \; in0 \; in1 \; out \; =  \recv{in0 }{} 
@@ -732,7 +726,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 We provide the typing derivation for the courier system defined in \autoref{example-process}.
 For the sake of simplicity, we instantiate these processes with concrete variable references before typing them.
 
-The \receiver{} defined by the $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
+The receiver defined by the $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
 After receiving twice, the process ends, and we should not be left with any unused multiplicities: $u$ needs to be $\lz$.
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
@@ -748,13 +742,13 @@ Once the types are given, the typing derivation is completely syntax directed.
 \end{flalign*}
 \end{multicols}
 
-The \sender{} defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
-We instantiate $t$ (the type of data that the \sender{} sends) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
+The sender defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
+We instantiate $t$ (the type of data that the sender sends) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
 As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
 We will transmit once, thus use a single output multiplicity, and leave the rest as leftovers.
 Agda can uniquely determine the arguments required by the $\new{}$ constructor, and thus we can omit them using underscores.
 
-Dually, the \courier{} defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
+Dually, the courier defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
 The typing derivation here is uniquely determined by the type and syntax of the process.
 \begin{multicols}{2}
 \begin{flalign*}
