@@ -207,10 +207,10 @@ The formalisation of the \picalc{} with leftover typing, from the syntax to the 
 
 We start by using type level {de Bruijn indices} \cite{deBruijn1972,Dybjer1994} to introduce a syntax of \picalc{} processes that is \emph{well scoped by construction}: every free variable is accounted for in the type of the process that uses it (\autoref{syntax}).
 We then provide an operational semantics for the \picalc{}, prior to any typing (\autoref{semantics}).
-This operational semantics is defined as a reduction relation on processes (\autoref{operational-semantics}).
+This operational semantics is defined as a reduction relation on processes.
 The reduction relation tracks at the type level the channel on which communication occurs.
 This information is later used to state the subject reduction theorem --- aka type preservation.
-The reduction relation is defined modulo \emph{structural congruence} (\autoref{structural-congruence}) --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
+The reduction relation is defined modulo \emph{structural congruence} --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 We then define an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
 Finally, we present the meta theoretical properties of our \picalc{} with leftovers in \autoref{meta-theory}.
 
@@ -355,11 +355,6 @@ There we use a mix of linear, graded and shared typing to type check $\func{syst
 \section{Operational Semantics}
 \label{semantics}
 Thanks to our well-scoped grammar in \autoref{syntax}, the semantics of our language can now be defined on the totality of the syntax.
-We define structural congruence in \autoref{structural-congruence} and provide a reduction relation in \autoref{operational-semantics}.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Structural Congruence}
-\label{structural-congruence}
 
 \begin{nidefinition}[\textsc{Unused}]
   \label{def:unused}
@@ -368,6 +363,7 @@ We define structural congruence in \autoref{structural-congruence} and provide a
 \end{nidefinition}
 
 \begin{nidefinition}[\textsc{StructCong}]
+  \label{def:structcong}
 We define the base cases of a structural congruence relation $\eqeq$ as follows:
 \begin{mathpar}
   \datatype
@@ -408,17 +404,12 @@ In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of
 In all the above, $i$ is incremented every time we go under a binder.
 \end{nidefinition}
 
-\begin{nidefinition}[\textsc{Equals}]
+\begin{nidefinition}[\textsc{Equals}] \label{equals}
 We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in $\eq{}$.
 This relation is structurally congruent under a context $\mathcal{C}[\cdot]$ \cite{Sangio01} and is reflexive, symmetric and transitive. 
 \end{nidefinition}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Operational Semantics}
-\label{operational-semantics}
-
-\begin{nidefinition}[\textsc{Reduces}]
+\begin{nidefinition}[\textsc{Reduces}]\label{def:reduces}
 The operational semantics of the \picalc{} is defined as a reduction relation $\reduce{c}$ indexed by the channel $c$ on which communication occurs.
 We keep track of channel $c$ so we can state subject reduction (\autoref{thm:subject-reduction}).
 
@@ -500,6 +491,7 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
   We use $\forall$ for universal quantification.
   The dependent product $\type{\exists}$ uses the value of its first argument in the type of its second.
   The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.
+
   \begin{equation*}
   \begin{aligned}
     &\zero                   &:{} &                 &        & C \\
@@ -538,6 +530,7 @@ Their use in typing derivations is illustrated in \autoref{example-derivation} (
 We use indexed sets of usage algebras to allow several usage algebras to coexist in our type system with leftovers (\autoref{leftover-typing}).
 \begin{nidefinition}[\textsc{Algebras}]
   An \emph{indexed set of usage algebras} is a type $\Idx$ of indices that is nonempty ($\type{\exists IDX}$) together with an interpretation $\Usage$ of indices into types, and an interpretation $\type{ALGEBRAS}$ of indices into usage algebras of the corresponding type.
+
   \begin{equation*}
     \begin{aligned}
       &\Idx               &:{} &\Set \\
@@ -813,8 +806,8 @@ Strengthening states that removing an unused variable preserves the well-typedne
   Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
 
-Subject congruence states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
-Subject reduction states that a well-typed process that communicates on a channel $c$ (\autoref{operational-semantics}) preserves its well-typedness and consumes $\lio$ from $c$ if $c$ is a channel in the environment.
+Subject congruence states that applying structural congruence (\autoref{def:equals}) to a well-typed process preserves its well-typedness.
+Subject reduction states that a well-typed process that communicates on a channel $c$ (\autoref{def:reduces}) preserves its well-typedness and consumes $\lio$ from $c$ if $c$ is a channel in the environment.
 
 \begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
