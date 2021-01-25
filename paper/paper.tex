@@ -402,7 +402,7 @@ In $\constr{scope-comm}$ the function $\func{exchange}_i \; P$ traverses $P$ (of
 In all the above, $i$ is incremented every time we go under a binder.
 \end{nidefinition}
 
-\begin{nidefinition}[\textsc{Equals}] \label{equals}
+\begin{nidefinition}[\textsc{Equals}] \label{def:equals}
 We lift the relation \textsc{StructCong} $\eqeq{}$ and close it under equivalence and congruence in $\eq{}$.
 This relation is structurally congruent under a context $\mathcal{C}[\cdot]$ \cite{Sangio01} and is reflexive, symmetric and transitive. 
 \end{nidefinition}
@@ -711,7 +711,11 @@ The receiver defined by the $\func{recv}$ process receives data along the channe
 After receiving twice, the process ends: we must not be left with any unused multiplicities, thus $u = \lz$.
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
-Once the types are given, the typing derivation is completely syntax directed.
+The sender defined by the $\func{send}$ process sends data along the channel with index $\constr{0}$, which needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
+We instantiate $t$ (the type of data that the sender sends) to the trivial channel $\channel{\unit}{\func{\omega}}$.
+As per the type of the process $\func{recv}$, $u = \lz$.
+We will transmit once, thus use $\suc{\constr{0}}$ output multiplicity, and leave the rest as leftovers.
+Agda can uniquely determine the arguments required by the $\new{}$ constructor.
 \begin{align*}
    & \func{recvWT} \;  : \; \types{\gamma \comma \channel{t}{\lz}  }{\Gamma \comma (\suc \suc l \comma r)  }{\func{recv} \; \constr{0}  }{\Gamma \comma (l \comma r)} \\
    & \func{recvWT} \;  = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
@@ -719,16 +723,8 @@ Once the types are given, the typing derivation is completely syntax directed.
    & \func{sendWT} \;  = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
 \end{align*}
 
-The sender defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
-We instantiate $t$ (the type of data that the sender sends) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
-As per the type of the process $\func{recv}$, the transmitted multiplicities $u$ are $\lz$.
-We will transmit once, thus use a single output multiplicity, and leave the rest as leftovers.
-Agda can uniquely determine the arguments required by the $\new{}$ constructor, and thus we can omit them using underscores.
-
 Dually, the courier defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
-The typing derivation here is uniquely determined by the type and syntax of the process.
 We can now compose these processes in parallel and type the courier system.
-Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
 \begin{align*}
 & \func{carryWT} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
 & \func{carryWT} && = \recv{(\suc \suc \constr{0})}{} \recv{(\suc \suc \constr{0})}{} \send{(\suc \suc \constr{0})}{\suc \constr{0}} \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
@@ -742,29 +738,26 @@ Specifying the types of the channels is not required: Agda can infer them from t
 
 We have mechanised subject reduction for our \picalc{} with leftovers in 850 lines of Agda code.
 The meta-theory of resource-aware type systems often needs to reason on typing derivations modulo associativity in the allocation of resources.
-For type systems using context splitting side conditions, this means applying associativity lemmas to recompute context splits; for type systems using leftover typing, this comes naturally \todo{rephrase?}.
-An example use of this is showing that the application of $\constr{comp-asssoc}$ preserves typing: the proof proceeds by deconstructing the input derivation into $\comp{P}{(\comp{Q}{R})}$ and reassembling it as $\comp{(\comp{P}{Q})}{R}$ without the need of any extra reasoning.
+For type systems using context splitting side conditions, this means applying associativity lemmas to recompute context splits; for type systems using leftover typing it does not.
+As an example, the proof that $\constr{comp-asssoc}$ preserves typing proceeds by deconstructing the input derivation into $\comp{P}{(\comp{Q}{R})}$ and reassembling it as $\comp{(\comp{P}{Q})}{R}$ without the need of any extra reasoning.
 
-All the reasoning carried out in our type safety proofs is based on the algebraic properties introduced in \autoref{multiplicities} -- an exception to this is $\func{\cdot -compute^r}$, which is only ever used for the user's convenience.
+All the reasoning carried out in our type safety proofs is based on the algebraic properties introduced in \autoref{multiplicities} -- the exception to this is $\func{\cdot -compute^r}$, only ever used for the user's convenience.
 This algebraic properties of the algebras allow us to see a typing derivation $\types{\gamma}{\Gamma}{P}{\Delta}$ as a unique \emph{arrow} from $\Gamma$ to $\Delta$, and to freely compose arrows with the same typing context and a matching output and input usage contexts.
 
-Leftover typing also allows us to prove a \emph{framing} theorem, which states that arbitrary usage annotations can be added to the input usage context, as long as they are added to the output usage context as well -- one can thus understand a typing derivation independently from its unused resources.
-An example use of this is showing that $\constr{comp-comm}$ preserves typing: we use framing to show that in $\comp{P}{Q}$ the typing of $P$ and $Q$ is independent of one another.
+Leftover typing also allows us to state a \emph{framing} theorem showing that adding arbitrary usage annotations to the input and output usage contexts preserves typing -- one can understand a typing derivation independently from its unused resources.
+With framing one can show that $\constr{comp-comm}$ preserves typing: in $\comp{P}{Q}$ the typing of $P$ and $Q$ is independent of one another.
 \begin{nitheorem}[Framing]
   \label{thm:framing}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
+  Let $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
   Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
-  Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
-  Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
+  Then for any $\Gamma_r$ and $\Xi_r$ where $\opctx{\Gamma_r}{\Delta}{\Xi_r}$ it holds that $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
 
-Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a more general form, in which variables can freely be added or removed from context regardless of their usage annotation -- as long as this usage annotation is added or removed from the leftover context as well.
-Weakening states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
-Strengthening states that removing an unused variable preserves the well-typedness of a process.
+Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a more general form where linear variables can freely be added or removed from context too -- as long as they are added and remove to or from both input and output contexts.
 
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
-  Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
+  Let $\func{ins}_i$ insert an element into a context at position $i$ --- we use it both to insert types into typing contexts and usage annotations into usage contexts.
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
   $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
@@ -772,14 +765,15 @@ Strengthening states that removing an unused variable preserves the well-typedne
 
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
-  Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
+  Let $\func{del}_i$ delete the element at position $i$ from a context --- we use it both to delete types from typing contexts and usage annotations from usage contexts.
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
   Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
 \end{nitheorem}
 
-Subject congruence states that applying structural congruence (\autoref{def:equals}) to a well-typed process preserves its well-typedness.
-Subject reduction states that a well-typed process that communicates on a channel $c$ (\autoref{def:reduces}) preserves its well-typedness and consumes $\lio$ from $c$ if $c$ is a channel in the environment.
+Subject congruence states that structural congruence (\autoref{def:equals}) preserves the well-typedness of a process.
+Subject reduction states that reducing on a channel $c$ (\autoref{def:reduces}) preserves the well-typedness of a process (after consuming $\lio$ from $c$ if $c$ is an $\constr{external}$ channel).
+We refer to Appendix \ref{app:type-safety} for a more detailed account of the mechanised type-safety proofs.
 
 \begin{nitheorem}[Subject congruence]
   \label{thm:subject-congruence}
@@ -788,14 +782,10 @@ Subject reduction states that a well-typed process that communicates on a channe
 
 \begin{nitheorem}[Subject reduction]
   \label{thm:subject-reduction}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
-  \begin{itemize}
-    \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
-    \item If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
-  \end{itemize}
+  Let $\types{\gamma}{\Gamma}{P}{\Xi}$ and $P \reduce{c} Q$.
+  If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+  If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
 \end{nitheorem}
-
-We refer to Appendix \ref{app:type-safety} for a more detailed account of the mechanised type-safety proofs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Conclusions, Related and Future Work}
