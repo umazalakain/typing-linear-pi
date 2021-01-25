@@ -251,7 +251,6 @@ To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, wher
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 
 \begin{nidefinition}[\textsc{Var} and \textsc{Process}]
-
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
 References outside of that range are meaningless, and it is useful to rule them out syntactically.
 We do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
@@ -356,14 +355,12 @@ There we use a mix of linear, graded and shared typing to type check $\func{syst
 \label{semantics}
 Thanks to our well-scoped grammar in \autoref{syntax}, the semantics of our language can now be defined on the totality of the syntax.
 
-\begin{nidefinition}[\textsc{Unused}]
-  \label{def:unused}
+\begin{nidefinition}[\textsc{Unused}] \label{def:unused}
   We consider a variable $i$ to be unused in $P$ ($\Unused_i \; P$) if none of the inputs nor the outputs refer to it.
   $Unused_i \; P$ is defined as a recursive predicate on $P$, incrementing $i$ every time we go under a binder, and using $i \type{\not\equiv} x$ ( which unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$) to compare variables.
 \end{nidefinition}
 
-\begin{nidefinition}[\textsc{StructCong}]
-  \label{def:structcong}
+\begin{nidefinition}[\textsc{StructCong}] \label{def:structcong}
 We define the base cases of a structural congruence relation $\eqeq$ as follows:
 
 \begin{mathpar}
@@ -596,9 +593,7 @@ The \textbf{typing judgement for variables} $\contains{\gamma}{\Gamma}{i}{t}{y}{
 The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
 
-\begin{nidefinition}[\textsc{VarRef}: typing variable references]
-  \label{def:varref}
-
+\begin{nidefinition}[\textsc{VarRef}: typing variable references] \label{def:varref}
   The \textsc{VarRef} typing relation for variable references is presented below.
   \begin{mathpar}
     \mprset{sep=0.5em}
@@ -646,9 +641,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- we use $\func{\cdot-compute^r}$ to automatically fulfill this proof obligation.
 \end{example}
 
-\begin{nidefinition}[\textsc{Types}: typing processes]
-  \label{def:types}
-
+\begin{nidefinition}[\textsc{Types}: typing processes] \label{def:types}
   The \textsc{Types} typing relation for \picalc{} processes is presented below.
   For convenience, we reuse the constructor names introduced for the syntax in \autoref{syntax}.
 
@@ -711,12 +704,11 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 
 \begin{example}[Typing derivation (Continued)]
 \label{example-derivation}
-
 We provide the typing derivation for the courier system defined in \autoref{example-process}.
 For the sake of simplicity, we instantiate these processes with concrete variable references before typing them.
 
-The receiver defined by the $\func{recv}$ process receives data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
-After receiving twice, the process ends, and we should not be left with any unused multiplicities: $u$ needs to be $\lz$.
+The receiver defined by the $\func{recv}$ process receives data along the channel with index $\constr{0}$, which needs to be of type $\channel{t}{u}$ for some $t$ and $u$.
+After receiving twice, the process ends: we must not be left with any unused multiplicities, thus $u = \lz$.
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
 Once the types are given, the typing derivation is completely syntax directed.
