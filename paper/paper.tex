@@ -38,10 +38,14 @@
 \spnewtheorem{nilemma}[lemma]{Lemma}{\bfseries}{}
 \spnewtheorem{nitheorem}[theorem]{Theorem}{\bfseries}{}
 
+%% remove for the camera ready
 \AtBeginDocument{%
 \renewcommand*{\figureautorefname}{Fig.\@\!}
 \renewcommand*{\sectionautorefname}{\S\!\!\,}
 \renewcommand*{\subsectionautorefname}{\S\!\!\,}
+\newcommand*{\nitheoremautorefname}{Thm.}
+\newcommand*{\nidefinitionautorefname}{Def.}
+\newcommand*{\nilemmaautorefname}{Lem.}
 }
 
 % Abbreviations
