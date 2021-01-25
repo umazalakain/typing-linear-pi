@@ -365,6 +365,7 @@ Thanks to our well-scoped grammar in \autoref{syntax}, the semantics of our lang
 \begin{nidefinition}[\textsc{StructCong}]
   \label{def:structcong}
 We define the base cases of a structural congruence relation $\eqeq$ as follows:
+
 \begin{mathpar}
   \datatype
   { }
@@ -895,19 +896,15 @@ We avoid the need for extrinsic context splits by defining a type system based o
 As a result, theorems like framing, weakening and strengthening can now be stated for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
-%As future work, we intend to prove further properties of our type system, such as that reduction preserves the balancing of channels.
-%We intend to add support for products, sum types and replication to both our syntax and our type system.
-As future work we intend to expand our framework to include infinite behaviour by adding replication, which can be added to a resource-algebra-agnostic type system with the following rule:
+As future work we intend to expand our framework to include infinite behaviour by adding replication, which can be added to a resource-algebra-agnostic type system like ours with the following rule:
 \begin{mathpar}
   \inferrule
   {\types{\gamma}{\Gamma}{P}{\Gamma}}
-  {\types{\gamma}{\Gamma}{!P}{\Gamma}}
+  {\types{\gamma}{\Gamma}{\constr{!}P}{\Gamma}}
 \end{mathpar}
-That is, if a process consumes no resources (e.g. because they are shared), then the process can be executed infinitely many times.
-To show subject congruence, one has to prove that $P \eqeq \comp{P}{!P}$ preserves typing in both directions.
-In our setting, that means showing that if $\types{\gamma}{\Gamma}{\comp{P}{!P}}{\Delta}$ then $\types{\gamma}{\Gamma}{!P}{\Delta}$.
-Eliminating the hypothesis gives $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$, where one has to show that $\Gamma$ and $\Xi$ are equivalent.
-However the process $P$ does not syntactically restrict the types of the channels created within $P$: within the typing derivations $\types{\gamma}{\Gamma}{P}{\Xi}$ and $\types{\gamma}{\Xi}{P}{\Xi}$ one can create channels that transmit different amounts of data in $\Gamma$ and in $\Xi$, which are then not necessarily the same anymore.
+That is, a process that consumes no resources (e.g. because they are shared) can be executed infinitely many times.
+To show subject congruence, one has to prove that $P \eqeq \comp{P}{\constr{!}P}$ preserves typing in both directions.
+To do so the resource consumption of a process has to be determined by e.g. adding type annotations to the syntax.
 Orthogonally, we aim to investigate making our typing rules bidirectional which would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
