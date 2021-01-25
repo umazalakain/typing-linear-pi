@@ -9,6 +9,7 @@
 \usepackage{hyperref}
 \usepackage{todonotes}
 \usepackage{appendix}
+\usepackage[strict]{changepage}
 
 % Two column itemize
 \usepackage{multicol}
@@ -945,10 +946,13 @@ Finally, we will use our \picalc{} with leftovers as an underlying framework on 
 
 We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their work and thoughts.
 
+%%
+\clearpage
 \bibliographystyle{splncs04}
 \bibliography{paper}
 
 %%
+\clearpage
 \appendix
-\input{appendix.tex}
+\changetext{}{10em}{-5em}{-5em}{}\input{appendix.tex}
 \end{document}
