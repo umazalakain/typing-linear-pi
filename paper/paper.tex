@@ -542,7 +542,6 @@ We use indexed sets of usage algebras to allow several usage algebras to coexist
   \end{equation*}
 \end{nidefinition}
 
-\todo{definition captions reset textsc}
 We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
 The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
 \begin{nidefinition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
@@ -552,10 +551,6 @@ The former are preserved throughout typing derivations; the latter are transform
     { }
     {\Type : \Set}
     \; \textsc{Type}
-  
-    \inferrule
-    { }
-    {\unit : \Type}
 
     \inferrule
     {n : \N}
@@ -566,10 +561,9 @@ The former are preserved throughout typing derivations; the latter are transform
     {\channel{t}{x} : \Type}
   \end{mathpar}
 
-  The unit type $\unit$ serves as a proof of inhabitance for types.
-  The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as booleans, $1$ as natural numbers) so that we avoid having to deal with universe polymorphism.
+  The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as the unit type, $1$ as booleans) so that we avoid dealing with universe polymorphism.
   The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
-  This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the multiplicities of input $i$ and output $o$ capabilities, respectively \cite{K07}.
+  This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the input and output multiplicities, respectively \cite{K07}.
 
   A \emph{typing context} $\PreCtx_n$ is a length-indexed list of types that is either empty ($\constr{[]}$) or the result of appending a type $t : \Type$ to an existing context ($\gamma \constr{,} t$).
 \end{nidefinition}
@@ -657,6 +651,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 
   The \textsc{Types} typing relation for \picalc{} processes is presented below.
   For convenience, we reuse the constructor names introduced for the syntax in \autoref{syntax}.
+
   \begin{mathpar}
     \datatype{
       \gamma : \PreCtx_n \\
@@ -725,16 +720,12 @@ After receiving twice, the process ends, and we should not be left with any unus
 We will use graded types to keep track of the exact number of times communication happens.
 Whatever the input multiplicity of the channel, we will consume $2$ of it and leave the remaining as leftovers.
 Once the types are given, the typing derivation is completely syntax directed.
-\begin{multicols}{2}
-\begin{flalign*}
-  & \func{\vdash recv} \; && : \; \types{\gamma \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc \suc l \comma r)\\ & &&}{\func{recv} \; \constr{0}\\ & &&}{\Gamma \comma (l \comma r)} & \\
-  & \func{\vdash recv} \; && = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO
-\end{flalign*}
-\begin{flalign*}
-  & \func{\vdash send} \; && : \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}\\ & &&}{\Gamma \comma (l \comma \suc r)\\ & &&}{\func{send} \; \constr{0}\\ & &&}{\Gamma \comma (l \comma r)} & \\
-  & \func{\vdash send} \; && = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
-\end{flalign*}
-\end{multicols}
+\begin{align*}
+   & \func{recvWT} \;  : \; \types{\gamma \comma \channel{t}{\lz}  }{\Gamma \comma (\suc \suc l \comma r)  }{\func{recv} \; \constr{0}  }{\Gamma \comma (l \comma r)} \\
+   & \func{recvWT} \;  = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
+   & \func{sendWT} \;  : \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}  }{\Gamma \comma (l \comma \suc r)  }{\func{send} \; \constr{0}  }{\Gamma \comma (l \comma r)}  \\
+   & \func{sendWT} \;  = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
+\end{align*}
 
 The sender defined by the $\func{send}$ process sends data along the channel with index $0$, thus that variable needs to be of channel type $\channel{t}{u}$ for some $t$ and $u$.
 We instantiate $t$ (the type of data that the sender sends) to $\channel{\unit}{\func{\omega}}$, as that is a value we can easily construct.
@@ -744,26 +735,14 @@ Agda can uniquely determine the arguments required by the $\new{}$ constructor, 
 
 Dually, the courier defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
 The typing derivation here is uniquely determined by the type and syntax of the process.
-\begin{multicols}{2}
-\begin{flalign*}
-& \func{\vdash carry} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
-& \func{\vdash carry} && = \\
-& && \recv{(\suc \suc \constr{0})}{} \\
-& && \recv{(\suc \suc \constr{0})}{} \\
-& && \send{(\suc \suc \constr{0})}{\suc \constr{0}} \\
-& && \send{(\suc \suc \constr{0})}{\constr{0}} \PO
-\end{flalign*}
-\begin{flalign*}
-& \func{\vdash system} && : \; \types{\constr{[]}}{\constr{[]}}{\func{system}}{\constr{[]}} & \\
-& \func{\vdash system} && = \new{} \; \_ \; \_ \; \_ \; ( \func{\vdash send} \\
-& && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash send} \\
-& && \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{\vdash recv} \\
-& && \comp{}{ \func{\vdash carry} })))
-\end{flalign*}
-\end{multicols}
-
 We can now compose these processes in parallel and type the courier system.
 Specifying the types of the channels is not required: Agda can infer them from the types of the processes.
+\begin{align*}
+& \func{carryWT} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
+& \func{carryWT} && = \recv{(\suc \suc \constr{0})}{} \recv{(\suc \suc \constr{0})}{} \send{(\suc \suc \constr{0})}{\suc \constr{0}} \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
+& \func{systemWT} && : \; \types{\constr{[]}}{\constr{[]}}{\func{system}}{\constr{[]}} \\
+& \func{systemWT} && = \new{} \; \_ \; \_ \; \_ \; ( \func{sendWT} \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{sendWT} \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{recvWT} \comp{}{ \func{carryWT} })))
+\end{align*}
 \end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
