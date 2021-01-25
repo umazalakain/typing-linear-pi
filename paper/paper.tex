@@ -335,6 +335,7 @@ The courier role is defined below as $\func{carry} \; x \; y \; z$.
 It sequentially receives on the two input channels $x$ and $y$ -- instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$ -- instantiating $out$.
 Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one sender and the courier, the second between the other sender and the courier, and the third between the receiver  and the courier.
 The result is the courier $\func{system}$ defined below.
+We continue this example and provide typing derivations for these processes in \autoref{leftover-typing}, where we use a mix of linear, graded and shared typing to type $\func{system}$.
 \begin{align*}
   & \func{carry} \; in0 \; in1 \; out \; =  \recv{in0 }{} 
   \recv{(\suc \; in1) }{} 
@@ -345,15 +346,12 @@ The result is the courier $\func{system}$ defined below.
   \comp{}{\new{} ( \func{recv} \; \constr{0} } 
   \comp{}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } 
 \end{align*}
-
-We continue this example and by providing typing derivations for these processes in \autoref{leftover-typing}.
-There we use a mix of linear, graded and shared typing to type check $\func{system}$.
 \end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Operational Semantics}
 \label{semantics}
-Thanks to our well-scoped grammar in \autoref{syntax}, the semantics of our language can now be defined on the totality of the syntax.
+Thanks to our well-scoped grammar in \autoref{syntax}, we now define the semantics of our language on the totality of the syntax.
 
 \begin{nidefinition}[\textsc{Unused}] \label{def:unused}
   We consider a variable $i$ to be unused in $P$ ($\Unused_i \; P$) if none of the inputs nor the outputs refer to it.
@@ -542,7 +540,9 @@ We use indexed sets of usage algebras to allow several usage algebras to coexist
 We keep typing contexts ($\PreCtx$) and usage contexts ($\Ctx$) separate.
 The former are preserved throughout typing derivations; the latter are transformed as a result of input, output, and context splits.
 \begin{nidefinition}[\textsc{Type} and \textsc{PreCtx}: types and typing contexts]
-  A \emph{type} is either a unit type ($\unit$), a base type ($\base{n}$) or a channel type ($\channel{t}{x}$).
+  A \emph{type} is either a unit type ($\unit$),
+  % a base type ($\base{n}$)
+  or a channel type ($\channel{t}{x}$).
   \begin{mathpar}
     \datatype
     { }
@@ -550,15 +550,16 @@ The former are preserved throughout typing derivations; the latter are transform
     \; \textsc{Type}
 
     \inferrule
-    {n : \N}
-    {\base{n} : \Type}
-  
+    { }
+    {\unit : \Type}
+
     \inferrule
     {t : \Type \\ \stacked{idx : \Idx \\\\ x : \Usage_{idx}^{\func{2}}}}
     {\channel{t}{x} : \Type}
   \end{mathpar}
 
-  The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as the unit type, $1$ as booleans) so that we avoid dealing with universe polymorphism.
+  The unit type $\unit$ serves as a proof of inhabitance for types.
+  % The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as the unit type, $1$ as booleans) so that we avoid dealing with universe polymorphism.
   The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
   This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the input and output multiplicities, respectively \cite{K07}.
 
