@@ -1,6 +1,5 @@
-\documentclass[]{llncs}
+\documentclass[runningheads]{llncs}
 % TODO: get rid of page numbers
-\pagestyle{plain}
 
 \usepackage[utf8]{inputenc}
 \usepackage{url}
@@ -38,9 +37,11 @@
 \spnewtheorem{nilemma}[lemma]{Lemma}{\bfseries}{}
 \spnewtheorem{nitheorem}[theorem]{Theorem}{\bfseries}{}
 
-\renewcommand{\sectionautorefname}{\S}%
-\renewcommand{\subsectionautorefname}{\S}%
-\renewcommand{\appendixautorefname}{Appendix}
+\AtBeginDocument{%
+\renewcommand*{\figureautorefname}{Fig.\@\!}
+\renewcommand*{\sectionautorefname}{\S\!\!\,}
+\renewcommand*{\subsectionautorefname}{\S\!\!\,}
+}
 
 % Abbreviations
 \newcommand{\lambdacalc}{$\lambda$-calculus}
