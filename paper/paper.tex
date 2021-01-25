@@ -333,46 +333,25 @@ The \sender{} creates a new channel to be sent as data, and sends it over channe
 Each \sender{} process $\func{send} \, x$ and $\func{send} \, y$ is an instantiation of $\func{send} \, c$.
 The \receiver{} receives data \emph{twice} on a channel $c$ and then terminates.
 The \receiver{} process $\func{recv} \, z$ is an instantiation of $\func{recv} \, c$.
-\todo{get rid of vertical space}
-\begin{minipage}[t]{0.5\textwidth}
-\begin{flalign*}
-  & \func{send} \; : \; \Var_n \to \Process_n & \\
-  & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO
-\end{flalign*}
-\end{minipage}
-\begin{minipage}[t]{0.5\textwidth}
-\begin{flalign*}
-  & \func{recv} \; : \; \Var_n \to \Process_n & \\
-  & \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)} \PO
-\end{flalign*}
-\end{minipage}
+\begin{align*}
+  & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO &&
+    \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)} \PO
+\end{align*}
 
 The \courier{} role is defined below as $\func{carry} \; x \; y \; z$.
 It sequentially receives on the two input channels $x$ and $y$ -- instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$ -- instantiating $out$.
 Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one \sender{} and the \courier{}, the second between the other \sender{} and the \courier{}, and the third between the \receiver{}  and the \courier{}.
 The result is the courier $\func{system}$ defined below.
-\begin{minipage}[t]{0.5\textwidth}
-\begin{flalign*}
-  \func{carry} \; : \; \Var_n \to \Var_n \to \Var_n \to \Process_n%
-\end{flalign*}%
-\begin{flalign*}
-  & \func{carry} \; in0 \; in1 \; out \; &&= \\
-  & && \recv{in0 &&}{} \\
-  & && \recv{(\suc \; in1) &&}{} \\
-  & && \send{(\suc \suc \; out) &&}{\suc \constr{0}} \\
-  & && \send{(\suc \suc \; out) &&}{\constr{0}} \PO
-\end{flalign*}
-\end{minipage}
-\begin{minipage}[t]{0.5\textwidth}
-\begin{flalign*}
-  & \func{system} && : \; \Process_{\constr{0}} & \\
-  & \func{system} && = \new{} ( \func{send} \; \constr{0} \\
-  & && \comp{}{ \new{} ( \func{send} \; \constr{0} } \\
-  & && \comp{}{ \new{} ( \func{recv} \; \constr{0} } \\
-  & && \comp{}{ \func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } \\
-\end{flalign*}
-\end{minipage}
-\todo{fix}
+\begin{align*}
+  & \func{carry} \; in0 \; in1 \; out \; =  \recv{in0 }{} 
+  \recv{(\suc \; in1) }{} 
+  \send{(\suc \suc \; out) }{\suc \constr{0}} 
+  \send{(\suc \suc \; out) }{\constr{0}} \PO \\
+  & \func{system} =  \new{} ( \func{send} \; \constr{0} 
+  \comp{}{\new{} ( \func{send} \; \constr{0} } 
+  \comp{}{\new{} ( \func{recv} \; \constr{0} } 
+  \comp{}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } 
+\end{align*}
 
 We continue this example and by providing typing derivations for these processes in \autoref{leftover-typing}.
 There we use a mix of linear, graded and shared typing to type check $\func{system}$.
