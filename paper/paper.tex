@@ -172,7 +172,7 @@ An alternative approach is leftover typing, a technique which has been used to f
 Leftover typing changes the shape of the typing judgments and includes a second \emph{leftover} output context that contains the resources that were not used by the term.
 As a result, typing rules \emph{thread the resources through} subterms without needing context splits: each subterm uses the resources it needs, and leaves the rest for its siblings.
 The first subterm in this chain of resources immediately knows what resources it has available.
-Below we present two alternative typing rules for process composition in the linear \picalc{}: the one on the left uses context splits, while the one on the right uses leftover typing.
+Below we present two alternative typing rules for process composition in the linear \picalc{}: the one on the left uses context splits, while the one on the right does not and uses leftover typing instead:
 \begin{mathpar}
   \inferrule
   {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
@@ -182,10 +182,9 @@ Below we present two alternative typing rules for process composition in the lin
   {\Gamma \; \type{\vdash} \; P \; \type{\triangleright} \; \Delta \\ \Delta \; \type{\vdash} \; P \; \type{\triangleright} \; \Xi}
   {\Gamma \; \type{\vdash} \; \comp{P}{Q} \; \type{\triangleright} \; \Xi}
 \end{mathpar}
-\todo{Ornela: Say something about the rules and why you presented them here. Did you want to convey that the second is so much easier and elegant etc etc?}
 
 In this paper, we use leftover typing for the first time to define a resource-aware type system for the \picalc{} and fully mechanise it in Agda. 
-With regards to mechanisation, all previous work on mechanisation of linear process calculi follows the approach of context splits \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}.
+All previous work on the mechanisation of linear process calculi uses context splits \cite{Gay2001,Goto2016a,Gay2010,Thiemann2019,Ciccone}.
 
 We make the following main contributions:
 \begin{enumerate}
