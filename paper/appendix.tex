@@ -78,8 +78,8 @@ In the following we present the main results that our conversion functions satis
   Translating from names to de Bruijn indices and back via $\func{toRaw} \circ \func{fromRaw}$ results in the same process modulo $\alpha$-conversion.
 \end{nilemma}
 
-\begin{proof}[Proof]
-  All the above results are proved by induction on \textsc{Process}, \textsc{Var}, and \textsc{Raw} (\autoref{def:syntax}).
+\begin{proof}
+  All the above results are proved by induction on \textsc{Process}, \textsc{Var} (\autoref{def:syntax}) and \textsc{Raw}.
   Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
 \end{proof}
 
@@ -95,7 +95,7 @@ We extend $\func{exchange}_i$  introduced in \autoref{def:equals} to exchange ty
   Then, $\types{\func{exchange}_i \; \gamma}{\func{exchange}_i \; \Gamma}{\allowbreak \func{exchange}_i \; P}{\func{exchange}_i \; \Xi}$.
 \end{nitheorem}
 
-\begin{proof}[Proof]
+\begin{proof}
   All the above theorems are proved by induction on \textsc{Types} and \textsc{VarRef}.
   For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
@@ -135,7 +135,7 @@ We are now in a position to prove subject congruence.
   If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
-\begin{proof}[Proof]
+\begin{proof}
   The proof is by induction on \textsc{Equals} $\eq{}$.
   Here we only consider those cases that are not purely inductive: the base cases for $\constr{struct}$ and their symmetric variants.
   Full proof in \cite{Zalakain2020Agda}.
@@ -167,9 +167,9 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
 \begin{nitheorem}[Generalised substitution]
   \label{thm:substitution-generalization}
   Let process $P$ be well-typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
-  The substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
+  The substituted variable at position $i$ can be split into $m$ in $\Gamma_i$, and into $n$ in $\Psi_i$.
   Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
-  In other words, there must exist some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
+  In other words, let there be some $\Gamma$, $\Psi$, $\Gamma_j$ and $\Psi_j$ such that:
   \begin{multicols}{2}
   \begin{itemize}
     \item $\contains{\gamma}{\Gamma_i}{i}{t}{m}{\Gamma}$
@@ -181,10 +181,9 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
   Let $\Gamma$ and $\Psi$ be related such that $\opctx{\Gamma}{\Delta}{\Psi}$ for some $\Delta$.
   Let $\Delta$ have a usage annotation $\lz$ at position $i$, so that all consumption from $m$ to $n$ must happen in $P$.
   Then substituting $i$ to $j$ in $P$ will be well-typed in $\types{\gamma}{\Gamma_j}{\subst{P}{j}{i}}{\Psi_j}$.
-  Refer to \autoref{fig:subst} for a diagramatic representation.
 \end{nitheorem}
 
-\begin{proof}[Proof]
+\begin{proof}
   By induction on the derivation $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   \begin{itemize}
     \item
@@ -219,68 +218,40 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
       We construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
       We can now make two inductive calls (on the derivation of $P$ and $Q$) and compose their results.
 
-      \begin{minipage}[b]{0.5\linewidth}
-        \centering
-        \begin{tikzpicture}
-          \node (gamma-i) at (0,4)   {$\Gamma_i$};
-          \node (gamma-m) at (0,2)   {$\Gamma$};
-          \node (gamma-j) at (0,0)   {$\Gamma_j$};
-          \node (xi-i)    at (3,3.5) {$\Xi_i$};
-          \node (theta)   at (3,2.3) {$\Theta$};
-          \node (delta-m) at (3,1.7) {};
-          \node (xi-j)    at (3,0.5) {$\Xi_j$};
-          \node (psi-i)   at (6,3)   {$\Psi_i$};
-          \node (psi-m)   at (6,2)   {$\Psi$};
-          \node (psi-j)   at (6,1)   {$\Psi_j$};
+      \centering
+      \begin{tikzpicture}
+        \node (gamma-i) at (0,4)   {$\Gamma_i$};
+        \node (gamma-m) at (0,2)   {$\Gamma$};
+        \node (gamma-j) at (0,0)   {$\Gamma_j$};
+        \node (xi-i)    at (3,3.5) {$\Xi_i$};
+        \node (theta)   at (3,2.3) {$\Theta$};
+        \node (delta-m) at (3,1.7) {};
+        \node (xi-j)    at (3,0.5) {$\Xi_j$};
+        \node (psi-i)   at (6,3)   {$\Psi_i$};
+        \node (psi-m)   at (6,2)   {$\Psi$};
+        \node (psi-j)   at (6,1)   {$\Psi_j$};
 
-          \draw[-]  (gamma-m) -- (delta-m.center);
-          \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \lz$}(psi-m);
+        \draw[-]  (gamma-m) -- (delta-m.center);
+        \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \lz$}(psi-m);
 
-          \draw[->,densely dotted] (gamma-m) -- (theta);
-          \draw[->,densely dotted] (theta) -- (psi-m);
+        \draw[->,densely dotted] (gamma-m) -- (theta);
+        \draw[->,densely dotted] (theta) -- (psi-m);
 
-          \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
-          \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
-          \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
-          \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
+        \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
+        \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
+        \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
+        \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
 
-          \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
-          \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
-          \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
-          \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
-          \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
-          \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
-        \end{tikzpicture}
+        \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
+        \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
+        \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
+        \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
+        \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
+        \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
+      \end{tikzpicture}
 
-        Diagrammatic representation of the $\comp{}{}$ case for substitution.
-        Continuous lines represent known facts, dotted lines proof obligations.
-      \end{minipage}
-      \begin{minipage}[b]{0.5\linewidth}
-        \centering
-        \begin{tikzpicture}
-          \node (gamma-i) at (0,2)   {};
-          \node (gamma-m) at (0,1)   {};
-          \node (gamma-j) at (0,0)   {};
-          \node (xi-i)    at (2,3)   {};
-          \node (xi-m)    at (2,2) {};
-          \node (xi-j)    at (2,1)   {};
-          \node (psi-m)   at (4,2) {};
-
-          \draw[->] (gamma-i) -- (xi-j);
-          \draw[->] (gamma-m) -- (xi-j);
-          \draw[->,densely dotted] (gamma-j) -- (xi-j);
-          \draw[->] (gamma-i) -- (gamma-m);
-          \draw[->] (gamma-j) -- (gamma-m);
-          \draw[->] (xi-i)    -- (xi-m);
-          \draw[->] (xi-j)    -- (xi-m);
-          \draw[->] (xi-i)    -- (psi-m);
-          \draw[->] (xi-m)    -- (psi-m);
-          \draw[->,densely dotted] (xi-j)    -- (psi-m);
-        \end{tikzpicture}
-
-        Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
-        This approach makes composing typing derivations before and after subsitution more difficult.
-      \end{minipage}
+      Diagrammatic representation of the $\comp{}{}$ case for substitution.
+      Continuous lines represent known facts, dotted lines proof obligations.
 
   \end{itemize}  
 \end{proof}
@@ -291,16 +262,10 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
   Let $\contains{\gamma}{\Psi}{j}{t}{m}{\Xi}$.
   Then, we can substitute the variable references to $\constr{0}$ in $P$ with $\suc j$ so that the result is well typed in $\types{\gamma \comma t}{\Gamma \comma m}{\subst{P}{\suc j}{\constr{0}}}{\Xi \comma m}$.
 \end{nitheorem}
-\begin{proof}[Proof]
+\begin{proof}
   For $\contains{\gamma}{\Gamma}{j}{t}{m}{\Theta}$ and $\types{\gamma \comma t}{\Theta \comma m}{P}{\Xi \comma \lz}$ for some $\Theta$, we use framing to derive them.
   Then, we use these to apply \autoref{thm:substitution-generalization}.
 \end{proof}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-% \begin{note}
-  We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
-% \end{note}
 
 \paragraph*{Subject Reduction}
 Finally we are ready to present our main result, stating  that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
@@ -326,7 +291,7 @@ We first introduce an auxiliary lemma:
   \end{itemize}
 \end{nitheorem}
 
-\begin{proof}[Proof]
+\begin{proof}
   By induction on $P \reduce{c} Q$. For the full details refer to our mechanisation in Agda.  
   \begin{itemize}
     \item
