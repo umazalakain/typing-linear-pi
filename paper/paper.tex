@@ -686,18 +686,18 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   This multiplicity $y$ is used for both input and output, so that they are balanced.
   The continuation process $P$ is provided with the new channel with usage annotation $y \comma y$, which it must completely exhaust.
 %
-  The input process in rule $\recv{}{}$ requires a channel $chan_i$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  The input process in rule $\recv{}{}$ requires a channel $chan$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
   Note that the index $i$ is used in the syntax of the typed process.
   We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ --- at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
 %
-  Similarly to input, the output process in rule $\send{}{}$ requires a channel $chan_i$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
-  We use the leftover context $\Delta$ to type the transmitted data, which needs an element $loc_j$ at index $j$ with type $t$ and usage $x$, as per the type of the channel $chan_i$.
+  Similarly to input, the output process in rule $\send{}{}$ requires a channel $chan$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
+  We use the leftover context $\Delta$ to type the transmitted data, which needs an element $loc$ at index $j$ with type $t$ and usage $x$, as per the type of the channel $chan$.
   The leftovers $\Xi$ are used to type the continuation process.
   Note that both indices $i$ and $j$ are used in the syntax of the typed process.
 %
   Parallel composition in rule $\comp{}{}$ uses the leftovers of the left-hand process to type the right-hand process.
-  By keeping track in the typing derivation of $P$ of the resources $P$ uses, we can use them to type $Q$ and save the user from having to provide a top-down proof of context split.
+  Indeed, \autoref{thm:subject-congruence} shows that the alternative rule where the resources are threaded through $Q$ first is admissible too.
 \end{nidefinition}
 
 \begin{example}[Typing derivation (Continued)]
