@@ -79,8 +79,8 @@
 \newcommand{\op}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\cdot} \, #3}
 \newcommand{\opsquared}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\cdot^2} \, #3}
 \newcommand{\opctx}[3]{#1 \, \func{\coloneqq} \, #2 \, \func{\otimes} \, #3}
-\newcommand{\zero}{\func{0\cdot}}
-\newcommand{\one}{\func{1\cdot}}
+\newcommand{\zero}{\func{\cdot-0}}
+\newcommand{\one}{\func{\cdot-1}}
 \newcommand{\li}{\func{\ell_i}}
 \newcommand{\lo}{\func{\ell_o}}
 \newcommand{\lz}{\func{\ell_{\varepsilon}}}
@@ -287,7 +287,7 @@ Every time we go under a binder, we increase the index of the continuation proce
 
 Process $\PO$ denotes the terminated process, where no further communications can occur;
 process $\new{} P$ creates a new channel and binds it at index $0$ in the continuation process $P$;
-$\comp{P}{Q}$ composes processes $P$ and $Q$ in parallel;
+process $\comp{P}{Q}$ composes $P$ and $Q$ in parallel;
 process $\recv{x}{}P$ receives data along channel $x$ and makes that data available at index $0$ in the continuation process $P$;
 process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as process $P$.
 \end{nidefinition}
@@ -326,12 +326,12 @@ Each sender process $\func{send} \, x$ and $\func{send} \, y$ is an instantiatio
 The receiver receives data \emph{twice} on a channel $c$ and then terminates.
 The receiver process $\func{recv} \, z$ is an instantiation of $\func{recv} \, c$.
 \begin{align*}
-  & \func{send} \; c = \new{} \send{(\suc c)}{\constr{0}} \PO &&
-    \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)} \PO
+  & \func{send} \; c = \new{} (\send{\suc c}{\constr{0}} \PO) &&
+    \func{recv} \; c \; = \recv{c}{} \recv{(\suc c)}{} \PO
 \end{align*}
 
 The courier role is defined below as $\func{carry} \; x \; y \; z$.
-It sequentially receives on the two input channels $x$ and $y$ -- instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$ -- instantiating $out$.
+It sequentially receives on the two input channels $x$ and $y$, instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$, instantiating $out$.
 Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one sender and the courier, the second between the other sender and the courier, and the third between the receiver  and the courier.
 The result is the courier $\func{system}$ defined below.
 We continue this example and provide typing derivations for these processes in \autoref{leftover-typing}, where we use a mix of linear, graded and shared typing to type $\func{system}$.
@@ -489,17 +489,16 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
 
   \begin{equation*}
   \begin{aligned}
-    &\zero                   &:{} &                 &        & C \\
-    &\one                    &:{} &                 &        & C \\
     &\op{\_}{\_}{\_}         &:{} &                 &        & C \to C \to C \to \Set \\
-    &\func{\cdot-compute^r}  &:{} &\forall x y       & \to \; & \type{DEC} \; (\type{\exists} z  \; (\op{x}{y}{z})) \\
     &\func{\cdot-unique}     &:{} &\forall x x' y z  & \to \; & \op{x'}{y}{z} \to \op{x}{y}{z} \to x' \equiv x \\
     &\func{\cdot-unique^l}   &:{} &\forall x y y' z  & \to \; & \op{x}{y'}{z} \to \op{x}{y}{z} \to y' \equiv y \\
-    &\func{\cdot-min^l}      &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
-    &\func{\cdot-id^l}       &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
+    &\func{\cdot-assoc}      &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z}) \\
     &\func{\cdot-comm}       &:{} &\forall x y z     & \to \; & \op{x}{y}{z} \to \op{x}{z}{y} \\
-    &\func{\cdot-assoc}      &:{} &\forall x y z u v & \to \; & \op{x}{y}{z} \to \op{y}{u}{v} \to \\
-    &                        &    &                  &        & \type{\exists} w  \; (\op{x}{u}{w} \times \op{w}{v}{z})
+    &\func{\cdot-compute^r}  &:{} &\forall x y       & \to \; & \type{DEC} \; (\type{\exists} z  \; (\op{x}{y}{z})) \\
+    &\zero                   &:{} &                 &        & C \\
+    &\func{\cdot-id^l}       &:{} &\forall x         & \to \; & \op{x}{\zero}{x} \\
+    &\func{\cdot-min^l}      &:{} &\forall y z        & \to \; & \op{\zero}{y}{z} \to y \equiv \zero \\
+    &\one                    &:{} &                 &        & C \\
   \end{aligned}
   \end{equation*}
 \end{nidefinition}
@@ -559,7 +558,7 @@ The former are preserved throughout typing derivations; the latter are transform
 
   The unit type $\unit$ serves as a proof of inhabitance for types.
   % The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as the unit type, $1$ as booleans) so that we avoid dealing with universe polymorphism.
-  The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel.
+  The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel --- we use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
   This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the input and output multiplicities, respectively \cite{K07}.
 
   A \emph{typing context} $\PreCtx_n$ is a length-indexed list of types that is either empty ($\constr{[]}$) or the result of appending a type $t : \Type$ to an existing context ($\gamma \constr{,} t$).
@@ -569,8 +568,7 @@ The former are preserved throughout typing derivations; the latter are transform
 \begin{nidefinition}[\textsc{Idxs} and \textsc{Ctx}: contexts of indices and usage contexts]
   A context of indices $\Idxs_n$ is a length-indexed list that is either empty ($\constr{[]}$) or the result of appending an index $i : \Idx$ to an existing context ($idxs \constr{,} i$).
   A \emph{usage context} is a context $\Ctx_{idxs}$ indexed by a context of indices $idxs : \Idxs_n$ that is either empty ($\constr{[]}$) or the result or appending a usage annotation pair $u : \Usage_{idx}^{\func{2}}$ with index $idx : \Idx$ to an existing context ($\Gamma \constr{,} u$).
-  We use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
-  Henceforth, we use $\lz$ to denote the multiplicity pair $0 \comma 0$, $\li$ for the pair $1 \comma 0$, $\lo$ for $0 \comma 1$, and $\lio$ for $1 \comma 1$.
+  Henceforth, we use $\lz$ to denote the multiplicity pair $\zero \comma \zero$, $\li$ for the pair $\one \comma \zero$, $\lo$ for $\zero \comma \one$, and $\lio$ for $\one \comma \one$.
   This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{nidefinition}
 
@@ -616,8 +614,8 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
     {\constr{0} : \contains{\gamma \comma t}{\Gamma \comma x}{\constr{0}}{t}{y}{\Gamma \comma z}}
     
     \inferrule
-    {loc_i : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
-    {\suc \; loc_i : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
+    {v : \contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}}
+    {\suc \; v : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
   \end{mathpar}
 
   The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
@@ -666,16 +664,16 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   
     \inferrule
         {\stacked{
-            chan_i : \contains{\gamma \hspace{1.0em}}{\Gamma \hspace{1.0em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
-            cont \hspace{0.5em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{4.2em}}{\Theta \comma \lz}}}
-        {\recv{chan_i}{} cont : \types{\gamma}{\Gamma}{\recv{i}{}P}{\Theta}}
+            chan : \contains{\gamma \hspace{1.0em}}{\Gamma \hspace{1.0em}}{i}{\channel{t}{x}}{\li}{\Xi} \\\\
+            cont \hspace{0.3em} : \types{\gamma \comma t}{\Xi \comma x}{P \hspace{3.8em}}{\Theta \comma \lz}}}
+        {\recv{chan}{} cont : \types{\gamma}{\Gamma}{\recv{i}{}P}{\Theta}}
   
     \inferrule
         {\stacked{
-            chan_i : \contains{\gamma}{\Gamma \hspace{0.1em}}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
-            loc_j \hspace{0.7em} : \contains{\gamma}{\Delta}{j}{t \hspace{2.8em}}{x \hspace{0.2em}}{\Xi} \\\\
-            cont \hspace{0.5em} : \types{\gamma}{\Xi}{\hspace{0.4em}P\hspace{4.0em}}{\Theta}}}
-        {\send{chan_i}{loc_j} cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
+            chan : \contains{\gamma}{\Gamma \hspace{0.1em}}{i}{\channel{t}{x}}{\lo}{\Delta} \\\\
+            loc \hspace{0.9em} : \contains{\gamma}{\Delta}{j}{t \hspace{2.8em}}{x \hspace{0.2em}}{\Xi} \\\\
+            cont \hspace{0.3em} : \types{\gamma}{\Xi}{\hspace{0.4em}P\hspace{3.8em}}{\Theta}}}
+        {\send{chan}{loc} cont : \types{\gamma}{\Gamma}{\send{i}{j}P}{\Theta}}
   
     \inferrule
     {l : \types{\gamma}{\Gamma}{P\hspace{0.3em}}{\Delta} \\\\
@@ -720,7 +718,7 @@ Agda can uniquely determine the arguments required by the $\new{}$ constructor.
    & \func{recvWT} \;  : \; \types{\gamma \comma \channel{t}{\lz}  }{\Gamma \comma (\suc \suc l \comma r)  }{\func{recv} \; \constr{0}  }{\Gamma \comma (l \comma r)} \\
    & \func{recvWT} \;  = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
    & \func{sendWT} \;  : \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}  }{\Gamma \comma (l \comma \suc r)  }{\func{send} \; \constr{0}  }{\Gamma \comma (l \comma r)}  \\
-   & \func{sendWT} \;  = \; \new{} \; \_ \; \_ \; \zero \; \send{(\suc \constr{0})}{\constr{0}} \PO
+   & \func{sendWT} \;  = \; \new{} \; \_ \; \_ \; \zero \; (\send{\suc \constr{0}}{\constr{0}} \PO)
 \end{align*}
 
 Dually, the courier defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.

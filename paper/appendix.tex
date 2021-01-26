@@ -33,7 +33,7 @@ Process $\comp{P}{Q}$ is the parallel composition of processes $P$ and $Q$.
 Processes $\recv{x}{y} P$ and $\send{x}{y} P$ denote respectively, the input and output processes of a variable $y$ over a channel $x$, with continuation $P$.
 Scope restriction $(\new{}x) \; P$ and input $\recv{x}{y} \; P$ are \emph{binders}, they are the only constructs that introduce bound names --- $x$ and $y$ in $P$, respectively.
 
-In order to demonstrate the correspondence between an \picalc{} that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
+In order to demonstrate the correspondence between a \picalc{} that uses names and one that uses de Bruijn indices, we provide conversion functions in both directions and prove that they are inverses of each other up to $\alpha$-conversion.
 
 \paragraph*{From names to de Bruijn indices}
 When we translate into de Bruijn indices we keep the original binder names around --- they will serve as name hints for when we translate back.
@@ -48,7 +48,7 @@ We demand that the original process is well-scoped: that all its free variable n
 \paragraph*{From de Bruijn indices to names}
 The translation function $\func{toRaw}$ works recursively, keeping a context $ctx : \Names_n$ that maps the first $n$ indices to their names.
 As some widely-used languages do, this translation function produces unique variable names.
-These unique variable names use the naming scheme $<name-hint>^{<n>}$, where $^{<n>}$ denotes that the name $<name-hint>$ has already been bound $n$ times before.
+These unique variable names use the naming scheme $<namehint>^{<n>}$, where $^{<n>}$ denotes that the name $<namehint>$ has already been bound $n$ times before.
 \begin{equation*}
     \func{toRaw} : (ctx : \Names_n) \to \Process_n \to \Raw
 \end{equation*}
@@ -88,7 +88,7 @@ In the following we present the main results that our conversion functions satis
 \end{nilemma}
 
 \begin{proof}[Proof]
-  All the above results are proved by induction on \textsc{Process} and \textsc{Var} (\autoref{fig:syntax}).
+  All the above results are proved by induction on \textsc{Process}, \textsc{Var}, and \textsc{Raw} (\autoref{fig:syntax}).
   Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
 \end{proof}
 
@@ -166,7 +166,7 @@ To prove this result, we must first introduce lemmas that establish that certain
 
 \begin{nilemma}
   \label{lm:types-unused}
-  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, if the variable $i$ is unused within $P$, then $\Gamma$ at $i$ is equivalent to $\Xi$ at $i$.
+  For all well-typed processes $\types{\gamma}{\Gamma}{P}{\Xi}$, if the variable $i$ is unused within $P$, then $\Gamma$ at $i$ is equal to $\Xi$ at $i$.
 \end{nilemma}
 \begin{proof}
   By induction on \textsc{Process} and \textsc{Var}.
@@ -195,7 +195,7 @@ We are now in a position to prove subject congruence.
       Case $\constr{scope-end}$: we show that the usage annotation of the newly created channel must be $\lz$, making the proof trivial.
       In the opposite direction, we instantiate the newly created channel to a type $\unit$ and a usage annotation $\lz$.
     \item
-      Case $\constr{scope-ext}$ for $\new \comp{P}{Q}$: we to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
+      Case $\constr{scope-ext}$ for $\new (\comp{P}{Q})$: we need to show that $P$ preserves the usage annotations of the unused variable (\autoref{lm:types-unused}) and then use strengthening (\autoref{thm:strengthening}).
       In the reverse direction, we use weakening (\autoref{thm:weakening}) on $P$ and show that lowering and then lifting $P$ results in $P$ (\autoref{lm:lower-lift}).
     \item
       Case $\constr{scope-comm}$:
