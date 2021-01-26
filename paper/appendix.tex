@@ -3,28 +3,23 @@
 \section{From names to de Bruijn indices and back}
 \label{from_to_deBruijn}
 
-\begin{figure}[h]
-  \begin{mathpar}
-    \datatype
-    { }
-    {\Raw : \Set}
-    \; \textsc{Raw}
-  \end{mathpar}
+The syntax of the \picalc{} \cite{Sangio01} using channel names is given by the $\Raw$ grammar below:
+\begin{mathpar}
+  \datatype
+  { }
+  {\Raw : \Set}
+  \; \textsc{Raw}
+\end{mathpar}
 
-  \begin{equation*}
-    \begin{aligned}
-      \Raw ::= &\; \PO              &&\text{(inaction)}    \\ 
-      |& \; (\new{\Name}) \; \Raw         &&\text{(restriction)} \\ 
-      |& \; \comp{\Raw}{\Raw}       &&\text{(parallel)}    \\ 
-      |& \; \recv{\Name}{\Name}\Raw &&\text{(input)}       \\ 
-      |& \; \send{\Name}{\Name}\Raw &&\text{(output)}      \\
-    \end{aligned}
-  \end{equation*}
-  \caption{Grammar with names.}
-  \label{fig:syntax-names}
-\end{figure}
-
-The syntax of the \picalc{} \cite{Sangio01} using channel names is given by the $\Raw$ grammar in \autoref{fig:syntax-names}.
+\begin{equation*}
+  \begin{aligned}
+    \Raw ::= &\; \PO              &&\text{(inaction)}    \\ 
+    |& \; (\new{\Name}) \; \Raw         &&\text{(restriction)} \\ 
+    |& \; \comp{\Raw}{\Raw}       &&\text{(parallel)}    \\ 
+    |& \; \recv{\Name}{\Name}\Raw &&\text{(input)}       \\ 
+    |& \; \send{\Name}{\Name}\Raw &&\text{(output)}      \\
+  \end{aligned}
+\end{equation*}
 
 Channel names and variables range over $x,y,z$ in $\Name$ and processes over $P,Q,R$ in $\Raw$.
 Process $\PO$ denotes the terminated process, where no further communications can occur.
@@ -54,16 +49,12 @@ These unique variable names use the naming scheme $<namehint>^{<n>}$, where $^{<
 \end{equation*}
 
 \begin{example}[$\func{fromRaw}$ and $\func{toRaw}$]
-  \begin{figure}[t]
-    \begin{alignat*}{7}
-      &P = (\new{x} ) && (\comp {\recv{x}{x} && \send{x}{z} && \PO} {(\new{y}) && (\send{x}{y} && \recv{y}{y} && \PO)}) \\
-      &Q = \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
-      &R = (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)})
-    \end{alignat*}
-    \caption{From names to de Bruijn indices and back}
-    \label{fig:conversion}
-    \end{figure}
-  We illustrate the conversion functions from names to de Bruijn indices $(\func{fromRaw}$) and back ($\func{toRaw}$) with three processes $P,Q,R$  in \autoref{fig:conversion}.
+  We illustrate the conversion functions from names to de Bruijn indices $(\func{fromRaw}$) and back ($\func{toRaw}$) with three processes $P,Q,R$  below.
+  \begin{alignat*}{7}
+    &P = (\new{x} ) && (\comp {\recv{x}{x} && \send{x}{z} && \PO} {(\new{y}) && (\send{x}{y} && \recv{y}{y} && \PO)}) \\
+    &Q = \new{} && (\comp {\recv{0}{} && \send{0}{2} && \PO} {\new{} && (\send{1}{0} && \recv{0}{} && \PO)}) \\
+    &R = (\new{x^0} ) && (\comp {\recv{x^0}{x^1} && \send{x^1}{z^0} && \PO} {(\new{y^0}) && (\send{x^0}{y^0} && \recv{y^0}{y^1} && \PO)})
+  \end{alignat*}
 
   Process $P$ uses names $x,y,z$ and is translated via the conversion function $\func{fromRaw}$ into process $Q$, which uses de Bruijn indices.
   Process $Q$ is then translated via $\func{toRaw}$ into process $R$, which follows the \emph{Barendregt convention}\footnote{The Barendregt variable convention states that all bound variables/names in a process are distinct among each other and from the free variables/names.} and is $\alpha$-equivalent to the original process $P$.
@@ -88,50 +79,16 @@ In the following we present the main results that our conversion functions satis
 \end{nilemma}
 
 \begin{proof}[Proof]
-  All the above results are proved by induction on \textsc{Process}, \textsc{Var}, and \textsc{Raw} (\autoref{fig:syntax}).
+  All the above results are proved by induction on \textsc{Process}, \textsc{Var}, and \textsc{Raw} (\autoref{def:syntax}).
   Complete details can be found in our mechanisation in Agda in \cite{Zalakain2020Agda}.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type Safety} \label{app:type-safety}
 
-\subsection{Auxiliary Results}
-We will start this section with auxiliary results which are needed to prove two main theorems: subject congruence (\autoref{thm:subject-congruence}) and subject reduction (\autoref{thm:subject-reduction}) for our \picalc{} with leftovers.
-
-\paragraph*{Framing}
-This property asserts that the well-typedness of a process is independent of its leftover resources.
-
-\begin{nitheorem}[Framing]
-  \label{thm:framing}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma_l}{P}{\Xi_l}$.
-  Let $\Delta$ be such that $\opctx{\Gamma_l}{\Delta}{\Xi_l}$.
-  Let $\Gamma_r$ and $\Xi_r$ be arbitrary contexts such that $\opctx{\Gamma_r}{\Delta}{\Xi_r}$.
-  Then $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
-\end{nitheorem}
-
-\paragraph*{Weakening}
-This property states that inserting a new variable into the context preserves the well-typedness of a process as long as the usage annotation of the inserted variable is preserved as a leftover.
-Let $\func{ins}_i$ insert an element into a context at position $i$ --- for simplicity, we use it both to insert types into typing contexts and usage annotations into usage contexts.
-\begin{nitheorem}[Weakening]
-  \label{thm:weakening}
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
-  $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
-\end{nitheorem}
-
-\paragraph*{Strengthening}
-This property states that removing an unused variable preserves the well-typedness of a process.
-Let $\func{del}_i$ delete the element at position $i$ from a context --- for simplicity, we use it both to delete types from typing contexts and usage annotations from usage contexts.
-\begin{nitheorem}[Strengthening]
-  \label{thm:strengthening} 
-  Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
-  Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
-  Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
-\end{nitheorem}
-
 \paragraph*{Exchange}
 This property states that the exchange of two variables preserves the well-typedness of a process.
-We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to exchange types in typing contexts and usage annotations in usage contexts.
+We extend $\func{exchange}_i$  introduced in \autoref{def:equals} to exchange types in typing contexts and usage annotations in usage contexts.
 \begin{nitheorem}[Exchange]
   \label{thm:exchange}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
@@ -143,9 +100,8 @@ We extend $\func{exchange}_i$  introduced in \autoref{structural-congruence} to 
   For details, refer to our mechanisation in Agda \cite{Zalakain2020Agda}.
 \end{proof}
 
-\subsection{Towards Subject Reduction}
 \paragraph*{Subject Congruence}
-This property states that applying structural congruence (\autoref{structural-congruence}) to a well-typed process preserves its well-typedness.
+This property states that applying structural congruence (\autoref{def:equals}) to a well-typed process preserves its well-typedness.
 To prove this result, we must first introduce lemmas that establish that certain syntactic manipulations can be inverted (\autoref{lm:lower-lift}, \autoref{lm:exchange-exchange}) and how unused variables relate to the preservation of leftovers (\autoref{lm:types-unused}).
 
 \begin{nilemma}
@@ -175,7 +131,7 @@ To prove this result, we must first introduce lemmas that establish that certain
 We are now in a position to prove subject congruence.
 
 \begin{nitheorem}[Subject congruence]
-  \label{thm:subject-congruence}
+  \label{thm:subject-congruence1}
   If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
@@ -209,7 +165,7 @@ In \autoref{thm:substitution-generalization} we prove a generalised version of s
 Then, in \autoref{thm:substitution} we instantiate the generalised version to the concrete case where $i$ is the most recently introduced variable $\constr{0}$, as required by subject reduction.
 
 \begin{nitheorem}[Generalised substitution]
-  \label{thm:subst-generalization1}
+  \label{thm:substitution-generalization}
   Let process $P$ be well-typed in $\types{\gamma}{\Gamma_i}{P}{\Psi_i}$.
   The substituted variable $i$ is capable of $m$ in $\Gamma_i$, and capable of $n$ in $\Psi_i$.
   Substitution will take these usages $m$ and $n$ away from $i$ and transfer them to the variable $j$ we are substituting for.
@@ -262,76 +218,72 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
       Observe that $\opsquared{m}{\delta}{\psi}$, where $\psi$ is the usage annotation at index $i$ consumed by the subprocess $P$.
       We construct an arrow $\containsusage{\Xi_j}{j}{\delta}{\Theta}$, for some $\Xi_j$.
       We can now make two inductive calls (on the derivation of $P$ and $Q$) and compose their results.
+
+      \begin{minipage}[b]{0.5\linewidth}
+        \centering
+        \begin{tikzpicture}
+          \node (gamma-i) at (0,4)   {$\Gamma_i$};
+          \node (gamma-m) at (0,2)   {$\Gamma$};
+          \node (gamma-j) at (0,0)   {$\Gamma_j$};
+          \node (xi-i)    at (3,3.5) {$\Xi_i$};
+          \node (theta)   at (3,2.3) {$\Theta$};
+          \node (delta-m) at (3,1.7) {};
+          \node (xi-j)    at (3,0.5) {$\Xi_j$};
+          \node (psi-i)   at (6,3)   {$\Psi_i$};
+          \node (psi-m)   at (6,2)   {$\Psi$};
+          \node (psi-j)   at (6,1)   {$\Psi_j$};
+
+          \draw[-]  (gamma-m) -- (delta-m.center);
+          \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \lz$}(psi-m);
+
+          \draw[->,densely dotted] (gamma-m) -- (theta);
+          \draw[->,densely dotted] (theta) -- (psi-m);
+
+          \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
+          \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
+          \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
+          \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
+
+          \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
+          \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
+          \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
+          \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
+          \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
+          \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
+        \end{tikzpicture}
+
+        Diagrammatic representation of the $\comp{}{}$ case for substitution.
+        Continuous lines represent known facts, dotted lines proof obligations.
+      \end{minipage}
+      \begin{minipage}[b]{0.5\linewidth}
+        \centering
+        \begin{tikzpicture}
+          \node (gamma-i) at (0,2)   {};
+          \node (gamma-m) at (0,1)   {};
+          \node (gamma-j) at (0,0)   {};
+          \node (xi-i)    at (2,3)   {};
+          \node (xi-m)    at (2,2) {};
+          \node (xi-j)    at (2,1)   {};
+          \node (psi-m)   at (4,2) {};
+
+          \draw[->] (gamma-i) -- (xi-j);
+          \draw[->] (gamma-m) -- (xi-j);
+          \draw[->,densely dotted] (gamma-j) -- (xi-j);
+          \draw[->] (gamma-i) -- (gamma-m);
+          \draw[->] (gamma-j) -- (gamma-m);
+          \draw[->] (xi-i)    -- (xi-m);
+          \draw[->] (xi-j)    -- (xi-m);
+          \draw[->] (xi-i)    -- (psi-m);
+          \draw[->] (xi-m)    -- (psi-m);
+          \draw[->,densely dotted] (xi-j)    -- (psi-m);
+        \end{tikzpicture}
+
+        Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
+        This approach makes composing typing derivations before and after subsitution more difficult.
+      \end{minipage}
+
   \end{itemize}  
 \end{proof}
-
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture}
-      \node (gamma-i) at (0,4)   {$\Gamma_i$};
-      \node (gamma-m) at (0,2)   {$\Gamma$};
-      \node (gamma-j) at (0,0)   {$\Gamma_j$};
-      \node (xi-i)    at (3,3.5) {$\Xi_i$};
-      \node (theta)   at (3,2.3) {$\Theta$};
-      \node (delta-m) at (3,1.7) {};
-      \node (xi-j)    at (3,0.5) {$\Xi_j$};
-      \node (psi-i)   at (6,3)   {$\Psi_i$};
-      \node (psi-m)   at (6,2)   {$\Psi$};
-      \node (psi-j)   at (6,1)   {$\Psi_j$};
-
-      \draw[-]  (gamma-m) -- (delta-m.center);
-      \draw[->] (delta-m.center) -- node[align=center,below] {$\Delta$\\$\Delta_i = \lz$}(psi-m);
-
-      \draw[->,densely dotted] (gamma-m) -- (theta);
-      \draw[->,densely dotted] (theta) -- (psi-m);
-      
-      \draw[->] (gamma-i) -- node[left] {$\ni_i m$} (gamma-m);
-      \draw[->] (gamma-j) -- node[left] {$\ni_j m$} (gamma-m);
-      \draw[->] (psi-i) -- node[right] {$\ni_i n$} (psi-m);
-      \draw[->] (psi-j) -- node[right] {$\ni_j n$} (psi-m);
-
-      \draw[->] (gamma-i) -- node[above] {$\vdash P$} (xi-i);
-      \draw[->] (xi-i) -- node[above] {$\vdash Q$} (psi-i);
-      \draw[->,densely dotted] (gamma-j) -- node[below] {$\vdash \subst{P}{j}{i}$} (xi-j);
-      \draw[->,densely dotted] (xi-j) -- node[below] {$\vdash \subst{Q}{j}{i}$} (psi-j);
-      \draw[->,densely dotted] (xi-i) -- node[left] {$\ni_i l$} (theta);
-      \draw[->,densely dotted] (xi-j) -- node[left] {$\ni_j l$} (theta);
-    \end{tikzpicture}
-    \caption{
-      Diagrammatic representation of the $\comp{}{}$ case for substitution.
-      Continuous lines represent known facts, dotted lines proof obligations.
-    }
-    \label{fig:subst}
-\end{figure}
-
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture}
-      \node (gamma-i) at (0,2)   {};
-      \node (gamma-m) at (0,1)   {};
-      \node (gamma-j) at (0,0)   {};
-      \node (xi-i)    at (2,3)   {};
-      \node (xi-m)    at (2,2) {};
-      \node (xi-j)    at (2,1)   {};
-      \node (psi-m)   at (4,2) {};
-
-      \draw[->] (gamma-i) -- (xi-j);
-      \draw[->] (gamma-m) -- (xi-j);
-      \draw[->,densely dotted] (gamma-j) -- (xi-j);
-      \draw[->] (gamma-i) -- (gamma-m);
-      \draw[->] (gamma-j) -- (gamma-m);
-      \draw[->] (xi-i)    -- (xi-m);
-      \draw[->] (xi-j)    -- (xi-m);
-      \draw[->] (xi-i)    -- (psi-m);
-      \draw[->] (xi-m)    -- (psi-m);
-      \draw[->,densely dotted] (xi-j)    -- (psi-m);
-    \end{tikzpicture}
-    \caption{
-      Alternative approach without arrows $\ni_i n$ and $\ni_j n$.
-      This approach makes composing typing derivations before and after subsitution more difficult.
-    }
-    \label{fig:subst-alternative}
-\end{figure}
 
 \begin{nitheorem}[Substitution]
   \label{thm:substitution}
@@ -352,8 +304,8 @@ Then, in \autoref{thm:substitution} we instantiate the generalised version to th
 
 \paragraph*{Subject Reduction}
 Finally we are ready to present our main result, stating  that if $P$ is well typed and it reduces to $Q$, then $Q$ is well typed.
-The relation between the typing contexts used to type $P$ and $Q$ will be explained in \autoref{thm:subject-reduction}.
-In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{operational-semantics}).
+The relation between the typing contexts used to type $P$ and $Q$ will be explained in \autoref{thm:subject-reduction1}.
+In the \picalc{} we distinguish between a reduction $P \reduce{\constr{internal}} Q$ on a channel internal to $P$, and a reduction $P \reduce{\constr{external} \; i} Q$ on a channel $i$ external to $P$ (refer to \autoref{semantics}).
 We first introduce an auxiliary lemma:
 
 \begin{nilemma}
@@ -366,7 +318,7 @@ We first introduce an auxiliary lemma:
 \end{proof}
 
 \begin{nitheorem}[Subject reduction]
-  \label{thm:subject-reduction}
+  \label{thm:subject-reduction1}
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$ and reduce such that $P \reduce{c} Q$.
   \begin{itemize}
     \item If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
@@ -390,6 +342,6 @@ We first introduce an auxiliary lemma:
     if $\constr{external}\; (\suc i)$ proceed inductively.
 
     \item
-    Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence}) and proceed inductively. \qed
+    Case $\constr{struct}$: we apply subject congruence (\autoref{thm:subject-congruence1}) and proceed inductively. \qed
   \end{itemize}
 \end{proof}

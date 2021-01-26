@@ -249,7 +249,7 @@ Names are cumbersome to mechanise: they are not inherently well scoped, one has 
 To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 
-\begin{nidefinition}[\textsc{Var} and \textsc{Process}]
+\begin{nidefinition}[\textsc{Var} and \textsc{Process}]\label{def:syntax}
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
 References outside of that range are meaningless, and it is useful to rule them out syntactically.
 We do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
