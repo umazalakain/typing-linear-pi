@@ -83,7 +83,7 @@
 \newcommand{\one}{\func{\cdot-1}}
 \newcommand{\li}{\func{\ell_i}}
 \newcommand{\lo}{\func{\ell_o}}
-\newcommand{\lz}{\func{\ell_{\varepsilon}}}
+\newcommand{\lz}{\func{\ell_{\emptyset}}}
 \newcommand{\lio}{\func{\ell_{\#}}}
 
 % Types
@@ -147,7 +147,7 @@
   This type system is parametrised over a set of usage algebras that are general enough to encompass shared types (free to reuse and discard), graded types (use an $n$ number of times) and linear types (use exactly once).
    Linear types are of fundamental importance in the \picalc{}: they ensure privacy and safety of communication and avoid race conditions.
   We provide a framing theorem for our type system, generalise the weakening and strengthening theorems to include linear types, and prove subject reduction.
-  Our formalisation is fully mechanised in about 1800 lines of Agda \cite{Zalakain2020Agda}.
+  Our formalisation is fully mechanised in about 1850 lines of Agda \cite{Zalakain2020Agda}.
 
 %  \keywords{Pi-calculus \and Linear types \and Leftover typing \and Concurrency \and Mechanisation \and Agda}
 \end{abstract}
@@ -161,18 +161,18 @@ Kobayashi et al. \cite{KPT96} introduced a typed version of the \picalc{} with l
 Linearity guarantees privacy and safety of communication and avoids race conditions.
 
 A linear type system must keep track of what resources are used in which parts of the program, and guarantee that they are \emph{neither duplicated nor discarded}.
-To do so, the standard approach is to use context splits: typing rules for terms with multiple subterms add an extra a side condition specifying what resources to allocate to each of the subterms.
+To do so, the standard approach is to use context splits: typing rules for terms with multiple subterms add an extra side condition specifying what resources to allocate to each of the subterms.
 The typing derivations for the subterms must then use the entirety of their allocated resources.
 A key observation here is that each subterm already \emph{knows} about the resources it needs.
 \emph{Context splits contain usage information that is already present in the subterms.}
 Moreover, the subterms cannot be typed until the context splits have been defined.
 On top of that, using binary context splits means that typing rules with $n$ subterms require $n - 1$ context splits, which considerably clutters the type system.
 
-An alternative approach is leftover typing, a technique which has been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
-Leftover typing changes the shape of the typing judgments and includes a second \emph{leftover} output context that contains the resources that were not used by the term.
-As a result, typing rules \emph{thread the resources through} subterms without needing context splits: each subterm uses the resources it needs, and leaves the rest for its siblings.
+An alternative approach is leftover typing, a technique that has been used to formulate intuitionistic linear logic \cite{Mackie} and to mechanise the linear \lambdacalc \cite{Allais2018a}.
+Leftover typing changes the shape of the typing judgments and includes a second \emph{leftover} output context that contains the resources that were left unused by the term.
+As a result, typing rules \emph{thread} the resources \emph{through} subterms without needing context splits: each subterm uses the resources it needs, and leaves the rest for its siblings.
 The first subterm in this chain of resources immediately knows what resources it has available.
-Below we present two alternative typing rules for process composition in the linear \picalc{}: the one on the left uses context splits, while the one on the right does not and uses leftover typing instead:
+Below we present two alternative typing rules for process composition in the linear \picalc{}: the one on the left uses context splits, while the one on the right does not, and uses leftover typing instead:
 \begin{mathpar}
   \inferrule
   {\opctx{\Gamma}{\Delta}{\Xi} \\ \Delta \; \type{\vdash} \; P \\ \Xi \; \type{\vdash} \; Q}
@@ -190,17 +190,17 @@ We make the following main contributions:
 \begin{enumerate}
   \item \textbf{Leftover typing for a resource-aware \picalc{}}. Our type system uses leftover typing to model the resource-aware \picalc{} (\autoref{leftover-typing}) and satisfies subject reduction.
     In addition to making context splits unnecessary, leftover typing allows for a \emph{framing} theorem to be stated and is naturally associative, making type safety properties considerably easier to reason about (\autoref{meta-theory}).
+    Thanks to leftover typing, we can now also define \emph{weakening} and \emph{strengthening} for the whole framework, not just the shared fragment.
         
   \item \textbf{Shared, graded and linear unified \picalc{}}.
   We {generalise resource counting to a set of usage algebras that can be mixed within the same type system}.
     We do not instantiate our type system to only work with linear resources, instead we present an algebra-agnostic type system, and admit a mix of user-defined \emph{resource aware} algebras (\autoref{multiplicities}).
     Any \emph{partial commutative monoid} that is \emph{decidable}, \emph{deterministic}, \emph{cancellative} and has a \emph{minimal element} is a valid such algebra.
-    Multiple algebras can be mixed in the type system --- usage contexts keep information about what algebra to for each type (\autoref{contexts}).
+    Multiple algebras can be mixed in the type system --- usage contexts keep information about what algebra to use for each type (\autoref{contexts}).
     In particular, this allows for type systems combining linear (use exactly once), graded (exact number of $n$ times) and shared (free to reuse and discard) types under the same framework.
-    Thanks to leftover typing, we can now define \emph{weakening} and \emph{strengthening} for the whole framework, not just the shared fragment.
     
-    \item \textbf{Full mechanisation in Agda}. We have fully mechanised a proof of subject reduction, the details of which are found in Appendix \ref{app:type-safety}
-The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our GitHub repository \cite{Zalakain2020Agda}.
+    \item \textbf{Full mechanisation in Agda}. We have fully mechanised a proof of subject reduction, the details of which are found in Appendix \ref{app:type-safety}.
+The formalisation of the \picalc{} with leftover typing, from the syntax to the semantics and the type system, has been fully mechanised in Agda in about 1850 lines of code, and is publicly available in our \cite{Zalakain2020Agda}.
 
 \end{enumerate}
 
@@ -211,14 +211,14 @@ The reduction relation tracks at the type level the channel on which communicati
 This information is later used to state the subject reduction theorem --- aka type preservation.
 The reduction relation is defined modulo \emph{structural congruence} --- a relation defined on processes that acts as a quotient type to remove unnecessary syntactic minutiae introduced by the syntax of the \picalc{}.
 We then define an interface for resource-aware algebras (\autoref{multiplicities}) and use it to parametrise a type system based on leftover typing (\autoref{leftover-typing}).
-Finally, we present the meta theoretical properties of our \picalc{} with leftovers in \autoref{meta-theory}.
+Finally, we present the meta theoretical properties of our type system in \autoref{meta-theory}.
 
 \paragraph{Notation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 We briefly illustrate the notation used in this paper.
 Data type definitions ($\type{\N}$) use double inference lines and index-free synonyms (\textsc{Nat}) as rule names for ease of reference.
-Constructors ($\constr{0}$ and $\suc$) are given as inference rules.
+Constructors ($\constr{0}$ and $\suc$) are used as inference rule names.
 We maintain a close correspondence between the definitions presented in this paper and our mechanised definitions in Agda: inference rules become type constructors, premises become argument types and conclusions return types.
 Universe levels and universe polymorphism are omitted for brevity --- all our types are of type $\Set$.
 Implicit arguments are mentioned in type definitions but omitted by constructors.
@@ -251,8 +251,7 @@ That is, binders no longer introduce names; terms at different \emph{depths} use
 
 \begin{nidefinition}[\textsc{Var} and \textsc{Process}]\label{def:syntax}
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
-References outside of that range are meaningless, and it is useful to rule them out syntactically.
-We do so by introducing the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
+We introduce the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
 We index processes according to their \emph{depth}: for all naturals $n$, a process of type $\Process_n$ contains free variables that can refer to $n$ distinct elements.
 Every time we go under a binder, we increase the index of the continuation process, allowing the variable references within to refer to one more thing.
 \begin{mathpar}
@@ -295,7 +294,7 @@ process $\send{x}{y}{P}$ sends variable $y$ over channel $x$ and continues as pr
 \begin{example}[The courier system]
 \label{example-process}
 
-As an example use of this syntax, we present a courier system that consists of three \emph{roles}:
+We present a courier system that consists of three \emph{roles}:
 a sender, who wants to send a package;
 a receiver, who receives the package sent by the sender;
 and a courier, who carries the package from the sender to the receiver.
@@ -322,7 +321,7 @@ The courier process first receives data from the two senders along its input cha
 
 The sender and receiver \emph{roles} are defined below, parametrised by the channels on which they operate.
 The sender creates a new channel to be sent as data, and sends it over channel $c$, and then terminates.
-Each sender process $\func{send} \, x$ and $\func{send} \, y$ is an instantiation of $\func{send} \, c$.
+Processes $\func{send} \, x$ and $\func{send} \, y$ are an instantiation of $\func{send} \, c$.
 The receiver receives data \emph{twice} on a channel $c$ and then terminates.
 The receiver process $\func{recv} \, z$ is an instantiation of $\func{recv} \, c$.
 \begin{align*}
@@ -331,7 +330,7 @@ The receiver process $\func{recv} \, z$ is an instantiation of $\func{recv} \, c
 \end{align*}
 
 The courier role is defined below as $\func{carry} \; x \; y \; z$.
-It sequentially receives on the two input channels $x$ and $y$, instantiating $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$, instantiating $out$.
+It sequentially receives on the two input channels $x$ and $y$, instantiated as $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$, instantiated as $out$.
 Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one sender and the courier, the second between the other sender and the courier, and the third between the receiver  and the courier.
 The result is the courier $\func{system}$ defined below.
 We continue this example and provide typing derivations for these processes in \autoref{leftover-typing}, where we use a mix of linear, graded and shared typing to type $\func{system}$.
@@ -354,7 +353,7 @@ Thanks to our well-scoped grammar in \autoref{syntax}, we now define the semanti
 
 \begin{nidefinition}[\textsc{Unused}] \label{def:unused}
   We consider a variable $i$ to be unused in $P$ ($\Unused_i \; P$) if none of the inputs nor the outputs refer to it.
-  $Unused_i \; P$ is defined as a recursive predicate on $P$, incrementing $i$ every time we go under a binder, and using $i \type{\not\equiv} x$ ( which unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$) to compare variables.
+  $\Unused_i \; P$ is defined as a recursive predicate on $P$, incrementing $i$ every time we go under a binder, and using $i \type{\not\equiv} x$ ( which unfolds to the negation of propositional equality on \textsc{Var}, i.e. $i \type{\equiv} x \to \type{\bot}$) to compare variables.
 \end{nidefinition}
 
 \begin{nidefinition}[\textsc{StructCong}] \label{def:structcong}
@@ -376,7 +375,7 @@ We define the base cases of a structural congruence relation $\eqeq$ as follows:
   
   \inferrule
   { }
-  {\constr{comp-end} : \comp{P}{\PO_n} \eqeq P}
+  {\constr{comp-id} : \comp{P}{\PO_n} \eqeq P}
   
   \inferrule
   { }
@@ -447,7 +446,7 @@ We keep track of channel $c$ so we can state subject reduction (\autoref{thm:sub
 We distinguish between channels that are created inside of the process ($\constr{internal}$), and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable.
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
-After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (and a proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$ is constructed).
+After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (and we derive the proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
@@ -557,20 +556,18 @@ The former are preserved throughout typing derivations; the latter are transform
     {\channel{t}{x} : \Type}
   \end{mathpar}
 
-  The unit type $\unit$ serves as a proof of inhabitance for types.
+  The unit type $\unit$ serves as a base case for types.
   % The base type $\base{n}$ uses natural numbers as placeholders for types (the host language can then interpret the former into the latter --- e.g., $0$ as the unit type, $1$ as booleans) so that we avoid dealing with universe polymorphism.
   The type $\channel{t}{x}$ of a channel determines what type ${t}$ of data and what usage annotations ${x}$ are sent over that channel --- we use the notation $\type{C}^{\func{2}}$ to stand for a $\type{C} \constr{\times} \type{C}$ pair of input and output multiplicities, respectively.
   This channel notation aligns with $[t]\ \mathbf{chan}_{(i^{y},o^{z})}$, where $y,z$ are the input and output multiplicities, respectively \cite{K07}.
-
+  Henceforth, we use $\lz$ to denote the multiplicity pair $\zero \comma \zero$, $\li$ for the pair $\one \comma \zero$, $\lo$ for $\zero \comma \one$, and $\lio$ for $\one \comma \one$.
+  This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
   A \emph{typing context} $\PreCtx_n$ is a length-indexed list of types that is either empty ($\constr{[]}$) or the result of appending a type $t : \Type$ to an existing context ($\gamma \constr{,} t$).
 \end{nidefinition}
-
 
 \begin{nidefinition}[\textsc{Idxs} and \textsc{Ctx}: contexts of indices and usage contexts]
   A context of indices $\Idxs_n$ is a length-indexed list that is either empty ($\constr{[]}$) or the result of appending an index $i : \Idx$ to an existing context ($idxs \constr{,} i$).
   A \emph{usage context} is a context $\Ctx_{idxs}$ indexed by a context of indices $idxs : \Idxs_n$ that is either empty ($\constr{[]}$) or the result or appending a usage annotation pair $u : \Usage_{idx}^{\func{2}}$ with index $idx : \Idx$ to an existing context ($\Gamma \constr{,} u$).
-  Henceforth, we use $\lz$ to denote the multiplicity pair $\zero \comma \zero$, $\li$ for the pair $\one \comma \zero$, $\lo$ for $\zero \comma \one$, and $\lio$ for $\one \comma \one$.
-  This notation was originally used in the linear \picalc{} \cite{KPT96,Sangio01}.
 \end{nidefinition}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -581,9 +578,9 @@ We present a resource-aware type system for the \picalc{} based on \emph{leftove
 This output context contains the \emph{leftovers} (the unused multiplicities) of the process being typed.
 These leftovers can then be used as input to another typing derivation.
 
-Leftover typing inverts the information flow concerning usage annotations so that it is the typing derivations of subprocesses which determine how resources are allocated.
+Leftover typing inverts the information flow of usage annotations so that it is the typing derivations of subprocesses which determine how resources are allocated.
 As a result, context split proofs are no longer necessary.
-Leftover typing also allows \emph{framing} to be stated, and \emph{weakening} and \emph{strengthening} to acquire a more general form.
+Leftover typing also allows \emph{framing} to be stated, and \emph{weakening} and \emph{strengthening} to cover linear types too.
 
 Our type system is composed of two typing judgments: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
 Both judgments are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
@@ -629,15 +626,15 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \end{nidefinition}
 
 \begin{example}[Variable reference]
-  We type a variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.
-  \begin{flalign*}
-  & \func{egVar} \; : \; \contains{(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)} {\constr{[]} \comma \lio \comma \lio)} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {(\constr{[]} \comma \lo \comma \lio)}\\
-  & \func{egVar} \; = \; \suc \constr{0}
-  \end{flalign*}
+  In $\func{egVar}$ we type a variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.
   We must show that the variable with index $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)$ and a usage context $(\constr{[]} \comma \lio \comma \lio)$.
   The \textsc{VarRef} constructors that we must use are completely determined by the variable index $\suc \; \constr{0}$ in the type.
   The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
   The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- we use $\func{\cdot-compute^r}$ to automatically fulfill this proof obligation.
+  \begin{flalign*}
+  & \func{egVar} \; : \; \contains{(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)} {\constr{[]} \comma \lio \comma \lio)} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {(\constr{[]} \comma \lo \comma \lio)}\\
+  & \func{egVar} \; = \; \suc \constr{0}
+  \end{flalign*}
 \end{example}
 
 \begin{nidefinition}[\textsc{Types}: typing processes] \label{def:types}
@@ -688,17 +685,17 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
   The continuation process $P$ is provided with the new channel with usage annotation $y \comma y$, which it must completely exhaust.
 %
   The input process in rule $\recv{}{}$ requires a channel $chan$ at index $i$ with usage $\li$ available, such that data with type $t$ and usage $x$ can be sent over it.
-  Note that the index $i$ is used in the syntax of the typed process.
+  Note that the index $i$ is determined by the syntax of the typed process.
   We use the leftovers $\Xi$ to type the continuation process, which is also provided with the received element --- of type $t$ and multiplicity $x$ --- at index $\constr{0}$.
   The received element $x$ must be completely exhausted by the continuation process.
 %
   Similarly to input, the output process in rule $\send{}{}$ requires a channel $chan$ at index $i$ with usage $\lo$ available, such that data with type $t$ and usage $x$ can be sent over it.
   We use the leftover context $\Delta$ to type the transmitted data, which needs an element $loc$ at index $j$ with type $t$ and usage $x$, as per the type of the channel $chan$.
   The leftovers $\Xi$ are used to type the continuation process.
-  Note that both indices $i$ and $j$ are used in the syntax of the typed process.
+  Note that both indices $i$ and $j$ are determined by the syntax of the typed process.
 %
   Parallel composition in rule $\comp{}{}$ uses the leftovers of the left-hand process to type the right-hand process.
-  Indeed, \autoref{thm:subject-congruence} shows that the alternative rule where the resources are threaded through $Q$ first is admissible too.
+  Indeed, \autoref{thm:subject-congruence} shows that an alternative rule where the resources are first threaded through $Q$ is admissible too.
 \end{nidefinition}
 
 \begin{example}[Typing derivation (Continued)]
@@ -742,9 +739,9 @@ As an example, the proof that $\constr{comp-asssoc}$ preserves typing proceeds b
 
 All the reasoning carried out in our type safety proofs is based on the algebraic properties introduced in \autoref{multiplicities} -- the exception to this is $\func{\cdot -compute^r}$, only there for the user's convenience.
   We lift the operation $\opsquared{x}{y}{z}$ and its algebraic properties to an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have the same underlying context of indices.
-The algebraic properties of the algebras allow us to see a typing derivation $\types{\gamma}{\Gamma}{P}{\Delta}$ as a unique \emph{arrow} from $\Gamma$ to $\Delta$, and to freely compose arrows with the same typing context and a matching output and input usage contexts.
+The algebraic properties of the algebras allow us to see a typing derivation $\types{\gamma}{\Gamma}{P}{\Delta}$ as a unique \emph{arrow} from $\Gamma$ to $\Delta$, and to freely compose and reason with arrows with the same typing context and a matching output and input usage contexts.
 
-Leftover typing also allows us to state a \emph{framing} theorem showing that adding arbitrary usage annotations to the input and output usage contexts preserves typing -- one can understand a typing derivation independently from its unused resources.
+Leftover typing also allows us to state a \emph{framing} theorem showing that adding or subtracting arbitrary usage annotations to the input and output usage contexts preserves typing -- one can understand a typing derivation independently from its unused resources.
 With framing one can show that $\constr{comp-comm}$ preserves typing: in $\comp{P}{Q}$ the typing of $P$ and $Q$ is independent of one another.
 \begin{nitheorem}[Framing]
   \label{thm:framing}
@@ -753,7 +750,7 @@ With framing one can show that $\constr{comp-comm}$ preserves typing: in $\comp{
   Then for any $\Gamma_r$ and $\Xi_r$ where $\opctx{\Gamma_r}{\Delta}{\Xi_r}$ it holds that $\types{\gamma}{\Gamma_r}{P}{\Xi_r}$.
 \end{nitheorem}
 
-Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a more general form where linear variables can freely be added or removed from context too -- as long as they are added and remove to or from both input and output contexts.
+Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a more general form where linear variables can freely be added or removed from context too -- as long as they are added and removed to and from both the input and output contexts.
 
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
@@ -772,7 +769,7 @@ Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a mo
 \end{nitheorem}
 
 Subject congruence states that structural congruence (\autoref{def:equals}) preserves the well-typedness of a process.
-Subject reduction states that reducing on a channel $c$ (\autoref{def:reduces}) preserves the well-typedness of a process (after consuming $\lio$ from $c$ if $c$ is an $\constr{external}$ channel).
+Subject reduction states that reducing on a channel $c$ (\autoref{def:reduces}) preserves the well-typedness of a process --- after consuming $\lio$ from $c$ if $c$ is an $\constr{external}$ channel.
 We refer to Appendix \ref{app:type-safety} for a more detailed account of the mechanised type-safety proofs.
 
 \begin{nitheorem}[Subject congruence]
@@ -866,7 +863,7 @@ As future work we intend to expand our framework to include infinite behaviour b
 \end{mathpar}
 That is, a process that consumes no resources (e.g. because they are shared) can be executed infinitely many times.
 To show subject congruence, one has to prove that $P \eqeq \comp{P}{\constr{!}P}$ preserves typing in both directions.
-To do so the resource consumption of a process has to be determined by e.g. adding type annotations to the syntax.
+To do so the resource consumption of a process has to be uniquely determined by e.g. adding type annotations to the syntax.
 Orthogonally, we aim to investigate making our typing rules bidirectional which would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
