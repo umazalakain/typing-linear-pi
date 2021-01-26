@@ -479,13 +479,14 @@ We generalise over this notion by defining an algebra for multiplicities that is
 We then use pairs of multiplicities as usage annotations for a channel's input and output capabilities.
 
 \begin{nidefinition}[\textsc{Algebra}]
-  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$ that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational reasoning), \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition), and in which the leftovers can be \emph{computed} (as to automatically update the usage context every time input and output occurs).
+  A \emph{usage algebra} is a ternary relation $\op{x}{y}{z}$ that is \emph{partial} (as not any two multiplicities can be combined), \emph{deterministic} and \emph{cancellative} (to aid equational reasoning) and \emph{associative} and \emph{commutative} (following directly from subject congruence for parallel composition).
+  In addition, we ask that the leftovers can be \emph{computed} so that we can automatically update the usage context every time input and output occurs --- this is purely for usability.
   It has a \emph{neutral element} $\zero$ that is absorbed on either side, and that is also \emph{minimal} (so that new resources cannot arbitrarily spring into life).
   It has an element $\one$ that is used to count inputs and outputs.
   Below we define such an algebra as a record $\Algebra_C$ on a carrier $C$.
-  We use $\forall$ for universal quantification.
+  (We use $\forall$ for universal quantification.
   The dependent product $\type{\exists}$ uses the value of its first argument in the type of its second.
-  The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.
+  The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.)
 
   \begin{equation*}
   \begin{aligned}
@@ -618,13 +619,13 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
     {\suc \; v : \contains{\gamma \comma t'}{\Gamma \comma x'}{\suc i}{t}{x}{\Delta \comma x'}}
   \end{mathpar}
 
-  The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}$ into $y$ and $z$ (the leftovers).
+  We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)}$ on pairs of multiplicities.
+  The base case $\constr{0}$ splits the usage annotation $x$ of type $\Usage_{idx}^{\func{2}}$ into $y$ and $z$ (the leftovers).
   Note that the remaining context $\Gamma$ is preserved unused as a leftover.
   This splitting $\opsquared{x}{y}{z}$ is as per the usage algebra provided by the developer for the index $idx$.
-  We use the \emph{computability} of the monoidal relation to alleviate the user from the proof burden $\opsquared{x}{y}{z}$.
+  In our Agda implementation, $\opsquared{x}{y}{z}$ is actually a trivially satisfiable implicit argument if $\opsquared{x}{y}{z}$ is inhabited and an unsatisfiable argument otherwise.
   The inductive case $\suc$ appends the type $t'$ to the typing context, and the usage annotation $x'$ to both the input and output usage contexts. 
 
-  We lift the operation $\op{x}{y}{z}$ and its algebraic properties to an operation $\opsquared{(x_l \comma x_r)}{(y_l \comma y_r)}{(z_l \comma z_r)}$ on pairs of multiplicities and an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts with the same underlying context of indices.
 \end{nidefinition}
 
 \begin{example}[Variable reference]
@@ -739,8 +740,9 @@ The meta-theory of resource-aware type systems often needs to reason on typing d
 For type systems using context splitting side conditions, this means applying associativity lemmas to recompute context splits; for type systems using leftover typing it does not.
 As an example, the proof that $\constr{comp-asssoc}$ preserves typing proceeds by deconstructing the input derivation into $\comp{P}{(\comp{Q}{R})}$ and reassembling it as $\comp{(\comp{P}{Q})}{R}$ without the need of any extra reasoning.
 
-All the reasoning carried out in our type safety proofs is based on the algebraic properties introduced in \autoref{multiplicities} -- the exception to this is $\func{\cdot -compute^r}$, only ever used for the user's convenience.
-This algebraic properties of the algebras allow us to see a typing derivation $\types{\gamma}{\Gamma}{P}{\Delta}$ as a unique \emph{arrow} from $\Gamma$ to $\Delta$, and to freely compose arrows with the same typing context and a matching output and input usage contexts.
+All the reasoning carried out in our type safety proofs is based on the algebraic properties introduced in \autoref{multiplicities} -- the exception to this is $\func{\cdot -compute^r}$, only there for the user's convenience.
+  We lift the operation $\opsquared{x}{y}{z}$ and its algebraic properties to an operation $\opctx{\Gamma}{\Delta}{\Xi}$ on usage contexts that have the same underlying context of indices.
+The algebraic properties of the algebras allow us to see a typing derivation $\types{\gamma}{\Gamma}{P}{\Delta}$ as a unique \emph{arrow} from $\Gamma$ to $\Delta$, and to freely compose arrows with the same typing context and a matching output and input usage contexts.
 
 Leftover typing also allows us to state a \emph{framing} theorem showing that adding arbitrary usage annotations to the input and output usage contexts preserves typing -- one can understand a typing derivation independently from its unused resources.
 With framing one can show that $\constr{comp-comm}$ preserves typing: in $\comp{P}{Q}$ the typing of $P$ and $Q$ is independent of one another.
@@ -755,7 +757,7 @@ Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a mo
 
 \begin{nitheorem}[Weakening]
   \label{thm:weakening}
-  Let $\func{ins}_i$ insert an element into a context at position $i$ --- we use it both to insert types into typing contexts and usage annotations into usage contexts.
+  Let $\func{ins}_i$ insert an element into a context at position $i$.
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Then, lifting every variable greater than or equal to $i$ in $P$ is well typed in
   $\types{\func{ins}_i \; t \; \gamma}{\func{ins}_i \; x \; \Gamma}{\func{lift}_i \; P}{\func{ins}_i \; x \; \Xi}$.
@@ -763,7 +765,7 @@ Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a mo
 
 \begin{nitheorem}[Strengthening]
   \label{thm:strengthening} 
-  Let $\func{del}_i$ delete the element at position $i$ from a context --- we use it both to delete types from typing contexts and usage annotations from usage contexts.
+  Let $\func{del}_i$ delete the element at position $i$ from a context.
   Let $P$ be well typed in $\types{\gamma}{\Gamma}{P}{\Xi}$.
   Let $i$ be a variable not in $P$, such that $uP \; : \; \Unused_i \; P$.
   Then lowering every variable greater than $i$ in $P$ is well typed in $\types{\func{del}_i \; \gamma}{\func{del}_i \; \Gamma}{\func{lower}_i \; P \; uP}{\func{del}_i \; \Xi}$.
