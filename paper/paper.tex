@@ -716,19 +716,19 @@ As per the type of the process $\func{recv}$, $u = \lz$.
 We will transmit once, thus use $\suc{\constr{0}}$ output multiplicity, and leave the rest as leftovers.
 Agda can uniquely determine the arguments required by the $\new{}$ constructor.
 \begin{align*}
-   & \func{recvWT} \;  : \; \types{\gamma \comma \channel{t}{\lz}  }{\Gamma \comma (\suc \suc l \comma r)  }{\func{recv} \; \constr{0}  }{\Gamma \comma (l \comma r)} \\
-   & \func{recvWT} \;  = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
-   & \func{sendWT} \;  : \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}  }{\Gamma \comma (l \comma \suc r)  }{\func{send} \; \constr{0}  }{\Gamma \comma (l \comma r)}  \\
-   & \func{sendWT} \;  = \; \new{} \; \_ \; \_ \; \zero \; (\send{\suc \constr{0}}{\constr{0}} \PO)
+   & \func{recvwt} \;  : \; \types{\gamma \comma \channel{t}{\lz}  }{\Gamma \comma (\suc \suc l \comma r)  }{\func{recv} \; \constr{0}  }{\Gamma \comma (l \comma r)} \\
+   & \func{recvwt} \;  = \; \recv{\constr{0}}{} \recv{(\suc \constr{0})}{} \PO \\
+   & \func{sendwt} \;  : \; \types{\gamma \comma \channel{\channel{\unit}{\func{\omega}}}{\lz}  }{\Gamma \comma (l \comma \suc r)  }{\func{send} \; \constr{0}  }{\Gamma \comma (l \comma r)}  \\
+   & \func{sendwt} \;  = \; \new{} \; \_ \; \_ \; \zero \; (\send{\suc \constr{0}}{\constr{0}} \PO)
 \end{align*}
 
 Dually, the courier defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
 We can now compose these processes in parallel and type the courier $\func{system}$.
 \begin{align*}
-& \func{carryWT} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
-& \func{carryWT} && = \recv{(\suc \suc \constr{0})}{} \recv{(\suc \suc \constr{0})}{} \send{(\suc \suc \constr{0})}{\suc \constr{0}} \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
-& \func{systemWT} && : \; \types{\constr{[]}}{\constr{[]}}{\func{system}}{\constr{[]}} \\
-& \func{systemWT} && = \new{} \; \_ \; \_ \; \_ \; ( \func{sendWT} \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{sendWT} \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{recvWT} \comp{}{ \func{carryWT} })))
+& \func{carrywt} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
+& \func{carrywt} && = \recv{(\suc \suc \constr{0})}{} \recv{(\suc \suc \constr{0})}{} \send{(\suc \suc \constr{0})}{\suc \constr{0}} \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
+& \func{systemwt} && : \; \types{\constr{[]}}{\constr{[]}}{\func{system}}{\constr{[]}} \\
+& \func{systemwt} && = \new{} \; \_ \; \_ \; \_ \; ( \func{sendwt} \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{sendwt} \comp{}{ \new{} \; \_ \; \_ \; \_ } \; ( \func{recvwt} \comp{}{ \func{carrywt} })))
 \end{align*}
 \end{example}
 
