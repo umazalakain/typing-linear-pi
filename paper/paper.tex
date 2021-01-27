@@ -333,7 +333,6 @@ The courier role is defined below as $\func{carry} \; x \; y \; z$.
 It sequentially receives on the two input channels $x$ and $y$, instantiated as $in0$ and $in1$, and then outputs the two pieces of received data on the output channel $z$, instantiated as $out$.
 Finally, we create three communication channels and compose all four processes together: the first channel is shared between the one sender and the courier, the second between the other sender and the courier, and the third between the receiver  and the courier.
 The result is the courier $\func{system}$ defined below.
-We continue this example and provide typing derivations for these processes in \autoref{leftover-typing}, where we use a mix of linear, graded and shared typing to type $\func{system}$.
 \begin{align*}
   & \func{carry} \; in0 \; in1 \; out \; =  \recv{in0 }{} 
   \recv{(\suc \; in1) }{} 
@@ -344,6 +343,8 @@ We continue this example and provide typing derivations for these processes in \
   \comp{}{\new{} ( \func{recv} \; \constr{0} } 
   \comp{}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}))) } 
 \end{align*}
+
+We continue this running example in  \autoref{leftover-typing}, where we provide typing derivations for the above processes and use a mix of linear, graded and shared typing to type the courier $\func{system}$.
 \end{example}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -443,14 +444,14 @@ We keep track of channel $c$ so we can state subject reduction (\autoref{thm:sub
   {\constr{struct} \; eq \; red : P \reduce{c} Q}
 \end{mathpar}
 
-We distinguish between channels that are created inside of the process ($\constr{internal}$), and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable.
+We distinguish between channels that are created inside the process ($\constr{internal}$), and channels that are created outside ($\constr{external}\ i$), where $i$ is the index of the channel variable.
 In rule $\constr{comm}$, parallel processes reduce when they communicate over a common channel with index ${i}$.
 As a result of that communication, the continuation of the input process $P$ has all the references to its most immediate variable substituted with references to $\suc j$, the variable sent by the output process $\send{i}{j}{Q}$.
 After this substitution, $\subst{P}{\suc j}{\constr{0}}$ is \emph{lowered} --- all variable references are decreased by one (and we derive the proof $\Unused_{\constr{0}} \; (\subst{P}{\suc j}{\constr{0}})$).
 Reduction is closed under parallel composition (rule $\constr{par}$), restriction (rule $\constr{res}$) and structural congruence (rule $\constr{struct}$) 
 --- notably, not under input nor output, as doing so would not preserve the sequencing of actions \cite{Sangio01}.
 Rule $\constr{res}$ uses $\func{dec}$ to decrement the index of channel $c$ as we wrap processes $P$ and $Q$ inside a binder.
-It is defined as follows:
+It is defined as expected below:
 \begin{equation*}
   \begin{aligned}
     & \func{dec} \; \constr{internal}                 && = \constr{internal} \\
@@ -504,7 +505,7 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
 \end{nidefinition}
 
 We sketch the implementation of linear, graded and shared types as instances of our usage algebra below.
-Their use in typing derivations is illustrated in \autoref{example-derivation} (Continued).
+Their use in typing derivations is illustrated in \autoref{example-derivation}.
 \begin{center}
 \begin{tabular}{l | l | l}
   & carrier & operation \\
@@ -638,7 +639,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \end{example}
 
 \begin{nidefinition}[\textsc{Types}: typing processes] \label{def:types}
-  The \textsc{Types} typing relation for \picalc{} processes is presented below.
+  The \textsc{Types} typing relation for the resource-aware \picalc{} processes is presented below.
   For convenience, we reuse the constructor names introduced for the syntax in \autoref{syntax}.
 
   \begin{mathpar}
@@ -720,7 +721,7 @@ Agda can uniquely determine the arguments required by the $\new{}$ constructor.
 \end{align*}
 
 Dually, the courier defined by the $\func{carry}$ process expects input multiplicities for the channels shared with $\func{send}$ and output multiplicities for the channel shared with $\func{recv}$.
-We can now compose these processes in parallel and type the courier system.
+We can now compose these processes in parallel and type the courier $\func{system}$.
 \begin{align*}
 & \func{carryWT} && : \types{\gamma \comma \channel{t}{\lz} \comma \channel{t}{\lz} \comma \channel{t}{\lz}\\ & &&}{\Gamma \comma (\suc lx \comma rx) \comma (\suc ly \comma ry) \comma (lz \comma \suc \suc rz)\\ & &&}{\func{carry} \; (\suc \suc \constr{0}) \; (\suc \constr{0}) \; \constr{0}\\ & &&}{\Gamma \comma (lx \comma rx) \comma (ly \comma ry) \comma (lz \comma rz)} & \\
 & \func{carryWT} && = \recv{(\suc \suc \constr{0})}{} \recv{(\suc \suc \constr{0})}{} \send{(\suc \suc \constr{0})}{\suc \constr{0}} \send{(\suc \suc \constr{0})}{\constr{0}} \PO \\
@@ -769,21 +770,19 @@ Leftover typing allows \emph{weakening} and \emph{strengthening} to acquire a mo
 \end{nitheorem}
 
 Subject congruence states that structural congruence (\autoref{def:equals}) preserves the well-typedness of a process.
-Subject reduction states that reducing on a channel $c$ (\autoref{def:reduces}) preserves the well-typedness of a process --- after consuming $\lio$ from $c$ if $c$ is an $\constr{external}$ channel.
-We refer to Appendix \ref{app:type-safety} for a more detailed account of the mechanised type-safety proofs.
-
-\begin{nitheorem}[Subject congruence]
+\begin{nitheorem}[Subject Congruence]
   \label{thm:subject-congruence}
-  If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
+  Let $P$ and $Q$ be processes. If $P \eq{} Q$ and $\types{\gamma}{\Gamma}{P}{\Xi}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
 \end{nitheorem}
 
-\begin{nitheorem}[Subject reduction]
+Finally, subject reduction states that reducing on a channel $c$ (\autoref{def:reduces}) preserves the well-typedness of a process --- after consuming $\lio$ from $c$ if $c$ is an $\constr{external}$ channel.  Below we use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.
+\begin{nitheorem}[Subject Reduction]
   \label{thm:subject-reduction}
   Let $\types{\gamma}{\Gamma}{P}{\Xi}$ and $P \reduce{c} Q$.
   If $c$ is $\constr{internal}$, then $\types{\gamma}{\Gamma}{Q}{\Xi}$.
   If $c$ is $\constr{external} \; i$ and $\containsusage{\Gamma}{i}{\lio}{\Delta}$, then $\types{\gamma}{\Delta}{Q}{\Xi}$.
-  (We use $\containsusage{\Gamma}{i}{x}{\Delta}$ to stand for $\contains{\gamma}{\Gamma}{i}{t}{x}{\Delta}$ for some $\gamma$ and $t$.)
 \end{nitheorem}
+We refer to Appendix \ref{app:type-safety} for a more detailed account of the mechanised proofs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \section{Conclusions, Related and Future Work}
@@ -850,20 +849,21 @@ Further work on mechanisation of the \picalc{} \cite{Henry-Gerard1999,Honsell200
 
 \paragraph*{Conclusions and Future Work}
 
-In this paper we provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
-We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}, which is defined here for the first time for the \picalc{}.
-As a result, theorems like framing, weakening and strengthening can now be stated for the linear \picalc{}.
+We provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
+We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}.
+As a result, theorems like framing, weakening and strengthening can now be stated also for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
-As future work we intend to expand our framework to include infinite behaviour by adding replication, which can be added to a resource-algebra-agnostic type system like ours with the following rule:
-\begin{mathpar}
-  \inferrule
-  {\types{\gamma}{\Gamma}{P}{\Gamma}}
-  {\types{\gamma}{\Gamma}{\constr{!}P}{\Gamma}}
-\end{mathpar}
-That is, a process that consumes no resources (e.g. because they are shared) can be executed infinitely many times.
-To show subject congruence, one has to prove that $P \eqeq \comp{P}{\constr{!}P}$ preserves typing in both directions.
-To do so the resource consumption of a process has to be uniquely determined by e.g. adding type annotations to the syntax.
+As future work we intend to expand our framework to include infinite behaviour by adding process replication, which is challenging due to a combination of proving subject congruence and the need for type annotations in the syntax of processes.
+%which can be added to a resource-algebra-agnostic type system like ours with the expected following rule:
+%\begin{mathpar}
+%  \inferrule
+%  {\types{\gamma}{\Gamma}{P}{\Gamma}}
+%  {\types{\gamma}{\Gamma}{\constr{!}P}{\Gamma}}
+%\end{mathpar}
+%That is, a process that consumes no resources (e.g. because they are shared) can be executed infinitely many times.
+%To show subject congruence, one has to prove that $P \eqeq \comp{P}{\constr{!}P}$ preserves typing in both directions.
+%To do so the resource consumption of a process has to be uniquely determined by e.g. adding type annotations to the syntax.
 Orthogonally, we aim to investigate making our typing rules bidirectional which would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
