@@ -139,13 +139,13 @@
 \maketitle
 
 \begin{abstract}
-  Linear type systems must keep track of how programs use their resources.
-  The standard approach is to use \emph{context splits} specifying how resources are disjointly split across subterms.
-  In this approach, context splits echo information which is already present within subterms, thus leading to redundancy.  An alternative approach is to use \emph{leftover typing} \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have also an output usage context: the leftovers.
-  In this approach, the leftovers of one typing derivation are fed as the input of the next, threading through linear resources while avoiding context splits.
-  We use leftover typing to define a type system for a \emph{resource-aware \picalc{}} \cite{MilnerPW92,Milner99}.
-  This type system is parametrised over a set of usage algebras that are general enough to encompass shared types (free to reuse and discard), graded types (use an $n$ number of times) and linear types (use exactly once).
-   Linear types are of fundamental importance in the \picalc{}: they ensure privacy and safety of communication and avoid race conditions.
+  Linear type systems need to keep track of how programs use their resources.
+  The standard approach is to use \emph{context splits} specifying how resources are (disjointly) split across subterms.
+  In this approach, context splits redundantly echo information which is already present within subterms.  An alternative approach is to use \emph{leftover typing} \cite{Mackie,Allais2018a}, where in addition to the usual (input) usage context, typing judgments have also an output usage context: the leftovers.
+  In this approach, the leftovers of one typing derivation are fed as input to the next, threading through linear resources while avoiding context splits.
+  We use leftover typing to define a type system for a {resource-aware \picalc{}} \cite{MilnerPW92,Milner99}, a process algebra used to  model concurrent systems.
+  Our type system is parametrised over a set of \emph{usage algebras} that are general enough to encompass \emph{shared types} (free to reuse and discard), \emph{graded types} (use exactly $n$ number of times) and \emph{linear types} (use exactly once).
+   Linear types are important in the \picalc{}: they ensure privacy and safety of communication and avoid race conditions, while graded and shared types allow for more flexible programming.
   We provide a framing theorem for our type system, generalise the weakening and strengthening theorems to include linear types, and prove subject reduction.
   Our formalisation is fully mechanised in about 1850 lines of Agda \cite{Zalakain2020Agda}.
 
