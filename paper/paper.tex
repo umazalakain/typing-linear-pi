@@ -249,6 +249,8 @@ Names are cumbersome to mechanise: they are not inherently well scoped, one has 
 To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 
+While de Bruijn indices are useful for mechanisation, they are not as readable as names. To overcome this difficulty and demonstrate the correspondence between a \picalc{} that uses names and one that uses de Bruijn indices,we provide \emph{conversion functions} in both directions and prove that they are inverses of each other up to $\alpha$-conversion. Further details can be found in Appendix~\ref{from_to_deBruijn}.
+
 \begin{nidefinition}[\textsc{Var} and \textsc{Process}]\label{def:syntax}
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
 We introduce the indexed family of types \cite{Dybjer1994} $\Var_n$: for all naturals $n$, the type $\Var_n$ has $n$ distinct elements.
@@ -849,8 +851,8 @@ Further work on mechanisation of the \picalc{} \cite{Henry-Gerard1999,Honsell200
 
 \paragraph*{Conclusions and Future Work}
 
-We provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show that reduction preserves the well-typedness of processes.
-We avoid the need for extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}.
+We provide a well-scoped syntax and a semantics for the \picalc{}, extrinsically define a type system on top of the syntax capable of handling linear, graded and shared types under the same unified framework and show subject reduction.
+We avoid extrinsic context splits by defining a type system based on leftover typing \cite{Allais2018a}.
 As a result, theorems like framing, weakening and strengthening can now be stated also for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
@@ -871,7 +873,7 @@ Finally, we will use our \picalc{} with leftovers as an underlying framework on 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \paragraph*{Acknowledgments}
 
-We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their work and thoughts.
+We want to thank Erika Kreuter, Wen Kokke, James Wood, Guillaume Allais, Bob Atkey, and Conor McBride for their valuable suggestions.
 
 %%
 \clearpage
