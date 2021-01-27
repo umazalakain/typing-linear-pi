@@ -361,7 +361,6 @@ Thanks to our well-scoped grammar in \autoref{syntax}, we now define the semanti
 
 \begin{nidefinition}[\textsc{StructCong}] \label{def:structcong}
 We define the base cases of a structural congruence relation $\eqeq$ as follows:
-
 \begin{mathpar}
   \datatype
   { }
@@ -392,7 +391,6 @@ We define the base cases of a structural congruence relation $\eqeq$ as follows:
   { }
   {\constr{scope-comm} : \new \new P \eqeq \new \new \func{exchange}_{\constr{0}} \; P}
 \end{mathpar}
-
 The first three rules ($\constr{comp}-$*) state associativity, symmetry, and $\PO$ as being the neutral element of parallel composition, respectively.
 The last three ($\constr{scope}-$*) state garbage collection, scope extrusion and commutativity of restrictions, respectively.
 In $\constr{scope-ext}$ the side condition $\Unused_i \; Q$ makes sure that $i$ is unused in $Q$ (see \autoref{def:unused}).
@@ -489,7 +487,6 @@ We then use pairs of multiplicities as usage annotations for a channel's input a
   (We use $\forall$ for universal quantification.
   The dependent product $\type{\exists}$ uses the value of its first argument in the type of its second.
   The type $\type{DEC} \; P$ is a witness of either $P$ or $P \to \type{\bot}$, where $\type{\bot}$ is the empty type with no constructors.)
-
   \begin{equation*}
   \begin{aligned}
     &\op{\_}{\_}{\_}         &:{} &                 &        & C \to C \to C \to \Set \\
@@ -642,7 +639,6 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \begin{nidefinition}[\textsc{Types}: typing processes] \label{def:types}
   The \textsc{Types} typing relation for the resource-aware \picalc{} processes is presented below.
   For convenience, we reuse the constructor names introduced for the syntax in \autoref{syntax}.
-
   \begin{mathpar}
     \datatype{
       \gamma : \PreCtx_n \\
