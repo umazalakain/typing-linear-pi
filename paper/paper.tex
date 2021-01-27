@@ -587,7 +587,6 @@ Leftover typing also allows \emph{framing} to be stated, and \emph{weakening} an
 
 Our type system is composed of two typing judgments: one for variable references (\autoref{def:varref}) and one for processes (\autoref{def:types}).
 Both judgments are indexed by a typing context $\gamma$, an input usage context $\Gamma$, and an output usage context $\Delta$ (the leftovers).
-
 The \textbf{typing judgement for variables} $\contains{\gamma}{\Gamma}{i}{t}{y}{\Delta}$ asserts that ``index $i$ in typing context $\gamma$ is of type $t$, and subtracting $y$ at position $i$ from input usage context $\Gamma$ results in leftovers $\Delta$''.
 The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ asserts that ``process $P$ is well typed under typing context $\gamma$, usage input context $\Gamma$ and leftovers $\Delta$''.
 
@@ -631,9 +630,9 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \begin{example}[Variable reference]
   In $\func{egVar}$ we type a variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.
   We must show that the variable with index $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)$ and a usage context $(\constr{[]} \comma \lio \comma \lio)$.
-  The \textsc{VarRef} constructors that we must use are completely determined by the variable index $\suc \; \constr{0}$ in the type.
+  The \textsc{VarRef} constructors are completely determined by the variable index $\suc \; \constr{0}$ in the type.
   The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
-  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- we use $\func{\cdot-compute^r}$ to automatically fulfill this proof obligation.
+  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- $\func{\cdot-compute^r}$ automatically fulfills this proof obligation.
   \begin{flalign*}
   & \func{egVar} \; : \; \contains{(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)} {\constr{[]} \comma \lio \comma \lio)} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {(\constr{[]} \comma \lo \comma \lio)}\\
   & \func{egVar} \; = \; \suc \constr{0}
@@ -858,7 +857,6 @@ Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain
 
 As future work we intend to expand our framework to include infinite behaviour by adding process replication, which is challenging, as to prove subject congruence one needs to uniquely determine the resources consumed by a process --- e.g., by adding type annotations to the syntax.
 Orthogonally, we aim to investigate making our typing rules bidirectional which would allow us to provide a decision procedure for type checking processes in a given set of algebras.
-Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
