@@ -856,16 +856,7 @@ We avoid extrinsic context splits by defining a type system based on leftover ty
 As a result, theorems like framing, weakening and strengthening can now be stated also for the linear \picalc{}.
 Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain2020Agda}.
 
-As future work we intend to expand our framework to include infinite behaviour by adding process replication, which is challenging due to a combination of proving subject congruence and the need for type annotations in the syntax of processes.
-%which can be added to a resource-algebra-agnostic type system like ours with the expected following rule:
-%\begin{mathpar}
-%  \inferrule
-%  {\types{\gamma}{\Gamma}{P}{\Gamma}}
-%  {\types{\gamma}{\Gamma}{\constr{!}P}{\Gamma}}
-%\end{mathpar}
-%That is, a process that consumes no resources (e.g. because they are shared) can be executed infinitely many times.
-%To show subject congruence, one has to prove that $P \eqeq \comp{P}{\constr{!}P}$ preserves typing in both directions.
-%To do so the resource consumption of a process has to be uniquely determined by e.g. adding type annotations to the syntax.
+As future work we intend to expand our framework to include infinite behaviour by adding process replication, which is challenging, as to prove subject congruence one needs to uniquely determine the resources consumed by a process --- e.g., by adding type annotations to the syntax.
 Orthogonally, we aim to investigate making our typing rules bidirectional which would allow us to provide a decision procedure for type checking processes in a given set of algebras.
 Furthermore, it might also be worth identifying correspondences between our usage algebra and particular state machines.
 Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
