@@ -626,12 +626,12 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 
 \begin{example}[Variable reference]
   $\func{egVar}$ defines a variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.
-  We must show that the variable with index $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)$ and a usage context $(\constr{[]} \comma \lio \comma \lio)$.
+  We must show that this variable is well typed in an environment with a typing context $\gamma = \constr{[]} \comma \channel{\unit}{\li} \comma \unit$ and a usage context $\Gamma = \constr{[]} \comma \lio \comma \lio$.
   The \textsc{VarRef} constructors are completely determined by the variable index $\suc \; \constr{0}$ in the type.
   The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
-  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- $\func{\cdot-compute^r}$ automatically fulfills this proof obligation.
+  The constructor $\constr{0}$ asserts that the next variable is of type $\channel{\unit}{\li}$, and that the usage annotation $\lio$ can be split such that $\op{\lio}{\li}{\lo}$ --- using $\func{\cdot-compute^r}$ to automatically fulfill the proof obligation.
   \begin{flalign*}
-  & \func{egVar} \; : \; \contains{(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)} {\constr{[]} \comma \lio \comma \lio)} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {(\constr{[]} \comma \lo \comma \lio)}\\
+  & \func{egVar} \; : \; \contains{(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)} {(\constr{[]} \comma \lio \comma \lio)} {\suc \constr{0}} {\channel{\unit}{\li}} {\li} {(\constr{[]} \comma \lo \comma \lio)}\\
   & \func{egVar} \; = \; \suc \constr{0}
   \end{flalign*}
 \end{example}
