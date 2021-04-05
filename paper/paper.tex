@@ -46,7 +46,7 @@
 \newcommand*{\nitheoremautorefname}{Thm.}
 \newcommand*{\nidefinitionautorefname}{Def.}
 \newcommand*{\nilemmaautorefname}{Lem.}
-\newcommand*{\exampleautorefname}{Eg.}
+\newcommand*{\exampleautorefname}{Example}
 }
 
 % Abbreviations
@@ -625,7 +625,7 @@ The \textbf{typing judgement for processes} $\types{\gamma}{\Gamma}{P}{\Delta}$ 
 \end{nidefinition}
 
 \begin{example}[Variable reference]
-  In $\func{egVar}$ we type a variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.
+  $\func{egVar}$ defines a variable reference $\suc \constr{0}$ with type $\channel{\unit}{\li}$ and usage $\li$.
   We must show that the variable with index $\suc \constr{0}$ is of type $\channel{\unit}{\li}$ and has a usage annotation $\li$ in an environment with a typing context $(\constr{[]} \comma \channel{\unit}{\li} \comma \unit)$ and a usage context $(\constr{[]} \comma \lio \comma \lio)$.
   The \textsc{VarRef} constructors are completely determined by the variable index $\suc \; \constr{0}$ in the type.
   The constructor $\suc$ steps under the outermost variable in the context, preserving its usage annotation $\lio$ from input to output.
