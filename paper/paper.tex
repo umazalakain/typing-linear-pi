@@ -40,12 +40,12 @@
 
 %% remove for the camera ready
 \AtBeginDocument{%
-\renewcommand*{\figureautorefname}{Fig.\@\!}
+\renewcommand*{\figureautorefname}{Figure\@\!}
 \renewcommand*{\sectionautorefname}{\S\!\!\,}
 \renewcommand*{\subsectionautorefname}{\S\!\!\,}
-\newcommand*{\nitheoremautorefname}{Thm.}
-\newcommand*{\nidefinitionautorefname}{Def.}
-\newcommand*{\nilemmaautorefname}{Lem.}
+\newcommand*{\nitheoremautorefname}{Theorem}
+\newcommand*{\nidefinitionautorefname}{Definition}
+\newcommand*{\nilemmaautorefname}{Lemma}
 \newcommand*{\exampleautorefname}{Example}
 }
 
@@ -248,7 +248,8 @@ Names are cumbersome to mechanise: they are not inherently well scoped, one has 
 To overcome these challenges, we use de Bruijn indices \cite{deBruijn1972}, where a natural number $n$ (aka \emph{index}) is used to refer to the variable introduced $n$ binders ago.
 That is, binders no longer introduce names; terms at different \emph{depths} use different indices to refer to the same binding.
 
-While de Bruijn indices are useful for mechanisation, they are not as readable as names. To overcome this difficulty and demonstrate the correspondence between a \picalc{} that uses names and one that uses de Bruijn indices,we provide \emph{conversion functions} in both directions and prove that they are inverses of each other up to $\alpha$-conversion. Further details can be found in Appendix~\ref{from_to_deBruijn}.
+While de Bruijn indices are useful for mechanisation, they are not as readable as names. To overcome this difficulty and demonstrate the correspondence between a \picalc{} that uses names and one that uses de Bruijn indices,
+we provide \emph{conversion functions} in both directions and prove that they are inverses of each other up to $\alpha$-conversion. Further details can be found in Appendix~\ref{from_to_deBruijn}.
 
 \begin{nidefinition}[\textsc{Var} and \textsc{Process}]\label{def:syntax}
 A variable reference occurring under $n$ binders can refer to $n$ distinct variables.
@@ -835,7 +836,7 @@ They distill their typing rules even further by modelling the supply and demand 
 Castro et al. \cite{Castro2020} provide tooling for locally-nameless representations of process calculi in Coq, where de Bruijn indices are less popular than in Agda or Idris.
 They use their tool to help automate proofs of subject reduction for a type system with session types.
 %
-Orchard and Yoshida \cite{OrchardY16} embed a small effectul imperative language into the session-typed \picalc{}, showing that session types are expressive enough to encode effect systems.
+Orchard and Yoshida \cite{OrchardY16} embed a small effecftul imperative language into the session-typed \picalc{}, showing that session types are expressive enough to encode effect systems.
 %
 Based on contextual type theory, LINCX \cite{Georges2017} extends the linear logical framework LLF \cite{Cervesato1996} by internalising the notion of bindings and contexts.
 The result is a meta-theory in which HOAS encodings with both linear and dependent types can be described.
@@ -852,7 +853,7 @@ Our work is fully mechanised in around 1850 lines of code in Agda \cite{Zalakain
 
 As future work we intend to expand our framework to include infinite behaviour by adding process replication, which is challenging, as to prove subject congruence one needs to uniquely determine the resources consumed by a process --- e.g., by adding type annotations to the syntax.
 Orthogonally, we aim to investigate making our typing rules bidirectional which would allow us to provide a decision procedure for type checking processes in a given set of algebras.
-Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types and other advanced type theories.
+Finally, we will use our \picalc{} with leftovers as an underlying framework on top of which we can implement session types, via their encodings into linear types \cite{Dardha14,DardhaGS17,ScalasDHY17} and other advanced type theories.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \paragraph*{Acknowledgments}
