@@ -22,7 +22,6 @@ module PiCalculus.Semantics where
 
   private
     variable
-      name namex namey : Name
       n : ℕ
       P P' Q R : Scoped n
       x y : Fin n
@@ -73,12 +72,12 @@ module PiCalculus.Semantics where
 
     comp-end : P ∥ 𝟘 ≈ P
 
-    scope-end : _≈_ {n} (ν 𝟘 ⦃ name ⦄) 𝟘
+    scope-end : _≈_ {n} (ν 𝟘) 𝟘
 
     scope-ext : (u : Unused zero P)
-              → ν (P ∥ Q) ⦃ name ⦄ ≈ lower zero P u ∥ (ν Q) ⦃ name ⦄
+              → ν (P ∥ Q) ≈ lower zero P u ∥ (ν Q)
 
-    scope-scope-comm : ν (ν P ⦃ namey ⦄) ⦃ namex ⦄ ≈ ν (ν (exchange zero P) ⦃ namex ⦄) ⦃ namey ⦄
+    scope-scope-comm : ν (ν P) ≈ ν (ν (exchange zero P))
 
   data RecTree : Set where
     zero : RecTree
@@ -100,10 +99,10 @@ module PiCalculus.Semantics where
     cong-trans : P ≅⟨ r ⟩ Q → Q ≅⟨ p ⟩ R → P ≅⟨ two r p ⟩ R
 
     -- Congruent relation
-    ν-cong_      : P ≅⟨ r ⟩ P' → ν P ⦃ name ⦄      ≅⟨ one r ⟩ ν P' ⦃ name ⦄
-    comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q             ≅⟨ one r ⟩ P' ∥ Q
-    input-cong_  : P ≅⟨ r ⟩ P' → (x ⦅⦆ P) ⦃ name ⦄ ≅⟨ one r ⟩ (x ⦅⦆ P') ⦃ name ⦄
-    output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P         ≅⟨ one r ⟩ x ⟨ y ⟩ P'
+    ν-cong_      : P ≅⟨ r ⟩ P' → ν P        ≅⟨ one r ⟩ ν P'
+    comp-cong_   : P ≅⟨ r ⟩ P' → P ∥ Q      ≅⟨ one r ⟩ P' ∥ Q
+    input-cong_  : P ≅⟨ r ⟩ P' → (x ⦅⦆ P)   ≅⟨ one r ⟩ (x ⦅⦆ P')
+    output-cong_ : P ≅⟨ r ⟩ P' → x ⟨ y ⟩ P  ≅⟨ one r ⟩ x ⟨ y ⟩ P'
 
   _≅_ : Scoped n → Scoped n → Set
   P ≅ Q = ∃[ r ] (P ≅⟨ r ⟩ Q)
@@ -153,7 +152,7 @@ module PiCalculus.Semantics where
 
     comm : {P : Scoped (1 + n)} {Q : Scoped n} {i j : Fin n}
          → let uP' = subst-unused (λ ()) P
-         in ((i ⦅⦆ P) ⦃ name ⦄) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
+         in ((i ⦅⦆ P)) ∥ (i ⟨ j ⟩ Q) =[ external i ]⇒ lower zero (P [ zero ↦ suc j ]) uP' ∥ Q
 
     par_ : ∀ {c} {P P' Q : Scoped n}
          → P =[ c ]⇒ P'
@@ -161,7 +160,7 @@ module PiCalculus.Semantics where
 
     res_ : ∀ {c} {P Q : Scoped (1 + n)}
          → P =[ c ]⇒ Q
-         → ν P ⦃ name ⦄ =[ dec c ]⇒ ν Q ⦃ name ⦄
+         → ν P =[ dec c ]⇒ ν Q
 
     struct : ∀ {c} {P P' Q' Q : Scoped n}
            → P ≅⟨ r ⟩ P'
