@@ -6,7 +6,7 @@ The related paper can be found [here](paper).
 
 # Compilation
 
-This project has been tested with Agda 2.6.1.1 and Agda-Stdlib 1.4.
+This project has been tested with Agda 2.6.2 and Agda-Stdlib 1.7.
 You can typecheck the entire project as follows:
 
     agda -i . --safe Everything.agda
