@@ -9,6 +9,7 @@ open import Data.Fin using (Fin; zero; suc) renaming (#_ to #'_)
 open import Data.Product using (_,_)
 open import Data.Vec using (Vec; []; _∷_)
 open import Data.Vec.Relation.Unary.All using (All; []; _∷_)
+open import Data.String
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 import Level as L
